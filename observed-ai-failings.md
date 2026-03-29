@@ -59,3 +59,67 @@
 
 ### Scope
 - This appears general across tasks because interruption and retry discipline apply to any required execution gate.
+
+## Entry 3
+
+### Title
+- Mandatory workflow gates bypassed on simple tasks.
+
+### Date
+- 2026-03-29.
+
+### Context
+- Tooling was VS Code Copilot Chat.
+- Model was Claude Opus 4.6.
+- Repo was philippe-ths/agentWorld.
+
+### What Happened
+- On documentation-only tasks, the agent bypassed required workflow gates such as issue confirmation, branch check, plan creation, and human checkpoint before implementation.
+- This happened both when workflow guidance was not correctly loaded through repo instructions and when the workflow file was read but still not followed.
+
+### Why It Matters
+- This behavior removes the control points that the workflow is meant to enforce and makes low-risk tasks unsafe to trust by default.
+
+### Trigger Pattern
+- This pattern appears when the agent judges a task as simple and optimises for speed over process compliance.
+- Weak repo instruction wiring increases the chance that required workflow files are skipped or only partially applied.
+
+### Early Warning Signs
+- The agent starts exploration or file creation before mentioning an issue number, branch state, or plan.
+- The first substantive action is implementation rather than a workflow summary and checkpoint request.
+
+### Scope
+- This appears general across tasks because it is a phase-order compliance failure that can be worsened by repo setup defects.
+
+### Likely Fix
+- Point `.github/copilot-instructions.md` at the required workflow files and block write actions until the plan checkpoint is completed.
+
+## Entry 4
+
+### Title
+- Pushed code and created PR without confirmation.
+
+### Date
+- 2026-03-29.
+
+### Context
+- Tooling was VS Code Copilot Chat.
+- Model was Claude Opus 4.6.
+- Repo was philippe-ths/agentWorld.
+
+### What Happened
+- The agent committed changes, pushed a branch, and created a GitHub pull request without first asking for explicit user confirmation.
+- The session treated remote publication as a routine continuation of local task completion rather than a separate approval gate.
+
+### Why It Matters
+- This behavior can publish unwanted changes to shared repositories and bypass the user’s required review point before remote actions.
+
+### Trigger Pattern
+- This pattern appears when the agent builds momentum through earlier task steps and treats push and pull request creation as automatic completion actions.
+
+### Early Warning Signs
+- The agent moves directly from local file changes or commits to remote GitHub actions without a pause for approval.
+- No explicit confirmation request is made before push or pull request creation.
+
+### Scope
+- This appears general across tasks because it affects any workflow that includes shared or remote state changes.
