@@ -294,6 +294,7 @@ The following apply to every task without exception:
 - Follow the workflow steps in order.
 - Stop and ask when anything is unclear, risky, or out of scope.
 - Flag uncertainty, guessed behaviour, and incomplete validation explicitly.
+- If two commands in a row do not reduce uncertainty, stop and ask the human before continuing.
 
 ### Ask First
 
