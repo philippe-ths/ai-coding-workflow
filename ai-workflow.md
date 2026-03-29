@@ -65,16 +65,26 @@ The human reviews and approves at defined checkpoints.
    - Enter [Failure Analysis Mode](#failure-analysis-mode) if a fix fails.
    - Enter [Failure Analysis Mode](#failure-analysis-mode) if manual verification fails.
 
-10. **Summarise and close.**
 
-    - Report what changed.
-    - Report what was tested.
-    - Report what was not tested.
-    - Report remaining risks and follow-up work.
-    - Check parent and sub-issue closure status.
-    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
-    - Suggest the next GitHub step when the work appears complete.
-    - See [GitHub Workflow](#github-workflow).
+10. **Summarise and prepare handoff.**
+
+   - Report what changed.
+   - Report what was tested.
+   - Report what was not tested.
+   - Report remaining risks and follow-up work.
+   - Check parent and sub-issue closure status.
+   - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
+   - State which GitHub action would be next if the human wants to publish the work.
+   - See [GitHub Workflow](#github-workflow).
+
+11. **Checkpoint: human approves the next GitHub action.**
+
+   - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
+
+12. **Run the approved GitHub action and stop.**
+
+   - Run only the single GitHub action the human explicitly approved.
+   - See [GitHub Workflow](#github-workflow).
 
 ## Planning Requirements
 
