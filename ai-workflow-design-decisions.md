@@ -142,10 +142,13 @@ The log should omit filler conversation and low-signal tool noise.
 Use this prompt when requesting a chronological session log for workflow maintenance.
 
 ```text
-Produce a chronological session log for this AI workflow session.
+Produce a chronological session log for this AI workflow maintenance session.
 List each material observation, decision, proposed wording change, accepted change, rejected change, and file edit in order.
+List any rules you clearly ignored in ai-workflow.md
 Separate applied changes from ideas that were discussed but not adopted.
 Omit filler chat and low-signal tool output.
+Record brief failure-mode context when relevant, including agent surface, model, repo, and trigger pattern if known.
+Do not use tables.
 ```
 
 ## Cross-Contamination Categories
@@ -157,3 +160,44 @@ When reviewing the file for structural problems, classify each line as one of:
 - **Redundant.** The same rule is stated in multiple places.
 - **Misplaced.** The line belongs in a different specific section (e.g. a human responsibility in a workflow step).
 - **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
+
+
+## Observed AI Failings
+
+Use `observed-ai-failings.md` file to record concrete AI-agent failure patterns seen in real sessions.
+Keep entries short.
+Write one sentence per line.
+Record what happened, not theories unless they are useful.
+
+---
+
+## Entry Template
+
+### Title
+- [Short name for the failure pattern.]
+
+### Date
+- [YYYY-MM-DD]
+
+### Context
+- [Tooling or environment, e.g. VS Code Copilot, ChatGPT app, CLI agent.]
+- [Model if known, e.g. GPT-5.4.]
+- [Repo or project if relevant.]
+
+### What Happened
+- [Describe the observed behaviour in one sentence.]
+- [Add one more sentence only if needed.]
+
+### Why It Matters
+- [State the practical cost or risk in one sentence.]
+
+### Trigger Pattern
+- [State what seemed to trigger it in one sentence.]
+- [Use "Unknown" if unclear.]
+
+### Early Warning Signs
+- [List the first visible sign.]
+- [List the second visible sign if useful.]
+
+### Scope
+- [State whether this seems local to one workflow step or general across tasks.]
