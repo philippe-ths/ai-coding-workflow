@@ -1,4 +1,6 @@
 # Project Spec Template
+
+Version: 1.0.0
 This file is a template for creating project-spec.md in a target repository.
 Use it to document current implementation truth for that repository.
 Write one sentence per line.

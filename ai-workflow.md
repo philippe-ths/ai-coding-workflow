@@ -1,5 +1,7 @@
 # AI Workflow
 
+Version: 1.0.0
+
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
 The human reviews and approves at defined checkpoints.
@@ -276,8 +278,12 @@ Every task must follow the GitHub branching workflow:
 - Use `refactor/` for refactors.
 - Keep branch work focused on the issue scope.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
-- Do not push to remote without explicit human confirmation.
-- Do not create a pull request without explicit human confirmation.
+- Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
+- Do not infer approval for one GitHub action from approval for another GitHub action.
+- Do not push to remote without explicit human confirmation in the current session.
+- Do not create a pull request without explicit human confirmation in the current session.
+- If new commits are added after approval, stop and ask again before the next remote GitHub action.
+- After running an approved GitHub action, stop and report the result.
 
 ## Handling Parent and Sub-Issues
 
