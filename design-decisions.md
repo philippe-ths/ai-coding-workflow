@@ -1,7 +1,7 @@
 # Design Decisions
 
 This document captures the structural principles and design rationale behind `ai-workflow.md`.
-It is for the human maintainer, not for the AI agent.
+It is for the human maintainer.
 When editing the workflow file, use these principles to guide changes.
 
 ## Audience
@@ -24,8 +24,7 @@ What this file is, who it is for.
 Contains no rules or principles.
 
 **First Principles.**
-The governing truths that override everything else.
-If a rule elsewhere conflicts with a first principle, the first principle wins.
+The governing truths.
 Keep this section as short as possible.
 Every line must earn its place by being genuinely foundational.
 
@@ -43,10 +42,9 @@ Each reference section owns its topic.
 Rules about that topic should live here, not scattered across the workflow or boundary sections.
 
 **Boundary rules.**
-Global rules that apply across all tasks and all sections.
+Global, context-free rules that apply regardless of which step or topic is active.
+Rules that don't fit into Reference sections.
 Three tiers: Always Do, Ask First, Never Do.
-These are the canonical location for boundary rules.
-If a boundary rule also appears in a reference section, remove it from the reference section and keep it here.
 
 **Human responsibilities.**
 What the AI cannot do.
@@ -61,7 +59,6 @@ Duplication causes drift over time and wastes context tokens.
 
 **One sentence per line.**
 Every line should contain exactly one sentence.
-Where a second sentence is a continuation of the same conditional (e.g. "If X, do Y. / Do not do Z."), indent it under the same bullet rather than creating a new bullet.
 
 **No em-dashes.**
 
@@ -75,9 +72,20 @@ Lines describing what the human does (e.g. "Human reviews the results") should n
 Human checkpoints are expressed as explicit numbered steps (e.g. "Checkpoint: human reviews the plan.").
 Detailed human responsibilities live in the Human Responsibilities section.
 
-**Reference sections should not restate boundary rules.**
-If a reference section contains a rule that is also in Always Do, Ask First, or Never Do, remove it from the reference section.
-The boundary section is the canonical location.
+**Boundary rules are context-free. Reference section rules are context-dependent.**
+A rule belongs in the boundary section if it applies regardless of which step or topic is active.
+A rule belongs in a reference section if it only makes sense within that section's topic.
+If a rule appears in both places, ask: does this rule need the surrounding context to be actionable?
+If it does, the reference section is the canonical location.
+If it does not, the boundary section is the canonical location.
+Do not keep it in both.
+
+**Boundary rule clustering.**
+Over time, boundary rules tend to accumulate.
+When 4-5 or more boundary rules cluster around the same topic, that is a signal the topic deserves its own reference section.
+Extract the cluster into a new reference section and remove the individual rules from the boundary section.
+The real test is whether the rules share a context: if you would naturally read them together and they reference the same concepts, they are a cluster.
+This keeps the boundary sections lean and genuinely global.
 
 **Keep First Principles minimal.**
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
@@ -92,11 +100,3 @@ When reviewing the file for structural problems, classify each line as one of:
 - **Redundant.** The same rule is stated in multiple places.
 - **Misplaced.** The line belongs in a different specific section (e.g. a human responsibility in a workflow step).
 - **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
-
-## Version History Context
-
-The file has been through multiple rounds of refinement.
-Key iterations:
-
-- v1: Single monolithic file with rules, principles, and workflow mixed together.
-- v2: Separated into preamble, first principles, workflow, reference sections, boundary rules, and human responsibilities. Deduplicated rules. Removed AI responsibilities section (was a restatement of the workflow). Consolidated boundary rules under one heading. Made workflow steps lean with pointers to reference sections. Moved issue-vs-codebase rules to Planning Requirements. Moved failure analysis rules out of workflow steps.
