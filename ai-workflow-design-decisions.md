@@ -1,4 +1,4 @@
-# Design Decisions
+# AI Workflow Design Decisions
 
 This document captures the structural principles and design rationale behind `ai-workflow.md`.
 It is for the human maintainer.
@@ -27,6 +27,7 @@ Contains no rules or principles.
 The governing truths.
 Keep this section as short as possible.
 Every line must earn its place by being genuinely foundational.
+The workflow must be model-agnostic and repo-agnostic.
 
 **Workflow.**
 The ordered sequence of steps for every task.
@@ -43,6 +44,7 @@ Rules about that topic should live here, not scattered across the workflow or bo
 
 **Boundary rules.**
 Global, context-free rules that apply regardless of which step or topic is active.
+Rules that don't fit into Reference sections.
 Three tiers: Always Do, Ask First, Never Do.
 
 **Human responsibilities.**
@@ -138,11 +140,3 @@ When reviewing the file for structural problems, classify each line as one of:
 - **Redundant.** The same rule is stated in multiple places.
 - **Misplaced.** The line belongs in a different specific section (e.g. a human responsibility in a workflow step).
 - **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
-
-## Version History Context
-
-The file has been through multiple rounds of refinement.
-Key iterations:
-
-- v1: Single monolithic file with rules, principles, and workflow mixed together.
-- v2: Separated into preamble, first principles, workflow, reference sections, boundary rules, and human responsibilities. Deduplicated rules. Removed AI responsibilities section (was a restatement of the workflow). Consolidated boundary rules under one heading. Made workflow steps lean with pointers to reference sections. Moved issue-vs-codebase rules to Planning Requirements. Moved failure analysis rules out of workflow steps.
