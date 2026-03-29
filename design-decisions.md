@@ -27,6 +27,7 @@ Contains no rules or principles.
 The governing truths.
 Keep this section as short as possible.
 Every line must earn its place by being genuinely foundational.
+The workflow must be model-agnostic and repo-agnostic.
 
 **Workflow.**
 The ordered sequence of steps for every task.
