@@ -131,6 +131,23 @@ This keeps the boundary sections lean and genuinely global.
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
 If a principle can live in a reference section instead, put it there.
 
+**Chronological session logs are an optional maintenance output.**
+When maintaining the workflow, the human may request a chronological session log.
+The log should list each material observation, decision, proposed wording change, accepted change, rejected change, and file edit in order.
+The log should separate applied changes from ideas that were discussed but not adopted.
+The log should omit filler conversation and low-signal tool noise.
+
+## Reusable Prompt
+
+Use this prompt when requesting a chronological session log for workflow maintenance.
+
+```text
+Produce a chronological session log for this AI workflow session.
+List each material observation, decision, proposed wording change, accepted change, rejected change, and file edit in order.
+Separate applied changes from ideas that were discussed but not adopted.
+Omit filler chat and low-signal tool output.
+```
+
 ## Cross-Contamination Categories
 
 When reviewing the file for structural problems, classify each line as one of:
