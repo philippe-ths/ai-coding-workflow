@@ -142,7 +142,7 @@ The log should omit filler conversation and low-signal tool noise.
 Use this prompt when requesting a chronological session log for workflow maintenance.
 
 ```text
-Produce a chronological session log for this AI workflow maintenance session.
+Produce a chronological log for maintenance of the file ai-workflow.md.
 List each material observation, decision, proposed wording change, accepted change, rejected change, and file edit in order.
 List any rules you clearly ignored in ai-workflow.md
 Separate applied changes from ideas that were discussed but not adopted.
