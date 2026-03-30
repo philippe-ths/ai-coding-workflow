@@ -123,3 +123,61 @@
 
 ### Scope
 - This appears general across tasks because it affects any workflow that includes shared or remote state changes.
+
+## Entry 5
+
+### Title
+Implemented issue work directly on main.
+
+### Date
+2026-03-30.
+
+### Context
+Tooling was Codex CLI agent.
+Model was a GPT-5 based coding agent in this session.
+Repo was philippe-ths/ai-running-coach.
+
+### What Happened
+The agent switched to main, fast-forwarded it to origin/main, and implemented issue #28 there without first creating an issue-scoped branch.
+The session later acknowledged the branch miss only after the implementation work was already done.
+
+### Why It Matters
+Working directly on main bypasses a required containment boundary and increases the risk of accidental publication, mixed task history, and harder rollback.
+Trigger Pattern
+This pattern appears when the agent treats local branch setup as optional once task context is clear and implementation momentum has started.
+
+### Early Warning Signs
+The session reports switching to or updating main immediately before implementation.
+No issue-scoped branch is created before file edits or validation runs begin.
+
+### Scope
+This appears general across tasks because branch isolation is a baseline workflow control rather than a task-specific implementation detail.
+
+## Entry 6
+
+### Title
+Conflicting validation commands run in parallel.
+
+### Date
+2026-03-30.
+
+### Context
+Tooling was Codex CLI agent.
+Model was a GPT-5 based coding agent in this session.
+Repo was philippe-ths/ai-running-coach.
+
+### What Happened
+After implementation, the agent launched make smoke and make test in parallel even though both exercised the frontend build or runtime path in the same workspace.
+The concurrent runs produced port contention and unstable frontend runtime behavior that did not reflect a clear product failure.
+
+### Why It Matters
+Parallel validation against shared runtime resources can create false negatives and contaminate the evidence used to judge whether the change is correct.
+
+### Trigger Pattern
+This pattern appears when the agent optimises for speed by overlapping validation steps that are supposed to run sequentially or require isolated frontend resources.
+Early Warning Signs
+The session starts a second validation command before the first command has fully completed and reported results.
+Multiple validation commands target the same app runtime, port range, or frontend build path in one workspace.
+
+### Scope
+This appears general across tasks because it affects validation reliability anywhere smoke tests and test suites share runtime dependencies.
