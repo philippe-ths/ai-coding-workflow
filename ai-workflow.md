@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.0.0
+Version: 1.0.1
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -162,6 +162,7 @@ Run the following checks in order:
 When running validation:
 
 - Do not modify smoke tests or the global test suite unless the task explicitly requires it.
+- Do not run validation commands in parallel when they can share ports, build outputs, caches, or runtime state.
 - If a previously passing test fails after the change, treat the change as wrong until proven otherwise.
 - Run smoke tests and the global test suite after each meaningful implementation pass.
 - Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
@@ -270,8 +271,8 @@ Every task must follow the GitHub branching workflow:
 
 - Link every task to a GitHub issue before implementation.
 - Do not work directly on `main`.
-- Create a branch for the issue before starting work.
-- If the branch name does not match the issue or task, stop and create or switch to an appropriate branch before continuing.
+- If the current branch is `main`, stop before implementation and create or switch to an issue-scoped branch.
+- Do not edit files, run issue validation, or make commits until the issue-scoped branch is active.
 - Use the branch naming format `type/short-description`.
 - Use `feature/` for new functionality.
 - Use `fix/` for bug fixes.
