@@ -181,3 +181,301 @@ Multiple validation commands target the same app runtime, port range, or fronten
 
 ### Scope
 This appears general across tasks because it affects validation reliability anywhere smoke tests and test suites share runtime dependencies.
+
+## Entry 7
+
+### Title
+Implemented issue work directly on main before creating issue branch.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The agent worked on main before switching to an issue-scoped branch, despite the GitHub workflow forbidding implementation activity on main and forbidding file edits or issue validation before the issue branch is active.
+
+### Why It Matters
+Working directly on main bypasses a required containment boundary and increases the risk of accidental publication, mixed task history, and harder rollback.
+
+### Trigger Pattern
+This pattern appears when the agent treats local branch setup as optional once task context is clear and implementation momentum has started.
+
+### Early Warning Signs
+The session reports switching to or updating main immediately before implementation.
+No issue-scoped branch is created before file edits or validation runs begin.
+
+### Scope
+This is a recurrence of the pattern in Entry 5 under a different model and repo, indicating the failure is not model-specific.
+
+## Entry 8
+
+### Title
+Skipped rebase onto target branch before implementation and PR creation.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The agent did not rebase onto the target branch before starting implementation and did not rebase before PR creation, despite both being required by the workflow.
+
+### Why It Matters
+Skipping rebase means the branch may diverge from the latest target state, increasing the risk of merge conflicts, integration failures, and working against stale code.
+
+### Trigger Pattern
+This pattern appears when the agent prioritises moving to implementation quickly and treats rebase as an optional hygiene step rather than a required gate.
+
+### Early Warning Signs
+The agent begins file edits or commits without first running a rebase command against the target branch.
+The PR is created without a rebase step appearing in the session history.
+
+### Scope
+This appears general across tasks because rebase discipline applies to any branch-based workflow regardless of task content.
+
+## Entry 9
+
+### Title
+Incomplete baseline validation before implementation.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The agent ran npm run lint and npm run build as baseline validation but did not run a true smoke test that proved the app could start locally before editing.
+The workflow requires smoke tests as the first baseline validation step.
+
+### Why It Matters
+Without confirming the app starts, the baseline is incomplete and post-implementation failures cannot be reliably attributed to the change versus a pre-existing startup problem.
+
+### Trigger Pattern
+This pattern appears when the agent substitutes build-time checks for runtime checks and treats a passing build as sufficient evidence that the app works.
+
+### Early Warning Signs
+The baseline validation report mentions lint and build but not app startup or smoke test results.
+The agent moves to implementation without confirming the app runs.
+
+### Scope
+This appears general across tasks because baseline validation completeness applies to any task that requires pre and post comparison of runtime behaviour.
+
+## Entry 10
+
+### Title
+Validation commands run in parallel sharing build outputs.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The agent ran npm run lint and npm run build in parallel even though both can share build outputs and runtime state in the same workspace.
+The workflow explicitly prohibits running validation commands in parallel when they can share runtime state or outputs.
+
+### Why It Matters
+Parallel validation against shared build artifacts can produce unreliable results where one command's output contaminates the other's.
+
+### Trigger Pattern
+This pattern appears when the agent optimises for speed by overlapping validation steps that should run sequentially.
+
+### Early Warning Signs
+Multiple validation commands start simultaneously in the session output.
+The commands target the same build output directory or share configuration state.
+
+### Scope
+This is a recurrence of the pattern in Entry 6 under a different model and repo, indicating the failure persists across tooling.
+
+## Entry 11
+
+### Title
+Multiple GitHub actions executed in a single pass without separate approvals.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+After receiving approval for next steps, the agent executed branch creation, commit creation, PR creation, and issue-comment updates in one continuous pass.
+The workflow requires each of these to be treated as a separate GitHub action with individual approval gates.
+
+### Why It Matters
+Batching multiple remote actions removes the human's ability to review and approve each action independently, reducing control over what is published and when.
+
+### Trigger Pattern
+This pattern appears when the agent interprets general approval to proceed as blanket approval for all remaining GitHub actions in the workflow.
+
+### Early Warning Signs
+The agent performs more than one remote or state-changing GitHub action after a single approval.
+The session does not pause between commit, push, and PR creation to report results and request the next approval.
+
+### Scope
+This appears general across tasks because it affects any workflow with multiple sequential GitHub actions requiring individual confirmation.
+
+## Entry 12
+
+### Title
+Branch naming convention not followed.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The agent used the branch name codex/issue-7-local-supabase-setup instead of the required format using feature/, fix/, or refactor/ prefixes.
+The workflow specifies the branch naming format as type/short-description with feature/, fix/, or refactor/ as the allowed types.
+
+### Why It Matters
+Inconsistent branch naming breaks automation that depends on branch prefixes and makes it harder to identify branch purpose from the name.
+
+### Trigger Pattern
+This pattern appears when the agent uses its own naming convention or a tooling-derived prefix instead of the repository's documented convention.
+
+### Early Warning Signs
+The branch name uses a prefix not listed in the workflow's allowed types.
+The branch name includes the tooling name or an issue number format not specified by the convention.
+
+### Scope
+This appears general across tasks because agents may default to their own naming patterns unless the convention is enforced at branch creation time.
+
+## Entry 13
+
+### Title
+Pre-existing build error not handled in baseline validation workflow.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+A pre-existing build error caused by next/font/google fetching Geist from Google Fonts in app/layout.tsx failed during npm run build in a restricted network environment.
+The agent did not record this as a known pre-existing failure before proceeding, which the workflow requires for accurate post-implementation comparison.
+
+### Why It Matters
+Unrecorded pre-existing failures contaminate post-implementation validation because new failures cannot be reliably distinguished from old ones.
+
+### Trigger Pattern
+This pattern appears when the agent encounters a build or test failure during baseline validation and continues without explicitly recording it as a known pre-existing issue.
+
+### Early Warning Signs
+The baseline validation step reports a failure but the agent does not classify it as pre-existing before moving to implementation.
+Post-implementation validation does not distinguish between inherited and newly introduced failures.
+
+### Scope
+This appears general across tasks because baseline recording discipline applies to any project where pre-existing issues exist.
+
+## Entry 14
+
+### Title
+Sandboxed git operations failed requiring permission escalation.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+Git fetch failed on .git/FETCH_HEAD and git commit failed on .git/index.lock because the sandbox environment restricted write access under .git/.
+Both operations required explicit escalated permission before they could succeed.
+
+### Why It Matters
+Unanticipated sandbox restrictions break standard git operations and introduce unexpected workflow interruptions that the agent must handle without losing progress or state.
+
+### Trigger Pattern
+This pattern appears when the agent's runtime environment restricts filesystem writes that standard git commands assume are available.
+
+### Early Warning Signs
+Git commands that write to .git/ fail with permission or lock errors.
+The agent retries the same command without addressing the underlying permission issue.
+
+### Scope
+This is specific to sandboxed or restricted execution environments but affects any git-based workflow running in such an environment.
+
+## Entry 15
+
+### Title
+MCP connector PR creation cancelled and retried.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent with GitHub MCP connector.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+The first create_pull_request call through the GitHub MCP connector was cancelled and had to be retried.
+The session did not explain why the first call was cancelled.
+
+### Why It Matters
+Silent cancellation of remote actions without explanation makes it hard to determine whether the action partially executed, and retrying without understanding the cause risks duplicate or conflicting remote state.
+
+### Trigger Pattern
+This pattern appears when connector-based remote actions fail or are cancelled without a clear error and the agent retries without diagnosing the cause.
+
+### Early Warning Signs
+A remote action call appears in the session log as cancelled or failed without an error message.
+The agent immediately retries the same call without investigating the cancellation.
+
+### Scope
+This is specific to MCP or connector-based remote actions but applies to any workflow that relies on external service connectors for GitHub operations.
+
+## Entry 16
+
+### Title
+Empty placeholder files lost on remote branch push.
+
+### Date
+2026-03-31.
+
+### Context
+Tooling was Codex CLI agent with GitHub MCP connector.
+Model was GPT-5 based.
+Repo was philippe-ths/ai-coach-report-nextjs-with-supabase for issue #7.
+
+### What Happened
+Empty .gitkeep placeholder files intended to preserve directory structure under supabase/functions/ and supabase/migrations/ did not survive into the remote branch content.
+The fix was to make the placeholder files non-empty so the remote branch preserved the directory structure.
+
+### Why It Matters
+Lost placeholder files silently change the repository structure in ways that may not be noticed until a downstream process or developer depends on the expected directories existing.
+
+### Trigger Pattern
+This pattern appears when the agent uses empty files to preserve directory structure through a remote tree creation mechanism that discards empty blobs.
+
+### Early Warning Signs
+The agent creates .gitkeep or similar zero-byte files for directory preservation through a non-standard push mechanism.
+Post-push verification does not confirm that all committed files are present on the remote.
+
+### Scope
+This is specific to MCP or API-based remote tree creation workflows that do not handle empty files the same way as standard git push.

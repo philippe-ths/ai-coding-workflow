@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.1.1
+Version: 1.1.2
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -95,6 +95,7 @@ The human reviews and approves at defined checkpoints.
 
 Before implementation, produce a plan that includes:
 
+- State the branch the work will be implemented on.
 - State the goal of the change in one or two sentences.
 - State the user-visible behaviour that must change.
 - State the files and code areas the change will touch.
