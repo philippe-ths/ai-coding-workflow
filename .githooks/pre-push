@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eu
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+
+"$ROOT_DIR/.ai-policy/scripts/check-protected-branch.sh"
+
+# shellcheck disable=SC1091
+. "$ROOT_DIR/.ai-policy/policy.env"
+
+if [ "$REQUIRE_VALIDATION_BEFORE_PUSH" = "true" ]; then
+  "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
+fi
+
+exit 0

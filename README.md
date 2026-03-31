@@ -39,3 +39,28 @@ Typical setup:
 - Treat the codebase and runtime behavior of the target repository as the source of truth.
 - Prefer concrete instructions over abstract guidance.
 - Update templates and workflow files when repeated failure patterns justify a rule change.
+
+## AI Policy Hooks
+
+This repo includes a lightweight local policy layer in `.ai-policy/` and `.githooks/`.
+
+Current protections:
+
+- block commit on protected branches
+- block push on protected branches
+- require a passed validation status before commit
+- require a passed validation status before push
+
+Setup:
+
+```bash
+./.ai-policy/scripts/install-hooks.sh
+```
+
+Run validation through the policy wrapper:
+
+```bash
+./.ai-policy/scripts/run-validation.sh
+```
+
+The validation state file is local runtime state and should not be committed.

@@ -57,6 +57,7 @@ This exists so the agent knows where to stop and hand off.
 Every rule should exist in exactly one place.
 If the same rule appears in two sections, decide which section owns it and remove the other.
 Duplication causes drift over time and wastes context tokens.
+When a rule has both an advisory form and an enforcement form, keep the advisory form once in `ai-workflow.md` and keep the enforcement form in repo-local deterministic policy.
 
 **One sentence per line.**
 Every line should contain exactly one sentence.
@@ -100,7 +101,13 @@ The agent tool's own system prompt already consumes some of this budget before t
 This means every low-value line added dilutes the compliance probability of every high-value line.
 Before adding a rule, ask: could the agent figure this out by reading the codebase?
 If yes, do not add it.
+If a boundary is bright-line and machine-checkable, prefer deterministic repo-local enforcement over repeated workflow wording.
 Prefer fewer, higher-quality rules over comprehensive coverage.
+
+**Deterministic policy placement.**
+Bright-line machine-checkable boundaries should move into deterministic repo-local policy when practical.
+Keep the behavioral instruction in `ai-workflow.md` if the AI needs it to plan and sequence work correctly before enforcement.
+Do not restate the same mechanically enforced boundary across multiple workflow sections.
 
 **Workflow steps should be lean.**
 A workflow step should contain sequenced actions and pointers to reference sections.

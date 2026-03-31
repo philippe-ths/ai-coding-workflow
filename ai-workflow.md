@@ -156,6 +156,7 @@ When comparing post-implementation results against the baseline:
 - Report pre-existing failures separately from change-related failures.
 
 Run validation after every code change.
+If repo-local deterministic policy requires a passed validation state before commit or push, satisfy that requirement through the repository validation flow.
 Run the following checks in order:
 
 1. **Smoke tests.**
@@ -296,9 +297,11 @@ Every task must follow the GitHub branching workflow:
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
+- Repo-local deterministic policy may block protected-branch Git actions and commit or push without passed validation.
 - Do not infer approval for one GitHub action from approval for another GitHub action.
 - Do not push to remote without explicit human confirmation in the current session.
 - Do not create a pull request without explicit human confirmation in the current session.
+- If deterministic policy blocks an action, fix the blocked condition before retrying.
 - If new commits are added after approval, stop and ask again before the next remote GitHub action.
 - After running an approved GitHub action, stop and report the result.
 
@@ -353,6 +356,7 @@ Do not do any of the following under any circumstances:
 - Silently expand scope or introduce unrelated changes.
 - Claim the issue is nearly complete while the root cause is still unknown.
 - Hardcode sensitive values.
+- Bypass deterministic policy checks or treat them as optional.
 
 ## The Human is Responsible For
 
