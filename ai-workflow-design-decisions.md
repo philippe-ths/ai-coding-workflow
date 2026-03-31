@@ -162,6 +162,35 @@ When reviewing the file for structural problems, classify each line as one of:
 - **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
 
 
+## Baseline Validation and Rebasing
+
+### Why rebase at the start of a task
+
+Working on a stale branch means the agent writes code against an outdated state.
+Files may have moved, APIs may have changed, or new conflicts may have accumulated.
+Code that is correct against the old state can be silently wrong against current main.
+Rebasing before implementation ensures the starting point matches reality.
+
+### Why rebase before creating a pull request
+
+The target branch may have moved forward during implementation.
+Rebasing before the PR ensures CI runs against the current target state, not a stale snapshot.
+It also reduces the chance of merge conflicts appearing after the PR is created.
+
+### Why run a baseline test suite before implementation
+
+The workflow rule "If a previously passing test fails after the change, treat the change as wrong until proven otherwise" is unenforceable without a known-good baseline.
+Without a baseline, neither the human nor the agent can distinguish a regression from a pre-existing failure.
+Both will naturally assume the change caused the failure, leading to wasted time debugging something that was already broken.
+Running smoke tests and the global test suite after rebasing but before implementation establishes the comparison point.
+Pre-existing failures are recorded so they can be excluded from post-implementation blame.
+
+### Why the baseline runs after rebasing
+
+The baseline must reflect the true starting state.
+If the baseline ran before rebasing, it would validate a stale branch state that the implementation will never build on.
+The sequence is: rebase, then baseline, then implement.
+
 ## Observed AI Failings
 
 Use `observed-ai-failings.md` file to record concrete AI-agent failure patterns seen in real sessions.

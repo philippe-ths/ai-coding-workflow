@@ -21,6 +21,9 @@ The human reviews and approves at defined checkpoints.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
    - Check branch state.
    - See [GitHub Workflow](#github-workflow).
+   - Rebase onto the target branch.
+   - Run baseline validation.
+   - See [Validation Requirements](#validation-requirements).
    - Confirm the task is a bounded change.
    - See [Scope Control](#scope-control).
    - Complete this step before analysing implementation details.
@@ -138,24 +141,34 @@ Keep the change focused on the approved task:
 
 ## Validation Requirements
 
+Before implementation, run a baseline validation:
+
+1. Run smoke tests.
+2. Run the global test suite.
+3. Record which tests pass and which tests fail.
+4. Treat any pre-existing failure as a known failure for the duration of the task.
+5. Do not attempt to fix pre-existing failures unless the task requires it.
+
+When comparing post-implementation results against the baseline:
+
+- If a test that passed in the baseline now fails, treat the change as the cause until proven otherwise.
+- If a test that failed in the baseline still fails, do not attribute it to the change.
+- Report pre-existing failures separately from change-related failures.
+
 Run validation after every code change.
 Run the following checks in order:
 
 1. **Smoke tests.**
-
    - Confirm the app builds and starts without errors.
 
 2. **Global test suite.**
-
    - Run the full existing test suite.
 
 3. **Targeted tests.**
-
    - Run tests specific to the changed area.
    - If no targeted tests exist, flag this.
 
 4. **New tests.**
-
    - Add tests if the change introduces behaviour that existing tests do not cover.
    - Run the new tests.
 
@@ -278,6 +291,9 @@ Every task must follow the GitHub branching workflow:
 - Use `fix/` for bug fixes.
 - Use `refactor/` for refactors.
 - Keep branch work focused on the issue scope.
+- Rebase the issue branch onto the target branch before starting implementation.
+- Rebase the issue branch onto the target branch before creating a pull request.
+- If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
 - Do not infer approval for one GitHub action from approval for another GitHub action.
