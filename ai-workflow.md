@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.0.2
+Version: 1.1.1
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -297,6 +297,8 @@ Every task must follow the GitHub branching workflow:
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
+- Confirm repo-local deterministic policy is active before relying on protected-branch or validation enforcement.
+- If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - Repo-local deterministic policy may block protected-branch Git actions and commit or push without passed validation.
 - Do not infer approval for one GitHub action from approval for another GitHub action.
 - Do not push to remote without explicit human confirmation in the current session.

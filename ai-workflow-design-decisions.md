@@ -107,6 +107,7 @@ Prefer fewer, higher-quality rules over comprehensive coverage.
 **Deterministic policy placement.**
 Bright-line machine-checkable boundaries should move into deterministic repo-local policy when practical.
 Keep the behavioral instruction in `ai-workflow.md` if the AI needs it to plan and sequence work correctly before enforcement.
+If advisory guidance depends on deterministic policy being active, state the activation check and recovery step once in the owning reference section.
 Do not restate the same mechanically enforced boundary across multiple workflow sections.
 
 **Workflow steps should be lean.**
