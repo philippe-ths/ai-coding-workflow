@@ -175,6 +175,101 @@ When reviewing the file for structural problems, classify each line as one of:
 - **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
 
 
+## First Principles
+
+The two first principles exist to prevent a class of failure where the agent trusts documentation, issue descriptions, or its own prior assumptions over what the code actually does and how it actually behaves.
+
+"The codebase provides implementation truth" means the agent should resolve ambiguity by reading the code, not by re-reading the issue or guessing from file names.
+"Runtime behaviour is the final source of truth" means that if the code says one thing and runtime says another, runtime wins.
+This ordering prevents the agent from declaring a task complete because the code looks correct while the feature is actually broken.
+
+## Planning Requirements
+
+The plan exists as a checkpoint artifact, not as a task management document.
+Its purpose is to give the human a concrete, reviewable description of what the agent intends to do before any code changes happen.
+
+Treating the issue goal as authoritative but implementation details as provisional addresses a common failure: issues are written against the author's mental model of the codebase, which may be stale or wrong.
+The agent must extract what should change from the issue but verify how to change it against the current code.
+If the issue says "edit file X" but file X no longer exists or the logic has moved, the agent should plan against reality and flag the mismatch rather than blindly following the issue.
+
+Separating issue assumptions from codebase-confirmed assumptions forces the agent to be explicit about what it knows versus what it is guessing.
+This makes the plan reviewable: the human can spot wrong assumptions before they become wrong code.
+
+Higher-risk markers (routing, persistence, sync, caching, reactive subscriptions, state transitions) exist because these areas have non-local effects.
+A bug in a utility function is usually caught by a failing test.
+A bug in sync or state transitions can appear correct locally but break a different screen or surface only after a delay.
+
+## Scope Control
+
+Scope control exists to prevent the most common form of AI scope drift: "while I am here" improvements.
+Agents naturally optimise for perceived completeness, which leads to unrequested refactors, extra error handling, and cosmetic changes that increase review burden and introduce risk.
+The rules are deliberately blunt because nuanced scope guidance gives the agent room to rationalise expansion.
+
+Splitting unrelated objectives within a single issue prevents a different failure mode: the agent picks the easiest objective, declares progress, and the harder objective gets lost or partially addressed.
+
+## Failure Analysis Mode
+
+Failure analysis mode exists because the default agent behaviour when something breaks is to immediately attempt a fix, then another fix, then another, often making the problem worse or masking the root cause.
+The structured format forces the agent to stop, describe the contradiction, and reason about causes before writing more code.
+
+The hypothesis-driven structure (observed vs expected, assumptions checked, plausible causes, cheapest next observation) comes from debugging methodology.
+It prevents the agent from cycling through random fixes and instead directs it toward the single observation that would eliminate the most hypotheses.
+
+The rule about preferring diagnostics over asking the human to retry exists because agents frequently ask the human to "try again" or "clear the cache" as a substitute for understanding what went wrong.
+This shifts debugging effort to the human and often does not resolve the issue.
+
+## Logging and Observability
+
+This section exists because agents tend toward two extremes: either adding no logging at all, or adding verbose logging everywhere.
+The rules guide toward targeted logging at meaningful boundaries (writes, sync, state transitions) where problems are hardest to diagnose after the fact.
+
+The emphasis on temporary diagnostics addresses a specific workflow need: during development, the agent may need to prove which code path executed or which state transition occurred before the human can verify the feature works.
+Requiring removal before completion prevents debug logging from accumulating in the codebase.
+
+The prohibition on sensitive data in diagnostics is a security boundary, not a style preference.
+Diagnostics are often printed to terminals, committed accidentally, or left in logs.
+
+## Command Approval
+
+Command approval is a minimal transparency rule.
+Agents run commands that can modify state, consume resources, or produce side effects.
+Stating what a command does and why it needs to run gives the human the minimum information needed to approve or reject it.
+This is deliberately lightweight because making it heavier would slow every task.
+
+## Handling Parent and Sub-Issues
+
+This section exists because GitHub issue hierarchies create an ambiguity: when given a parent issue, should the agent implement all of it or just part of it?
+Without explicit rules, agents tend to treat a parent issue as a single task and attempt the full scope, which violates scope control.
+
+The rule to stop and ask which sub-issue to work on prevents the agent from picking one arbitrarily.
+The rule to read one level up (parent) but not further prevents the agent from spending its context window on distant ancestors that provide diminishing context.
+
+Checking whether the completed sub-issue is the last open one under the parent is a convenience signal for the human to know when a larger piece of work is done.
+
+## Boundary Rules
+
+The three-tier structure (Always Do, Ask First, Never Do) exists to separate rules by enforcement weight.
+
+"Always Do" rules are unconditional process requirements.
+They apply to every task regardless of context.
+They are things the agent should do automatically without prompting.
+
+"Ask First" rules define actions the agent may take but only with explicit human approval.
+These are actions that are individually reasonable but carry risk: adding dependencies, changing architecture, deleting code.
+The common thread is that these actions are hard to reverse or have non-local consequences.
+
+"Never Do" rules are bright-line prohibitions.
+They exist because some actions are never acceptable regardless of context, and an agent that reasons about them case-by-case will eventually rationalise an exception.
+The list is deliberately short: only include rules where zero tolerance is warranted.
+
+## Human Responsibilities
+
+This section exists to define the boundary of the agent's authority.
+Without it, agents tend to gradually absorb responsibilities that belong to the human: deciding scope, judging completeness, approving their own work.
+
+Listing human responsibilities explicitly also serves as a checklist for the human.
+If the agent is making poor decisions, the human can check whether they failed to provide one of their inputs (e.g. a well-formed issue, sufficient project context).
+
 ## Baseline Validation and Rebasing
 
 ### Why rebase at the start of a task
@@ -243,3 +338,90 @@ Record what happened, not theories unless they are useful.
 
 ### Scope
 - [State whether this seems local to one workflow step or general across tasks.]
+
+## Deterministic Policy System (.ai-policy/)
+
+### Why deterministic enforcement exists
+
+The workflow file instructs the agent, but instruction compliance degrades as context grows and task complexity increases.
+Bright-line mechanical rules (do not commit on a protected branch, do not commit without passing validation) are too important to rely on instruction-following alone.
+The `.ai-policy/` directory moves these rules into deterministic enforcement: shell scripts that block the action at the Git level regardless of whether the agent remembered the rule.
+
+This follows the maintenance rule "When a rule has both an advisory form and an enforcement form, keep the advisory form once in `ai-workflow.md` and keep the enforcement form in repo-local deterministic policy."
+The advisory form helps the agent plan correctly; the deterministic form catches it when it does not.
+
+### Why policy.env exists
+
+`policy.env` centralises configuration for the policy system in one file.
+Protected branch names, validation toggle flags, state file paths, and the validation command are all defined here.
+This avoids scattering configuration across multiple scripts and makes it easy for a human to see or change the policy in one place.
+Scripts source this file rather than hardcoding values.
+
+### Protected branch enforcement
+
+`check-protected-branch.sh` blocks commits and pushes to branches listed in `PROTECTED_BRANCHES`.
+This enforces the workflow rule "Do not work directly on `main`" at the Git level.
+The agent may forget or rationalise working on main; the hook will not.
+
+### Validation state tracking
+
+The validation system uses a simple state file (`validation.status`) with three states: `running`, `passed`, `failed`.
+
+`run-validation.sh` orchestrates the flow: it sets the state to `running`, runs the configured validation command, and sets the state to `passed` or `failed` based on the result.
+The `running` state plus a trap on exit ensures that if the script is interrupted or crashes, the state reverts to `failed` rather than remaining `passed` from a stale run.
+
+`check-validation.sh` reads the state file and blocks the Git action unless the state is `passed`.
+This enforces the workflow rule that validation must pass before commit or push.
+
+`mark-validation-pass.sh` and `mark-validation-fail.sh` exist as manual overrides.
+They allow the human to set validation state directly when the automated flow is not appropriate (e.g. the project has no tests yet, or a known-failing test needs to be bypassed for a specific commit).
+These are escape hatches, not normal workflow paths.
+
+### project-validation.sh
+
+`project-validation.sh` is the validation command that `run-validation.sh` invokes.
+In this repository it runs `bash -n` (syntax check) on all scripts in `.ai-policy/scripts/` and `.githooks/`.
+In an adopting project, this file would be replaced with the project's actual test and build commands.
+The indirection through `VALIDATION_COMMAND` in `policy.env` means the validation system works without modifying any script other than `project-validation.sh` (or changing the command path in `policy.env`).
+
+### current-branch.sh
+
+`current-branch.sh` is a one-line helper that returns the current branch name.
+It exists as a separate script so that `check-protected-branch.sh` does not embed Git plumbing directly, keeping each script focused on a single concern.
+
+### install-hooks.sh
+
+`install-hooks.sh` sets `core.hooksPath` to `.githooks` and makes all scripts executable.
+This is a one-time setup step per clone.
+The workflow references it as a recovery step: if hooks are not active, run this script.
+Using `core.hooksPath` instead of copying hooks into `.git/hooks/` means the hooks are version-controlled and shared across clones.
+
+## Git Hooks (.githooks/)
+
+### Why hooks are in .githooks/ not .git/hooks/
+
+`.git/hooks/` is local and not version-controlled.
+`.githooks/` is committed to the repository, which means every clone gets the same enforcement.
+`install-hooks.sh` configures Git to use this directory via `core.hooksPath`.
+
+### pre-commit hook
+
+The pre-commit hook runs two checks in order:
+1. Protected branch check: blocks the commit if on a protected branch.
+2. Validation check (if enabled): blocks the commit if validation has not passed.
+
+The protected branch check runs first because it is the cheaper operation and the more fundamental violation.
+There is no point checking validation status if the commit should not happen on this branch at all.
+
+### pre-push hook
+
+The pre-push hook mirrors the pre-commit hook structure: protected branch check first, then validation check.
+This provides a second enforcement point at push time.
+Even if an agent or human bypasses pre-commit (e.g. with `--no-verify`), the push hook catches it.
+Having both hooks means the feedback is early (at commit time) but the enforcement is redundant (at push time).
+
+### Why both hooks exist
+
+Pre-commit gives fast feedback: the agent learns immediately that it cannot commit without validation.
+Pre-push provides a safety net: if pre-commit was bypassed, the invalid state does not reach the remote.
+The cost of running both is negligible (two shell script invocations), and the benefit is defence in depth.
