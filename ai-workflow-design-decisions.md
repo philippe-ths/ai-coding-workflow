@@ -331,10 +331,20 @@ Source: Workflow architecture.
 
 ### Workflow Step 9: Fix and revalidate
 
+> "Fix reported issues."
+
+Rationale: Directs the agent to address what the human identified during the checkpoint. Without this explicit instruction, the agent might only partially address feedback or prioritise easy fixes.
+Source: Workflow architecture (human checkpoints produce actionable issues).
+
 > "Rerun relevant validation checks after each fix."
 
 Rationale: A fix can introduce new regressions. Re-validating after each fix prevents error compounding.
 Source: Validation Requirements.
+
+> "Repeat until no issues remain."
+
+Rationale: Sets an explicit termination condition. Without it the agent may stop after one pass even when multiple issues were reported.
+Source: Workflow architecture.
 
 > "Enter Failure Analysis Mode if a fix fails." / "Enter Failure Analysis Mode if manual verification fails."
 
@@ -626,6 +636,11 @@ Source: Validation Requirements (do not claim code is tested when it is not).
 > "Add tests if the change introduces behaviour that existing tests do not cover."
 
 Rationale: New behaviour without tests will have no safety net for future changes.
+Source: Validation Requirements.
+
+> "Run the new tests."
+
+Rationale: Writing tests that are never run provides no validation signal. The explicit instruction ensures the agent executes them and confirms they pass.
 Source: Validation Requirements.
 
 > "Do not modify smoke tests or the global test suite unless the task explicitly requires it."
