@@ -479,3 +479,37 @@ Post-push verification does not confirm that all committed files are present on 
 
 ### Scope
 This is specific to MCP or API-based remote tree creation workflows that do not handle empty files the same way as standard git push.
+
+## Entry 17
+
+### Title
+Committed and pushed directly to main with hooks not installed.
+
+### Date
+2026-04-03.
+
+### Context
+Tooling was VS Code Copilot Chat.
+Model was Claude Sonnet 4.6 high.
+Repo was philippe-ths/ai-coding-workflow.
+
+### What Happened
+The agent committed and pushed directly to main without first installing the local git hooks via `.ai-policy/scripts/install-hooks.sh`.
+The hooks were designed to block commits and pushes on protected branches, but because they had not been installed, the protections were not in place when the agent acted.
+The agent also ignored the bright-line rules that unconditionally prohibit committing or pushing to main.
+
+### Why It Matters
+Installing the hooks is a setup prerequisite that enforces branch protection locally.
+Bypassing it — whether by omission or by proceeding before setup is confirmed — removes a key safety control.
+Bright-line rules are unconditional: they must be followed regardless of whether the hooks are active.
+
+### Trigger Pattern
+This pattern appears when the agent proceeds to GitHub handoff steps without first verifying that the local policy layer is installed and active, and without independently checking whether the current branch is protected.
+
+### Early Warning Signs
+The agent runs git commit or git push without confirming hooks are installed.
+The current branch is main and no branch-creation step preceded the commit.
+The agent does not reference or check `.ai-policy/` before performing remote git actions.
+
+### Scope
+This appears general across tasks because hook installation and branch protection checks are prerequisites for any GitHub handoff action.
