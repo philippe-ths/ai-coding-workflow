@@ -70,9 +70,11 @@ Use imperative mood: "Do X", "Do not do X", "Flag this to the human."
 Do not use passive voice: "The plan should be reviewed" is weaker than "Wait for the human to review the plan."
 When there is a conditional, put the condition first: "If X, do Y."
 Do not hedge: avoid "consider", "you might want to", "it is generally a good idea to."
-Do not explain why a rule exists.
 The file instructs. It does not teach, persuade, or justify.
-Rationale wastes tokens and the agent does not need to agree with a rule to follow it.
+Do not include rationale for bright-line mechanical rules where the instruction is unambiguous on its own.
+Include rationale for judgment-heavy rules with ambiguous boundaries, where the agent needs to understand the purpose to avoid violating the spirit.
+Every rationale line consumes tokens that compete with the actual task, so each one must earn its place.
+
 
 **Negative rules need a positive alternative.**
 A rule that only says "Do not do X" leaves the agent guessing what to do instead.
