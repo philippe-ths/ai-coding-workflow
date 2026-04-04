@@ -91,11 +91,13 @@ Abstract instructions give the agent room to interpret, which means room to get 
 If a line needs a subordinate clause to make sense, it is probably two rules and should be split.
 Long lines are harder for the model to attend to and easier to partially skip.
 
-**No emphasis formatting for priority.**
-Do not use bold, caps, or exclamation marks to signal that a rule is more important.
-LLMs do not reliably weight formatting as priority.
-If a rule is critical, put it earlier in the file or in First Principles.
-Position in the file is a more reliable priority signal than formatting.
+**Emphasis formatting.**
+Do not use bold, caps, or exclamation marks as a general priority signal across the file.
+Position in the file and placement in First Principles remain the primary priority signals.
+Exception: apply CAPS to the opening action verb in boundary rule bullets only (ALWAYS, ASK, NEVER).
+This targets generation-time salience for unconditional rules, not abstract priority.
+Do not extend caps emphasis to reference section rules or workflow steps.
+If emphasis is used broadly, it loses its salience effect and adds noise tokens.
 
 **Context budget.**
 Every line in the file consumes context window tokens that compete with the actual task.
