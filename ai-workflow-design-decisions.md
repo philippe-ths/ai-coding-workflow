@@ -150,6 +150,27 @@ The log should list each material observation, decision, proposed wording change
 The log should separate applied changes from ideas that were discussed but not adopted.
 The log should omit filler conversation and low-signal tool noise.
 
+## File Splitting
+
+The workflow file can be split into a core file and topic-specific files loaded on demand.
+The core file contains the workflow steps, boundary rules, human responsibilities, and first principles.
+Topic-specific files contain reference section content that is only relevant during a specific phase or condition.
+
+A section qualifies for extraction when all of the following are true:
+1. It activates under a specific, identifiable condition or phase.
+2. It is self-contained and has no dependencies on other sections during its active phase.
+3. It is not needed in context during the majority of sessions or phases.
+
+Loading is agent-driven: the core workflow instructs the agent to read the file at the right moment.
+This approach works across all agent tools because file reading is a universal capability.
+Tool-native mechanisms (such as Claude Code path-scoped rules or @imports) can supplement agent-driven loading but should not replace it as the primary mechanism.
+
+Keep boundary rules (Always Do, Ask First, Never Do) in the core file.
+These are context-free and must be in context at all times.
+
+Extracted files live in a `workflow/` directory at the repository root.
+Each file covers one topic and follows the same formatting rules as the core workflow.
+
 ## Reusable Prompt
 
 Use this prompt when requesting a chronological session log for workflow maintenance.
