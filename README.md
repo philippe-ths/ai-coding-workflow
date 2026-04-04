@@ -13,6 +13,7 @@ The design decision files are written for the human maintainer.
 - `project-spec-template.md`: Template for creating a `project-spec.md` file in a target repository.
 - `project-spec-design-decisions.md`: Maintenance rules for keeping `project-spec.md` factual, concise, and aligned with implementation truth.
 - `observed-ai-failings.md`: Log of concrete failure patterns observed in real AI-agent sessions.
+- `workflow/failure-analysis.md`: Step-by-step process for investigating contradictions between implementation and runtime behaviour.
 
 ## Intended Use
 
