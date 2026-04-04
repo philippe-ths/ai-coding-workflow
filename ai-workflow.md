@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.1.2
+Version: 1.2.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
