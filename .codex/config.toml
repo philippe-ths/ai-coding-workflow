@@ -1,0 +1,5 @@
+[features]
+codex_hooks = true
+
+[mcp_servers.github]
+disabled_tools = ["push_files", "create_or_update_file", "delete_file"]
