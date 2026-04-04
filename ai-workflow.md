@@ -32,7 +32,7 @@ The human reviews and approves at defined checkpoints.
 
    - Read `project-spec.md` and relevant files.
    - Review the code areas the task is likely to touch.
-   - Extract the intended outcome from the issue before using implementation suggestions.
+   - Extract the intended outcome from the issue before using implementation suggestions. (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative causes the agent to implement the wrong thing.)
    - See [Planning Requirements](#planning-requirements).
 
 3. **Produce a code-aware plan.**
@@ -115,7 +115,7 @@ Before implementation, produce a plan that includes:
 When writing the plan:
 
 - Treat the issue goal as authoritative.
-- Treat issue-suggested implementation details as provisional until the current codebase confirms them.
+- Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: Issues are written before implementation and may not reflect the current codebase.)
 - Do not assume the files, data flow, or control points named in the issue are the real execution path.
 - If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
 - If the issue suggests a structure that the current codebase does not follow, plan against the real structure and flag the mismatch to the human.
@@ -126,7 +126,7 @@ When writing the plan:
 During implementation:
 
 - Use `project-spec.md` for initial context on architectural patterns, project structure, and conventions.
-- Prefer extending current patterns over introducing new ones.
+- Prefer extending current patterns over introducing new ones. (Why: New patterns increase review surface, reduce predictability, and create maintenance drift.)
 - Keep changes focused and relevant to the approved plan.
 
 ## Scope Control
@@ -136,9 +136,9 @@ Keep the change focused on the approved task:
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
 - Do only the work required to complete the task.
-- Do not treat "while I am here" changes as free.
-- Separate fixes, refactors, and feature work unless the task clearly requires them together.
-- If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation.
+- Do not treat "while I am here" changes as free. (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
+- Separate fixes, refactors, and feature work unless the task clearly requires them together. (Why: Mixing change types obscures the commit's intent and makes review harder.)
+- If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation. (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
 
 ## Validation Requirements
 
@@ -233,7 +233,7 @@ When in failure analysis mode:
 - Gather evidence before proposing another fix.
 - Test at least one concrete hypothesis before asking the human to retry the flow, refresh the app, clear cache, restart the dev server, or repeat manual verification.
 - Prioritise code path, persistence, sync, routing, and UI binding explanations over environment or caching unless evidence shows otherwise.
-- Do not signal a flawed approach based on difficulty alone.
+- Do not signal a flawed approach based on difficulty alone. (Why: Difficulty is normal implementation friction; only evidence of wrong assumptions signals a flawed approach.)
 - Signal a flawed approach only when evidence shows the assumptions were wrong.
 
 ## Logging and Observability

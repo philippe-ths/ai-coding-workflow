@@ -72,7 +72,8 @@ When there is a conditional, put the condition first: "If X, do Y."
 Do not hedge: avoid "consider", "you might want to", "it is generally a good idea to."
 The file instructs. It does not teach, persuade, or justify.
 Do not include rationale for bright-line mechanical rules where the instruction is unambiguous on its own.
-Include rationale for judgment-heavy rules with ambiguous boundaries, where the agent needs to understand the purpose to avoid violating the spirit.
+Include inline rationale for a rule only when all three criteria are met: the rule requires a judgment call, an agent could comply with the literal wording while violating the intent, and understanding the why would materially change how the agent applies the rule in ambiguous cases.
+Use the format: rule sentence on its own line, then "(Why: rationale.)" on the next line or in a parenthetical on the same line.
 Every rationale line consumes tokens that compete with the actual task, so each one must earn its place.
 
 
@@ -152,7 +153,7 @@ The log should omit filler conversation and low-signal tool noise.
 Use this prompt when requesting a chronological session log for workflow maintenance.
 
 ```text
-Produce a chronological log for maintenance of the file ai-workflow.md.
+Produce a chronological log of this chat session for maintenance of the file ai-workflow.md.
 List the following: 
 - [Tooling or environment, e.g. VS Code Copilot, ChatGPT app, CLI agent.]
 - [Model if known, e.g. GPT-5.4.]
