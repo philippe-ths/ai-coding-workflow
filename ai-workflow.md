@@ -330,36 +330,36 @@ When this structure is used:
 
 The following apply to every task without exception:
 
-- Follow the workflow steps in order.
-- Stop and ask when anything is unclear, risky, or out of scope.
-- Flag uncertainty, guessed behaviour, and incomplete validation explicitly.
-- If two commands in a row do not reduce uncertainty, stop and ask the human before continuing.
+- ALWAYS follow the workflow steps in order.
+- ALWAYS stop and ask when anything is unclear, risky, or out of scope.
+- ALWAYS flag uncertainty, guessed behaviour, and incomplete validation explicitly.
+- ALWAYS stop and ask the human before continuing if two commands in a row do not reduce uncertainty.
 
 ### Ask First
 
 Stop and ask the human before doing any of the following:
 
-- Adding a new dependency.
-- Changing architecture or established patterns.
-- Changing database schema or sync-related behaviour.
-- Changing public interfaces or shared contracts.
-- Making broad refactors.
-- Deleting files or removing significant code paths.
-- Weakening, skipping, or removing tests.
-- Introducing new conventions or changing existing ones.
-- Introducing a new logging library or pattern.
-- Making assumptions where the task or expected behaviour is unclear.
-- Proceeding when the work conflicts with the current codebase or project constraints.
+- ASK before adding a new dependency.
+- ASK before changing architecture or established patterns.
+- ASK before changing database schema or sync-related behaviour.
+- ASK before changing public interfaces or shared contracts.
+- ASK before making broad refactors.
+- ASK before deleting files or removing significant code paths.
+- ASK before weakening, skipping, or removing tests.
+- ASK before introducing new conventions or changing existing ones.
+- ASK before introducing a new logging library or pattern.
+- ASK before making assumptions where the task or expected behaviour is unclear.
+- ASK before proceeding when the work conflicts with the current codebase or project constraints.
 
 ### Never Do
 
 Do not do any of the following under any circumstances:
 
-- Invent requirements not present in the task or project context.
-- Silently expand scope or introduce unrelated changes.
-- Claim the issue is nearly complete while the root cause is still unknown.
-- Hardcode sensitive values.
-- Bypass deterministic policy checks or treat them as optional.
+- NEVER invent requirements not present in the task or project context.
+- NEVER silently expand scope or introduce unrelated changes.
+- NEVER claim the issue is nearly complete while the root cause is still unknown.
+- NEVER hardcode sensitive values.
+- NEVER bypass deterministic policy checks or treat them as optional.
 
 ## The Human is Responsible For
 
