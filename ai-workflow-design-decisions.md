@@ -37,7 +37,7 @@ The workflow points to reference sections rather than inlining their content.
 Human checkpoints are explicit numbered steps.
 
 **Reference sections.**
-The detailed "how" for specific topics: planning, implementation, scope, validation, failure analysis, logging, GitHub workflow, sub-issue handling.
+The detailed "how" for specific topics: planning, implementation, scope, validation, failure analysis, logging, command approval, GitHub workflow, sub-issue handling.
 These do the heavy lifting.
 Each reference section owns its topic.
 Rules about that topic should live here, not scattered across the workflow or boundary sections.
@@ -47,7 +47,7 @@ Global, context-free rules that apply regardless of which step or topic is activ
 Rules that don't fit into Reference sections.
 Three tiers: Always Do, Ask First, Never Do.
 
-**Human responsibilities.**
+**The Human is Responsible For.**
 What the AI cannot do.
 This exists so the agent knows where to stop and hand off.
 
@@ -123,7 +123,7 @@ If a line in a workflow step reads like a rule rather than a sequenced action, i
 **Human responsibilities do not belong in workflow steps.**
 Lines describing what the human does (e.g. "Human reviews the results") should not appear inline in workflow steps.
 Human checkpoints are expressed as explicit numbered steps (e.g. "Checkpoint: human reviews the plan.").
-Detailed human responsibilities live in the Human Responsibilities section.
+Detailed human responsibilities live in the "The Human is Responsible For" section.
 
 **Boundary rules are context-free. Reference section rules are context-dependent.**
 A rule belongs in the boundary section if it applies regardless of which step or topic is active.
@@ -143,6 +143,13 @@ This keeps the boundary sections lean and genuinely global.
 **Keep First Principles minimal.**
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
 If a principle can live in a reference section instead, put it there.
+
+**Version number.**
+The workflow file carries a `Version: X.Y.Z` line in the preamble.
+Bump the patch version (Z) for any change that corrects wording, fixes a gap, or removes duplication without altering the workflow's intent.
+Bump the minor version (Y) for any change that adds a new rule, section, or meaningful constraint.
+Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps.
+Update the version on every edit so session logs can be tied to a specific file state.
 
 **Chronological session logs are an optional maintenance output.**
 When maintaining the workflow, the human may request a chronological session log.
@@ -170,6 +177,10 @@ These are context-free and must be in context at all times.
 
 Extracted files live in a `workflow/` directory at the repository root.
 Each file covers one topic and follows the same formatting rules as the core workflow.
+Name each extracted file after its topic in lowercase with hyphens: `workflow/planning.md`, `workflow/failure-analysis.md`.
+In the core workflow, use this exact loading instruction pattern: `Load the <name> skill (<path>).`
+For example: `Load the planning skill (workflow/planning.md).`
+The loading instruction must name the section or skill and supply the file path so the agent can act without resolving ambiguity.
 
 ## Reusable Prompt
 
