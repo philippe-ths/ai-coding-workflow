@@ -37,8 +37,7 @@ The human reviews and approves at defined checkpoints.
 
 3. **Produce a code-aware plan.**
 
-   - Load the `planning` skill.
-   - Write the plan following the skill requirements.
+   - See [Planning Requirements](#planning-requirements).
 
 4. **Checkpoint: human reviews the plan.**
 
@@ -93,8 +92,10 @@ The human reviews and approves at defined checkpoints.
 
 ## Planning Requirements
 
-The full planning process is defined in `workflow/planning.md`.
-Load the `planning` skill at Step 3 to access it.
+Use when executing Step 3 of the workflow (Produce a code-aware plan).
+Do not produce a plan without loading this skill first.
+
+Load the `planning` skill (`workflow/planning.md`).
 
 ## Implementation Rules
 
@@ -185,7 +186,7 @@ Enter failure analysis mode when manual verification fails.
 Enter failure analysis mode when runtime behaviour contradicts the implementation.
 Enter failure analysis mode when test results conflict with observed behaviour.
 
-Before proceeding in failure analysis mode, read `workflow/failure-analysis.md` and follow the process defined there.
+Before proceeding in failure analysis mode, load the `failure-analysis` skill (`workflow/failure-analysis.md`).
 
 ## Logging and Observability
 
