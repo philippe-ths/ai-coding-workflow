@@ -37,8 +37,8 @@ The human reviews and approves at defined checkpoints.
 
 3. **Produce a code-aware plan.**
 
-   - Write the plan.
-   - See [Planning Requirements](#planning-requirements).
+   - Load the `planning` skill.
+   - Write the plan following the skill requirements.
 
 4. **Checkpoint: human reviews the plan.**
 
@@ -93,33 +93,8 @@ The human reviews and approves at defined checkpoints.
 
 ## Planning Requirements
 
-Before implementation, produce a plan that includes:
-
-- State the branch the work will be implemented on.
-- State the goal of the change in one or two sentences.
-- State the user-visible behaviour that must change.
-- State the files and code areas the change will touch.
-- State the proposed implementation approach.
-- State any assumptions the plan depends on.
-- Separate issue assumptions from codebase-confirmed assumptions.
-- State how each critical assumption will be verified.
-- State any remaining uncertainties or ambiguities.
-- State the risks and edge cases.
-- Mark the change as higher-risk if it affects routing, persistence, sync, caching, reactive subscriptions, or state transitions.
-- Include at least one runtime validation step for higher-risk changes.
-- State the validation approach.
-- See [Validation Requirements](#validation-requirements).
-- State any logging or observability changes needed.
-- See [Logging and Observability](#logging-and-observability).
-
-When writing the plan:
-
-- Treat the issue goal as authoritative.
-- Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: Issues are written before implementation and may not reflect the current codebase.)
-- Do not assume the files, data flow, or control points named in the issue are the real execution path.
-- If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
-- If the issue suggests a structure that the current codebase does not follow, plan against the real structure and flag the mismatch to the human.
-- Keep the plan concise.
+The full planning process is defined in `workflow/planning.md`.
+Load the `planning` skill at Step 3 to access it.
 
 ## Implementation Rules
 
