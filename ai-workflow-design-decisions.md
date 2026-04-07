@@ -111,8 +111,11 @@ Prefer fewer, higher-quality rules over comprehensive coverage.
 
 **Deterministic policy placement.**
 Bright-line machine-checkable boundaries should move into deterministic repo-local policy when practical.
-Keep the behavioral instruction in `ai-workflow.md` if the AI needs it to plan and sequence work correctly before enforcement.
-If advisory guidance depends on deterministic policy being active, state the activation check and recovery step once in the owning reference section.
+Keep the rule once in `ai-workflow.md` in its shortest actionable form if the agent needs it to avoid the blocked path before enforcement.
+The workflow should prevent avoidable collisions with the trust layer.
+The trust layer should catch misses, not replace the agent’s ability to plan correctly.
+Remove repeated wording, rationale, and mirrored positive or negative forms.
+State activation checks and recovery steps once in the owning section.
 Do not restate the same mechanically enforced boundary across multiple workflow sections.
 
 **Workflow steps should be lean.**
