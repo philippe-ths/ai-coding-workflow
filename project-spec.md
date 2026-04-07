@@ -45,7 +45,7 @@ Version: 1.0.0
 
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent.
-- `ai-workflow-design-decisions.md`: maintenance rules and rationale for editing `ai-workflow.md`.
+- `ai-workflow-design-decisions/`: maintenance rules and rationale for editing `ai-workflow.md`, split into topic-scoped files.
 - `project-spec-template.md`: template for creating `project-spec.md` in a target repository.
 - `project-spec-design-decisions.md`: maintenance rules for keeping `project-spec.md` factual and concise.
 - `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
