@@ -344,7 +344,7 @@ Rationale: Prevents wasted time debugging failures the change did not cause.
 
 Rationale: Fixing unrelated failures is scope drift and may introduce new problems.
 
-> "If a test that passed in the baseline now fails, treat the change as the cause until proven otherwise."
+> "If a test that passed in the baseline now fails, treat the change as wrong until proven otherwise."
 
 Rationale: The default assumption should be that the change broke it. This prevents the agent from dismissing regressions.
 
@@ -399,10 +399,6 @@ Rationale: Modifying tests to make them pass is a form of scope drift and can ma
 > "Do not run validation commands in parallel when they can share ports, build outputs, caches, or runtime state."
 
 Rationale: Parallel validation with shared state produces flaky, non-deterministic results that waste debugging time.
-
-> "If a previously passing test fails after the change, treat the change as wrong until proven otherwise."
-
-Rationale: The fundamental regression rule. Without this, agents dismiss failures and continue.
 
 > "Run smoke tests and the global test suite after each meaningful implementation pass."
 
@@ -732,6 +728,18 @@ Rationale: Ensures CI runs against the current target state, not a stale snapsho
 
 Rationale: Staleness can accumulate during implementation. The rebase must be fresh at the point of the remote action.
 
+> "Before rebasing, compare tracked files between the branch and target and check whether gitignored or untracked local files exist at paths the target state tracks."
+
+Rationale: Catches two classes of problem before the rebase starts: junk files committed on the branch that would be carried forward, and local gitignored files at paths the target tracks that git would overwrite or delete.
+
+> "If either check reveals unexpected files or path overlap, stop and report before proceeding."
+
+Rationale: Stopping before the rebase gives the human the information needed to decide whether to proceed, clean up the branch, or back up local files. Proceeding blindly leads to cleanup operations that risk destroying local files.
+
+> "If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving."
+
+Rationale: Modify/delete conflicts signal divergent branch history that may require dropping commits or restructuring rather than mechanical resolution. Mechanical resolution without understanding the divergence can carry forward files that should have been dropped.
+
 > "If the task changes significantly during implementation, update the issue or flag the mismatch to the human."
 
 Rationale: The issue is the scope contract. If implementation diverges, the issue must be updated or the human must be informed.
@@ -867,6 +875,10 @@ Rationale: Broad refactors touch many files, increase review burden, and risk re
 > "Deleting files or removing significant code paths."
 
 Rationale: Deletion is hard to reverse and may remove functionality that is not obviously referenced.
+
+> "Running `git reset --hard` or any command that discards uncommitted working-tree state."
+
+Rationale: These commands destroy uncommitted changes including gitignored files at conflicting paths. The damage is irreversible and often invisible until the files are needed.
 
 > "Weakening, skipping, or removing tests."
 
