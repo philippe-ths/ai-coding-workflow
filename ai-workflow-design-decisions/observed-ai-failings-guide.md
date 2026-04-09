@@ -16,6 +16,9 @@ Record what happened, not theories unless they are useful.
 ### Title
 - [Short name for the failure pattern.]
 
+### Version
+- [Current version from `ai-workflow.md`.]
+
 ### Date
 - [YYYY-MM-DD]
 

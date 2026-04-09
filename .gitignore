@@ -1,3 +1,18 @@
+# Runtime state
 .ai-policy/state/validation.status
+
+# Local settings
 .claude/settings.local.json
 .vscode/settings.json
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor artifacts
+*.swp
+*.swo
+.idea/
+
+# Logs
+*.log

@@ -2,29 +2,132 @@
 
 Project-agnostic workflow and maintenance documents for AI-assisted coding.
 
-This repository provides a small set of files that help a human maintain consistent guardrails for an AI coding agent across repositories.
-The workflow is written for the agent.
-The design decision files are written for the human maintainer.
+AI coding agents routinely skip validation, expand scope beyond what was approved, and ignore human checkpoints. This repository provides a small set of governance files that prevent those failures by giving the agent an explicit workflow with enforced rules and required human approvals.
+
+The workflow is written for the agent. The design decision files are written for the human maintainer.
+
+**Prerequisites:** bash, git.
+
+## Approach
+
+This project is built in layers, simple to complex. Each layer is designed to deliver the maximum gain for the minimum effort and maintenance. Staying with a layer long enough to learn its limitations is the point — a new layer is only added when the current one hits a tipping point.
+
+The first layer was a single monolithic workflow file — one document that told the agent what to do. That worked until the workflow grew complex enough that it needed to be split into on-demand context (skills) and deterministic blockers (policy hooks) that enforce rules without relying on the agent to follow them.
+
+The current focus is finding the right split between always-on global rules and on-demand rules that are loaded only when relevant. After that: formally defined rules, and eventually multi-agent coordination.
+
+Tipping points are a judgement call. They come from real-world usage in other repositories — observing where agents actually fail, recording those patterns, and learning which new methods work. The `observed-ai-failings.md` file is where those lessons accumulate.
+
+## History
+
+1. **Single workflow file.** The project started as one document — `ai-workflow.md` — that told the agent what to do: confirm the task, plan, implement, validate, get approval. No enforcement, no tooling.
+2. **Failures drove new rules.** Real-world usage across multiple repos and agents surfaced repeated failures: agents skipping branches, bypassing checkpoints, running validation in parallel, pushing without approval. Each pattern was recorded in `observed-ai-failings.md` and addressed with a targeted workflow rule.
+3. **Deterministic enforcement.** Workflow rules alone were not enough — agents ignored them under momentum. The `.ai-policy/` layer and `.githooks/` were added to block protected-branch writes and require passed validation before commit or push, without relying on the agent to comply.
+4. **Agent-specific enforcement.** Git hooks only cover the shell path. Agents that use MCP connectors bypass hooks entirely. Enforcement was extended to Claude Code (PreToolUse hooks) and Codex (disabled_tools + PreToolUse hooks) to cover both execution paths.
+5. **On-demand skills.** The monolithic workflow file grew too large for agent context budgets. Planning and failure analysis were split into standalone skill files loaded only when the workflow step requires them.
+6. **Current: global vs on-demand rules.** Finding the right boundary between rules that must always be loaded and rules that can be deferred to skills.
 
 ## Repository Contents
 
-- `ai-workflow.md`: Canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
-- `ai-workflow-design-decisions.md`: Maintenance rules and structural rationale for editing `ai-workflow.md`.
-- `project-spec-template.md`: Template for creating a `project-spec.md` file in a target repository.
-- `project-spec-design-decisions.md`: Maintenance rules for keeping `project-spec.md` factual, concise, and aligned with implementation truth.
-- `observed-ai-failings.md`: Log of concrete failure patterns observed in real AI-agent sessions.
-- `.claude/skills/failure-analysis/SKILL.md`: Step-by-step process for investigating contradictions between implementation and runtime behaviour (also mirrored in `.github/skills/`).
+### Agent-facing files
 
-## Intended Use
+- `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
+- `project-spec.md` — factual reference for this repository's implementation state, created from `project-spec-template.md`.
+- `project-spec-template.md` — template for creating `project-spec.md` in a target repository.
 
-Use this repository as a source of reusable governance files for another software project.
+### Agent instruction entry points
 
-Typical setup:
+- `CLAUDE.md` — Claude Code agent instructions.
+- `AGENTS.md` — Codex agent instructions.
+- `GEMINI.md` — Gemini CLI agent instructions.
+- `.github/copilot-instructions.md` — VS Code Copilot agent instructions.
 
-1. Copy `ai-workflow.md` into the target repository and load it through that repository's AI-agent instructions.
-2. Create `project-spec.md` in the target repository from `project-spec-template.md`.
-3. Use the two design decision documents when refining either file.
-4. Record repeated real-world agent failure patterns in `observed-ai-failings.md`.
+### Skills
+
+- `.claude/skills/planning/SKILL.md` — code-aware planning process (Claude Code).
+- `.claude/skills/failure-analysis/SKILL.md` — failure investigation process (Claude Code).
+- `.github/skills/planning/SKILL.md` — code-aware planning process (Copilot).
+- `.github/skills/failure-analysis/SKILL.md` — failure investigation process (Copilot).
+
+### Policy enforcement
+
+- `.ai-policy/` — shell scripts that enforce protected-branch and validation-state rules.
+- `.ai-policy/scripts/test-claude-code-enforcement.sh` — enforcement integration tests for Claude Code.
+- `.ai-policy/scripts/test-codex-enforcement.sh` — enforcement integration tests for Codex.
+- `.githooks/pre-commit`, `.githooks/pre-push` — git hooks that call `.ai-policy/` scripts.
+- `.claude/settings.json` — Claude Code hook configuration for protected-branch blocking.
+- `.codex/config.toml`, `.codex/hooks.json` — Codex agent configuration and hook definitions.
+
+### Maintenance documents
+
+- `ai-workflow-design-decisions/` — scoped maintenance rules and rationale for editing `ai-workflow.md`.
+- `project-spec-design-decisions.md` — maintenance rules for keeping `project-spec.md` factual and concise.
+- `observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
+
+## Installation by Tool
+
+Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow and spec files, and the policy enforcement layer.
+
+### Claude Code
+
+```
+CLAUDE.md
+.claude/
+.ai-policy/
+.githooks/
+ai-workflow.md
+project-spec.md          # create from project-spec-template.md
+```
+
+### VS Code Copilot
+
+```
+.github/copilot-instructions.md
+.github/skills/
+.ai-policy/
+.githooks/
+ai-workflow.md
+project-spec.md          # create from project-spec-template.md
+```
+
+### Codex
+
+```
+AGENTS.md
+.codex/
+.ai-policy/
+.githooks/
+ai-workflow.md
+project-spec.md          # create from project-spec-template.md
+```
+
+### Gemini CLI
+
+```
+GEMINI.md
+.ai-policy/
+.githooks/
+ai-workflow.md
+project-spec.md          # create from project-spec-template.md
+```
+
+> Gemini-specific skills and enforcement hooks are not yet available. See [#36](https://github.com/philippe-ths/ai-coding-workflow/issues/36).
+
+After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.
+
+### Post-install setup
+
+Install the git hooks:
+
+```bash
+./.ai-policy/scripts/install-hooks.sh
+```
+
+Run validation:
+
+```bash
+./.ai-policy/scripts/run-validation.sh
+```
 
 ## What This Repository Optimizes For
 
@@ -40,28 +143,3 @@ Typical setup:
 - Treat the codebase and runtime behavior of the target repository as the source of truth.
 - Prefer concrete instructions over abstract guidance.
 - Update templates and workflow files when repeated failure patterns justify a rule change.
-
-## AI Policy Hooks
-
-This repo includes a lightweight local policy layer in `.ai-policy/` and `.githooks/`.
-
-Current protections:
-
-- block commit on protected branches
-- block push on protected branches
-- require a passed validation status before commit
-- require a passed validation status before push
-
-Setup:
-
-```bash
-./.ai-policy/scripts/install-hooks.sh
-```
-
-Run validation through the policy wrapper:
-
-```bash
-./.ai-policy/scripts/run-validation.sh
-```
-
-The validation state file is local runtime state and should not be committed.
