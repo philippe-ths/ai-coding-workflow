@@ -63,6 +63,7 @@ Use this prompt when requesting a chronological session log for workflow mainten
 Produce a chronological log of this chat session for maintenance of the file ai-workflow.md.
 List the following: 
 - [Tooling or environment, e.g. VS Code Copilot, ChatGPT app, CLI agent.]
+- [AI Workflow Version] 
 - [Model if known, e.g. GPT-5.4.]
 - [Repo or project.]
 List each material observation, decision, proposed wording change, accepted change, rejected change, and file edit in order.

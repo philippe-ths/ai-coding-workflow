@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.0.0
+Version: 1.1.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -128,7 +128,7 @@ Before implementation, run a baseline validation:
 
 When comparing post-implementation results against the baseline:
 
-- If a test that passed in the baseline now fails, treat the change as the cause until proven otherwise.
+- If a test that passed in the baseline now fails, treat the change as wrong until proven otherwise.
 - If a test that failed in the baseline still fails, do not attribute it to the change.
 - Report pre-existing failures separately from change-related failures.
 
@@ -154,7 +154,6 @@ When running validation:
 
 - Do not modify smoke tests or the global test suite unless the task explicitly requires it.
 - Do not run validation commands in parallel when they can share ports, build outputs, caches, or runtime state.
-- If a previously passing test fails after the change, treat the change as wrong until proven otherwise.
 - Run smoke tests and the global test suite after each meaningful implementation pass.
 - Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
 - Treat existing passing tests as evidence of stability.
@@ -248,6 +247,10 @@ Every task must follow the GitHub branching workflow:
 - Rebase the issue branch onto the target branch before starting implementation.
 - Rebase the issue branch onto the target branch before creating a pull request.
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
+- Before rebasing, compare tracked files between the branch and target and check whether gitignored or untracked local files exist at paths the target state tracks.
+- If either check reveals unexpected files or path overlap, stop and report before proceeding.
+  (Why: Rebase carries forward all tracked files from the branch, and git overwrites local files at conflicting paths regardless of gitignore status.)
+- If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
 - Confirm repo-local deterministic policy is active before relying on protected-branch or validation enforcement.
@@ -297,6 +300,7 @@ Stop and ask the human before doing any of the following:
 - ASK before changing public interfaces or shared contracts.
 - ASK before making broad refactors.
 - ASK before deleting files or removing significant code paths.
+- ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
 - ASK before introducing new conventions or changing existing ones.
 - ASK before introducing a new logging library or pattern.
