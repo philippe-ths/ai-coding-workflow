@@ -95,7 +95,7 @@ The human reviews and approves at defined checkpoints.
 Use when executing Step 3 of the workflow (Produce a code-aware plan).
 Do not produce a plan without loading this skill first.
 
-Load the `planning` skill (`workflow/planning.md`).
+Load the `planning` skill.
 
 ## Implementation Rules
 
@@ -186,7 +186,7 @@ Enter failure analysis mode when manual verification fails.
 Enter failure analysis mode when runtime behaviour contradicts the implementation.
 Enter failure analysis mode when test results conflict with observed behaviour.
 
-Before proceeding in failure analysis mode, load the `failure-analysis` skill (`workflow/failure-analysis.md`).
+Before proceeding in failure analysis mode, load the `failure-analysis` skill.
 
 ## Logging and Observability
 

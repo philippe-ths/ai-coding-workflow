@@ -20,7 +20,7 @@ Version: 1.0.0
 - Provides a project-spec template (`project-spec-template.md`) for documenting implementation truth in any target repository.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for code-aware planning (`workflow/planning.md`) and failure analysis (`workflow/failure-analysis.md`).
+- Provides agent skills for code-aware planning and failure analysis, located in agent-specific directories (`.claude/skills/` for Claude Code, `.github/skills/` for Copilot).
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Does not contain any runtime application code.
@@ -49,10 +49,9 @@ Version: 1.0.0
 - `project-spec-template.md`: template for creating `project-spec.md` in a target repository.
 - `project-spec-design-decisions.md`: maintenance rules for keeping `project-spec.md` factual and concise.
 - `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
-- `workflow/planning.md`: on-demand planning skill loaded at Step 3 of the workflow.
-- `workflow/failure-analysis.md`: on-demand failure-analysis skill loaded when investigation is needed.
+- `.claude/skills/`: Claude Code skill definitions (`planning`, `failure-analysis`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-spec.md`.
-- `.github/skills/`: VS Code Copilot skill wrappers that reference files in `workflow/`.
+- `.github/skills/`: VS Code Copilot skill definitions (`planning`, `failure-analysis`), each self-contained in a `SKILL.md` file.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
