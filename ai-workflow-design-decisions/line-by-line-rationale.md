@@ -570,15 +570,15 @@ Rationale: The trigger for changing approaches should be evidence, not frustrati
 
 ---
 
-### Logging and Observability: When to add logging
+### Logging and Observability: Loading instruction
 
-> "Decide whether additional logging or observability is needed when the change introduces user-facing flows, data writes, sync operations, state transitions, silently failing error handling paths, or integration points between layers."
+> "Load the `logging-and-observability` skill when the change requires runtime observability to validate correctness."
 
-Rationale: These are the areas where problems are hardest to diagnose after the fact. Logging here provides the most diagnostic value per line.
+Rationale: The skill provides runtime visibility so the agent can prove its changes work. The specific scenarios that need observability live inside the skill to keep the core workflow lean. Extracting the detailed rules to an on-demand skill reclaims always-on context budget.
 
 ---
 
-### Logging and Observability: Adding logging
+### Logging and Observability skill: Adding logging
 
 > "Use the project's existing logging approach."
 
@@ -630,7 +630,7 @@ Rationale: Asking the human to retry without diagnostics produces no new informa
 
 ---
 
-### Logging and Observability: Investigation
+### Logging and Observability skill: Investigation
 
 > "Prefer automated diagnostics over asking the human to observe and report."
 

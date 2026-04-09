@@ -49,9 +49,9 @@ Version: 1.0.0
 - `project-spec-template.md`: template for creating `project-spec.md` in a target repository.
 - `project-spec-design-decisions.md`: maintenance rules for keeping `project-spec.md` factual and concise.
 - `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
-- `.claude/skills/`: Claude Code skill definitions (`planning`, `failure-analysis`), each self-contained in a `SKILL.md` file.
+- `.claude/skills/`: Claude Code skill definitions (`planning`, `failure-analysis`, `logging-and-observability`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-spec.md`.
-- `.github/skills/`: VS Code Copilot skill definitions (`planning`, `failure-analysis`), each self-contained in a `SKILL.md` file.
+- `.github/skills/`: VS Code Copilot skill definitions (`planning`, `failure-analysis`, `logging-and-observability`), each self-contained in a `SKILL.md` file.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
