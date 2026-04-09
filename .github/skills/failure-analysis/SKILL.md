@@ -17,7 +17,7 @@ When tests pass and validation succeeds, the agent believes the implementation i
 This skill works alongside these workflow sections — consult them during investigation:
 
 - **Validation Requirements** — understand what validation should have caught; compare post-change results against the baseline.
-- **Logging and Observability** — use the project's diagnostic approaches when gathering evidence; prefer automated observation over asking the human to report.
+- **Logging and Observability** — load the `logging-and-observability` skill when diagnostic approaches are needed during investigation.
 
 ## Process
 
