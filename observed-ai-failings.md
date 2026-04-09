@@ -569,3 +569,55 @@ The agent does not reference or check `.ai-policy/` before performing remote git
 
 ### Scope
 This appears general across tasks because hook installation and branch protection checks are prerequisites for any GitHub handoff action.
+
+## Entry 18
+
+### Title
+Destructive git operations destroyed gitignored local files during rebase recovery.
+
+### Version
+1.0.0.
+
+### Date
+2026-04-09.
+
+### Context
+Tooling was Claude Code CLI.
+Model was Claude Opus 4.6.
+Repo was philippe-ths/FCP-Auto-Editor for issue #7.
+
+### What Happened
+The agent resumed work on a stale branch (2 ahead, 8 behind main) and ran `git rebase main`.
+The branch contained junk files (copy-named directories and unrelated workflow files) committed alongside legitimate work.
+The rebase produced modify/delete conflicts on files that main had removed, but the agent resolved them mechanically and continued without questioning the branch history.
+After the user flagged tracked junk files, the agent spent many consecutive investigative commands trying to understand why `git status` showed clean despite unexpected files on disk, instead of immediately comparing tracked files between branches.
+The agent then attempted recovery by running `git reset --hard` twice — first to the pre-rebase state, then dropping a commit — without considering the impact on gitignored local files that existed at the same paths as tracked files on the branch.
+The resets destroyed gitignored local files: `ai-workflow.md`, `project-spec.md`, `.codex/`, `.githooks/`, and parts of `.ai-policy/` and `.github/` were deleted or gutted.
+The agent did not realise the destruction had occurred until the user asked how the files would be restored.
+
+### Why It Matters
+Gitignored files are not protected from git operations when branches track files at the same paths.
+`git rebase`, `git checkout`, and `git reset --hard` can overwrite or delete untracked and gitignored files in this situation.
+The agent treated gitignored files as inherently safe, which is incorrect.
+The destruction was silent and only discovered because the user explicitly asked about restoration.
+
+### Rules Ignored
+- Workflow step 1 (check branch state): Branch state was checked superficially by commit counts, not by examining tracked file differences between branches.
+- Scope control: A cleanup commit unrelated to the task scope was rebased without questioning whether it belonged.
+- Validation requirements (baseline): Declaring the branch clean based on passing tests alone, without verifying the tracked file set matched expectations.
+- GitHub workflow (rebase): The rebase was performed mechanically without verifying the result was correct before proceeding.
+- Boundary rules (stop and ask when risky): The agent did not stop when the rebase produced modify/delete conflicts on files deleted from main, a signal that the branch history was messy.
+- Boundary rules (two commands without reducing uncertainty): The agent ran many consecutive investigative commands without stopping to explain or ask the user.
+- MARR approval requirements: `git reset --hard` is equally destructive as committing or pushing, but was run without discussing the risk to local files.
+
+### Trigger Pattern
+This pattern appears when a branch tracks files at paths that also exist as gitignored local files, and the agent performs destructive git operations (rebase, reset, checkout) without inventorying what local files would be affected.
+
+### Early Warning Signs
+- The branch being rebased has a messy history with commits that add or remove files unrelated to the task.
+- Rebase conflicts involve files that exist on one branch but not the other, especially modify/delete conflicts.
+- The repository has gitignored files at paths that overlap with tracked files on other branches.
+- The agent runs `git reset --hard` without first listing what untracked or gitignored files exist in the working tree.
+
+### Scope
+This appears general across tasks because any repository that uses gitignored local configuration files (workflow files, policy scripts, hooks) is vulnerable when branches track files at the same paths and destructive git operations are performed without checking for path overlap.
