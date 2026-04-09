@@ -1,9 +1,14 @@
 # Observed AI Failings
 
+Each entry is tagged with the workflow version that was active when the failure was observed. A version tag does not guarantee the failure has been resolved in later versions — the same pattern may resurface with different tools, models, or task conditions.
+
 ## Entry 1
 
 ### Title
 - Command thrashing before checkpoint approval.
+
+### Version
+- pre-1.0.0.
 
 ### Date
 - 2026-03-29.
@@ -35,6 +40,9 @@
 ### Title
 - Interrupted critical step treated as completed work.
 
+### Version
+- pre-1.0.0.
+
 ### Date
 - 2026-03-29.
 
@@ -64,6 +72,9 @@
 
 ### Title
 - Mandatory workflow gates bypassed on simple tasks.
+
+### Version
+- pre-1.0.0.
 
 ### Date
 - 2026-03-29.
@@ -99,6 +110,12 @@
 ### Title
 - Pushed code and created PR without confirmation.
 
+### Version
+- pre-1.0.0.
+
+### Version
+- pre-1.0.0.
+
 ### Date
 - 2026-03-29.
 
@@ -129,6 +146,9 @@
 ### Title
 Implemented issue work directly on main.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-30.
 
@@ -157,6 +177,9 @@ This appears general across tasks because branch isolation is a baseline workflo
 
 ### Title
 Conflicting validation commands run in parallel.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-03-30.
@@ -187,6 +210,9 @@ This appears general across tasks because it affects validation reliability anyw
 ### Title
 Implemented issue work directly on main before creating issue branch.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -216,6 +242,9 @@ This is a recurrence of the pattern in Entry 5 under a different model and repo,
 ### Title
 Skipped rebase onto target branch before implementation and PR creation.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -244,6 +273,9 @@ This appears general across tasks because rebase discipline applies to any branc
 
 ### Title
 Incomplete baseline validation before implementation.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-03-31.
@@ -275,6 +307,9 @@ This appears general across tasks because baseline validation completeness appli
 ### Title
 Validation commands run in parallel sharing build outputs.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -304,6 +339,9 @@ This is a recurrence of the pattern in Entry 6 under a different model and repo,
 
 ### Title
 Multiple GitHub actions executed in a single pass without separate approvals.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-03-31.
@@ -335,6 +373,9 @@ This appears general across tasks because it affects any workflow with multiple 
 ### Title
 Branch naming convention not followed.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -364,6 +405,9 @@ This appears general across tasks because agents may default to their own naming
 
 ### Title
 Pre-existing build error not handled in baseline validation workflow.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-03-31.
@@ -395,6 +439,9 @@ This appears general across tasks because baseline recording discipline applies 
 ### Title
 Sandboxed git operations failed requiring permission escalation.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -424,6 +471,9 @@ This is specific to sandboxed or restricted execution environments but affects a
 
 ### Title
 MCP connector PR creation cancelled and retried.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-03-31.
@@ -455,6 +505,9 @@ This is specific to MCP or connector-based remote actions but applies to any wor
 ### Title
 Empty placeholder files lost on remote branch push.
 
+### Version
+pre-1.0.0.
+
 ### Date
 2026-03-31.
 
@@ -484,6 +537,9 @@ This is specific to MCP or API-based remote tree creation workflows that do not 
 
 ### Title
 Committed and pushed directly to main with hooks not installed.
+
+### Version
+pre-1.0.0.
 
 ### Date
 2026-04-03.

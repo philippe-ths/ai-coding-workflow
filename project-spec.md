@@ -54,6 +54,7 @@ Version: 1.0.0
 - `.github/skills/`: VS Code Copilot skill definitions (`planning`, `failure-analysis`), each self-contained in a `SKILL.md` file.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
+- `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
 - `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement.
 - `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`.
