@@ -1,13 +1,23 @@
 ---
 name: failure-analysis
-description: "Failure analysis process for when things go wrong during implementation. Use when: manual verification fails; runtime behaviour contradicts the implementation; test results conflict with observed behaviour; a fix attempt does not resolve the problem; investigation is needed before making another code change."
+description: "Structured investigation process for when the user reports that something is broken or not working, especially after the agent believed implementation was complete. Use this skill when the user's observed behaviour contradicts what the agent expected — tests passed but the feature doesn't work, a fix didn't help, or the app is visibly broken despite validation succeeding. The skill exists to prevent the agent from jumping to quick fixes and instead force a structured pause: acknowledge the gap between the agent's perspective and the user's reality, then investigate before changing more code."
 ---
 
 # Failure Analysis Mode
 
 Read this file when entering failure analysis mode.
-Enter failure analysis mode when manual verification fails, when runtime behaviour contradicts the implementation, or when test results conflict with observed behaviour.
-This file contains the full process for investigating and resolving those contradictions.
+This file contains the full process for investigating and resolving contradictions between the agent's expectations and user-observed reality.
+
+## Why This Mode Exists
+
+When tests pass and validation succeeds, the agent believes the implementation is correct. If the user then reports that the feature is broken or the app doesn't work, there is a gap between the agent's understanding and reality. The agent's natural response is to jump to the nearest quick fix — but if the agent's understanding of the system was wrong enough for the tests to miss the problem, a quick fix is likely to be wrong too. This mode forces a structured pause: stop, describe the contradiction, list what could be wrong, and gather evidence before writing more code.
+
+## Related Workflow Sections
+
+This skill works alongside these workflow sections — consult them during investigation:
+
+- **Validation Requirements** — understand what validation should have caught; compare post-change results against the baseline.
+- **Logging and Observability** — use the project's diagnostic approaches when gathering evidence; prefer automated observation over asking the human to report.
 
 ## Process
 
