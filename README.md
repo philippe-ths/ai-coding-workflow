@@ -36,6 +36,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
 - `project-spec.md` — factual reference for this repository's implementation state, created from `project-spec-template.md`.
 - `project-spec-template.md` — template for creating `project-spec.md` in a target repository.
+- `lite-monolithic/` — single-file version of the workflow with planning and failure analysis inlined, no policy layer, no skills, no multi-agent entry points. See `lite-monolithic/README.md`.
 
 ### Agent instruction entry points
 

@@ -23,6 +23,7 @@ Version: 1.0.0
 - Provides agent skills for code-aware planning and failure analysis, located in agent-specific directories (`.claude/skills/` for Claude Code, `.github/skills/` for Copilot).
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
+- Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Does not contain any runtime application code.
 - Does not include a test framework beyond shell-script syntax checks and two enforcement integration tests.
 
@@ -63,6 +64,8 @@ Version: 1.0.0
 - `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration for protected branch enforcement.
 - `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration and hook definitions.
 - `.claude/settings.json`: Claude Code local settings including hook configuration.
+- `lite-monolithic/ai-workflow.md`: single-file AI workflow with planning and failure analysis inlined, no policy layer or skill indirection.
+- `lite-monolithic/README.md`: usage instructions for the lite-monolithic version.
 
 ## Testing Overview
 - Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`.
