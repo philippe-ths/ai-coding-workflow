@@ -57,14 +57,15 @@ Version: 1.0.0
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
 - `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement.
-- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`.
+- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, and `.github/hooks/`.
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
+- `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
 - `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration and hook definitions.
 - `.claude/settings.json`: Claude Code local settings including hook configuration.
 
 ## Testing Overview
 - Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`.
-- Validation also runs two enforcement integration tests: `test-claude-code-enforcement.sh` and `test-codex-enforcement.sh`.
+- Validation also runs three enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, and `test-vscode-copilot-enforcement.sh`.
 - No unit test framework exists; there are no automated tests for documentation content.
 - Manual verification is the primary check for documentation changes.
 
