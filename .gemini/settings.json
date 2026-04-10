@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "mcp_.*github.*",
+        "hooks": [
+          {
+            "name": "block-protected-branch-mcp",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\"",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "name": "block-protected-branch-bash",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-bash.sh\"",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}
