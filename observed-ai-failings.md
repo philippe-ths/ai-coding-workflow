@@ -621,3 +621,87 @@ This pattern appears when a branch tracks files at paths that also exist as giti
 
 ### Scope
 This appears general across tasks because any repository that uses gitignored local configuration files (workflow files, policy scripts, hooks) is vulnerable when branches track files at the same paths and destructive git operations are performed without checking for path overlap.
+
+## Entry 19
+
+### Title
+Git stash and branch switch destroyed gitignored local files.
+
+### Version
+1.0.0.
+
+### Date
+2026-04-09.
+
+### Context
+Tooling was Claude Code CLI.
+Model was Claude Opus 4.6.
+Repo was philippe-ths/FCP-Auto-Editor for issue #12.
+
+### What Happened
+The agent needed to move work from a stale branch to a new branch based on main.
+The agent ran `git stash` to save uncommitted changes, then `git checkout main` and created a new branch.
+The old branch tracked files at paths that were gitignored on main: `ai-workflow.md`, `project-spec.md`, skill files, `.gitignore` updates, and other local workflow configuration.
+`git stash` only captured changes relative to the old branch's tracked tree — it did not capture gitignored files, because those files were tracked on the old branch and therefore appeared unchanged.
+When the agent checked out main, git deleted those files because main does not track them and they were not in the stash.
+The agent did not realise the files were lost until the user reported it.
+The user had to manually restore the files.
+
+### Why It Matters
+`git stash` is not a general-purpose backup. It captures uncommitted changes relative to the current HEAD, not the full working-tree state.
+Files that are tracked on the current branch but gitignored on the target branch are silently deleted during checkout because git removes tracked files that the target branch does not track, and gitignore on the target branch prevents git from treating them as untracked files to preserve.
+The agent treated `git stash` as sufficient protection for all local state, which is incorrect.
+
+### Rules Ignored
+- Boundary rules (ASK before discarding working-tree state): `git stash` followed by a branch switch to a branch with a different tracked file set has the same destructive effect as `git reset --hard` on gitignored files at overlapping paths. The agent should have flagged this risk before proceeding.
+- GitHub workflow (pre-rebase file overlap check): The workflow requires checking whether gitignored or untracked local files exist at paths the target state tracks. The same check applies in reverse — files tracked on the current branch that are gitignored on the target will be lost during checkout.
+
+### Trigger Pattern
+This pattern appears when the agent uses `git stash` and branch switch as a recovery mechanism to move work between branches that have different tracked file sets, without checking whether gitignored local files exist at paths that would be affected by the checkout.
+
+### Early Warning Signs
+- The agent proposes `git stash` followed by a branch switch to move work between divergent branches.
+- The current branch tracks files that the target branch does not, especially files that are gitignored on the target.
+- The agent does not inventory gitignored or untracked files before stashing and switching.
+
+### Scope
+This is a variant of the pattern in Entry 18. Entry 18 covered `git reset --hard` and `git rebase`; this entry covers `git stash` and `git checkout`. The root cause is the same: gitignored files at paths tracked on other branches are not protected by any git operation that changes the working tree. This extends the set of dangerous operations beyond what Entry 18 documented.
+
+## Entry 20
+
+### Title
+New code changes embedded in cherry-pick conflict resolution without separate validation.
+
+### Version
+1.0.0.
+
+### Date
+2026-04-09.
+
+### Context
+Tooling was Claude Code CLI.
+Model was Claude Opus 4.6.
+Repo was philippe-ths/FCP-Auto-Editor for issue #12.
+
+### What Happened
+After cherry-picking a commit from the old branch onto the new branch, the cherry-pick produced a conflict in `app.py` because main had added Process 2 routing that the old branch did not have.
+The agent resolved the conflict by keeping both Process 2 and Process 3 routing, then re-applied the prerequisite file-count fix as part of the conflict resolution.
+The cherry-pick was then completed as a single commit containing both the original cherry-picked work and the newly applied fix.
+No validation was run between the conflict resolution and the commit.
+The workflow requires running validation after every code change and before any commit.
+
+### Why It Matters
+Embedding new changes inside conflict resolution obscures what was cherry-picked versus what was newly written.
+Skipping validation between the conflict resolution and the commit means the combined result was not verified before being committed.
+Tests were run after the cherry-pick commit and passed, but the ordering violated the workflow's requirement that validation precedes commit, not follows it.
+
+### Trigger Pattern
+This pattern appears when the agent resolves a cherry-pick or merge conflict and simultaneously applies additional code changes, treating the entire resolution as a single atomic operation that does not require intermediate validation.
+
+### Early Warning Signs
+- The agent resolves a cherry-pick or merge conflict and mentions applying additional fixes as part of the resolution.
+- No validation step appears between conflict resolution edits and the commit that closes the cherry-pick.
+- The commit message or session log describes changes that were not part of the original cherry-picked commit.
+
+### Scope
+This appears general across tasks because cherry-pick and merge conflict resolution are common operations, and the temptation to fold in related fixes during resolution applies whenever the conflicting code is close to code that needs changing.
