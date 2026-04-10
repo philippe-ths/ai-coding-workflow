@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.2.0
+Version: 1.3.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -214,9 +214,13 @@ Every task must follow the GitHub branching workflow:
 - Rebase the issue branch onto the target branch before starting implementation.
 - Rebase the issue branch onto the target branch before creating a pull request.
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
-- Before rebasing, compare tracked files between the branch and target and check whether gitignored or untracked local files exist at paths the target state tracks.
+- Before any operation that moves the working tree to a different branch state (rebase, checkout, switch), compare tracked files between the current branch and the target.
+- Before the same operation, check whether gitignored or untracked local files exist at paths the target state tracks.
 - If either check reveals unexpected files or path overlap, stop and report before proceeding.
-  (Why: Rebase carries forward all tracked files from the branch, and git overwrites local files at conflicting paths regardless of gitignore status.)
+  (Why: Rebase, checkout, and switch all modify the working tree to match a different branch state, and git overwrites or deletes local files at conflicting paths regardless of gitignore status.)
+- If the human approves proceeding after a path-overlap report, create a local filesystem backup of the working tree (excluding `.git/`) before running the branch-changing operation.
+- Delete the backup only after confirming on the new branch that no expected files were lost.
+  (Why: No git-native operation, including `git stash`, preserves gitignored files that are tracked on another branch during a branch switch.)
 - If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
