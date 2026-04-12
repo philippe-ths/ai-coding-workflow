@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.0.0
+Version: 2.0.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -13,84 +13,83 @@ The human reviews and approves at defined checkpoints.
 
 ## Workflow
 
-1. **Confirm the task and inputs.**
+1. **Step 1: Confirm the task and inputs.**
 
    - Confirm the GitHub issue number.
-   - Read the issue and its comments.
-   - Check branch state.
+   - Read the issue.
+   - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
+   - Check branch state and confirm the branch is up to date with the target branch.
    - See [GitHub Workflow](#github-workflow).
-   - Rebase onto the target branch.
    - Run baseline validation.
    - See [Validation Requirements](#validation-requirements).
    - Confirm the task is a bounded change.
    - See [Scope Control](#scope-control).
-   - Complete this step before analysing implementation details.
+   - If the GitHub issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding.
 
-2. **Review project context.**
+2. **Step 2: Review project context.**
 
-   - Read relevant project files.
+   - Review relevant project files for structure, constraints, and domain context.
    - Review the code areas the task is likely to touch.
-   - Extract the intended outcome from the issue before using implementation suggestions. (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative causes the agent to implement the wrong thing.)
+   - Extract the intended outcome from the issue.
 
-3. **Produce a code-aware plan.**
+3. **Step 3: Produce a code-aware plan.**
 
    - See [Planning Requirements](#planning-requirements).
 
-4. **Checkpoint: human reviews the plan.**
+4. **Checkpoint 4: human reviews the plan.**
 
    - Update the plan if the human requests changes.
 
-5. **Implement the approved scope.**
+5. **Step 5: Implement the approved scope.**
 
    - Implement the work defined in the approved plan.
    - See [Implementation Rules](#implementation-rules).
    - See [Scope Control](#scope-control).
 
-6. **Run validation.**
+6. **Step 6: Run validation.**
 
    - Run validation checks.
    - See [Validation Requirements](#validation-requirements).
 
-7. **Support manual verification.**
+7. **Step 7: Support manual verification.**
 
    - Suggest manual checks for the human.
    - See [Manual Verification Requirements](#manual-verification-requirements).
 
-8. **Checkpoint: human reviews validation results and manual verification.**
+8. **Checkpoint 8: human reviews validation results and manual verification.**
 
-9. **Fix and revalidate.**
+9. **Step 9: If the human reports issues, fix and revalidate.**
 
    - Fix reported issues.
    - Rerun relevant validation checks after each fix.
-   - Repeat until no issues remain.
-   - Enter [Failure Analysis Mode](#failure-analysis-mode) if a fix fails.
-   - Enter [Failure Analysis Mode](#failure-analysis-mode) if manual verification fails.
+   - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
+   - If a fix fails or manual verification fails, enter [Failure Analysis Mode](#failure-analysis-mode).
 
-10. **Summarise and prepare handoff.**
+10. **Step 10: Summarise and prepare handoff.**
 
-    - Report what changed.
-    - Report what was tested.
-    - Report what was not tested.
+    - Report what changed, what was tested, and what was not tested.
     - Report remaining risks and follow-up work.
+    - Check parent and sub-issue closure status.
+    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
     - State which GitHub action would be next if the human wants to publish the work.
     - See [GitHub Workflow](#github-workflow).
 
-11. **Checkpoint: human approves the next GitHub action.**
+11. **Checkpoint 11: human approves the next GitHub action.**
 
     - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
 
-12. **Run the approved GitHub action and stop.**
+12. **Step 12: Run the approved GitHub action and stop.**
 
     - Run only the single GitHub action the human explicitly approved.
     - See [GitHub Workflow](#github-workflow).
+    - If the human approves another GitHub action, return to Step 11.
 
 ## Planning Requirements
 
 When producing a plan:
 
 - State the branch the work will be implemented on.
-- State the goal of the change in one or two sentences.
-- State the user-visible behaviour that must change.
+- State the goal and the user-visible behaviour that must change.
 - State the files and code areas the change will touch.
 - State the proposed implementation approach.
 - State assumptions and classify each as issue-sourced (unverified) or codebase-confirmed (verified by reading the code).
@@ -100,9 +99,7 @@ When producing a plan:
 - Mark the change as higher-risk if it affects routing, persistence, sync, caching, reactive subscriptions, or state transitions.
 - Include at least one runtime validation step for higher-risk changes.
 - State the validation approach.
-- Keep the plan concise.
-- Do not include implementation detail that belongs in the code.
-- Do not restate the issue verbatim.
+- Do not include implementation detail that belongs in the code or restate the issue verbatim.
 - Treat the issue goal as authoritative but treat implementation suggestions as provisional until the codebase confirms them.
 - If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
 
@@ -110,19 +107,25 @@ When producing a plan:
 
 During implementation:
 
-- Prefer extending current patterns over introducing new ones. (Why: New patterns increase review surface, reduce predictability, and create maintenance drift.)
+- Prefer extending current patterns over introducing new ones.
+  (Why: New patterns increase review surface, reduce predictability, and create maintenance drift.)
 - Keep changes focused and relevant to the approved plan.
 
 ## Scope Control
 
 Keep the change focused on the approved task:
 
-- If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
-- If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
+- If the issue contains multiple unrelated objectives or would require changes across many unrelated areas, flag this and suggest decomposition.
+- Extract the intended outcome from the issue before using implementation suggestions.
+  (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative leads to implementing the wrong thing.)
 - Do only the work required to complete the task.
-- Do not treat "while I am here" changes as free. (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
-- Separate fixes, refactors, and feature work unless the task clearly requires them together. (Why: Mixing change types obscures the commit's intent and makes review harder.)
-- If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation. (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
+- Do not treat "while I am here" changes as free.
+  (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
+- Separate fixes, refactors, and feature work unless the task clearly requires them together.
+  (Why: Mixing change types obscures the commit's intent and makes review harder.)
+- If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation.
+  (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
+- If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
 ## Validation Requirements
 
@@ -160,23 +163,24 @@ Run the following checks in order:
 When running validation:
 
 - Do not modify smoke tests or the global test suite unless the task explicitly requires it.
-- Run smoke tests and the global test suite after each meaningful implementation pass.
-- Treat existing passing tests as evidence of stability, not proof of correctness for new behaviour.
+- Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
+- Treat existing passing tests as evidence of stability.
 - If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path.
 - If no automated test exercises the real user path, say so explicitly.
+
 When reporting validation:
 
 - Report what was tested and what passed.
 - Report what failed and whether the failure is related to the change.
 - Report what was not tested and why.
-- Do not claim code is tested when it is not.
-- Do not ignore failing tests and continue as if the task is complete.
+- Do not claim code is tested when it is not or ignore failing tests and continue as if the task is complete.
 
 ## Manual Verification Requirements
 
-When supporting manual verification:
+Manual verification covers what only a human can verify.
 
-- Suggest specific manual checks based on the change.
+- Suggest checks that require human observation: visual behaviour, user experience flows, real-device interaction, external system responses.
+- Do not suggest checks that can be verified through automated tests or tool output.
 - State the success signal for each check.
 - State the failure signal for each check.
 
@@ -185,6 +189,7 @@ When supporting manual verification:
 Enter failure analysis mode when manual verification fails.
 Enter failure analysis mode when runtime behaviour contradicts the implementation.
 Enter failure analysis mode when test results conflict with observed behaviour.
+Stop implementation and do not make further code changes until failure analysis is complete.
 
 When in failure analysis mode:
 
@@ -196,9 +201,25 @@ When in failure analysis mode:
 - Name the single leading hypothesis and its supporting evidence before proposing the next step.
 - Gather evidence before proposing another fix.
 - Test at least one concrete hypothesis before asking the human to retry.
-- Prioritise code path, persistence, sync, routing, and UI binding explanations over environment or caching unless evidence shows otherwise.
-- If investigation reveals the plan was based on incorrect assumptions, state what the plan assumed, what the codebase actually does, and what a revised approach needs.
-- Signal a flawed approach only when evidence shows the assumptions were wrong, not based on difficulty alone.
+- If the plan was based on incorrect assumptions, state what was assumed versus what the codebase does and what a revised approach needs.
+
+## Handling Parent and Sub-Issues
+
+For every issue:
+
+- Read the issue comments for clarifications, scope changes, and constraints not in the original body.
+
+When the issue has sub-issues (it is a parent):
+
+- Treat the parent as broader context and do not implement the full parent scope.
+- Stop and ask which sub-issue to work on.
+
+When the issue is a sub-issue:
+
+- Read the direct parent issue and its comments for context.
+- Do not read further up the hierarchy.
+- Implement only the sub-issue scope.
+- When completing the sub-issue, check whether it is the last open sub-issue under the parent and flag this to the human.
 
 ## GitHub Workflow
 
@@ -214,12 +235,9 @@ Every task must follow the GitHub branching workflow:
 - Rebase the issue branch onto the target branch before creating a pull request.
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
 - If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
-- If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
-- Do not push to remote without explicit human confirmation in the current session.
-- Do not create a pull request without explicit human confirmation in the current session.
 - Do not infer approval for one GitHub action from approval for another.
-- After running an approved GitHub action, stop and report the result.
+- Do not push to remote or create a pull request without explicit human confirmation in the current session.
 
 ## Boundary Rules
 
@@ -238,17 +256,15 @@ The following apply to every task without exception:
 Stop and ask the human before doing any of the following:
 
 - ASK before adding a new dependency.
-- ASK before changing architecture or established patterns.
+- ASK before changing architecture, established patterns, or conventions.
 - ASK before changing database schema or sync-related behaviour.
 - ASK before changing public interfaces or shared contracts.
 - ASK before making broad refactors.
 - ASK before deleting files or removing significant code paths.
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
-- ASK before introducing new conventions or changing existing ones.
 - ASK before introducing a new logging library or pattern.
-- ASK before making assumptions where the task or expected behaviour is unclear.
-- ASK before proceeding when the work conflicts with the current codebase or project constraints.
+- ASK before making assumptions or proceeding when the task, expected behaviour, or project constraints are unclear.
 
 ### Never Do
 
