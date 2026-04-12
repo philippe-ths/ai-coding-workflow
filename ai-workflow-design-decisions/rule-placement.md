@@ -26,7 +26,7 @@ If a line in a workflow step reads like a rule rather than a sequenced action, i
 
 **Human responsibilities do not belong in workflow steps.**
 Lines describing what the human does (e.g. "Human reviews the results") should not appear inline in workflow steps.
-Human checkpoints are expressed as explicit numbered steps (e.g. "Checkpoint: human reviews the plan.").
+Human checkpoints are expressed as explicit numbered steps (e.g. "Checkpoint 4: human reviews the plan.").
 Detailed human responsibilities live in the "The Human is Responsible For" section.
 
 **Boundary rules are context-free. Reference section rules are context-dependent.**
