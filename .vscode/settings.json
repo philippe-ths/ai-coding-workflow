@@ -1,0 +1,95 @@
+{
+    // -----------------------------------------------------------
+    // VS Code Copilot: auto-approve safe terminal commands
+    // Equivalent of .claude/settings.json permissions.allow
+    // -----------------------------------------------------------
+    "chat.tools.terminal.autoApprove": {
+        // Git read (zero side effects)
+        "git status": true,
+        "git log": true,
+        "git diff": true,
+        "git show": true,
+        "git branch": true,
+        "git fetch": true,
+        "git remote": true,
+        "git rev-parse": true,
+        "git merge-base": true,
+        "git ls-tree": true,
+        "git config": true,
+        "git stash list": true,
+
+        // Git local write (reversible, no shared state)
+        "git checkout": true,
+        "git switch": true,
+        "git add": true,
+        "git commit": true,
+        "git rebase": true,
+        "git restore": true,
+        "git stash push": true,
+        "git stash pop": true,
+        "git stash apply": true,
+        "git stash drop": true,
+
+        // Git remote (workflow enforces human confirmation)
+        "git push": true,
+        "git pull": true,
+
+        // GitHub CLI
+        "gh issue": true,
+        "gh pr": true,
+        "gh repo": true,
+        "gh auth": true,
+
+        // Shell read utilities
+        "ls": true,
+        "cat": true,
+        "head": true,
+        "tail": true,
+        "find": true,
+        "grep": true,
+        "awk": true,
+        "wc": true,
+        "which": true,
+        "echo": true,
+        "pwd": true,
+        "tree": true,
+        "sort": true,
+        "uniq": true,
+        "diff": true,
+        "file": true,
+        "dirname": true,
+        "basename": true,
+        "realpath": true,
+
+        // File operations (local, reversible)
+        "mkdir": true,
+        "cp": true,
+        "mv": true,
+        "touch": true,
+
+        // Test runners
+        "npm test": true,
+        "npm run": true,
+        "npm list": true,
+        "npm outdated": true,
+        "npm ls": true,
+        "npx": true,
+        "yarn test": true,
+        "yarn run": true,
+        "pnpm test": true,
+        "pnpm run": true,
+        "pytest": true,
+        "python -m pytest": true,
+        "make": true,
+
+        // Version checks
+        "pip3 list": true,
+        "node --version": true,
+        "npm --version": true,
+        "python3 --version": true,
+
+        // Workflow validation scripts
+        "./.ai-policy/scripts/run-validation.sh": true,
+        "./.ai-policy/scripts/install-hooks.sh": true
+    }
+}

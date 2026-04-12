@@ -58,8 +58,10 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `.ai-policy/scripts/test-claude-code-enforcement.sh` — enforcement integration tests for Claude Code.
 - `.ai-policy/scripts/test-codex-enforcement.sh` — enforcement integration tests for Codex.
 - `.githooks/pre-commit`, `.githooks/pre-push` — git hooks that call `.ai-policy/` scripts.
-- `.claude/settings.json` — Claude Code hook configuration for protected-branch blocking.
-- `.codex/config.toml`, `.codex/hooks.json` — Codex agent configuration and hook definitions.
+- `.claude/settings.json` — Claude Code hook configuration and tool permission defaults.
+- `.codex/config.toml`, `.codex/hooks.json` — Codex agent configuration, permission defaults, and hook definitions.
+- `.gemini/settings.json` — Gemini CLI hook configuration and tool permission defaults.
+- `.vscode/settings.json` — VS Code Copilot tool permission defaults.
 
 ### Maintenance documents
 
@@ -87,6 +89,7 @@ project-spec.md          # create from project-spec-template.md
 ```
 .github/copilot-instructions.md
 .github/skills/
+.vscode/
 .ai-policy/
 .githooks/
 ai-workflow.md
@@ -108,6 +111,7 @@ project-spec.md          # create from project-spec-template.md
 
 ```
 GEMINI.md
+.gemini/
 .ai-policy/
 .githooks/
 ai-workflow.md

@@ -88,3 +88,66 @@ Having both hooks means the feedback is early (at commit time) but the enforceme
 Pre-commit gives fast feedback: the agent learns immediately that it cannot commit without validation.
 Pre-push provides a safety net: if pre-commit was bypassed, the invalid state does not reach the remote.
 The cost of running both is negligible (two shell script invocations), and the benefit is defence in depth.
+
+## Tool Permission Defaults
+
+### Why tracked permission configs exist
+
+Each AI coding tool has its own mechanism for controlling which commands the agent can run without prompting the user.
+Without pre-configured defaults, every new clone starts with zero approvals, and the human must manually approve each command the first time it runs.
+This creates friction that slows the workflow and trains the human to click "approve" reflexively — the opposite of the intended safety model.
+
+Tracked permission configs solve this by shipping a curated set of pre-approved commands with the repository.
+The human reviews them once (in the PR that adds them), and every subsequent clone inherits the same baseline.
+
+### The two-layer safety model
+
+Tool permission configs and git hooks serve complementary roles:
+
+1. **Tool-side permissions** reduce friction by pre-approving commands that are safe or that the workflow already gates through human checkpoints (e.g. `git push` requires explicit human approval at Step 11 before the agent runs it).
+2. **Git hooks** enforce bright-line rules mechanically regardless of what the tool permits. Even if a tool auto-approves `git push`, the pre-push hook blocks it on a protected branch.
+
+Neither layer is sufficient alone.
+Tool permissions without hooks rely on instruction-following for safety-critical rules.
+Hooks without tool permissions create constant approval prompts that add no safety value for read-only or local operations.
+
+### Per-tool configuration
+
+Each tool uses a different permission model.
+The configs are kept consistent in intent (same commands are safe across all tools) but differ in format because each tool's mechanism is different.
+
+**Claude Code** (`.claude/settings.json`) uses a per-command allowlist under `permissions.allow`.
+Each entry is a pattern like `Bash(git push:*)` that matches a command prefix.
+This is the most granular model — every permitted command is explicitly listed.
+
+**Codex** (`.codex/config.toml`) uses sandbox-based permissions.
+`approval_policy = "on-failure"` auto-approves commands inside the sandbox and escalates to the user only when a command fails sandbox restrictions.
+`sandbox_mode = "workspace-write"` allows writes within the project directory.
+There is no per-command allowlist; safety comes from sandbox confinement plus hooks.
+Dangerous GitHub MCP tools (`push_files`, `create_or_update_file`, `delete_file`) are explicitly disabled.
+
+**Gemini CLI** (`.gemini/settings.json`) uses a sandbox and trusted-folders model.
+`tools.shell.allowedCommands = "all"` permits shell execution; safety comes from the sandbox layer and the `BeforeTool` hooks that block protected-branch operations.
+There is no per-command allowlist.
+
+**VS Code Copilot** (`.vscode/settings.json`) uses `chat.tools.terminal.autoApprove` with prefix-matched command names.
+This is similar to Claude's model — each safe command is explicitly listed.
+
+### What is pre-approved and why
+
+Commands are organised into categories:
+
+- **Git read** (`status`, `log`, `diff`, `show`, `branch`, `fetch`, etc.): zero side effects, always safe.
+- **Git local write** (`checkout`, `add`, `commit`, `rebase`, `restore`, `stash`): reversible, no shared state affected.
+- **Git remote** (`push`, `pull`): the workflow requires human confirmation at checkpoint steps before the agent runs these. Pre-approving the tool execution avoids a redundant prompt since the workflow and hooks already gate the action.
+- **GitHub CLI** (`gh issue`, `gh pr`, `gh repo`): needed for the workflow's issue and PR operations.
+- **Shell read utilities** (`ls`, `cat`, `grep`, `find`, `wc`, etc.): read-only, no risk.
+- **File operations** (`mkdir`, `cp`, `mv`, `touch`): local and reversible.
+- **Test runners** (`npm test`, `pytest`, `make`, etc.): needed for validation steps. Scoped to specific runners rather than broad `bash:*` wildcards.
+- **Workflow scripts** (`run-validation.sh`, `install-hooks.sh`): the two scripts the workflow explicitly references.
+
+### Why broad scripting permissions are excluded
+
+Earlier iterations included `Bash(bash:*)` and `Bash(python:*)` in Claude's config.
+These effectively bypass all other restrictions since any command can be run through `bash -c "..."`.
+The current approach permits specific runners (`npm run`, `npx`, `pytest`, `make`) instead, preserving the principle that each permission is intentional and auditable.

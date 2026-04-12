@@ -1,4 +1,9 @@
 {
+  "tools": {
+    "shell": {
+      "allowedCommands": "all"
+    }
+  },
   "hooks": {
     "BeforeTool": [
       {
