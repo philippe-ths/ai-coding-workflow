@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 1.3.0
+Version: 2.0.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -13,86 +13,103 @@ The human reviews and approves at defined checkpoints.
 
 ## Workflow
 
-1. **Confirm the task and inputs.**
+The workflow runs as a loop.
+Steps 5 through 9 form an implementation cycle: implement, validate, and fix until the human approves.
+Steps 10 through 12 form a handoff cycle: summarise, get approval, and run one GitHub action at a time.
+After the human merges the pull request, run post-merge cleanup and return to Step 1 for the next task.
+
+1. **Step 1: Confirm the task and inputs.**
 
    - Confirm the GitHub issue number.
-   - Read the issue and its comments.
-   - Check parent and sub-issue structure.
+   - Read the issue.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
    - Check branch state.
+   - Check the branch is up to date with the target branch.
    - See [GitHub Workflow](#github-workflow).
-   - Rebase onto the target branch.
    - Run baseline validation.
    - See [Validation Requirements](#validation-requirements).
    - Confirm the task is a bounded change.
    - See [Scope Control](#scope-control).
-   - Complete this step before analysing implementation details.
+   - If the GitHub issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding.
 
-2. **Review project context.**
+2. **Step 2: Review project context.**
 
-   - Read `project-spec.md` and relevant files.
+   - Review `project-spec.md` for project structure, constraints, and domain context relevant to the task.
    - Review the code areas the task is likely to touch.
-   - Extract the intended outcome from the issue before using implementation suggestions. (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative causes the agent to implement the wrong thing.)
+   - Extract the intended outcome from the issue.
+
+3. **Step 3: Produce a code-aware plan.**
+
    - See [Planning Requirements](#planning-requirements).
 
-3. **Produce a code-aware plan.**
-
-   - See [Planning Requirements](#planning-requirements).
-
-4. **Checkpoint: human reviews the plan.**
+4. **Checkpoint 4: human reviews the plan.**
 
    - Update the plan if the human requests changes.
+   - See [Planning Requirements](#planning-requirements) for handling human feedback.
 
-5. **Implement the approved scope.**
+5. **Step 5: Implement the approved scope.**
 
    - Implement the work defined in the approved plan.
    - See [Implementation Rules](#implementation-rules).
    - See [Scope Control](#scope-control).
 
-6. **Run validation.**
+6. **Step 6: Run validation.**
 
    - Run validation checks.
    - See [Validation Requirements](#validation-requirements).
 
-7. **Support manual verification.**
+7. **Step 7: Support manual verification.**
 
    - Suggest manual checks for the human.
    - See [Manual Verification Requirements](#manual-verification-requirements).
 
-8. **Checkpoint: human reviews validation results and manual verification.**
+8. **Checkpoint 8: human reviews validation results and manual verification.**
 
-9. **Fix and revalidate.**
+9. **Step 9: If the human reports issues, fix and revalidate.**
 
    - Fix reported issues.
    - Rerun relevant validation checks after each fix.
-   - Repeat until no issues remain.
-   - Enter [Failure Analysis Mode](#failure-analysis-mode) if a fix fails.
-   - Enter [Failure Analysis Mode](#failure-analysis-mode) if manual verification fails.
+   - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
+   - If a fix fails or manual verification fails, enter [Failure Analysis Mode](#failure-analysis-mode).
 
+10. **Step 10: Summarise and prepare handoff.**
 
-10. **Summarise and prepare handoff.**
+    - Report what changed.
+    - Report what was tested.
+    - Report what was not tested.
+    - Report remaining risks and follow-up work.
+    - If follow-up issues need to be created, load the `issue-creation` skill.
+    - Flag if documentation or README files need updating based on the change.
+    - Flag if version numbers need updating.
+    - Flag if a tagged release is needed.
+    - Check parent and sub-issue closure status.
+    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
+    - State which GitHub action would be next if the human wants to publish the work.
+    - See [GitHub Workflow](#github-workflow).
 
-   - Report what changed.
-   - Report what was tested.
-   - Report what was not tested.
-   - Report remaining risks and follow-up work.
-   - Check parent and sub-issue closure status.
-   - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
-   - State which GitHub action would be next if the human wants to publish the work.
-   - See [GitHub Workflow](#github-workflow).
+11. **Checkpoint 11: human approves the next GitHub action.**
 
-11. **Checkpoint: human approves the next GitHub action.**
+    - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
 
-   - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
+12. **Step 12: Run the approved GitHub action and stop.**
 
-12. **Run the approved GitHub action and stop.**
+    - Run only the single GitHub action the human explicitly approved.
+    - See [GitHub Workflow](#github-workflow).
+    - If the human approves another GitHub action, return to Step 11.
 
-   - Run only the single GitHub action the human explicitly approved.
-   - See [GitHub Workflow](#github-workflow).
+13. **Step 13: Post-merge cleanup.**
+
+    - Check whether the local issue branch has unmerged commits before deleting it.
+    - Switch to the main branch.
+    - Pull latest changes from remote.
+    - Close the GitHub issue.
+    - If the issue uses checkboxes, check off completed items.
+    - Comment on the issue with key findings or direction changes.
+    - Return to Step 1 for the next task, or end the session.
 
 ## Planning Requirements
 
-Use when executing Step 3 of the workflow (Produce a code-aware plan).
+Use when executing Step 3 (Produce a code-aware plan) or Checkpoint 4 (human reviews the plan).
 Do not produce a plan without loading this skill first.
 
 Load the `planning` skill.
@@ -111,10 +128,14 @@ Keep the change focused on the approved task:
 
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
+- Extract the intended outcome from the issue before using implementation suggestions.
+  (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative leads to implementing the wrong thing.)
 - Do only the work required to complete the task.
 - Do not treat "while I am here" changes as free. (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
 - Separate fixes, refactors, and feature work unless the task clearly requires them together. (Why: Mixing change types obscures the commit's intent and makes review harder.)
 - If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation. (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
+- If the human approves, load the `issue-creation` skill to create the follow-up issue.
+- If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
 ## Validation Requirements
 
@@ -157,25 +178,23 @@ When running validation:
 - Run smoke tests and the global test suite after each meaningful implementation pass.
 - Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
 - Treat existing passing tests as evidence of stability.
-- Do not treat existing passing tests as proof of correctness for new behaviour.
 - If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path.
 - If no automated test exercises the real user path, say so explicitly.
-- If manual verification fails, stop implementation mode and enter [Failure Analysis Mode](#failure-analysis-mode) before making more code changes.
 
 When reporting validation:
 
 - Report what was tested and what passed.
 - Report what failed and whether the failure is related to the change.
 - Report what was not tested and why.
-- Report failures honestly, including failures unrelated to the change.
 - Do not claim code is tested when it is not.
 - Do not ignore failing tests and continue as if the task is complete.
 
 ## Manual Verification Requirements
 
-When supporting manual verification:
+Manual verification covers what only a human can verify.
 
-- Suggest specific manual checks based on the change.
+- Suggest checks that require human observation: visual behaviour, user experience flows, real-device interaction, external system responses.
+- Do not suggest checks that can be verified through automated tests or tool output.
 - State the success signal for each check.
 - State the failure signal for each check.
 
@@ -184,12 +203,13 @@ When supporting manual verification:
 Enter failure analysis mode when manual verification fails.
 Enter failure analysis mode when runtime behaviour contradicts the implementation.
 Enter failure analysis mode when test results conflict with observed behaviour.
+Stop implementation and do not make further code changes until failure analysis is complete.
 
 Before proceeding in failure analysis mode, load the `failure-analysis` skill.
 
 ## Logging and Observability
 
-Load the `logging-and-observability` skill when the change requires runtime observability to validate correctness.
+When the change requires runtime observability to validate correctness, load the `logging-and-observability` skill.
 
 ## Command Approval
 
@@ -222,33 +242,35 @@ Every task must follow the GitHub branching workflow:
 - Delete the backup only after confirming on the new branch that no expected files were lost.
   (Why: No git-native operation, including `git stash`, preserves gitignored files that are tracked on another branch during a branch switch.)
 - If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
-- If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
 - Confirm repo-local deterministic policy is active before relying on protected-branch or validation enforcement.
 - If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - Repo-local deterministic policy may block protected-branch Git actions and commit or push without passed validation.
 - Do not infer approval for one GitHub action from approval for another GitHub action.
-- Do not push to remote without explicit human confirmation in the current session.
-- Do not create a pull request without explicit human confirmation in the current session.
+- Do not push to remote or create a pull request without explicit human confirmation in the current session.
 - If deterministic policy blocks an action, fix the blocked condition before retrying.
 - If new commits are added after approval, stop and ask again before the next remote GitHub action.
 - After running an approved GitHub action, stop and report the result.
 
 ## Handling Parent and Sub-Issues
 
-Some work may be organised into parent issues and sub-issues in GitHub.
-When this structure is used:
+For every issue:
 
-- Treat a parent issue as broader context that may list sub-issues.
-- Treat a sub-issue as a single bounded work item.
-- If the provided issue is a parent issue with sub-issues, do not implement the full parent scope.
-- If the provided issue is a parent issue with sub-issues, stop and ask which sub-issue to work on.
-- If the provided issue is a sub-issue, read the parent issue and its comments for context.
-- If the provided issue is a sub-issue, do not read further up the hierarchy.
-- If the provided issue is a sub-issue, implement only the sub-issue scope.
-- If the provided issue has no sub-issues, treat it as a standalone work item.
-- When completing a sub-issue, check whether it is the last open sub-issue under the parent.
-- If the completed sub-issue is the last open sub-issue under the parent, flag this to the human.
+- Read the issue comments for clarifications, scope changes, and constraints not in the original body.
+
+When the issue has sub-issues (it is a parent):
+
+- Treat the parent issue as broader context, not as a work item.
+- Do not implement the full parent scope.
+- Stop and ask which sub-issue to work on.
+
+When the issue is a sub-issue:
+
+- Read the direct parent issue and its comments for context.
+- Do not read further up the hierarchy.
+- Implement only the sub-issue scope.
+- When completing the sub-issue, check whether it is the last open sub-issue under the parent.
+- If it is the last open sub-issue, flag this to the human.
 
 ## Boundary Rules
 
@@ -291,7 +313,7 @@ Do not do any of the following under any circumstances:
 ## The Human is Responsible For
 
 The AI cannot perform these tasks.
-They must be completed by the human.
+The human must complete them.
 
 - Define and scope the task before it reaches the AI.
 - Decompose larger work into sub-issues and provide a sub-issue rather than the parent as the starting input.
@@ -301,4 +323,6 @@ They must be completed by the human.
 - Monitor for scope drift during implementation.
 - Perform manual verification where automated tests are not sufficient.
 - Report issues found during review or testing.
+- Merge pull requests.
+- Communicate the intent of issues clearly when delegating issue creation.
 - Decide when the work is complete.

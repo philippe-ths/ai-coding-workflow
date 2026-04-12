@@ -6,7 +6,7 @@ description: "Ensures the agent has enough runtime observability to validate its
 # Logging and Observability
 
 Read this file when the change requires runtime observability to validate correctness.
-This skill ensures the agent has enough runtime visibility to prove its changes work.
+This skill ensures you have enough runtime visibility to prove your changes work.
 
 ## Changes That Typically Need Observability
 

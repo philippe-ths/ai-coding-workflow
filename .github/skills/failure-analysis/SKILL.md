@@ -6,11 +6,11 @@ description: "Structured investigation process for when the user reports that so
 # Failure Analysis Mode
 
 Read this file when entering failure analysis mode.
-This file contains the full process for investigating and resolving contradictions between the agent's expectations and user-observed reality.
+This file contains the full process for investigating and resolving contradictions between your expectations and user-observed reality.
 
 ## Why This Mode Exists
 
-When tests pass and validation succeeds, the agent believes the implementation is correct. If the user then reports that the feature is broken or the app doesn't work, there is a gap between the agent's understanding and reality. The agent's natural response is to jump to the nearest quick fix — but if the agent's understanding of the system was wrong enough for the tests to miss the problem, a quick fix is likely to be wrong too. This mode forces a structured pause: stop, describe the contradiction, list what could be wrong, and gather evidence before writing more code.
+When tests pass and validation succeeds, you believe the implementation is correct. If the user then reports that the feature is broken or the app doesn't work, there is a gap between your understanding and reality. Your natural response is to jump to the nearest quick fix — but if your understanding of the system was wrong enough for the tests to miss the problem, a quick fix is likely to be wrong too. This mode forces a structured pause: stop, describe the contradiction, list what could be wrong, and gather evidence before writing more code.
 
 ## Related Workflow Sections
 

@@ -26,6 +26,11 @@ Every rationale line consumes tokens that compete with the actual task, so each 
 A rule that only says "Do not do X" leaves the agent guessing what to do instead.
 Where possible, pair it with the correct action: "Do not add logging for trivial operations" is fine because the alternative is obvious (do nothing). "Do not use console.log" is incomplete without "Use the project logger instead."
 
+**No third-person self-reference in agent-facing text.**
+In instruction text (workflow steps, skill bodies), use second-person imperative voice.
+Do not refer to the agent in third person: "the agent should", "the agent's expectations", "causes the agent to."
+Third person is acceptable in metadata (skill frontmatter descriptions) and in sections that describe human responsibilities.
+
 **Concrete over abstract.**
 Prefer concrete actions over abstract goals.
 "Run the full test suite" over "Ensure adequate test coverage."
