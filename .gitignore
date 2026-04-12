@@ -1,9 +1,8 @@
 # Runtime state
 .ai-policy/state/validation.status
 
-# Local settings
+# Local settings TODO: update to all '.local' files
 .claude/settings.local.json
-.vscode/settings.json
 
 # OS artifacts
 .DS_Store

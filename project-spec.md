@@ -61,9 +61,10 @@ Version: 1.0.0
 - `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`.
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
-- `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration for protected branch enforcement.
-- `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration and hook definitions.
-- `.claude/settings.json`: Claude Code local settings including hook configuration.
+- `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration and tool permission defaults.
+- `.vscode/settings.json`: VS Code Copilot tool permission defaults.
+- `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration, permission defaults, and hook definitions.
+- `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
 - `lite-monolithic/ai-workflow.md`: single-file AI workflow with planning and failure analysis inlined, no policy layer or skill indirection.
 - `lite-monolithic/README.md`: usage instructions for the lite-monolithic version.
 
