@@ -5,8 +5,8 @@ description: "Structured planning process for producing a code-aware implementat
 
 # Code-Aware Planning
 
-Read this file when producing a code-aware plan before implementation.
-This file contains the full requirements for a valid plan.
+Read this file when producing or revising a code-aware plan.
+This file contains the full requirements for a valid plan and for handling human feedback at review.
 
 ## Related Workflow Sections
 
@@ -63,3 +63,10 @@ If a codebase-confirmed assumption turns out to be wrong during implementation, 
 - Do not include implementation detail that belongs in the code.
 - Do not restate the issue verbatim.
 - One sentence per item where possible.
+
+## Handling Human Feedback at Plan Review
+
+- If the human partially approves, update only the unapproved parts and present the revised plan.
+- If the human adds new requirements, assess whether they change the scope and flag if they do.
+- If the human's feedback contradicts the issue, flag the contradiction.
+- After updating the plan, present the revised plan for re-approval before proceeding.
