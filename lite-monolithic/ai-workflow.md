@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.0.0
+Version: 2.1.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -65,24 +65,28 @@ The human reviews and approves at defined checkpoints.
    - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
    - If a fix fails or manual verification fails, enter [Failure Analysis Mode](#failure-analysis-mode).
 
-10. **Step 10: Summarise and prepare handoff.**
+10. **Step 10: Summarise.**
 
     - Report what changed, what was tested, and what was not tested.
     - Report remaining risks and follow-up work.
+
+11. **Step 11: Pre-PR readiness check.**
+
+    - Complete all readiness checks before proposing the first remote GitHub action.
     - Check parent and sub-issue closure status.
     - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
     - State which GitHub action would be next if the human wants to publish the work.
     - See [GitHub Workflow](#github-workflow).
 
-11. **Checkpoint 11: human approves the next GitHub action.**
+12. **Checkpoint 12: human approves the next GitHub action.**
 
     - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
 
-12. **Step 12: Run the approved GitHub action and stop.**
+13. **Step 13: Run the approved GitHub action and stop.**
 
     - Run only the single GitHub action the human explicitly approved.
     - See [GitHub Workflow](#github-workflow).
-    - If the human approves another GitHub action, return to Step 11.
+    - If the human approves another GitHub action, return to Step 12.
 
 ## Planning Requirements
 
