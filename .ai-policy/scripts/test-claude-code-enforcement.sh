@@ -5,6 +5,18 @@ set -eu
 # Covers Path 1 (Shell/Bash) and Path 2 (MCP).
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"
+TMPDIR_TEST=""
+REAL_SCRIPT="$ROOT_DIR/.ai-policy/scripts/current-branch.sh"
+
+cleanup() {
+  if [ -n "$TMPDIR_TEST" ] && [ -f "$TMPDIR_TEST/current-branch-backup.sh" ]; then
+    cp "$TMPDIR_TEST/current-branch-backup.sh" "$REAL_SCRIPT"
+  fi
+  if [ -n "$TMPDIR_TEST" ] && [ -d "$TMPDIR_TEST" ]; then
+    rm -rf "$TMPDIR_TEST"
+  fi
+}
+trap cleanup EXIT
 PASS=0
 FAIL=0
 
@@ -134,17 +146,12 @@ FAKE
 chmod +x "$TMPDIR_TEST/current-branch.sh"
 
 # Temporarily replace the real script with the fake one.
-REAL_SCRIPT="$ROOT_DIR/.ai-policy/scripts/current-branch.sh"
 cp "$REAL_SCRIPT" "$TMPDIR_TEST/current-branch-backup.sh"
 cp "$TMPDIR_TEST/current-branch.sh" "$REAL_SCRIPT"
 
 rc=0
 printf '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' \
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
-
-# Restore immediately.
-cp "$TMPDIR_TEST/current-branch-backup.sh" "$REAL_SCRIPT"
-rm -rf "$TMPDIR_TEST"
 
 assert_blocked "git commit when current-branch returns main (simulated)" "$rc"
 

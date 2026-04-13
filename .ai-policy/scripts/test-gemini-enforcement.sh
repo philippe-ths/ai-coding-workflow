@@ -6,6 +6,18 @@ set -eu
 # Path 2 (MCP via hooks.BeforeTool → mcp hook).
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"
+TMPDIR_TEST=""
+REAL_SCRIPT="$ROOT_DIR/.ai-policy/scripts/current-branch.sh"
+
+cleanup() {
+  if [ -n "$TMPDIR_TEST" ] && [ -f "$TMPDIR_TEST/current-branch-backup.sh" ]; then
+    cp "$TMPDIR_TEST/current-branch-backup.sh" "$REAL_SCRIPT"
+  fi
+  if [ -n "$TMPDIR_TEST" ] && [ -d "$TMPDIR_TEST" ]; then
+    rm -rf "$TMPDIR_TEST"
+  fi
+}
+trap cleanup EXIT
 PASS=0
 FAIL=0
 
@@ -124,7 +136,6 @@ echo "Path 1 — Shell/Bash blocking (Gemini BeforeTool → bash hook):"
 
 # Simulate being on a protected branch by overriding current-branch.sh.
 TMPDIR_TEST="$(mktemp -d)"
-REAL_SCRIPT="$ROOT_DIR/.ai-policy/scripts/current-branch.sh"
 cp "$REAL_SCRIPT" "$TMPDIR_TEST/current-branch-backup.sh"
 
 # Override to return "main".
@@ -171,10 +182,6 @@ rc=0
 printf '{"tool_name":"run_shell_command","tool_input":{"command":"git push origin feature/test"}}' \
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "git push on feature/test (simulated)" "$rc"
-
-# Restore real script.
-cp "$TMPDIR_TEST/current-branch-backup.sh" "$REAL_SCRIPT"
-rm -rf "$TMPDIR_TEST"
 
 # ── Summary ──
 

@@ -200,16 +200,17 @@ Manual verification covers what only a human can verify.
 
 ## Failure Analysis Mode
 
-Enter failure analysis mode when manual verification fails.
-Enter failure analysis mode when runtime behaviour contradicts the implementation.
-Enter failure analysis mode when test results conflict with observed behaviour.
-Stop implementation and do not make further code changes until failure analysis is complete.
+Enter failure analysis mode when manual verification fails, runtime behaviour contradicts the implementation, or test results conflict with observed behaviour.
+Do not make further code changes until failure analysis is complete.
 
-Before proceeding in failure analysis mode, load the `failure-analysis` skill.
+Load the `failure-analysis` skill.
 
 ## Logging and Observability
 
-When the change requires runtime observability to validate correctness, load the `logging-and-observability` skill.
+Use when the change modifies runtime behaviour that automated tests cannot fully validate.
+Use when existing logging is insufficient to diagnose a failure.
+
+Load the `logging-and-observability` skill.
 
 ## Command Approval
 

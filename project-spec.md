@@ -43,6 +43,7 @@ Version: 1.0.0
 ## Key Dependencies
 - `bash`: all policy scripts and git hooks are written in bash and validated with `bash -n`.
 - `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
+- `jq`: hook scripts and one enforcement test parse JSON with `jq`.
 
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent.
