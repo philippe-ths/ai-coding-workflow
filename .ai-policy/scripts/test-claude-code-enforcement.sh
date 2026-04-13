@@ -69,11 +69,11 @@ printf '{"tool_name":"mcp__github__delete_file","tool_input":{"branch":"main","o
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
 assert_blocked "delete_file on main" "$rc"
 
-# Test 4: create_pull_request with base=main → blocked
+# Test 4: create_pull_request with base=main → allowed (PRs target a branch for review, not a direct write)
 rc=0
 printf '{"tool_name":"mcp__github__create_pull_request","tool_input":{"base":"main","head":"feature/x","owner":"x","repo":"y","title":"t"}}' \
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
-assert_blocked "create_pull_request base=main" "$rc"
+assert_allowed "create_pull_request base=main" "$rc"
 
 # Test 5: push_files targeting non-protected branch → allowed
 rc=0

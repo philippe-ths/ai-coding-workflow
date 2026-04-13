@@ -13,10 +13,14 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 INPUT="$(cat)"
 TOOL_NAME="$(printf '%s' "$INPUT" | jq -r '.tool_name // empty')"
 
+# Allow create_pull_request — PRs target a branch for review, not a direct write.
+case "$TOOL_NAME" in
+  *create_pull_request) exit 0 ;;
+esac
+
 # Extract the target branch from tool_input.
 # push_files, create_or_update_file, delete_file use "branch".
-# create_pull_request uses "base" (the branch being merged into).
-BRANCH="$(printf '%s' "$INPUT" | jq -r '.tool_input.branch // .tool_input.base // empty')"
+BRANCH="$(printf '%s' "$INPUT" | jq -r '.tool_input.branch // empty')"
 
 if [ -z "$BRANCH" ]; then
   # No branch info available (e.g. merge_pull_request) — cannot check, allow.
