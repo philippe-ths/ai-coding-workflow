@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.0.1
+Version: 2.1.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -15,7 +15,7 @@ The human reviews and approves at defined checkpoints.
 
 The workflow runs as a loop.
 Steps 5 through 9 form an implementation cycle: implement, validate, and fix until the human approves.
-Steps 10 through 12 form a handoff cycle: summarise, get approval, and run one GitHub action at a time.
+Steps 10 through 13 form a handoff cycle: summarise, check readiness, get approval, and run one GitHub action at a time.
 After the human merges the pull request, run post-merge cleanup and return to Step 1 for the next task.
 
 1. **Step 1: Confirm the task and inputs.**
@@ -72,12 +72,16 @@ After the human merges the pull request, run post-merge cleanup and return to St
    - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
    - If a fix fails or manual verification fails, enter [Failure Analysis Mode](#failure-analysis-mode).
 
-10. **Step 10: Summarise and prepare handoff.**
+10. **Step 10: Summarise.**
 
     - Report what changed.
     - Report what was tested.
     - Report what was not tested.
     - Report remaining risks and follow-up work.
+
+11. **Step 11: Pre-PR readiness check.**
+
+    - Complete all readiness checks before proposing the first remote GitHub action.
     - If follow-up issues need to be created, load the `issue-creation` skill.
     - Flag if documentation or README files need updating based on the change.
     - Flag if version numbers need updating.
@@ -87,17 +91,17 @@ After the human merges the pull request, run post-merge cleanup and return to St
     - State which GitHub action would be next if the human wants to publish the work.
     - See [GitHub Workflow](#github-workflow).
 
-11. **Checkpoint 11: human approves the next GitHub action.**
+12. **Checkpoint 12: human approves the next GitHub action.**
 
     - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
 
-12. **Step 12: Run the approved GitHub action and stop.**
+13. **Step 13: Run the approved GitHub action and stop.**
 
     - Run only the single GitHub action the human explicitly approved.
     - See [GitHub Workflow](#github-workflow).
-    - If the human approves another GitHub action, return to Step 11.
+    - If the human approves another GitHub action, return to Step 12.
 
-13. **Step 13: Post-merge cleanup.**
+14. **Step 14: Post-merge cleanup.**
 
     - Check whether the local issue branch has unmerged commits before deleting it.
     - Switch to the main branch.

@@ -148,7 +148,7 @@ Rationale: Prevents the agent from cycling through speculative fixes. Manual ver
 
 ---
 
-### Workflow Step 10: Summarise and prepare handoff
+### Workflow Step 10: Summarise
 
 > "Report what changed."
 
@@ -165,6 +165,14 @@ Rationale: Honest reporting prevents the human from assuming full coverage when 
 > "Report remaining risks and follow-up work."
 
 Rationale: The agent may have discovered problems outside the current scope. These should be surfaced, not silently dropped.
+
+---
+
+### Workflow Step 11: Pre-PR readiness check
+
+> "Complete all readiness checks before proposing the first remote GitHub action."
+
+Rationale: Makes the readiness gate explicit. When readiness checks were embedded in the summary step, agents treated the summary as complete once they had reported what changed and what was tested, then skipped the remaining checks and jumped to proposing a GitHub action.
 
 > "If follow-up issues need to be created, load the `issue-creation` skill."
 
@@ -192,7 +200,7 @@ Rationale: Prepares the handoff. The agent proposes; the human decides.
 
 ---
 
-### Workflow Checkpoint 11: Human approves the next GitHub action
+### Workflow Checkpoint 12: Human approves the next GitHub action
 
 > "Stop after the summary until the human explicitly approves the next GitHub action in the current session."
 
@@ -200,19 +208,19 @@ Rationale: Prevents the agent from pushing code or creating PRs based on momentu
 
 ---
 
-### Workflow Step 12: Run the approved GitHub action and stop
+### Workflow Step 13: Run the approved GitHub action and stop
 
 > "Run only the single GitHub action the human explicitly approved."
 
 Rationale: Prevents chaining (e.g. human approves a push, agent also creates a PR). Each action is a separate approval.
 
-> "If the human approves another GitHub action, return to Step 11."
+> "If the human approves another GitHub action, return to Step 12."
 
 Rationale: Keeps the one-action-at-a-time model. The human can approve sequential actions, but each requires its own approval cycle.
 
 ---
 
-### Workflow Step 13: Post-merge cleanup
+### Workflow Step 14: Post-merge cleanup
 
 > "Check whether the local issue branch has unmerged commits before deleting it."
 
