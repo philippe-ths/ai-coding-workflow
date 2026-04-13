@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.2.0
+Version: 2.3.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -147,57 +147,40 @@ Keep the change focused on the approved task:
 
 Before implementation, run a baseline validation:
 
-1. Run smoke tests.
-2. Run the global test suite.
-3. Record which tests pass and which tests fail.
-4. Treat any pre-existing failure as a known failure for the duration of the task.
-5. Do not attempt to fix pre-existing failures unless the task requires it.
+1. Run smoke tests and the global test suite.
+2. Record which tests pass and which tests fail.
+3. Treat pre-existing failures as known for the task's duration.
+4. Do not fix pre-existing failures unless the task requires it.
 
 When comparing post-implementation results against the baseline:
 
 - If a test that passed in the baseline now fails, treat the change as wrong until proven otherwise.
 - If a test that failed in the baseline still fails, do not attribute it to the change.
-- Report pre-existing failures separately from change-related failures.
 
-Run validation after every code change.
-If repo-local deterministic policy requires a passed validation state before commit or push, satisfy that requirement through the repository validation flow.
-Run the following checks in order:
+After each code change, run the following checks in order:
 
-1. **Smoke tests.**
-   - Confirm the app builds and starts without errors.
-
-2. **Global test suite.**
-   - Run the full existing test suite.
-
-3. **Targeted tests.**
-   - Run tests specific to the changed area.
+1. **Smoke tests.** Confirm the app builds and starts without errors.
+2. **Global test suite.** Run the full existing test suite.
+3. **Targeted tests.** Run tests specific to the changed area.
    - If no targeted tests exist, flag this.
-
-4. **New tests.**
-   - Add tests if the change introduces behaviour that existing tests do not cover.
+4. **New tests.** Add tests if the change introduces behaviour that existing tests do not cover.
    - See [Writing Tests](#writing-tests).
-   - Run the new tests.
    - If a new test fails, use the failure output to guide the next implementation change before rerunning.
+
+If repo-local deterministic policy requires a passed validation state before commit or push, satisfy that requirement through the repository validation flow.
 
 When running validation:
 
 - Do not modify smoke tests or the global test suite unless the task explicitly requires it.
 - Do not run validation commands in parallel when they can share ports, build outputs, caches, or runtime state.
-- Run smoke tests and the global test suite after each meaningful implementation pass.
 - Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
-- Treat existing passing tests as evidence of stability.
-- Use test results to guide implementation decisions during the Step 5-9 cycle.
-  (Why: Tests are the primary feedback mechanism for the implementation loop. Treating them only as a final gate misses their value as a steering signal.)
 - If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path.
 - If no automated test exercises the real user path, say so explicitly.
 
 When reporting validation:
 
-- Report what was tested and what passed.
-- Report what failed and whether the failure is related to the change.
-- Report what was not tested and why.
-- Do not claim code is tested when it is not.
-- Do not ignore failing tests and continue as if the task is complete.
+- Report what was tested, what passed, what failed (and whether change-related), and what was not tested.
+- Do not ignore failing tests or claim code is tested when it is not.
 
 ## Test Readiness
 
@@ -256,30 +239,20 @@ Every task must follow the GitHub branching workflow:
 
 - Link every task to a GitHub issue before implementation.
 - Do not work directly on `main`.
-- If the current branch is `main`, stop before implementation and create or switch to an issue-scoped branch.
-- Do not edit files, run issue validation, or make commits until the issue-scoped branch is active.
+- Create or switch to an issue-scoped branch before editing files or making commits.
 - Use the branch naming format `type/short-description`.
-- Use `feature/` for new functionality.
-- Use `fix/` for bug fixes.
-- Use `refactor/` for refactors.
-- Keep branch work focused on the issue scope.
-- Rebase the issue branch onto the target branch before starting implementation.
-- Rebase the issue branch onto the target branch before creating a pull request.
+- Rebase the issue branch onto the target branch before starting implementation and before creating a pull request.
 - If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
 - Before any operation that moves the working tree to a different branch state (rebase, checkout, switch), compare tracked files between the current branch and the target.
 - Before the same operation, check whether gitignored or untracked local files exist at paths the target state tracks.
 - If either check reveals unexpected files or path overlap, stop and report before proceeding.
-  (Why: Rebase, checkout, and switch all modify the working tree to match a different branch state, and git overwrites or deletes local files at conflicting paths regardless of gitignore status.)
-- If the human approves proceeding after a path-overlap report, create a local filesystem backup of the working tree (excluding `.git/`) before running the branch-changing operation.
-- Delete the backup only after confirming on the new branch that no expected files were lost.
-  (Why: No git-native operation, including `git stash`, preserves gitignored files that are tracked on another branch during a branch switch.)
+- If the human approves, back up the working tree (excluding `.git/`) before the operation.
+- Delete the backup after confirming no files were lost.
 - If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
-- Confirm repo-local deterministic policy is active before relying on protected-branch or validation enforcement.
-- If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
-- Repo-local deterministic policy may block protected-branch Git actions and commit or push without passed validation.
-- Do not infer approval for one GitHub action from approval for another GitHub action.
+- Do not infer approval for one GitHub action from approval for another.
 - Do not push to remote or create a pull request without explicit human confirmation in the current session.
+- If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - If deterministic policy blocks an action, fix the blocked condition before retrying.
 - If new commits are added after approval, stop and ask again before the next remote GitHub action.
 - After running an approved GitHub action, stop and report the result.
@@ -320,17 +293,12 @@ The following apply to every task without exception:
 Stop and ask the human before doing any of the following:
 
 - ASK before adding a new dependency.
-- ASK before changing architecture or established patterns.
-- ASK before changing database schema or sync-related behaviour.
-- ASK before changing public interfaces or shared contracts.
+- ASK before changing architecture, established patterns, or conventions.
+- ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
 - ASK before making broad refactors.
 - ASK before deleting files or removing significant code paths.
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
-- ASK before introducing new conventions or changing existing ones.
-- ASK before introducing a new logging library or pattern.
-- ASK before making assumptions where the task or expected behaviour is unclear.
-- ASK before proceeding when the work conflicts with the current codebase or project constraints.
 
 ### Never Do
 
