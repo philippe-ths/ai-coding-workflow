@@ -175,10 +175,7 @@ Run the following checks in order:
 
 4. **New tests.**
    - Add tests if the change introduces behaviour that existing tests do not cover.
-   - Write tests that verify observable behaviour, not implementation details.
-     (Why: Tests coupled to internal structure break on refactor and give false failure signals that waste implementation cycles.)
-   - Write tests that produce clear pass/fail output with failure messages that identify what went wrong.
-     (Why: The agent uses test output to decide what to fix next. Vague failures force guesswork instead of targeted fixes.)
+   - See [Writing Tests](#writing-tests).
    - Run the new tests.
    - If a new test fails, use the failure output to guide the next implementation change before rerunning.
 
@@ -217,7 +214,9 @@ If the task is specifically about writing tests, skip this check.
 
 ## Writing Tests
 
-Use when the plan includes writing new tests, when Step 6 identifies missing test coverage, or when the task is specifically about creating tests.
+Use when the plan includes writing new tests.
+Use when Step 6 identifies missing test coverage.
+Use when the task is specifically about creating tests.
 
 Load the `testing` skill.
 

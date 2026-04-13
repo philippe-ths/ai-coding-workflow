@@ -390,14 +390,6 @@ Rationale: Honest reporting. The human should know that the changed area has no 
 
 Rationale: New behaviour without tests will have no safety net for future changes.
 
-> "Write tests that verify observable behaviour, not implementation details."
-
-Rationale: Tests coupled to internal structure break when the agent refactors, producing false negatives that waste implementation cycles and erode trust in the test suite.
-
-> "Write tests that produce clear pass/fail output with failure messages that identify what went wrong."
-
-Rationale: The agent reads test output to decide what to fix next. Tests that produce vague or unparseable output break the feedback loop and force speculative fixes.
-
 > "Run the new tests."
 
 Rationale: Writing tests that are never run provides no validation signal. The explicit instruction ensures the agent executes them and confirms they pass.
@@ -494,9 +486,9 @@ Rationale: When the task is to create tests, flagging their absence is redundant
 
 ### Writing Tests
 
-> "Use when the plan includes writing new tests, when Step 6 identifies missing test coverage, or when the task is specifically about creating tests."
+> "Use when the plan includes writing new tests." / "Use when Step 6 identifies missing test coverage." / "Use when the task is specifically about creating tests."
 
-Rationale: Defines the three activation conditions. The skill is not needed when the agent is only running existing tests.
+Rationale: Defines the three activation conditions. The skill is not needed when only running existing tests.
 
 > "Load the `testing` skill."
 
