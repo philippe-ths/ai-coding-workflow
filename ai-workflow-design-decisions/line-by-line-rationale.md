@@ -36,6 +36,26 @@ Rationale: If the code says one thing and runtime says another, runtime wins. Pr
 
 ---
 
+### Workflow
+
+> "The workflow runs as a loop."
+
+Rationale: Tells the agent the workflow is iterative, not a one-shot sequence. Each task starts at Step 1 and loops through the cycle.
+
+> "Steps 5 through 9 form an implementation cycle: implement, validate, and fix until the human approves."
+
+Rationale: Names the inner loop explicitly so the agent knows which steps repeat during implementation.
+
+> "Steps 10 through 13 form a handoff cycle: summarise, check readiness, get approval, and run one GitHub action at a time."
+
+Rationale: Names the handoff sequence and establishes that GitHub actions happen one at a time within it.
+
+> "After the human merges the pull request, run post-merge cleanup and return to Step 1 for the next task."
+
+Rationale: Connects the end of one task to the beginning of the next. Makes the loop boundary explicit.
+
+---
+
 ### Workflow Step 1: Confirm the task and inputs
 
 > "Confirm the GitHub issue number."
@@ -69,6 +89,8 @@ Rationale: Unbounded tasks lead to scope drift. Confirming boundaries early forc
 > "If the GitHub issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding."
 
 Rationale: Prevents the agent from jumping into code analysis before confirming the task inputs are correct. Proceeding with missing inputs leads to wasted work on the wrong problem.
+
+Note on cross-reference pointers: Throughout the workflow steps, `See [Section Name]` lines direct the agent to the relevant reference section for detailed rules. They keep the workflow steps lean while ensuring the agent loads the right context. These pointers are not listed individually in this rationale because they carry no independent meaning — the referenced section's rationale covers the content.
 
 ---
 
@@ -330,7 +352,7 @@ Rationale: The issue is the scope contract. If implementation diverges, the issu
 
 ### Validation Requirements: Baseline
 
-> "Run smoke tests." / "Run the global test suite."
+> "Run smoke tests and the global test suite."
 
 Rationale: Establishes the known-good baseline before implementation. Without this, regressions cannot be distinguished from pre-existing failures.
 
@@ -338,11 +360,11 @@ Rationale: Establishes the known-good baseline before implementation. Without th
 
 Rationale: The recorded baseline is the comparison point for post-implementation results.
 
-> "Treat any pre-existing failure as a known failure for the duration of the task."
+> "Treat pre-existing failures as known for the task's duration."
 
 Rationale: Prevents wasted time debugging failures the change did not cause.
 
-> "Do not attempt to fix pre-existing failures unless the task requires it."
+> "Do not fix pre-existing failures unless the task requires it."
 
 Rationale: Fixing unrelated failures is scope drift and may introduce new problems.
 
@@ -354,21 +376,13 @@ Rationale: The default assumption should be that the change broke it. This preve
 
 Rationale: Pre-existing failures should not block the current task or trigger unnecessary debugging.
 
-> "Report pre-existing failures separately from change-related failures."
-
-Rationale: Mixed reporting makes it impossible for the human to assess the change's impact.
-
 ---
 
 ### Validation Requirements: Running validation
 
-> "Run validation after every code change."
+> "After each code change, run the following checks in order:"
 
-Rationale: Catching regressions immediately is cheaper than catching them after multiple changes have accumulated.
-
-> "If repo-local deterministic policy requires a passed validation state before commit or push, satisfy that requirement through the repository validation flow."
-
-Rationale: Connects the workflow instruction to the deterministic enforcement system. The agent should use the project's validation flow, not bypass it.
+Rationale: Catching regressions immediately is cheaper than catching them after multiple changes have accumulated. The explicit ordering ensures the cheapest checks run first.
 
 > "Confirm the app builds and starts without errors." (Smoke tests)
 
@@ -390,13 +404,13 @@ Rationale: Honest reporting. The human should know that the changed area has no 
 
 Rationale: New behaviour without tests will have no safety net for future changes.
 
-> "Run the new tests."
-
-Rationale: Writing tests that are never run provides no validation signal. The explicit instruction ensures the agent executes them and confirms they pass.
-
 > "If a new test fails, use the failure output to guide the next implementation change before rerunning."
 
 Rationale: Makes the feedback loop explicit. Without this instruction, the agent tends to treat a failing new test as a problem with the test rather than a signal about the implementation.
+
+> "If repo-local deterministic policy requires a passed validation state before commit or push, satisfy that requirement through the repository validation flow."
+
+Rationale: Connects the workflow instruction to the deterministic enforcement system. The agent should use the project's validation flow, not bypass it.
 
 > "Do not modify smoke tests or the global test suite unless the task explicitly requires it."
 
@@ -406,21 +420,9 @@ Rationale: Modifying tests to make them pass is a form of scope drift and can ma
 
 Rationale: Parallel validation with shared state produces flaky, non-deterministic results that waste debugging time.
 
-> "Run smoke tests and the global test suite after each meaningful implementation pass."
-
-Rationale: Frequent validation catches regressions close to the change that introduced them.
-
 > "Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works."
 
 Rationale: Existing tests may not cover the new behaviour. Passing tests only prove nothing was broken, not that the feature works.
-
-> "Treat existing passing tests as evidence of stability."
-
-Rationale: Passing tests confirm the change did not break existing behaviour. They are not proof that new behaviour is correct.
-
-> "Use test results to guide implementation decisions during the Step 5-9 cycle."
-
-Rationale: Frames tests as a steering mechanism for implementation, not just a gate at the end. Tests exist to tell the agent whether it is on track, not just whether it finished correctly.
 
 > "If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path."
 
@@ -434,29 +436,21 @@ Rationale: Honest reporting. The human needs to know when automated coverage is 
 
 ### Validation Requirements: Reporting
 
-> "Report what was tested and what passed."
+> "Report what was tested, what passed, what failed (and whether change-related), and what was not tested."
 
-Rationale: Basic accountability. The human needs to know the validation scope.
+Rationale: Consolidates validation reporting into a single line that covers accountability, regression classification, and gap transparency. The human needs to see all four dimensions in one place.
 
-> "Report what failed and whether the failure is related to the change."
+> "Do not ignore failing tests or claim code is tested when it is not."
 
-Rationale: Distinguishing change-caused failures from pre-existing ones prevents unnecessary debugging.
-
-> "Report what was not tested and why."
-
-Rationale: Gaps in testing should be transparent so the human can decide whether additional verification is needed.
-
-> "Do not claim code is tested when it is not."
-
-Rationale: False claims of testing are worse than no testing because they suppress the human's review instinct.
-
-> "Do not ignore failing tests and continue as if the task is complete."
-
-Rationale: Ignoring failures and declaring success is a critical trust violation.
+Rationale: Ignoring failures and declaring success is a critical trust violation. False claims of testing suppress the human's review instinct.
 
 ---
 
 ### Test Readiness
+
+> "Check test readiness during Step 1, after baseline validation."
+
+Rationale: Specifies when the check runs and that it follows baseline validation. Without this sequencing, the agent might check test readiness at an arbitrary point or skip it entirely.
 
 > "Check whether the project has smoke tests that confirm the app builds and starts."
 
@@ -522,23 +516,15 @@ Rationale: The human needs to know what "broken" looks like to catch regressions
 
 ### Failure Analysis Mode
 
-> "Enter failure analysis mode when manual verification fails."
+> "Enter failure analysis mode when manual verification fails, runtime behaviour contradicts the implementation, or test results conflict with observed behaviour."
 
-Rationale: Manual verification failure means runtime behaviour contradicts the implementation. Speculative fixes without diagnosis make things worse.
+Rationale: Lists the three trigger conditions in a single line. Manual verification failure, runtime contradictions, and test-observation conflicts all signal that speculative fixes will make things worse and structured diagnosis is needed first.
 
-> "Enter failure analysis mode when runtime behaviour contradicts the implementation."
-
-Rationale: The contradiction itself is the signal, regardless of how it was discovered.
-
-> "Enter failure analysis mode when test results conflict with observed behaviour."
-
-Rationale: Tests saying one thing and observation saying another indicates a deeper problem that fix attempts will not resolve.
-
-> "Stop implementation and do not make further code changes until failure analysis is complete."
+> "Do not make further code changes until failure analysis is complete."
 
 Rationale: Prevents the agent from making speculative fixes while the problem is still undiagnosed. Code changes before diagnosis compound the problem.
 
-> "Before proceeding in failure analysis mode, load the `failure-analysis` skill."
+> "Load the `failure-analysis` skill."
 
 Rationale: Extracts detailed failure analysis procedure to an on-demand skill to keep the core workflow lean. The skill provides the structured reasoning framework.
 
@@ -546,9 +532,17 @@ Rationale: Extracts detailed failure analysis procedure to an on-demand skill to
 
 ### Logging and Observability
 
-> "When the change requires runtime observability to validate correctness, load the `logging-and-observability` skill."
+> "Use when the change modifies runtime behaviour that automated tests cannot fully validate."
 
-Rationale: The skill provides runtime visibility so the agent can prove its changes work. Extracting the detailed rules to an on-demand skill reclaims always-on context budget.
+Rationale: Defines the primary activation condition. If automated tests can fully validate the change, runtime observability is unnecessary overhead.
+
+> "Use when existing logging is insufficient to diagnose a failure."
+
+Rationale: Defines the secondary activation condition. Insufficient logging during failure analysis blocks diagnosis.
+
+> "Load the `logging-and-observability` skill."
+
+Rationale: Extracts detailed logging and observability rules to an on-demand skill to keep the core workflow lean and reclaim always-on context budget.
 
 ---
 
@@ -572,35 +566,19 @@ Rationale: Without an issue, there is no scope boundary, no audit trail, and no 
 
 > "Do not work directly on `main`."
 
-Rationale: Direct work on main bypasses review, breaks the branching model, and risks breaking the shared branch. Enforced deterministically by the pre-commit hook.
+Rationale: Direct work on main bypasses review, breaks the branching model, and risks breaking the shared branch.
 
-> "If the current branch is `main`, stop before implementation and create or switch to an issue-scoped branch."
+> "Create or switch to an issue-scoped branch before editing files or making commits."
 
-Rationale: Positive alternative to "do not work on main". Tells the agent what to do, not just what not to do.
-
-> "Do not edit files, run issue validation, or make commits until the issue-scoped branch is active."
-
-Rationale: Any work done on the wrong branch has to be moved later, wasting time and risking errors.
+Rationale: Ensures all work happens on the correct branch. Any work done on the wrong branch has to be moved later, wasting time and risking errors.
 
 > "Use the branch naming format `type/short-description`."
 
 Rationale: Consistent naming makes branches identifiable by purpose at a glance.
 
-> "Use `feature/` for new functionality." / "Use `fix/` for bug fixes." / "Use `refactor/` for refactors."
+> "Rebase the issue branch onto the target branch before starting implementation and before creating a pull request."
 
-Rationale: Concrete branch type prefixes remove ambiguity about which prefix to use.
-
-> "Keep branch work focused on the issue scope."
-
-Rationale: Scope control applied to branch content. A branch should contain one task's changes.
-
-> "Rebase the issue branch onto the target branch before starting implementation."
-
-Rationale: Ensures the starting point matches the current state of the target branch. Code written against a stale base can be silently wrong.
-
-> "Rebase the issue branch onto the target branch before creating a pull request."
-
-Rationale: Ensures CI runs against the current target state, not a stale snapshot. Reduces merge conflicts after PR creation.
+Rationale: Ensures the starting point matches the current target state. Code written against a stale base can be silently wrong. Rebasing before a PR ensures CI runs against the current target, not a stale snapshot.
 
 > "If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action."
 
@@ -618,11 +596,11 @@ Rationale: Git overwrites or deletes local files at conflicting paths regardless
 
 Rationale: Stopping before the operation gives the human the information needed to decide whether to proceed, clean up, or back up files. Proceeding blindly leads to cleanup operations that risk destroying local files.
 
-> "If the human approves proceeding after a path-overlap report, create a local filesystem backup of the working tree (excluding `.git/`) before running the branch-changing operation."
+> "If the human approves, back up the working tree (excluding `.git/`) before the operation."
 
 Rationale: The backup is a safety net against silent file loss during branch operations. No git-native operation preserves gitignored files that are tracked on another branch.
 
-> "Delete the backup only after confirming on the new branch that no expected files were lost."
+> "Delete the backup after confirming no files were lost."
 
 Rationale: Premature deletion of the backup removes the safety net before the agent has verified the operation was safe.
 
@@ -634,25 +612,17 @@ Rationale: Modify/delete conflicts signal divergent branch history that may requ
 
 Rationale: Each remote action has different risk and reversibility. Bundling them removes the human's ability to approve incrementally.
 
-> "Confirm repo-local deterministic policy is active before relying on protected-branch or validation enforcement."
-
-Rationale: If hooks are not installed, the deterministic safety net does not exist. The agent must verify before assuming it is protected.
-
-> "If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`."
-
-Rationale: Recovery step. Tells the agent exactly what to do when hooks are not active.
-
-> "Repo-local deterministic policy may block protected-branch Git actions and commit or push without passed validation."
-
-Rationale: Informs the agent that deterministic enforcement exists so it does not interpret a blocked action as a mysterious error.
-
-> "Do not infer approval for one GitHub action from approval for another GitHub action."
+> "Do not infer approval for one GitHub action from approval for another."
 
 Rationale: Prevents chaining. Approval for a commit does not imply approval for a push.
 
 > "Do not push to remote or create a pull request without explicit human confirmation in the current session."
 
 Rationale: Push and PR creation affect shared state, trigger notifications, and are hard to reverse. Each requires explicit, per-session consent.
+
+> "If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`."
+
+Rationale: Recovery step. Tells the agent exactly what to do when hooks are not active.
 
 > "If deterministic policy blocks an action, fix the blocked condition before retrying."
 
@@ -734,17 +704,13 @@ Rationale: Non-converging investigation is a signal that the agent is stuck and 
 
 Rationale: Dependencies are hard to remove, affect build size and security surface, and may conflict with project constraints.
 
-> "ASK before changing architecture or established patterns."
+> "ASK before changing architecture, established patterns, or conventions."
 
-Rationale: Architecture changes affect the entire codebase and require deliberate human decision-making.
+Rationale: Architecture and convention changes affect the entire codebase and every future change. They require deliberate human decision-making.
 
-> "ASK before changing database schema or sync-related behaviour."
+> "ASK before changing database schema, sync behaviour, public interfaces, or shared contracts."
 
-Rationale: Schema changes are among the hardest to reverse and can break data integrity.
-
-> "ASK before changing public interfaces or shared contracts."
-
-Rationale: Public interfaces affect consumers who may not be visible to the agent.
+Rationale: These are among the hardest changes to reverse. Schema changes can break data integrity, and public interface changes affect consumers who may not be visible to the agent.
 
 > "ASK before making broad refactors."
 
@@ -761,22 +727,6 @@ Rationale: These commands destroy uncommitted changes including gitignored files
 > "ASK before weakening, skipping, or removing tests."
 
 Rationale: Tests are a safety net. Weakening them to make the change pass is a dangerous shortcut.
-
-> "ASK before introducing new conventions or changing existing ones."
-
-Rationale: Conventions affect every future change and should be deliberate human decisions.
-
-> "ASK before introducing a new logging library or pattern."
-
-Rationale: Logging patterns should be consistent across the codebase. A new one fragments the approach.
-
-> "ASK before making assumptions where the task or expected behaviour is unclear."
-
-Rationale: An assumption made silently becomes wrong code. An assumption made explicitly becomes a question.
-
-> "ASK before proceeding when the work conflicts with the current codebase or project constraints."
-
-Rationale: Conflicts should be surfaced, not overridden. The human may have context the agent lacks.
 
 ---
 
