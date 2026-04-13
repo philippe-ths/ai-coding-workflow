@@ -58,6 +58,10 @@ Rationale: Working on a stale branch means writing code against an outdated stat
 
 Rationale: The rule "if a previously passing test fails after the change, treat the change as wrong" is unenforceable without a known-good baseline. The baseline distinguishes regressions from pre-existing failures.
 
+> "Check test readiness."
+
+Rationale: Baseline validation only catches regressions if meaningful tests exist. A project with no smoke tests or no test suite has no safety net, and this should be surfaced before starting work rather than discovered during validation.
+
 > "Confirm the task is a bounded change."
 
 Rationale: Unbounded tasks lead to scope drift. Confirming boundaries early forces the agent to flag multi-objective issues or overly broad tasks before starting.
@@ -390,6 +394,10 @@ Rationale: New behaviour without tests will have no safety net for future change
 
 Rationale: Writing tests that are never run provides no validation signal. The explicit instruction ensures the agent executes them and confirms they pass.
 
+> "If a new test fails, use the failure output to guide the next implementation change before rerunning."
+
+Rationale: Makes the feedback loop explicit. Without this instruction, the agent tends to treat a failing new test as a problem with the test rather than a signal about the implementation.
+
 > "Do not modify smoke tests or the global test suite unless the task explicitly requires it."
 
 Rationale: Modifying tests to make them pass is a form of scope drift and can mask regressions.
@@ -409,6 +417,10 @@ Rationale: Existing tests may not cover the new behaviour. Passing tests only pr
 > "Treat existing passing tests as evidence of stability."
 
 Rationale: Passing tests confirm the change did not break existing behaviour. They are not proof that new behaviour is correct.
+
+> "Use test results to guide implementation decisions during the Step 5-9 cycle."
+
+Rationale: Frames tests as a steering mechanism for implementation, not just a gate at the end. Tests exist to tell the agent whether it is on track, not just whether it finished correctly.
 
 > "If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path."
 
@@ -441,6 +453,46 @@ Rationale: False claims of testing are worse than no testing because they suppre
 > "Do not ignore failing tests and continue as if the task is complete."
 
 Rationale: Ignoring failures and declaring success is a critical trust violation.
+
+---
+
+### Test Readiness
+
+> "Check whether the project has smoke tests that confirm the app builds and starts."
+
+Rationale: Smoke tests are the minimum safety net. Without them, the baseline comparison model cannot detect build-breaking regressions.
+
+> "Check whether the project has a test suite with at least one passing test."
+
+Rationale: A project with no tests at all has no regression detection. This should be surfaced rather than silently proceeding with zero coverage.
+
+> "Check whether tests exist for the code area the task will touch."
+
+Rationale: Targeted test coverage for the affected area is what gives the implementation feedback loop its signal. Without it, the agent can only rely on smoke tests and manual verification.
+
+> "If any of these are missing, flag the gap to the human before proceeding."
+
+Rationale: The human decides whether to address the gap now or accept the risk. The agent should not make this decision silently.
+
+> "Do not write tests to fill the gap unless the human approves."
+
+Rationale: Writing foundational tests is a scoping decision. It changes the task and should go through the same approval flow as any scope expansion.
+
+> "If the task is specifically about writing tests, skip this check."
+
+Rationale: When the task is to create tests, flagging their absence is redundant.
+
+---
+
+### Writing Tests
+
+> "Use when the plan includes writing new tests." / "Use when Step 6 identifies missing test coverage." / "Use when the task is specifically about creating tests."
+
+Rationale: Defines the three activation conditions. The skill is not needed when only running existing tests.
+
+> "Load the `testing` skill."
+
+Rationale: Defers detailed test-writing guidance to a skill that loads on demand. This keeps the core workflow lean while providing test construction rules when needed.
 
 ---
 

@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.1.0
+Version: 2.2.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -28,6 +28,8 @@ After the human merges the pull request, run post-merge cleanup and return to St
    - See [GitHub Workflow](#github-workflow).
    - Run baseline validation.
    - See [Validation Requirements](#validation-requirements).
+   - Check test readiness.
+   - See [Test Readiness](#test-readiness).
    - Confirm the task is a bounded change.
    - See [Scope Control](#scope-control).
    - If the GitHub issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding.
@@ -173,7 +175,9 @@ Run the following checks in order:
 
 4. **New tests.**
    - Add tests if the change introduces behaviour that existing tests do not cover.
+   - See [Writing Tests](#writing-tests).
    - Run the new tests.
+   - If a new test fails, use the failure output to guide the next implementation change before rerunning.
 
 When running validation:
 
@@ -182,6 +186,8 @@ When running validation:
 - Run smoke tests and the global test suite after each meaningful implementation pass.
 - Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
 - Treat existing passing tests as evidence of stability.
+- Use test results to guide implementation decisions during the Step 5-9 cycle.
+  (Why: Tests are the primary feedback mechanism for the implementation loop. Treating them only as a final gate misses their value as a steering signal.)
 - If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path.
 - If no automated test exercises the real user path, say so explicitly.
 
@@ -192,6 +198,27 @@ When reporting validation:
 - Report what was not tested and why.
 - Do not claim code is tested when it is not.
 - Do not ignore failing tests and continue as if the task is complete.
+
+## Test Readiness
+
+Check test readiness during Step 1, after baseline validation.
+
+1. Check whether the project has smoke tests that confirm the app builds and starts.
+2. Check whether the project has a test suite with at least one passing test.
+3. Check whether tests exist for the code area the task will touch.
+
+If any of these are missing, flag the gap to the human before proceeding.
+Do not write tests to fill the gap unless the human approves.
+
+If the task is specifically about writing tests, skip this check.
+
+## Writing Tests
+
+Use when the plan includes writing new tests.
+Use when Step 6 identifies missing test coverage.
+Use when the task is specifically about creating tests.
+
+Load the `testing` skill.
 
 ## Manual Verification Requirements
 
