@@ -7,6 +7,12 @@ description: "Structured process for creating follow-up or spin-off GitHub issue
 
 Read this file when creating a follow-up or spin-off GitHub issue.
 
+## Before Creating the Issue
+
+- Search open issues in the repository for overlap with the proposed issue's intent.
+- If a potential overlap is found, surface the overlapping issue to the human before proceeding.
+- Only proceed with creation after the human confirms there is no duplicate.
+
 ## What the Issue Must Contain
 
 - State what needs to change from the user's perspective.
