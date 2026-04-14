@@ -20,7 +20,7 @@ Version: 1.0.0
 - Provides a project-spec template (`project-spec-template.md`) for documenting implementation truth in any target repository.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for code-aware planning, failure analysis, issue creation, and test construction, located in agent-specific directories (`.claude/skills/` for Claude Code, `.github/skills/` for Copilot).
+- Provides agent skills for code-aware planning, failure analysis, issue creation, and test construction, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code). Both directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
@@ -51,9 +51,9 @@ Version: 1.0.0
 - `project-spec-template.md`: template for creating `project-spec.md` in a target repository.
 - `project-spec-design-decisions.md`: maintenance rules for keeping `project-spec.md` factual and concise.
 - `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
-- `.claude/skills/`: Claude Code skill definitions (`planning`, `failure-analysis`, `logging-and-observability`, `issue-creation`, `testing`), each self-contained in a `SKILL.md` file.
+- `.agents/skills/`: cross-platform skill definitions (`planning`, `failure-analysis`, `logging-and-observability`, `issue-creation`, `testing`), each self-contained in a `SKILL.md` file. Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-spec.md`.
-- `.github/skills/`: VS Code Copilot skill definitions (`planning`, `failure-analysis`, `logging-and-observability`, `issue-creation`, `testing`), each self-contained in a `SKILL.md` file.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.

@@ -47,10 +47,8 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.claude/skills/planning/SKILL.md` — code-aware planning process (Claude Code).
-- `.claude/skills/failure-analysis/SKILL.md` — failure investigation process (Claude Code).
-- `.github/skills/planning/SKILL.md` — code-aware planning process (Copilot).
-- `.github/skills/failure-analysis/SKILL.md` — failure investigation process (Copilot).
+- `.agents/skills/` — cross-platform skill definitions (`planning`, `failure-analysis`, `logging-and-observability`, `issue-creation`, `testing`). Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement
 
@@ -88,7 +86,7 @@ project-spec.md          # create from project-spec-template.md
 
 ```
 .github/copilot-instructions.md
-.github/skills/
+.agents/skills/
 .vscode/
 .ai-policy/
 .githooks/
@@ -100,6 +98,7 @@ project-spec.md          # create from project-spec-template.md
 
 ```
 AGENTS.md
+.agents/skills/
 .codex/
 .ai-policy/
 .githooks/
@@ -111,14 +110,13 @@ project-spec.md          # create from project-spec-template.md
 
 ```
 GEMINI.md
+.agents/skills/
 .gemini/
 .ai-policy/
 .githooks/
 ai-workflow.md
 project-spec.md          # create from project-spec-template.md
 ```
-
-> Gemini-specific skills and enforcement hooks are not yet available. See [#36](https://github.com/philippe-ths/ai-coding-workflow/issues/36).
 
 After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.
 
