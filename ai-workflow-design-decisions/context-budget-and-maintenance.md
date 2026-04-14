@@ -49,8 +49,9 @@ Tool-native mechanisms (such as Claude Code path-scoped rules or @imports) can s
 Keep boundary rules (Always Do, Ask First, Never Do) in the core file.
 These are context-free and must be in context at all times.
 
-Extracted files live in agent-specific skill directories: `.claude/skills/` for Claude Code and `.github/skills/` for Copilot.
-Each skill is self-contained in a `SKILL.md` file within a named subdirectory (e.g. `.claude/skills/planning/SKILL.md`).
+Extracted files live in two skill directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
+Both directories contain the same skills. When editing any skill, apply the change to both directories.
+Each skill is self-contained in a `SKILL.md` file within a named subdirectory (e.g. `.agents/skills/planning/SKILL.md`).
 In the core workflow, use this exact loading instruction pattern: `Load the <name> skill.`
 For example: `Load the planning skill.`
 The loading instruction names the skill; the agent's native skill system handles discovery.
