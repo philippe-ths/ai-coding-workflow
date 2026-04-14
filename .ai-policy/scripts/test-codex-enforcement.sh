@@ -140,14 +140,32 @@ printf '{"tool_name":"Bash","tool_input":{"command":"git push origin feature/tes
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "git push on feature/test (simulated)" "$rc"
 
-# ── Path 2: MCP tool blocking via disabled_tools in config.toml ──
+# ── Path 2: MCP tool-blocking limitation warning via SessionStart hook ──
 
-echo "Path 2 — MCP tool blocking (config.toml disabled_tools):"
+echo "Path 2 — MCP tool-blocking limitation (SessionStart warning hook):"
 
 assert_contains "codex_hooks feature flag enabled" "$CONFIG_TOML" "codex_hooks = true"
-assert_contains "push_files disabled" "$CONFIG_TOML" "push_files"
-assert_contains "create_or_update_file disabled" "$CONFIG_TOML" "create_or_update_file"
-assert_contains "delete_file disabled" "$CONFIG_TOML" "delete_file"
+assert_contains "hooks.json references SessionStart" "$HOOKS_JSON" '"SessionStart"'
+
+WARNING_SCRIPT="$ROOT_DIR/.ai-policy/hooks/warn-codex-mcp-limitation.sh"
+assert_contains "hooks.json references MCP warning script" "$HOOKS_JSON" "warn-codex-mcp-limitation.sh"
+
+if [ -f "$WARNING_SCRIPT" ] && [ -x "$WARNING_SCRIPT" ]; then
+  PASS=$((PASS + 1))
+  echo "  PASS: MCP warning script exists and is executable"
+else
+  FAIL=$((FAIL + 1))
+  echo "  FAIL: MCP warning script missing or not executable"
+fi
+
+WARNING_OUTPUT="$(bash "$WARNING_SCRIPT" 2>/dev/null)"
+if echo "$WARNING_OUTPUT" | grep -qF "MCP tool blocking is NOT enforced"; then
+  PASS=$((PASS + 1))
+  echo "  PASS: warning script outputs MCP limitation message"
+else
+  FAIL=$((FAIL + 1))
+  echo "  FAIL: warning script does not output expected message"
+fi
 
 # ── Summary ──
 

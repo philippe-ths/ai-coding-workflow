@@ -12,9 +12,6 @@
 #   "workspace-write"   — writes confined to project + writable_roots
 #   "danger-full-access" — unrestricted (not recommended)
 
-[features]
-codex_hooks = true
-
 # Allow commands to run in sandbox; escalate to user on sandbox failure.
 # This lets safe git/shell reads run without prompts while still gating
 # destructive operations through sandbox restrictions + hooks.
@@ -23,5 +20,5 @@ approval_policy = "on-failure"
 # Allow writes within the project directory (and /tmp).
 sandbox_mode = "workspace-write"
 
-[mcp_servers.github]
-disabled_tools = ["push_files", "create_or_update_file", "delete_file"]
+[features]
+codex_hooks = true
