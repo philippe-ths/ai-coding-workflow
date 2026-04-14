@@ -17,11 +17,28 @@ Prefer fewer, higher-quality rules over comprehensive coverage.
 ## Version Number
 
 **Version number.**
-The workflow file carries a `Version: X.Y.Z` line in the preamble.
-Bump the patch version (Z) for any change that corrects wording, fixes a gap, or removes duplication without altering the workflow's intent.
-Bump the minor version (Y) for any change that adds a new rule, section, or meaningful constraint.
-Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps.
-Update the version on every edit so session logs can be tied to a specific file state.
+The version number in `ai-workflow.md` (`Version: X.Y.Z`) tracks the project's user-facing behaviour, not just the workflow file itself.
+
+A change is user-facing if it can alter how the agent behaves, what the human sees, or what rules are enforced.
+User-facing files include:
+
+- `ai-workflow.md` (workflow steps, rules, reference sections).
+- Skill files in `.agents/skills/` and `.claude/skills/`.
+- Policy scripts and hooks in `.ai-policy/`, `.githooks/`, and agent hook configurations.
+- Agent entry points (`.github/copilot-instructions.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`).
+- `project-spec-template.md`.
+- `lite-monolithic/ai-workflow.md`.
+
+Bump the patch version (Z) for any user-facing change that corrects wording, fixes a gap, or removes duplication without altering intent.
+Bump the minor version (Y) for any user-facing change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.
+Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps, or fundamentally restructures the skill or policy layer.
+Update the version on every user-facing edit so session logs can be tied to a specific file state.
+
+Changes to non-user-facing files (design decisions, `observed-ai-failings.md`, `README.md`, test scripts) do not require a version bump.
+
+**Tagged releases.**
+Create a tagged release for any minor or major version bump.
+Patch bumps do not require a tagged release unless they fix a defect that users need to identify by version.
 
 ## Session Logs
 
