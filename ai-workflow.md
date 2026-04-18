@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.3.0
+Version: 2.4.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -225,6 +225,13 @@ Use when the change modifies runtime behaviour that automated tests cannot fully
 Use when existing logging is insufficient to diagnose a failure.
 
 Load the `logging-and-observability` skill.
+
+## Project Spec Management
+
+Use when creating `project-spec.md` for the first time.
+Use when updating `project-spec.md` after routes, schema, sync rules, dependencies, project structure, or test coverage have changed.
+
+Load the `project-spec-management` skill.
 
 ## Command Approval
 

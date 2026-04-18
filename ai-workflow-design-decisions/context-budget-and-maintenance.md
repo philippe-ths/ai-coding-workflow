@@ -26,7 +26,6 @@ User-facing files include:
 - Skill files in `.agents/skills/` and `.claude/skills/`.
 - Policy scripts and hooks in `.ai-policy/`, `.githooks/`, and agent hook configurations.
 - Agent entry points (`.github/copilot-instructions.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`).
-- `project-spec-template.md`.
 - `lite-monolithic/ai-workflow.md`.
 
 Bump the patch version (Z) for any user-facing change that corrects wording, fixes a gap, or removes duplication without altering intent.
