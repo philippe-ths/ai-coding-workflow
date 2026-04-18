@@ -1,5 +1,5 @@
 ---
-name: project-spec-management
+name: aiw-project-spec-management
 description: "Structured process for initializing and updating `project-spec.md`, a repository's factual reference of current implementation truth. Use this skill when the human asks to create, scaffold, refresh, or correct the project spec — including phrasings like 'update the spec', 'the architecture summary is out of date', 'document the project structure', or 'the project-spec.md is stale' — and when the agent detects the existing spec has drifted from the codebase after changes to routes, schema, sync rules, dependencies, project structure, or test coverage. The skill exists to prevent specs from drifting into planned architecture, roadmap language, or multi-sentence lines that degrade agent parsing in future sessions."
 ---
 

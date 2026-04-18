@@ -1,5 +1,5 @@
 ---
-name: testing
+name: aiw-testing
 description: "Test construction rules for writing tests that serve the AI implementation feedback loop. Use this skill when the agent needs to write new tests, improve existing tests, or when Step 6 identifies missing test coverage. The skill exists to prevent common test quality pitfalls that break the feedback loop: tests coupled to implementation details, vague failure messages, shared mutable state, and duplicate coverage."
 ---
 

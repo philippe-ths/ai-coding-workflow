@@ -1,5 +1,5 @@
 ---
-name: failure-analysis
+name: aiw-failure-analysis
 description: "Structured investigation process for when the user reports that something is broken or not working, especially after the agent believed implementation was complete. Use this skill when the user's observed behaviour contradicts what the agent expected — tests passed but the feature doesn't work, a fix didn't help, or the app is visibly broken despite validation succeeding. The skill exists to prevent the agent from jumping to quick fixes and instead force a structured pause: acknowledge the gap between the agent's perspective and the user's reality, then investigate before changing more code."
 ---
 
@@ -17,7 +17,7 @@ When tests pass and validation succeeds, you believe the implementation is corre
 This skill works alongside these workflow sections — consult them during investigation:
 
 - **Validation Requirements** — understand what validation should have caught; compare post-change results against the baseline.
-- **Logging and Observability** — load the `logging-and-observability` skill when diagnostic approaches are needed during investigation.
+- **Logging and Observability** — load the `aiw-logging-and-observability` skill when diagnostic approaches are needed during investigation.
 
 ## Process
 

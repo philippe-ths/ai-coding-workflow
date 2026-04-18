@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.4.0
+Version: 2.5.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -84,7 +84,7 @@ After the human merges the pull request, run post-merge cleanup and return to St
 11. **Step 11: Pre-PR readiness check.**
 
     - Complete all readiness checks before proposing the first remote GitHub action.
-    - If follow-up issues need to be created, load the `issue-creation` skill.
+    - If follow-up issues need to be created, load the `aiw-issue-creation` skill.
     - Flag if documentation or README files need updating based on the change.
     - Flag if version numbers need updating.
     - Flag if a tagged release is needed.
@@ -118,7 +118,7 @@ After the human merges the pull request, run post-merge cleanup and return to St
 Use when executing Step 3 (Produce a code-aware plan) or Checkpoint 4 (human reviews the plan).
 Do not produce a plan without loading this skill first.
 
-Load the `planning` skill.
+Load the `aiw-planning` skill.
 
 ## Implementation Rules
 
@@ -140,7 +140,7 @@ Keep the change focused on the approved task:
 - Do not treat "while I am here" changes as free. (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
 - Separate fixes, refactors, and feature work unless the task clearly requires them together. (Why: Mixing change types obscures the commit's intent and makes review harder.)
 - If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation. (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
-- If the human approves, load the `issue-creation` skill to create the follow-up issue.
+- If the human approves, load the `aiw-issue-creation` skill to create the follow-up issue.
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
 ## Validation Requirements
@@ -201,7 +201,7 @@ Use when the plan includes writing new tests.
 Use when Step 6 identifies missing test coverage.
 Use when the task is specifically about creating tests.
 
-Load the `testing` skill.
+Load the `aiw-testing` skill.
 
 ## Manual Verification Requirements
 
@@ -217,21 +217,21 @@ Manual verification covers what only a human can verify.
 Enter failure analysis mode when manual verification fails, runtime behaviour contradicts the implementation, or test results conflict with observed behaviour.
 Do not make further code changes until failure analysis is complete.
 
-Load the `failure-analysis` skill.
+Load the `aiw-failure-analysis` skill.
 
 ## Logging and Observability
 
 Use when the change modifies runtime behaviour that automated tests cannot fully validate.
 Use when existing logging is insufficient to diagnose a failure.
 
-Load the `logging-and-observability` skill.
+Load the `aiw-logging-and-observability` skill.
 
 ## Project Spec Management
 
 Use when creating `project-spec.md` for the first time.
 Use when updating `project-spec.md` after routes, schema, sync rules, dependencies, project structure, or test coverage have changed.
 
-Load the `project-spec-management` skill.
+Load the `aiw-project-spec-management` skill.
 
 ## Command Approval
 
