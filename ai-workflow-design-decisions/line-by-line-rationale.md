@@ -200,7 +200,7 @@ Rationale: The agent may have discovered problems outside the current scope. The
 
 Rationale: Makes the readiness gate explicit. When readiness checks were embedded in the summary step, agents treated the summary as complete once they had reported what changed and what was tested, then skipped the remaining checks and jumped to proposing a GitHub action.
 
-> "If follow-up issues need to be created, load the `issue-creation` skill."
+> "If follow-up issues need to be created, load the `aiw-issue-creation` skill."
 
 Rationale: Follow-up work identified during the task should be captured in structured issues rather than lost in conversation. The skill ensures consistent issue quality.
 
@@ -288,7 +288,7 @@ Rationale: Scopes when the planning skill is relevant so the agent does not load
 
 Rationale: The planning skill contains the detailed structure and rules for plans. Without it, the agent produces unstructured plans that are harder to review.
 
-> "Load the `planning` skill."
+> "Load the `aiw-planning` skill."
 
 Rationale: Extracts detailed planning rules to an on-demand skill to keep the core workflow lean and reclaim always-on context budget.
 
@@ -340,7 +340,7 @@ Rationale: Mixing change types in one task makes review harder and makes it impo
 
 Rationale: Silently broadening scope is the most common agent failure mode. Flagging preserves scope while ensuring the problem is not lost.
 
-> "If the human approves, load the `issue-creation` skill to create the follow-up issue."
+> "If the human approves, load the `aiw-issue-creation` skill to create the follow-up issue."
 
 Rationale: Provides the action path for flagged follow-up work. The skill ensures follow-up issues are well-formed rather than hastily written.
 
@@ -484,7 +484,7 @@ Rationale: When the task is to create tests, flagging their absence is redundant
 
 Rationale: Defines the three activation conditions. The skill is not needed when only running existing tests.
 
-> "Load the `testing` skill."
+> "Load the `aiw-testing` skill."
 
 Rationale: Defers detailed test-writing guidance to a skill that loads on demand. This keeps the core workflow lean while providing test construction rules when needed.
 
@@ -524,7 +524,7 @@ Rationale: Lists the three trigger conditions in a single line. Manual verificat
 
 Rationale: Prevents the agent from making speculative fixes while the problem is still undiagnosed. Code changes before diagnosis compound the problem.
 
-> "Load the `failure-analysis` skill."
+> "Load the `aiw-failure-analysis` skill."
 
 Rationale: Extracts detailed failure analysis procedure to an on-demand skill to keep the core workflow lean. The skill provides the structured reasoning framework.
 
@@ -540,7 +540,7 @@ Rationale: Defines the primary activation condition. If automated tests can full
 
 Rationale: Defines the secondary activation condition. Insufficient logging during failure analysis blocks diagnosis.
 
-> "Load the `logging-and-observability` skill."
+> "Load the `aiw-logging-and-observability` skill."
 
 Rationale: Extracts detailed logging and observability rules to an on-demand skill to keep the core workflow lean and reclaim always-on context budget.
 

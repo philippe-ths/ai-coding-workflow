@@ -34,7 +34,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 ### Agent-facing files
 
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
-- `project-spec.md` — factual reference for this repository's implementation state, authored using the `project-spec-management` skill.
+- `project-spec.md` — factual reference for this repository's implementation state, authored using the `aiw-project-spec-management` skill.
 - `lite-monolithic/` — single-file version of the workflow with planning and failure analysis inlined, no policy layer, no skills, no multi-agent entry points. See `lite-monolithic/README.md`.
 
 ### Agent instruction entry points
@@ -46,7 +46,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`planning`, `failure-analysis`, `logging-and-observability`, `issue-creation`, `testing`). Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`). Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement

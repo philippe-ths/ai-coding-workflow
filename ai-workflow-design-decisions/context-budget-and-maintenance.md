@@ -67,9 +67,10 @@ These are context-free and must be in context at all times.
 
 Extracted files live in two skill directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
 Both directories contain the same skills. When editing any skill, apply the change to both directories.
-Each skill is self-contained in a `SKILL.md` file within a named subdirectory (e.g. `.agents/skills/planning/SKILL.md`).
+Each skill is self-contained in a `SKILL.md` file within a named subdirectory (e.g. `.agents/skills/aiw-planning/SKILL.md`).
 In the core workflow, use this exact loading instruction pattern: `Load the <name> skill.`
-For example: `Load the planning skill.`
+For example: `Load the aiw-planning skill.`
+Core workflow skills use the `aiw-` prefix to avoid name collisions with project-specific or third-party skills in target repositories.
 The loading instruction names the skill; the agent's native skill system handles discovery.
 
 ## Reusable Prompt
