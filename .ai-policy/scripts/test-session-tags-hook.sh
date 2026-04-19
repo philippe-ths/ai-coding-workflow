@@ -138,6 +138,41 @@ rc=0
 "$HOOK" >/dev/null 2>&1 || rc=$?
 assert_exit "version bump without update is blocked" 1 "$rc"
 
+# Case H: downstream repo with non-upstream tag string → hook exits 0 and
+# does not overwrite the existing tag value.
+cat > .claude/settings.json <<'EOF'
+{
+  "permissions": { "allow": [], "deny": [] },
+  "env": {
+    "OTEL_RESOURCE_ATTRIBUTES": "service.name=claude-code,repo=downstream-test,workflow_version=9.9.9"
+  }
+}
+EOF
+rc=0
+"$HOOK" >/dev/null 2>&1 || rc=$?
+assert_exit "downstream tag string is skipped by hook" 0 "$rc"
+
+preserved="$(jq -r '.env.OTEL_RESOURCE_ATTRIBUTES' .claude/settings.json)"
+if [ "$preserved" = "service.name=claude-code,repo=downstream-test,workflow_version=9.9.9" ]; then
+  PASS=$((PASS + 1))
+  echo "  PASS: downstream tag string preserved by write mode"
+else
+  FAIL=$((FAIL + 1))
+  echo "  FAIL: downstream tag string was overwritten ($preserved)"
+fi
+rc=0
+"$SCRIPT" >/dev/null 2>&1 || rc=$?
+assert_exit "write mode in downstream repo returns 0" 0 "$rc"
+
+after_write="$(jq -r '.env.OTEL_RESOURCE_ATTRIBUTES' .claude/settings.json)"
+if [ "$after_write" = "service.name=claude-code,repo=downstream-test,workflow_version=9.9.9" ]; then
+  PASS=$((PASS + 1))
+  echo "  PASS: write mode left downstream tag string untouched"
+else
+  FAIL=$((FAIL + 1))
+  echo "  FAIL: write mode modified downstream tag string ($after_write)"
+fi
+
 # Case G: missing settings.json → exit 2.
 rm .claude/settings.json
 rc=0
