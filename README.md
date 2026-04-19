@@ -34,7 +34,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 ### Agent-facing files
 
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
-- `project-spec.md` — factual reference for this repository's implementation state, authored using the `aiw-project-spec-management` skill.
+- `project-context.md` — factual reference for this repository's implementation state, authored using the `aiw-project-context-management` skill.
 - `lite-monolithic/` — single-file version of the workflow with planning and failure analysis inlined, no policy layer, no skills, no multi-agent entry points. See `lite-monolithic/README.md`.
 
 ### Agent instruction entry points
@@ -63,12 +63,12 @@ Tipping points are a judgement call. They come from real-world usage in other re
 ### Maintenance documents
 
 - `ai-workflow-design-decisions/` — scoped maintenance rules and rationale for editing `ai-workflow.md`.
-- `project-spec-design-decisions.md` — maintenance rules for keeping `project-spec.md` factual and concise.
+- `project-context-design-decisions.md` — maintenance rules for keeping `project-context.md` factual and concise.
 - `observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
 
 ## Installation by Tool
 
-Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow and spec files, and the policy enforcement layer.
+Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow and context files, and the policy enforcement layer.
 
 ### Claude Code
 
@@ -78,7 +78,7 @@ CLAUDE.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-spec.md          # author via the project-spec-management skill
+project-context.md       # author via the project-context-management skill
 ```
 
 ### VS Code Copilot
@@ -90,7 +90,7 @@ project-spec.md          # author via the project-spec-management skill
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-spec.md          # author via the project-spec-management skill
+project-context.md       # author via the project-context-management skill
 ```
 
 ### Codex
@@ -102,7 +102,7 @@ AGENTS.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-spec.md          # author via the project-spec-management skill
+project-context.md       # author via the project-context-management skill
 ```
 
 ### Gemini CLI
@@ -114,7 +114,7 @@ GEMINI.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-spec.md          # author via the project-spec-management skill
+project-context.md       # author via the project-context-management skill
 ```
 
 After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.

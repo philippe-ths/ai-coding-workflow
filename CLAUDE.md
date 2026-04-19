@@ -1,2 +1,2 @@
 @ai-workflow.md
-@project-spec.md
+@project-context.md

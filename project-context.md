@@ -1,15 +1,15 @@
-# Project Spec
+# Project Context
 
-Version: 1.1.0
+Version: 1.1.1
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
 - Primary users are human developers who have an AI coding agent (Copilot, Claude Code, Codex) working in their projects.
-- The core user flow is: copy workflow and spec files into a target repository, configure the agent to read them, then run tasks through the defined workflow with human checkpoints.
+- The core user flow is: copy workflow and context files into a target repository, configure the agent to read them, then run tasks through the defined workflow with human checkpoints.
 
 ## Domain Concepts
 - **AI workflow**: the step-by-step process defined in `ai-workflow.md` that the agent follows for every task.
-- **Project spec**: a factual reference document (`project-spec.md`) describing the target repository's current implementation state, authored using the `aiw-project-spec-management` skill.
+- **Project context**: a factual reference document (`project-context.md`) describing the target repository's current implementation state, authored using the `aiw-project-context-management` skill.
 - **Validation state**: a local runtime artifact (`.ai-policy/state/validation.status`) tracking whether the current validation run has passed.
 - **Policy layer**: the set of shell scripts in `.ai-policy/` that enforce protected-branch and validation-state rules.
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
@@ -17,10 +17,10 @@ Version: 1.1.0
 
 ## Scope
 - Defines a reusable AI coding workflow (`ai-workflow.md`) with planning, validation, scope-control, failure-analysis, and GitHub handoff rules.
-- Provides a project-spec management skill (`aiw-project-spec-management`) for authoring and maintaining a repository's `project-spec.md`.
+- Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for code-aware planning, failure analysis, issue creation, test construction, and project spec management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code). Both directories contain the same skills.
+- Provides agent skills for code-aware planning, failure analysis, issue creation, test construction, and project context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code). Both directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
@@ -29,14 +29,14 @@ Version: 1.1.0
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
-- `project-spec.md` must stay under 300 lines.
+- `project-context.md` must stay under 300 lines.
 - No work may be done directly on `main` or `master`; the policy layer and git hooks enforce this at commit and push time.
 - Validation must pass before commit or push when hooks are installed.
-- All facts in `project-spec.md` must reflect implementation truth, not planned architecture.
+- All facts in `project-context.md` must reflect implementation truth, not planned architecture.
 
 ## Architecture Summary
 - This is a documentation-only repository with no runtime application.
-- Three layers exist: agent-facing governance files (workflow and spec documents), on-demand skill files loaded at specific workflow steps, and a local policy enforcement layer (scripts and git hooks).
+- Three layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, and a local policy enforcement layer (scripts and git hooks).
 - Primary data flow: human copies files to target repository → agent reads them before each task → agent follows the workflow → human reviews checkpoints.
 - No external service dependencies exist at repository runtime; GitHub is used only for issue and PR tracking.
 
@@ -48,11 +48,11 @@ Version: 1.1.0
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent.
 - `ai-workflow-design-decisions/`: maintenance rules and rationale for editing `ai-workflow.md`, split into topic-scoped files.
-- `project-spec-design-decisions.md`: maintenance rules for keeping `project-spec.md` factual and concise.
+- `project-context-design-decisions.md`: maintenance rules for keeping `project-context.md` factual and concise.
 - `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`, `aiw-project-spec-management`), each self-contained in a `SKILL.md` file. Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`, `aiw-project-context-management`), each self-contained in a `SKILL.md` file. Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
-- `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-spec.md`.
+- `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.

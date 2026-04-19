@@ -1,14 +1,14 @@
-# Project Spec Design Decisions
+# Project Context Design Decisions
 
-This document defines maintenance rules for `project-spec.md` files.
-It is for humans who maintain project specs.
-Use these rules when creating or editing a project spec.
+This document defines maintenance rules for `project-context.md` files.
+It is for humans who maintain project context files.
+Use these rules when creating or editing a project context file.
 
 ## Core Purpose
 
-The project spec records current implementation truth.
-The project spec is a factual reference, not a roadmap.
-The project spec should help an AI agent orient quickly before planning changes.
+The project context records current implementation truth.
+The project context is a factual reference, not a roadmap.
+The project context should help an AI agent orient quickly before planning changes.
 
 ## Base Rules
 
@@ -37,8 +37,8 @@ Update outdated terms when the codebase is renamed or refactored.
 
 ## Maintenance
 
-Update the spec when routes, schema, sync rules, persistence, or provider behavior changes.
-Update the spec when build, runtime, or dependency boundaries change.
+Update the context file when routes, schema, sync rules, persistence, or provider behavior changes.
+Update the context file when build, runtime, or dependency boundaries change.
 During reviews, remove stale lines instead of accumulating historical notes.
 Do not let this file exceed 300 lines.
 If the file approaches 300 lines, merge overlapping facts and remove low-value detail.

@@ -96,9 +96,9 @@ Note on cross-reference pointers: Throughout the workflow steps, `See [Section N
 
 ### Workflow Step 2: Review project context
 
-> "Review `project-spec.md` for project structure, constraints, and domain context relevant to the task."
+> "Review `project-context.md` for project structure, constraints, and domain context relevant to the task."
 
-Rationale: The project spec provides architectural patterns, structure, and conventions. Reading it before planning prevents the agent from proposing changes that conflict with established patterns.
+Rationale: The project context provides architectural patterns, structure, and conventions. Reading it before planning prevents the agent from proposing changes that conflict with established patterns.
 
 > "Review the code areas the task is likely to touch."
 
@@ -296,9 +296,9 @@ Rationale: Extracts detailed planning rules to an on-demand skill to keep the co
 
 ### Implementation Rules
 
-> "Use `project-spec.md` for initial context on architectural patterns, project structure, and conventions."
+> "Use `project-context.md` for initial context on architectural patterns, project structure, and conventions."
 
-Rationale: The project spec is the starting point for understanding the codebase. It prevents the agent from inventing patterns that conflict with existing ones.
+Rationale: The project context is the starting point for understanding the codebase. It prevents the agent from inventing patterns that conflict with existing ones.
 
 > "Prefer extending current patterns over introducing new ones."
 
@@ -770,7 +770,7 @@ Rationale: The workflow starts from an issue. A missing or poorly formed issue m
 
 > "Ensure the right project context is available."
 
-Rationale: The agent reads what is available. If project-spec.md is missing or stale, the agent's understanding will be wrong.
+Rationale: The agent reads what is available. If project-context.md is missing or stale, the agent's understanding will be wrong.
 
 > "Review and approve the plan before coding starts."
 
