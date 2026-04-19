@@ -13,6 +13,7 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 ### Changed
 
 - `project-context.md` Project Structure section lists `aiw-telemetry-setup` in the enumerated skill set; `Version:` header bumped to `1.4.0` ([#124]).
+- `.ai-policy/scripts/update-session-tags.sh` self-scopes to the `ai-coding-workflow` upstream repository. When the current `env.OTEL_RESOURCE_ATTRIBUTES` does not declare `workflow_repo=ai-coding-workflow`, both `--check` and write modes exit 0 without reading, writing, or drift-checking. Downstream repositories that copy `.ai-policy/` wholesale per the install instructions no longer have their skill-written repo-distinguishing tag strings overwritten or commits blocked by the session-tags hook. Covered by three new cases in `.ai-policy/scripts/test-session-tags-hook.sh` ([#124]).
 
 ## 2.10.0 - 2026-04-19
 

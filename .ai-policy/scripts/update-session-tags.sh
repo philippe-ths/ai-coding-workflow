@@ -64,6 +64,16 @@ if [ ! -f "$SETTINGS_FILE" ]; then
   exit 2
 fi
 
+# Self-scope to the ai-coding-workflow upstream repo. Downstream repos that
+# copy .ai-policy/ wholesale set their own OTEL_RESOURCE_ATTRIBUTES via the
+# aiw-telemetry-setup skill; their tag string does not carry
+# workflow_repo=ai-coding-workflow and must not be overwritten or drift-checked
+# against the upstream ruleset hash.
+existing="$(jq -r '.env.OTEL_RESOURCE_ATTRIBUTES // ""' "$SETTINGS_FILE")"
+if [ -n "$existing" ] && ! printf '%s' "$existing" | grep -q 'workflow_repo=ai-coding-workflow'; then
+  exit 0
+fi
+
 tmp_input="$(mktemp)"
 trap 'rm -f "$tmp_input"' EXIT
 
