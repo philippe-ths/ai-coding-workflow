@@ -134,6 +134,10 @@ Run validation:
 ./.ai-policy/scripts/run-validation.sh
 ```
 
+The shipped validator (`./.ai-policy/scripts/project-validation.sh`) checks only the policy layer itself: shell-script syntax in `.ai-policy/` and `.githooks/`, plus the enforcement tests that match the agent entry points installed in your repo (tests for agents you did not install are skipped).
+
+To add repo-specific checks (tests, linters, type checks, etc.) that run as part of the same validation, create an executable `./scripts/repo-validation.sh` at the root of your repo. The shipped validator invokes it automatically when present. The file is not part of the shipped policy layer, so each repo owns its own.
+
 ### Optional: enable session telemetry (Claude Code only)
 
 To start recording Claude Code session data from the target repository into the local stack shipped in this repo, invoke the `aiw-telemetry-setup` skill from a Claude Code session in the target repo, for example:

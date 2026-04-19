@@ -4,6 +4,17 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.13.0 - 2026-04-19
+
+### Changed
+
+- `.ai-policy/scripts/project-validation.sh` is now portable across repos. It validates only the policy layer itself (`bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`) and then runs each `test-*.sh` under `.ai-policy/scripts/` whose matching agent entry point is installed: `test-claude-code-enforcement.sh` and `test-session-tags-hook.sh` require `./.claude/`, `test-codex-enforcement.sh` requires `./.codex/`, `test-gemini-enforcement.sh` requires `./.gemini/`, `test-vscode-copilot-enforcement.sh` requires `./.github/hooks/`; `test-changelog-hook.sh` and `test-pre-push-hook.sh` always run. If `./scripts/repo-validation.sh` exists and is executable, it runs at the end. Fresh target-repo installs following the README no longer fail validation on missing paths, and per-tool installs (Claude-Code-only, Codex-only, etc.) are now supported out of the box without editing any shipped file ([#131]).
+
+### Added
+
+- `scripts/repo-validation.sh` at the repo root carries this repo's repo-specific checks (telemetry YAML/JSON syntax, baseline-harness Python `py_compile`, `bash -n` on `telemetry/*.sh` and `scripts/run-baseline.sh`, `docker compose config -q`). The file is not part of the shipped policy layer; target repos supply their own `scripts/repo-validation.sh` to declare their tests, linters, or type checks. The shipped `project-validation.sh` invokes it automatically when present ([#131]).
+- README `Post-install setup` now documents `scripts/repo-validation.sh` as the per-repo extension point and describes the agent-gated skipping behaviour of the enforcement tests ([#131]).
+
 ## 2.12.0 - 2026-04-19
 
 ### Added
