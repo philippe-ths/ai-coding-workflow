@@ -4,6 +4,19 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.7.0 - 2026-04-19
+
+### Added
+
+- `.ai-policy/scripts/update-session-tags.sh` computing `workflow_version` and an 8-hex `ruleset_hash` across rule-defining files and writing them into `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` ([#109]).
+- `.ai-policy/hooks/check-session-tags.sh` pre-commit check that blocks commits when the tag fragment drifts from the current ruleset ([#109]).
+- `.ai-policy/scripts/test-session-tags-hook.sh` enforcement test, wired into `project-validation.sh` ([#109]).
+- README section describing the three maintainer-side telemetry shell variables and the OTEL temporality gotcha ([#109]).
+
+### Changed
+
+- `.claude/settings.json` carries a committed `env.OTEL_RESOURCE_ATTRIBUTES` value so Claude Code sessions emit tagged telemetry when the maintainer enables it.
+
 ## 2.6.0 - 2026-04-19
 
 ### Added
@@ -79,3 +92,4 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 [#103]: https://github.com/philippe-ths/ai-coding-workflow/pull/103
 [#105]: https://github.com/philippe-ths/ai-coding-workflow/pull/105
 [#107]: https://github.com/philippe-ths/ai-coding-workflow/pull/107
+[#109]: https://github.com/philippe-ths/ai-coding-workflow/issues/109

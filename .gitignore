@@ -4,6 +4,9 @@
 # Local settings
 *.local.json
 
+# direnv (per-repo shell env, e.g. telemetry enablement)
+.envrc
+
 # OS artifacts
 .DS_Store
 Thumbs.db

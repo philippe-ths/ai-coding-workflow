@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.1.2
+Version: 1.1.3
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -25,7 +25,7 @@ Version: 1.1.2
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Does not contain any runtime application code.
-- Does not include a test framework beyond shell-script syntax checks and five enforcement integration tests.
+- Does not include a test framework beyond shell-script syntax checks and six enforcement integration tests.
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
@@ -58,8 +58,8 @@ Version: 1.1.2
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
-- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement.
-- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`. Includes `check-changelog.sh`, a pre-push check rejecting `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry.
+- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, testing enforcement, and keeping Claude Code session tags in sync via `update-session-tags.sh`.
+- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`. Includes `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry) and `check-session-tags.sh` (pre-commit, rejects drift between `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` and the current ruleset).
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
 - `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration and tool permission defaults.
@@ -71,7 +71,7 @@ Version: 1.1.2
 
 ## Testing Overview
 - Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`.
-- Validation also runs five enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, `test-vscode-copilot-enforcement.sh`, `test-gemini-enforcement.sh`, and `test-changelog-hook.sh`.
+- Validation also runs six enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, `test-vscode-copilot-enforcement.sh`, `test-gemini-enforcement.sh`, `test-changelog-hook.sh`, and `test-session-tags-hook.sh`.
 - No unit test framework exists; there are no automated tests for documentation content.
 - Manual verification is the primary check for documentation changes.
 
