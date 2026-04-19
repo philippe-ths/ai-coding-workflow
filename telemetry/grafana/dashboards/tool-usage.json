@@ -1,0 +1,108 @@
+{
+  "uid": "aiw-tool-usage",
+  "title": "Tool Usage",
+  "tags": ["ai-coding-workflow", "claude-code"],
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "time": { "from": "now-7d", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "workflow_version",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(claude_code_code_edit_tool_decision_total, workflow_version)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Accept rate (range)",
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(claude_code_code_edit_tool_decision_total{decision=\"accept\",workflow_version=~\"$workflow_version\"}[$__range])) / clamp_min(sum(increase(claude_code_code_edit_tool_decision_total{workflow_version=~\"$workflow_version\"}[$__range])), 1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 1 } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Total decisions (range)",
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(claude_code_code_edit_tool_decision_total{workflow_version=~\"$workflow_version\"}[$__range]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Rejects (range)",
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase(claude_code_code_edit_tool_decision_total{decision=\"reject\",workflow_version=~\"$workflow_version\"}[$__range]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "decimals": 0 } }
+    },
+    {
+      "id": 4,
+      "type": "barchart",
+      "title": "Decisions by tool",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (tool_name, decision) (increase(claude_code_code_edit_tool_decision_total{workflow_version=~\"$workflow_version\"}[$__range]))",
+          "legendFormat": "{{tool_name}} / {{decision}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Accept rate over time (5m)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate(claude_code_code_edit_tool_decision_total{decision=\"accept\",workflow_version=~\"$workflow_version\"}[5m])) / clamp_min(sum(rate(claude_code_code_edit_tool_decision_total{workflow_version=~\"$workflow_version\"}[5m])), 0.0001)",
+          "legendFormat": "accept rate",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } }
+    },
+    {
+      "id": 6,
+      "type": "logs",
+      "title": "Recent tool_result events (from Loki)",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "{service_name=\"claude-code\"} |= \"tool_result\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

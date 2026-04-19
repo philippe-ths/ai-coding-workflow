@@ -18,3 +18,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Captured telemetry (stack volumes and any local harness output)
+telemetry/data/
+telemetry/**/data/

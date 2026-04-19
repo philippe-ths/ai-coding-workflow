@@ -151,11 +151,14 @@ The three exported variables are:
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ```
 
 `OTEL_EXPORTER_OTLP_PROTOCOL` must be set explicitly; Claude Code's OTEL SDK does not infer it from the endpoint and fails init without it. Use `grpc` with port 4317, or `http/protobuf` with port 4318.
+
+`OTEL_LOGS_EXPORTER=otlp` is required for event logs (`user_prompt`, `tool_result`, `api_request`) to reach the collector. Without it, only metrics flow.
 
 `.envrc` is gitignored so these values stay on your machine. You can also export them in `~/.zshrc` or the current shell instead of using direnv.
 
@@ -164,6 +167,18 @@ Caveats:
 - Some downstream collectors require `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`.
 - Claude Code's `-p` one-shot mode may not flush telemetry reliably before exit; use an interactive session to verify emission.
 - After bumping the `Version:` header in `ai-workflow.md` or editing any rule file, run `./.ai-policy/scripts/update-session-tags.sh` to refresh the tag fragment.
+
+### Local storage and dashboards
+
+The `telemetry/` directory ships a local OpenTelemetry Collector + Prometheus + Loki + Grafana stack with pre-provisioned dashboards for session overview, tool usage, fix cycles, and cross-version comparison. The Collector applies redaction rules (email/path/API-key scrubbing, identity-attribute stripping) before anything reaches storage, so screenshots and backups stay safe.
+
+```bash
+./telemetry/up.sh          # docker compose up -d
+./telemetry/down.sh        # stop
+./telemetry/down.sh -v     # stop and wipe captured data
+```
+
+Grafana is at <http://localhost:3000>. See [`docs/telemetry-setup.md`](docs/telemetry-setup.md) for the full setup, redaction rules, and troubleshooting. See [`docs/telemetry-schema.md`](docs/telemetry-schema.md) for the baseline-harness session JSON contract.
 
 ## What This Repository Optimizes For
 

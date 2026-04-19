@@ -1,0 +1,72 @@
+{
+  "uid": "aiw-version-comparison",
+  "title": "Version Comparison",
+  "tags": ["ai-coding-workflow", "claude-code"],
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "time": { "from": "now-30d", "to": "now" },
+  "refresh": "1m",
+  "description": "Compare session telemetry across workflow_version and ruleset_hash values. Requires Sub-issue B session tagging (#109).",
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Sessions per workflow_version + ruleset_hash",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_version, ruleset_hash) (increase(claude_code_session_count_total[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Avg cost per session by version",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_version) (increase(claude_code_cost_usage_USD_total[$__range])) / clamp_min(sum by (workflow_version) (increase(claude_code_session_count_total[$__range])), 1)",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Token usage by version",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_version) (rate(claude_code_token_usage_tokens_total[5m]))",
+          "legendFormat": "{{workflow_version}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Accept rate by version",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_version) (rate(claude_code_code_edit_tool_decision_total{decision=\"accept\"}[5m])) / clamp_min(sum by (workflow_version) (rate(claude_code_code_edit_tool_decision_total[5m])), 0.0001)",
+          "legendFormat": "{{workflow_version}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 } }
+    }
+  ]
+}
