@@ -22,3 +22,8 @@ Thumbs.db
 # Captured telemetry (stack volumes and any local harness output)
 telemetry/data/
 telemetry/**/data/
+
+# Baseline-harness virtualenv and Python caches
+evals/.venv/
+**/__pycache__/
+*.pyc

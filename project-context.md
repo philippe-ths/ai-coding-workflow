@@ -26,8 +26,9 @@ Version: 1.2.0
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Provides an optional local telemetry stack (`telemetry/`) with OTEL Collector, Prometheus, Loki, Grafana, redaction processors, and four pre-provisioned dashboards for evaluating workflow changes from Claude Code session telemetry.
 - Provides user-facing documentation (`docs/telemetry-setup.md`, `docs/telemetry-schema.md`) for running the stack and the baseline-harness session JSON contract.
-- Does not contain runtime application code beyond the optional telemetry stack.
-- Does not include a test framework beyond shell-script syntax checks, YAML/JSON syntax checks for telemetry configs, and seven enforcement integration tests.
+- Provides a baseline task harness (`evals/`, `scripts/run-baseline.sh`, `scripts/compare-versions.py`) that runs frozen coding tasks under any workflow version and writes per-session JSONs matching `docs/telemetry-schema.md`. Ships a host-side `mock` agent for plumbing tests and a `claude-code` agent that runs the Claude Code CLI inside a Docker sandbox.
+- Beyond the optional telemetry stack, the repository now ships runtime Python code under `evals/` and `scripts/`.
+- Does not include a unit-test framework for that Python code; validation covers shell-script syntax, YAML/JSON syntax, Python `py_compile` on harness and scripts, seven enforcement integration tests, and the baseline-harness's own pytest graders invoked per run.
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
@@ -37,8 +38,8 @@ Version: 1.2.0
 - All facts in `project-context.md` must reflect implementation truth, not planned architecture.
 
 ## Architecture Summary
-- This is primarily a documentation repository. The only runtime component is the optional local telemetry stack under `telemetry/`.
-- Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and an optional local telemetry stack for observing workflow effectiveness.
+- This is primarily a documentation repository. Runtime components are the optional local telemetry stack under `telemetry/` and the baseline task harness under `evals/` + `scripts/`.
+- Five layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), an optional local telemetry stack for observing workflow effectiveness, and a baseline task harness that produces cross-version reliability numbers (pass^k, McNemar, continuous-metric deltas).
 - Primary data flow: human copies files to target repository → agent reads them before each task → agent follows the workflow → human reviews checkpoints.
 - Optional telemetry flow (this repo only): Claude Code session → OTEL Collector (localhost:4317/4318) → redaction processors → Prometheus (metrics) + Loki (logs) → Grafana dashboards.
 - No external service dependencies exist at repository runtime; GitHub is used only for issue and PR tracking.
@@ -49,6 +50,8 @@ Version: 1.2.0
 - `jq`: hook scripts and one enforcement test parse JSON with `jq`.
 - `docker` (optional): required only for the local telemetry stack in `telemetry/`. Not needed to use the workflow itself.
 - `python3` + `pyyaml` (optional): used by `project-validation.sh` to syntax-check telemetry YAML/JSON if present; validation skips the check when absent.
+- `python3` (required for the baseline harness): `scripts/run-baseline.sh` creates `evals/.venv` and installs `pytest` and `scipy`. Not needed to use the workflow itself.
+- `docker` (required for the baseline harness's `claude-code` agent): launches the Claude Code CLI in an isolated sandbox. The `mock` agent does not need Docker.
 
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent. Its `Version:` header is the canonical project version.
@@ -81,7 +84,12 @@ Version: 1.2.0
 - `telemetry/up.sh`, `telemetry/down.sh`: convenience wrappers around `docker compose`.
 - `telemetry/.gitignore`: blocks captured data from being committed.
 - `docs/telemetry-setup.md`: maintainer-facing setup, redaction, and troubleshooting guide for the telemetry stack.
-- `docs/telemetry-schema.md`: baseline-harness per-session JSON contract (consumed by Sub-issue D, #112).
+- `docs/telemetry-schema.md`: baseline-harness per-session JSON contract (v0.2, locked by #112).
+- `evals/harness/`: Python baseline harness — runner, JSON writer, workflow-version / ruleset-hash reader, pytest grader, `mock` and `claude-code` agents, plus `Dockerfile` + `compose.yaml` for the sandbox used by the `claude-code` agent.
+- `evals/tasks/<task_id>/`: frozen baseline tasks. Each has `spec.md` (prompt + acceptance criteria), `starter/` (code the agent sees), `grader/` (hidden pytest applied after the agent completes), and `solution/` (reference solution used only by the `mock` agent).
+- `evals/requirements.txt`: Python dependencies for the harness (`pytest`, `scipy`).
+- `scripts/run-baseline.sh`: creates `evals/.venv`, runs `N` tasks × `k` repeats, writes results under `telemetry/data/baseline/<version>/<ruleset_hash>/<task>/<run>.json`.
+- `scripts/compare-versions.py`: reads two versions' results and prints per-task pass^k, aggregate pass^k, McNemar's test on paired outcomes, and mean/median deltas on duration, cost, tokens, and fix cycles.
 
 ## Testing Overview
 - Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, `.githooks/`, and `telemetry/*.sh`.
