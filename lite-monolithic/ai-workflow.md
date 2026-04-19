@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.8.0
+Version: 2.12.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -53,7 +53,9 @@ The human reviews and approves at defined checkpoints.
 
 7. **Step 7: Support manual verification.**
 
-   - Suggest manual checks for the human.
+   - Attempt automated coverage for non-functional categories before suggesting manual checks.
+   - See [Non-Functional Test Coverage](#non-functional-test-coverage).
+   - Suggest manual checks only for what automation cannot cover.
    - See [Manual Verification Requirements](#manual-verification-requirements).
 
 8. **Checkpoint 8: human reviews validation results and manual verification.**
@@ -179,12 +181,36 @@ When reporting validation:
 - Report what was not tested and why.
 - Do not claim code is tested when it is not or ignore failing tests and continue as if the task is complete.
 
+## Non-Functional Test Coverage
+
+Attempt automated coverage for the following categories before suggesting manual verification:
+
+- UI state transitions and reactive rerender paths.
+- Execution latency and throughput on the affected code path.
+- Security-relevant behaviour: authorisation checks, input validation, escaping, secret handling, and data-access boundaries.
+
+A passing functional test is not proof of performance, responsiveness, or security.
+If automated coverage is not feasible for a category, state the reason in writing in the plan or summary before falling back to a manual check.
+Do not treat manual verification as the default coverage path for non-functional behaviour.
+
+When a change touches UI state transitions, reactive rerenders, caching, memoisation, debouncing, manual state resets, or heavy data loops:
+
+- Capture a baseline measurement before writing the test.
+- Write latency assertions against the baseline plus a stated tolerance.
+- Run benchmarks multiple times and assert on a stable statistic, not a single sample.
+- Isolate the timed section from setup, teardown, and unrelated I/O.
+- For UI state transitions, assert on both the transition outcome and the input-to-rendered-state time.
+- When a caching workaround or manual state reset is added, write a test that proves it does not reintroduce the problem it is patching.
+- Do not weaken a failing performance threshold before investigating the cause.
+- Do not claim performance coverage based on a functional test that happens to pass quickly.
+
 ## Manual Verification Requirements
 
 Manual verification covers what only a human can verify.
 
+- Before suggesting a manual check, attempt automated coverage per [Non-Functional Test Coverage](#non-functional-test-coverage).
 - Suggest checks that require human observation: visual behaviour, user experience flows, real-device interaction, external system responses.
-- Do not suggest checks that can be verified through automated tests or tool output.
+- Do not suggest a manual check for behaviour that automated tests or tool output can verify.
 - State the success signal for each check.
 - State the failure signal for each check.
 

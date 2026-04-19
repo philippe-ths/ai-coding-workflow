@@ -14,6 +14,22 @@ This skill works alongside these workflow sections — consult them when writing
 
 - **Validation Requirements** — covers when to run tests, baseline comparison, and result reporting. This skill covers how to write them.
 - **Test Readiness** — covers the pre-implementation check for test infrastructure gaps. This skill covers filling those gaps when approved.
+- **Non-Functional Test Coverage** — covers when automated coverage for UI state transitions, latency, and security must be attempted before manual verification.
+- **aiw-performance-profiling** — detailed rules for writing performance and UI-state-transition tests. Load it in addition to this skill when the change triggers those conditions.
+
+## Non-Functional Coverage
+
+Before suggesting manual verification for any change, attempt automated coverage of the following categories when they apply to the change:
+
+- UI state transitions and reactive rerender paths.
+- Execution latency and throughput on the affected code path.
+- Security-relevant behaviour: authorisation checks, input validation, escaping, secret handling, and data-access boundaries.
+
+If the change affects UI state, reactive subscriptions, caching, heavy loops, or manual state resets, load the `aiw-performance-profiling` skill and follow its rules.
+
+For security-relevant changes, write tests that exercise the negative path: rejected input, forbidden access, malformed tokens, and boundary conditions. A passing happy-path test is not sufficient security coverage.
+
+If automated coverage is not feasible for a category, state the reason in writing in the plan or summary, and propose a manual check with explicit success and failure signals. Do not silently fall back to manual verification.
 
 ## Test Construction Rules
 
