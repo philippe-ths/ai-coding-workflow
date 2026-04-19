@@ -87,6 +87,18 @@ printf '{"tool_name":"mcp__github__merge_pull_request","tool_input":{"owner":"x"
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "merge_pull_request (no branch — known limitation)" "$rc"
 
+# Test 6a: create_ref with tag ref → allowed (tags do not modify a branch)
+rc=0
+printf '{"tool_name":"mcp__github__create_ref","tool_input":{"ref":"refs/tags/v1.0.0","sha":"abc","owner":"x","repo":"y"}}' \
+  | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "create_ref refs/tags/v1.0.0" "$rc"
+
+# Test 6b: create_ref with branch ref pointing to protected branch → blocked
+rc=0
+printf '{"tool_name":"mcp__github__create_ref","tool_input":{"ref":"refs/heads/main","sha":"abc","owner":"x","repo":"y"}}' \
+  | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "create_ref refs/heads/main" "$rc"
+
 # ── Path 1: Shell/Bash blocking ──
 
 echo "Path 1 — Shell/Bash blocking:"
@@ -154,6 +166,36 @@ printf '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' \
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 
 assert_blocked "git commit when current-branch returns main (simulated)" "$rc"
+
+# ── Tag-push cases (simulated main branch still active) ──
+
+echo "Tag-push cases on simulated main:"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push --tags"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push --tags on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin --tags"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin --tags on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin refs/tags/v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin refs/tags/v1.0.0 on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin tag v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin tag v1.0.0 on main" "$rc"
+
+# Branch-push via explicit refspec to protected branch must still block.
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin HEAD:main"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin HEAD:main on main" "$rc"
 
 # ── Summary ──
 

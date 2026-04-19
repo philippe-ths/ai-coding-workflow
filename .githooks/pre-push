@@ -3,7 +3,29 @@ set -eu
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"
 
-"$ROOT_DIR/.ai-policy/scripts/check-protected-branch.sh"
+# Pre-push receives one line per ref being pushed on stdin:
+#   <local_ref> <local_sha> <remote_ref> <remote_sha>
+# If every remote_ref is under refs/tags/, this is a tag-only push and
+# the protected-branch check does not apply (no branch is being modified).
+# Otherwise run the protected-branch check.
+PUSH_REFS="$(cat || true)"
+TAG_ONLY=true
+HAS_ANY_REF=false
+
+while IFS=' ' read -r _local_ref _local_sha remote_ref _remote_sha; do
+  [ -z "${remote_ref:-}" ] && continue
+  HAS_ANY_REF=true
+  case "$remote_ref" in
+    refs/tags/*) ;;
+    *) TAG_ONLY=false ;;
+  esac
+done <<EOF
+$PUSH_REFS
+EOF
+
+if [ "$HAS_ANY_REF" = "false" ] || [ "$TAG_ONLY" = "false" ]; then
+  "$ROOT_DIR/.ai-policy/scripts/check-protected-branch.sh"
+fi
 
 # shellcheck disable=SC1091
 . "$ROOT_DIR/.ai-policy/policy.env"
@@ -12,6 +34,6 @@ if [ "$REQUIRE_VALIDATION_BEFORE_PUSH" = "true" ]; then
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
 fi
 
-"$ROOT_DIR/.ai-policy/hooks/check-changelog.sh"
+printf '%s\n' "$PUSH_REFS" | "$ROOT_DIR/.ai-policy/hooks/check-changelog.sh"
 
 exit 0

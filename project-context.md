@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.1.3
+Version: 1.1.4
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -25,7 +25,7 @@ Version: 1.1.3
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Does not contain any runtime application code.
-- Does not include a test framework beyond shell-script syntax checks and six enforcement integration tests.
+- Does not include a test framework beyond shell-script syntax checks and seven enforcement integration tests.
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
@@ -71,7 +71,7 @@ Version: 1.1.3
 
 ## Testing Overview
 - Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`.
-- Validation also runs six enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, `test-vscode-copilot-enforcement.sh`, `test-gemini-enforcement.sh`, `test-changelog-hook.sh`, and `test-session-tags-hook.sh`.
+- Validation also runs seven enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, `test-vscode-copilot-enforcement.sh`, `test-gemini-enforcement.sh`, `test-changelog-hook.sh`, `test-session-tags-hook.sh`, and `test-pre-push-hook.sh`.
 - No unit test framework exists; there are no automated tests for documentation content.
 - Manual verification is the primary check for documentation changes.
 

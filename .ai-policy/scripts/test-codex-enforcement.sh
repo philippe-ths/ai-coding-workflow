@@ -127,6 +127,27 @@ printf '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' \
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "ls on main (simulated)" "$rc"
 
+# --- Tag-push cases on protected branch (still simulated main) ---
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push --tags"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push --tags on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin refs/tags/v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin refs/tags/v1.0.0 on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin tag v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin tag v1.0.0 on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin HEAD:main"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin HEAD:main on main (simulated)" "$rc"
+
 # --- Tests on feature branch ---
 cp "$TMPDIR_TEST/current-branch-fake-feature.sh" "$REAL_SCRIPT"
 
