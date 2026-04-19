@@ -17,7 +17,8 @@ Prefer fewer, higher-quality rules over comprehensive coverage.
 ## Version Number
 
 **Version number.**
-The version number in `ai-workflow.md` (`Version: X.Y.Z`) tracks the project's user-facing behaviour, not just the workflow file itself.
+The `Version:` header in `ai-workflow.md` is the canonical version for the project. It tracks the project's user-facing behaviour, not just the workflow file itself.
+No other file holds a release-level version number; subordinate files (for example `lite-monolithic/ai-workflow.md`) carry this same version so they can be identified against the canonical anchor, but they are not independent sources of truth.
 
 A change is user-facing if it can alter how the agent behaves, what the human sees, or what rules are enforced.
 User-facing files include:
@@ -32,6 +33,8 @@ Bump the patch version (Z) for any user-facing change that corrects wording, fix
 Bump the minor version (Y) for any user-facing change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.
 Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps, or fundamentally restructures the skill or policy layer.
 Update the version on every user-facing edit so session logs can be tied to a specific file state.
+
+Every change to the `Version:` header requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
 
 Changes to non-user-facing files (design decisions, `observed-ai-failings.md`, `README.md`, test scripts) do not require a version bump.
 
