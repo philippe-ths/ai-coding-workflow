@@ -1,0 +1,10 @@
+# Captured telemetry is never committed. Only configs and dashboards live here.
+data/
+loki/data/
+prometheus/data/
+grafana/data/
+*.wal
+
+# Per-machine compose override (e.g. remap ports when 3000/9090/3100 are busy).
+# docker-compose picks this up automatically; keep it out of the repo.
+docker-compose.override.yml

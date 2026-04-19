@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.1.4
+Version: 1.2.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -24,8 +24,10 @@ Version: 1.1.4
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
 - Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
-- Does not contain any runtime application code.
-- Does not include a test framework beyond shell-script syntax checks and seven enforcement integration tests.
+- Provides an optional local telemetry stack (`telemetry/`) with OTEL Collector, Prometheus, Loki, Grafana, redaction processors, and four pre-provisioned dashboards for evaluating workflow changes from Claude Code session telemetry.
+- Provides user-facing documentation (`docs/telemetry-setup.md`, `docs/telemetry-schema.md`) for running the stack and the baseline-harness session JSON contract.
+- Does not contain runtime application code beyond the optional telemetry stack.
+- Does not include a test framework beyond shell-script syntax checks, YAML/JSON syntax checks for telemetry configs, and seven enforcement integration tests.
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
@@ -35,15 +37,18 @@ Version: 1.1.4
 - All facts in `project-context.md` must reflect implementation truth, not planned architecture.
 
 ## Architecture Summary
-- This is a documentation-only repository with no runtime application.
-- Three layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, and a local policy enforcement layer (scripts and git hooks).
+- This is primarily a documentation repository. The only runtime component is the optional local telemetry stack under `telemetry/`.
+- Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and an optional local telemetry stack for observing workflow effectiveness.
 - Primary data flow: human copies files to target repository → agent reads them before each task → agent follows the workflow → human reviews checkpoints.
+- Optional telemetry flow (this repo only): Claude Code session → OTEL Collector (localhost:4317/4318) → redaction processors → Prometheus (metrics) + Loki (logs) → Grafana dashboards.
 - No external service dependencies exist at repository runtime; GitHub is used only for issue and PR tracking.
 
 ## Key Dependencies
 - `bash`: all policy scripts and git hooks are written in bash and validated with `bash -n`.
 - `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
 - `jq`: hook scripts and one enforcement test parse JSON with `jq`.
+- `docker` (optional): required only for the local telemetry stack in `telemetry/`. Not needed to use the workflow itself.
+- `python3` + `pyyaml` (optional): used by `project-validation.sh` to syntax-check telemetry YAML/JSON if present; validation skips the check when absent.
 
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent. Its `Version:` header is the canonical project version.
@@ -68,12 +73,22 @@ Version: 1.1.4
 - `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
 - `lite-monolithic/ai-workflow.md`: single-file AI workflow with planning and failure analysis inlined, no policy layer or skill indirection.
 - `lite-monolithic/README.md`: usage instructions for the lite-monolithic version.
+- `telemetry/docker-compose.yml`: four-service local stack (OTEL Collector, Prometheus, Loki, Grafana) for receiving and visualising Claude Code session telemetry.
+- `telemetry/otel-collector-config.yaml`: OTLP receivers on `:4317`/`:4318`, redaction processors (identity-attribute strip, body regex scrub, attribute truncation), and exporters to Prometheus and Loki.
+- `telemetry/prometheus/prometheus.yml`, `telemetry/loki/loki-config.yaml`: backend configs with 30-day retention.
+- `telemetry/grafana/provisioning/`: auto-wired datasources and dashboard provider.
+- `telemetry/grafana/dashboards/`: four pre-built dashboards — `session-overview.json`, `tool-usage.json`, `fix-cycles.json` (placeholder until Sub-issue D), `version-comparison.json`.
+- `telemetry/up.sh`, `telemetry/down.sh`: convenience wrappers around `docker compose`.
+- `telemetry/.gitignore`: blocks captured data from being committed.
+- `docs/telemetry-setup.md`: maintainer-facing setup, redaction, and troubleshooting guide for the telemetry stack.
+- `docs/telemetry-schema.md`: baseline-harness per-session JSON contract (consumed by Sub-issue D, #112).
 
 ## Testing Overview
-- Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`.
+- Validation runs `bash -n` syntax checks on all shell scripts in `.ai-policy/scripts/`, `.ai-policy/hooks/`, `.githooks/`, and `telemetry/*.sh`.
+- Validation runs YAML syntax checks on telemetry configs when `python3` + `pyyaml` are present, JSON syntax checks on Grafana dashboards, and `docker compose config -q` in `telemetry/` when Docker is installed.
 - Validation also runs seven enforcement integration tests: `test-claude-code-enforcement.sh`, `test-codex-enforcement.sh`, `test-vscode-copilot-enforcement.sh`, `test-gemini-enforcement.sh`, `test-changelog-hook.sh`, `test-session-tags-hook.sh`, and `test-pre-push-hook.sh`.
-- No unit test framework exists; there are no automated tests for documentation content.
-- Manual verification is the primary check for documentation changes.
+- No unit test framework exists; there are no automated tests for documentation content or Grafana dashboard correctness.
+- Manual verification is the primary check for documentation changes and telemetry dashboard behaviour.
 
 ## Maintenance Checklist
 - Update this file when the project structure, key files, or policy rules change.

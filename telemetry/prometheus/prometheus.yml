@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+# No scrape jobs configured; metrics arrive via remote-write from the
+# OTEL Collector (see --web.enable-remote-write-receiver in docker-compose.yml).
+scrape_configs: []

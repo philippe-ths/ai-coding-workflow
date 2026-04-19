@@ -1,0 +1,143 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 512
+
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 75
+    spike_limit_percentage: 25
+
+  # Strip identifying attributes from all signals. Claude Code attaches user
+  # and organization identifiers on BOTH the OTLP resource envelope AND as
+  # per-log-record attributes, so we run the same deletion/hash list through
+  # both a `resource` processor (for resource scope) and an `attributes`
+  # processor (for log-record scope). Anything identifying is removed before
+  # it reaches Prometheus or Loki, so screenshots and backups stay safe.
+  resource/redact:
+    attributes:
+      - key: user.email
+        action: delete
+      - key: user.account_uuid
+        action: delete
+      - key: user.account_id
+        action: delete
+      - key: user.id
+        action: hash
+      - key: organization.id
+        action: hash
+
+  attributes/redact:
+    actions:
+      - key: user.email
+        action: delete
+      - key: user.account_uuid
+        action: delete
+      - key: user.account_id
+        action: delete
+      - key: user.id
+        action: hash
+      - key: organization.id
+        action: hash
+
+  # Redact sensitive patterns inside log bodies and known high-risk attributes.
+  # These run after receive but before export. Claude Code already gates
+  # prompt/tool content behind OTEL_LOG_USER_PROMPTS / OTEL_LOG_TOOL_DETAILS
+  # (both default off). When the maintainer opts in, raw prompts and tool
+  # arguments flow through as log attributes, so we scrub them here.
+  #
+  # We target specific attributes by name because OTTL does not offer a clean
+  # way to iterate every string attribute. Extend the list if Claude Code
+  # starts emitting additional sensitive attributes.
+  transform/redact:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          # ---- body ----
+          - replace_pattern(body, "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "<email>")
+          - replace_pattern(body, "/Users/[^/\\s\"]+", "/Users/<user>")
+          - replace_pattern(body, "/home/[^/\\s\"]+", "/home/<user>")
+          - replace_pattern(body, "sk-[A-Za-z0-9_-]{20,}", "<api-key>")
+          - replace_pattern(body, "AKIA[0-9A-Z]{16}", "<aws-key>")
+          - replace_pattern(body, "(?i)bearer\\s+[A-Za-z0-9._-]+", "bearer <token>")
+          - replace_pattern(body, "gh[pousr]_[A-Za-z0-9]{36,}", "<gh-token>")
+          # ---- prompt (user_prompt event, when OTEL_LOG_USER_PROMPTS=1) ----
+          - replace_pattern(attributes["prompt"], "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "<email>") where attributes["prompt"] != nil
+          - replace_pattern(attributes["prompt"], "/Users/[^/\\s\"]+", "/Users/<user>") where attributes["prompt"] != nil
+          - replace_pattern(attributes["prompt"], "/home/[^/\\s\"]+", "/home/<user>") where attributes["prompt"] != nil
+          - replace_pattern(attributes["prompt"], "sk-[A-Za-z0-9_-]{20,}", "<api-key>") where attributes["prompt"] != nil
+          - replace_pattern(attributes["prompt"], "gh[pousr]_[A-Za-z0-9]{36,}", "<gh-token>") where attributes["prompt"] != nil
+          # ---- tool_input (tool_result / tool_decision events) ----
+          - replace_pattern(attributes["tool_input"], "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "<email>") where attributes["tool_input"] != nil
+          - replace_pattern(attributes["tool_input"], "/Users/[^/\\s\"]+", "/Users/<user>") where attributes["tool_input"] != nil
+          - replace_pattern(attributes["tool_input"], "/home/[^/\\s\"]+", "/home/<user>") where attributes["tool_input"] != nil
+          - replace_pattern(attributes["tool_input"], "sk-[A-Za-z0-9_-]{20,}", "<api-key>") where attributes["tool_input"] != nil
+          - replace_pattern(attributes["tool_input"], "gh[pousr]_[A-Za-z0-9]{36,}", "<gh-token>") where attributes["tool_input"] != nil
+          # ---- tool_parameters (tool_result event) ----
+          - replace_pattern(attributes["tool_parameters"], "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "<email>") where attributes["tool_parameters"] != nil
+          - replace_pattern(attributes["tool_parameters"], "/Users/[^/\\s\"]+", "/Users/<user>") where attributes["tool_parameters"] != nil
+          - replace_pattern(attributes["tool_parameters"], "/home/[^/\\s\"]+", "/home/<user>") where attributes["tool_parameters"] != nil
+          - replace_pattern(attributes["tool_parameters"], "sk-[A-Za-z0-9_-]{20,}", "<api-key>") where attributes["tool_parameters"] != nil
+          - replace_pattern(attributes["tool_parameters"], "gh[pousr]_[A-Za-z0-9]{36,}", "<gh-token>") where attributes["tool_parameters"] != nil
+          # ---- tool_response (when OTEL_LOG_TOOL_CONTENT=1) ----
+          - replace_pattern(attributes["tool_response"], "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}", "<email>") where attributes["tool_response"] != nil
+          - replace_pattern(attributes["tool_response"], "/Users/[^/\\s\"]+", "/Users/<user>") where attributes["tool_response"] != nil
+          - replace_pattern(attributes["tool_response"], "/home/[^/\\s\"]+", "/home/<user>") where attributes["tool_response"] != nil
+          - replace_pattern(attributes["tool_response"], "sk-[A-Za-z0-9_-]{20,}", "<api-key>") where attributes["tool_response"] != nil
+          - replace_pattern(attributes["tool_response"], "gh[pousr]_[A-Za-z0-9]{36,}", "<gh-token>") where attributes["tool_response"] != nil
+
+  # Size cap on log attributes to keep storage bounded and contain any
+  # accidental secret-in-large-blob leak.
+  transform/truncate:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - truncate_all(attributes, 4096)
+
+exporters:
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    resource_to_telemetry_conversion:
+      enabled: true
+    tls:
+      insecure: true
+
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource/redact, attributes/redact, batch]
+      exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      processors:
+        - memory_limiter
+        - resource/redact
+        - attributes/redact
+        - transform/redact
+        - transform/truncate
+        - batch
+      exporters: [otlphttp/loki]
