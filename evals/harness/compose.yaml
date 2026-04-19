@@ -1,0 +1,14 @@
+# Docker compose for the baseline-harness sandbox (claude-code agent only).
+# Mirrors the D0 spike pattern: host-gateway bridge so the OTEL collector on
+# the host is reachable from inside the sandbox at host.docker.internal:4318.
+services:
+  default:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://host.docker.internal:4318"
+    init: true

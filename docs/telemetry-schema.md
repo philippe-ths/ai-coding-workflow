@@ -2,7 +2,9 @@
 
 This document defines the per-session JSON structure the baseline task harness (Sub-issue D, #112) produces for each baseline run. The structure is the contract between Sub-issue C (this stack) and Sub-issue D (the harness) — the harness writes files matching this shape, the telemetry stack consumes them for cross-version comparison.
 
-Status: **draft v0.1**. Will be refined by Sub-issue D during implementation. Changes here require a matching CHANGELOG entry.
+Status: **v0.2**. Locked by Sub-issue D (#112). Changes here require a matching CHANGELOG entry and a `SCHEMA_VERSION` bump in `evals/harness/schema.py`.
+
+In v0.2 the following fields are explicitly optional (nullable) — the harness emits `null` when the metric was not derivable from the current agent: `fix_cycles` (returned as `0` by the v0.2 harness — derivation method still to be resolved), `checkpoint_reached`, `plan_accepted_first_pass`, `tests.pre_baseline_passed`, `session_id`, `model`, `transcript_path`.
 
 ## Filename
 
