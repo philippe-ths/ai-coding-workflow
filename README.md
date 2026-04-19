@@ -152,7 +152,10 @@ The three exported variables are:
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ```
+
+`OTEL_EXPORTER_OTLP_PROTOCOL` must be set explicitly; Claude Code's OTEL SDK does not infer it from the endpoint and fails init without it. Use `grpc` with port 4317, or `http/protobuf` with port 4318.
 
 `.envrc` is gitignored so these values stay on your machine. You can also export them in `~/.zshrc` or the current shell instead of using direnv.
 

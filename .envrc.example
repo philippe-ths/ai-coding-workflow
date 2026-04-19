@@ -7,8 +7,10 @@
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
-# Uncomment if your collector is HTTP-only (port 4318 is the OTLP/HTTP default):
+# Uncomment if your collector is HTTP-only (port 4318 is the OTLP/HTTP default)
+# and comment out the gRPC endpoint/protocol above:
 # export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 # export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 
