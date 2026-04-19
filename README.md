@@ -133,6 +133,38 @@ Run validation:
 ./.ai-policy/scripts/run-validation.sh
 ```
 
+## Session Telemetry (Claude Code)
+
+Every Claude Code session started in this repository emits OTEL events tagged with the current workflow version and an 8-character ruleset hash. The tag fragment lives in `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` block and is kept in sync with the rule files by `.ai-policy/scripts/update-session-tags.sh`. A pre-commit check blocks commits when the fragment drifts.
+
+The repository file declares **what the tags mean**. The maintainer's shell declares **whether telemetry is enabled and where it goes**. The three enablement variables are intentionally not committed, so cloning the repo does not start emitting telemetry.
+
+To enable telemetry locally, copy the example direnv config and allow it:
+
+```bash
+cp .envrc.example .envrc
+direnv allow
+```
+
+The three exported variables are:
+
+```bash
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+```
+
+`OTEL_EXPORTER_OTLP_PROTOCOL` must be set explicitly; Claude Code's OTEL SDK does not infer it from the endpoint and fails init without it. Use `grpc` with port 4317, or `http/protobuf` with port 4318.
+
+`.envrc` is gitignored so these values stay on your machine. You can also export them in `~/.zshrc` or the current shell instead of using direnv.
+
+Caveats:
+
+- Some downstream collectors require `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`.
+- Claude Code's `-p` one-shot mode may not flush telemetry reliably before exit; use an interactive session to verify emission.
+- After bumping the `Version:` header in `ai-workflow.md` or editing any rule file, run `./.ai-policy/scripts/update-session-tags.sh` to refresh the tag fragment.
+
 ## What This Repository Optimizes For
 
 - Clear human checkpoints before risky transitions.
