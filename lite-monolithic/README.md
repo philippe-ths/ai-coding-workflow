@@ -23,6 +23,6 @@ The full version includes:
 - A policy enforcement layer (`.ai-policy/` scripts and git hooks) that blocks commits and pushes when rules are violated.
 - Separate skill files loaded on demand for planning, failure analysis, logging/observability, and issue creation.
 - Multi-agent entry points for VS Code Copilot, Claude Code, Codex, and Gemini CLI.
-- A project-spec template for documenting implementation truth in target repositories.
+- A project-context template for documenting implementation truth in target repositories.
 
 This lite version strips all of that down to a single file with the essential rules inlined. If you need deterministic enforcement or multi-agent configuration, use the [full version](https://github.com/philippe-ths/ai-coding-workflow).

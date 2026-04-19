@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.5.0
+Version: 2.5.1
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -36,7 +36,7 @@ After the human merges the pull request, run post-merge cleanup and return to St
 
 2. **Step 2: Review project context.**
 
-   - Review `project-spec.md` for project structure, constraints, and domain context relevant to the task.
+   - Review `project-context.md` for project structure, constraints, and domain context relevant to the task.
    - Review the code areas the task is likely to touch.
    - Extract the intended outcome from the issue.
 
@@ -124,7 +124,7 @@ Load the `aiw-planning` skill.
 
 During implementation:
 
-- Use `project-spec.md` for initial context on architectural patterns, project structure, and conventions.
+- Use `project-context.md` for initial context on architectural patterns, project structure, and conventions.
 - Prefer extending current patterns over introducing new ones. (Why: New patterns increase review surface, reduce predictability, and create maintenance drift.)
 - Keep changes focused and relevant to the approved plan.
 
@@ -226,12 +226,12 @@ Use when existing logging is insufficient to diagnose a failure.
 
 Load the `aiw-logging-and-observability` skill.
 
-## Project Spec Management
+## Project Context Management
 
-Use when creating `project-spec.md` for the first time.
-Use when updating `project-spec.md` after routes, schema, sync rules, dependencies, project structure, or test coverage have changed.
+Use when creating `project-context.md` for the first time.
+Use when updating `project-context.md` after routes, schema, sync rules, dependencies, project structure, or test coverage have changed.
 
-Load the `aiw-project-spec-management` skill.
+Load the `aiw-project-context-management` skill.
 
 ## Command Approval
 
