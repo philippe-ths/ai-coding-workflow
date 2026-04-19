@@ -134,6 +134,14 @@ Run validation:
 ./.ai-policy/scripts/run-validation.sh
 ```
 
+### Optional: enable session telemetry (Claude Code only)
+
+To start recording Claude Code session data from the target repository into the local stack shipped in this repo, invoke the `aiw-telemetry-setup` skill from a Claude Code session in the target repo, for example:
+
+> "use the aiw-telemetry-setup skill to start recording telemetry here"
+
+The skill auto-detects the environment (collector reachability, `direnv` presence, terminal vs IDE launch context, existing configuration), proposes one consolidated set of file changes, and — after a single confirmation — writes the configuration and verifies round-trip by sending a synthetic OTLP record carrying a fresh UUID and re-querying it from Loki. It reports PASS or FAIL with the specific phase that failed and leaves no partial state on failure. It never enables telemetry as a default side effect. The local stack itself lives in this repo's `telemetry/` — see [Session Telemetry](#session-telemetry-claude-code) below.
+
 ## Session Telemetry (Claude Code)
 
 Every Claude Code session started in this repository emits OTEL events tagged with the current workflow version and an 8-character ruleset hash. The tag fragment lives in `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` block and is kept in sync with the rule files by `.ai-policy/scripts/update-session-tags.sh`. A pre-commit check blocks commits when the fragment drifts.

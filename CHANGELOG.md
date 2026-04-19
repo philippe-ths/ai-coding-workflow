@@ -4,6 +4,16 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.11.0 - 2026-04-19
+
+### Added
+
+- `aiw-telemetry-setup` skill in both `.agents/skills/` and `.claude/skills/` — guided, mostly-automated process for enabling Claude Code session telemetry in any repository and verifying end-to-end that tagged data reaches the local telemetry store before reporting success. The skill automates pre-flight detection (collector reachability, direnv presence, launch context, existing configuration) and the round-trip probe (collector reachability, shell-env propagation, synthetic OTLP log carrying a fresh UUID matched back in Loki), presents a single consolidated change set for user approval, and never enables telemetry as a default side effect. Motivated by a silent non-emission failure observed during acceptance testing of #101 on 2026-04-19, where an IDE-launched Claude Code session in this repo emitted nothing because `.envrc` did not propagate through the VS Code launch path ([#124]).
+
+### Changed
+
+- `project-context.md` Project Structure section lists `aiw-telemetry-setup` in the enumerated skill set; `Version:` header bumped to `1.4.0` ([#124]).
+
 ## 2.10.0 - 2026-04-19
 
 ### Added
