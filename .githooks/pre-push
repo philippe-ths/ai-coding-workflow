@@ -12,4 +12,6 @@ if [ "$REQUIRE_VALIDATION_BEFORE_PUSH" = "true" ]; then
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
 fi
 
+"$ROOT_DIR/.ai-policy/hooks/check-changelog.sh"
+
 exit 0
