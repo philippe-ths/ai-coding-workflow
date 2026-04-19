@@ -1,0 +1,5 @@
+.venv/
+logs/
+run_id.txt
+__pycache__/
+*.pyc
