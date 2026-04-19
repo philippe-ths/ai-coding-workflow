@@ -109,6 +109,6 @@
     ]
   },
   "env": {
-    "OTEL_RESOURCE_ATTRIBUTES": "workflow_version=2.12.0,workflow_repo=ai-coding-workflow,ruleset_hash=53773ef8"
+    "OTEL_RESOURCE_ATTRIBUTES": "workflow_version=2.13.0,workflow_repo=ai-coding-workflow,ruleset_hash=36b3f156"
   }
 }
