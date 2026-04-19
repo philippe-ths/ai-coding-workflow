@@ -127,6 +127,18 @@ printf '{"tool_name":"mcp_github_merge_pull_request","tool_input":{"owner":"x","
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "merge_pull_request (no branch — known limitation)" "$rc"
 
+# Test: create_ref with tag ref → allowed (tags do not modify a branch)
+rc=0
+printf '{"tool_name":"mcp_github_create_ref","tool_input":{"ref":"refs/tags/v1.0.0","sha":"abc","owner":"x","repo":"y"}}' \
+  | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "create_ref refs/tags/v1.0.0" "$rc"
+
+# Test: create_ref with refs/heads/main → blocked
+rc=0
+printf '{"tool_name":"mcp_github_create_ref","tool_input":{"ref":"refs/heads/main","sha":"abc","owner":"x","repo":"y"}}' \
+  | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "create_ref refs/heads/main" "$rc"
+
 # ── Path 1: Shell/Bash blocking via BeforeTool → bash hook ──
 
 echo "Path 1 — Shell/Bash blocking (Gemini BeforeTool → bash hook):"
@@ -169,6 +181,27 @@ rc=0
 printf '{"tool_name":"run_shell_command","tool_input":{"command":"ls -la"}}' \
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "ls on main (simulated)" "$rc"
+
+# --- Tag-push cases on protected branch (still simulated main) ---
+rc=0
+printf '{"tool_name":"run_shell_command","tool_input":{"command":"git push --tags"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push --tags on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"run_shell_command","tool_input":{"command":"git push origin refs/tags/v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin refs/tags/v1.0.0 on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"run_shell_command","tool_input":{"command":"git push origin tag v1.0.0"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin tag v1.0.0 on main (simulated)" "$rc"
+
+rc=0
+printf '{"tool_name":"run_shell_command","tool_input":{"command":"git push origin HEAD:main"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin HEAD:main on main (simulated)" "$rc"
 
 # --- Tests on feature branch ---
 cp "$TMPDIR_TEST/current-branch-fake-feature.sh" "$REAL_SCRIPT"

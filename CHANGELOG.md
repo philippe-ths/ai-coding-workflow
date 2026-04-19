@@ -4,6 +4,16 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.7.1 - 2026-04-19
+
+### Fixed
+
+- Pre-push hook and agent PreToolUse hooks no longer block tag pushes from protected branches; `git push <tag>`, `git push --tags`, and MCP `create_ref` for `refs/tags/*` now succeed from `main` while branch pushes remain blocked ([#104]).
+
+### Added
+
+- `.ai-policy/scripts/test-pre-push-hook.sh` covering tag-vs-branch discrimination in the git-level pre-push hook, wired into `project-validation.sh` ([#104]).
+
 ## 2.7.0 - 2026-04-19
 
 ### Added
@@ -92,4 +102,5 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 [#103]: https://github.com/philippe-ths/ai-coding-workflow/pull/103
 [#105]: https://github.com/philippe-ths/ai-coding-workflow/pull/105
 [#107]: https://github.com/philippe-ths/ai-coding-workflow/pull/107
+[#104]: https://github.com/philippe-ths/ai-coding-workflow/issues/104
 [#109]: https://github.com/philippe-ths/ai-coding-workflow/issues/109

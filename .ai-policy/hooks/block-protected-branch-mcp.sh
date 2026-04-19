@@ -18,9 +18,22 @@ case "$TOOL_NAME" in
   *create_pull_request) exit 0 ;;
 esac
 
+# Tag refs do not modify a branch. Allow when tool_input.ref is a tag ref.
+REF="$(printf '%s' "$INPUT" | jq -r '.tool_input.ref // empty')"
+case "$REF" in
+  refs/tags/*) exit 0 ;;
+esac
+
 # Extract the target branch from tool_input.
 # push_files, create_or_update_file, delete_file use "branch".
 BRANCH="$(printf '%s' "$INPUT" | jq -r '.tool_input.branch // empty')"
+
+# If the tool names a branch ref explicitly via "ref", derive the branch name.
+if [ -z "$BRANCH" ]; then
+  case "$REF" in
+    refs/heads/*) BRANCH="${REF#refs/heads/}" ;;
+  esac
+fi
 
 if [ -z "$BRANCH" ]; then
   # No branch info available (e.g. merge_pull_request) — cannot check, allow.

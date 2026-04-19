@@ -8,3 +8,4 @@ bash -n ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*
 ./.ai-policy/scripts/test-gemini-enforcement.sh
 ./.ai-policy/scripts/test-changelog-hook.sh
 ./.ai-policy/scripts/test-session-tags-hook.sh
+./.ai-policy/scripts/test-pre-push-hook.sh
