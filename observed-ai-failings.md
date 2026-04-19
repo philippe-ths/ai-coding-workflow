@@ -705,3 +705,35 @@ This pattern appears when the agent resolves a cherry-pick or merge conflict and
 
 ### Scope
 This appears general across tasks because cherry-pick and merge conflict resolution are common operations, and the temptation to fold in related fixes during resolution applies whenever the conflicting code is close to code that needs changing.
+
+## Entry 21
+
+### Title
+- Feature bloat and silent performance degradation.
+
+### Version
+- 2.3.0
+
+### Date
+- 2026-04-19
+
+### Context
+- Claude Code. 4.6 - 4.7, effort: medium - Xhigh. 
+- FCP Auto-Editor.
+
+### What Happened
+- The agent implemented complex UI workarounds that passed functional unit tests but severely degraded real-world execution speed.
+- It failed to write automated performance tests to catch these latency regressions.
+
+### Why It Matters
+- The application becomes practically unusable despite the workflow reporting complete validation success.
+
+### Trigger Pattern
+- Implementing heavy state changes or complex UI fragments in top-down execution frameworks like Streamlit.
+
+### Early Warning Signs
+- The agent introduces caching workarounds or manual state resets to prevent double-reruns.
+- The agent adds complex UI decorators without adding corresponding automated latency tests.
+
+### Scope
+- General across tasks touching the UI or heavy data processing loops.
