@@ -4,6 +4,22 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.12.0 - 2026-04-19
+
+### Added
+
+- `aiw-performance-profiling` skill in both `.agents/skills/` and `.claude/skills/` — automated performance and UI-state-transition coverage rules. Lists the trigger conditions (UI state transitions, reactive rerenders, caching, memoisation, debouncing, manual state resets, heavy data loops, sync/async path swaps) and prescribes baseline capture, tolerance-anchored latency assertions, multi-run stable-statistic benchmarks, isolated timed sections, UI transition outcome plus latency assertions, caching-workaround regression tests, a feasibility-fallback rule that forbids silent reversion to manual, and a rule against weakening failing thresholds without investigation ([#127]).
+- `Non-Functional Test Coverage` reference section in `ai-workflow.md` — requires the agent to attempt automated coverage for UI state transitions, execution latency, and security-relevant behaviour before suggesting manual verification, and to state in writing when automation is not feasible. Motivated by Entry 21 in `observed-ai-failings.md`, where the agent passed functional tests while shipping severe UI stuttering and latency regressions in FCP Auto-Editor ([#127]).
+- `Performance and UI-State Profiling` loader section in `ai-workflow.md` — names the conditions under which `aiw-performance-profiling` must be loaded ([#127]).
+
+### Changed
+
+- `Manual Verification Requirements` in `ai-workflow.md` tightened — manual checks must cite the non-functional coverage section before being proposed, and the "automated tests can verify" exclusion is rephrased to target behaviour rather than checks ([#127]).
+- Step 7 in `ai-workflow.md` now points at `Non-Functional Test Coverage` and restricts manual checks to what automation cannot cover ([#127]).
+- `aiw-testing` skill in both skill directories gained a `Non-Functional Coverage` subsection covering the three categories, a pointer to `aiw-performance-profiling`, a security negative-path rule, and the feasibility-fallback rule ([#127]).
+- `lite-monolithic/ai-workflow.md` mirrors the Non-Functional Test Coverage rules inline and carries `Version: 2.12.0`; the file had drifted from canonical since `2.8.0` and this change realigns it only for the non-functional coverage rule set, not for changes introduced between `2.9.0` and `2.11.0` ([#127]).
+- `project-context.md` Project Structure section lists `aiw-performance-profiling`; `Version:` header bumped to `1.5.0` ([#127]).
+
 ## 2.11.0 - 2026-04-19
 
 ### Added

@@ -142,9 +142,13 @@ Rationale: Validation after every code change catches regressions immediately. D
 
 ### Workflow Step 7: Support manual verification
 
-> "Suggest manual checks for the human."
+> "Attempt automated coverage for non-functional categories before suggesting manual checks."
 
-Rationale: Automated tests cannot cover every user-facing path. The agent should identify what manual checks are needed and make them easy for the human.
+Rationale: Prevents the workflow's most common blindspot, where the agent passes functional tests while UI responsiveness, latency, or security behaviour degrades silently (Entry 21 in `observed-ai-failings.md`). Forces the automation attempt up front rather than letting manual verification become the default coverage path.
+
+> "Suggest manual checks only for what automation cannot cover."
+
+Rationale: Keeps manual verification expensive and scarce. Once the agent has attempted automated coverage, anything left over belongs to the human; anything the agent could have automated should not be offloaded.
 
 ---
 
@@ -490,19 +494,59 @@ Rationale: Defers detailed test-writing guidance to a skill that loads on demand
 
 ---
 
+### Performance and UI-State Profiling
+
+> "Use when the change touches UI state transitions, reactive rerender paths, caching, memoisation, debouncing, manual state resets, or heavy data-processing loops."
+
+Rationale: Defines the primary activation condition from the trigger patterns in Entry 21 of `observed-ai-failings.md`. These are the code shapes where functional tests mask real-world performance regressions.
+
+> "Use when the change introduces a caching workaround or manual state reset to patch a symptom."
+
+Rationale: A workaround added to fix an observed problem is itself a signal that the underlying path is fragile. Without a regression test anchored to the workaround, the next refactor silently reintroduces the problem.
+
+> "Load the `aiw-performance-profiling` skill."
+
+Rationale: Extracts the detailed performance and UI-state-transition test construction rules to an on-demand skill. Keeps the core workflow lean while making baseline capture, tolerance assertions, and feasibility-fallback discipline available when the triggers fire.
+
+---
+
+### Non-Functional Test Coverage
+
+> "Attempt automated coverage for the following categories before suggesting manual verification:"
+
+Rationale: Inverts the previous default where manual verification absorbed any coverage the agent did not bother to automate. The categories list (UI state transitions, latency, security-relevant behaviour) names the specific blindspots that passed functional tests cannot close.
+
+> "A passing functional test is not proof of performance, responsiveness, or security."
+
+Rationale: Names the false-confidence mode directly. Entry 21 showed the agent treating functional-test success as total coverage while the app was becoming unusable. Without this line, the agent can satisfy the workflow's validation checks without ever exercising the non-functional dimensions.
+
+> "If automated coverage is not feasible for a category, state the reason in writing in the plan or summary before falling back to a manual check."
+
+Rationale: Makes the fallback to manual explicit rather than silent. Requires the agent to name the constraint (toolchain limits, environment access, time cost) so the human can contest the claim or accept the gap. Prevents manual verification from becoming a convenience default.
+
+> "Do not treat manual verification as the default coverage path for non-functional behaviour."
+
+Rationale: The rule that closes the loop. Even with the "attempt automation first" directive, the agent can comply literally while still treating manual as the expected home for non-functional checks. This line removes that escape.
+
+---
+
 ### Manual Verification Requirements
 
 > "Manual verification covers what only a human can verify."
 
 Rationale: Scopes the section to human-only checks, preventing the agent from suggesting automated verifications here.
 
+> "Before suggesting a manual check, attempt automated coverage per [Non-Functional Test Coverage](#non-functional-test-coverage)."
+
+Rationale: Acts as a point-of-use pointer rather than a duplicate rule. The canonical rule lives in Non-Functional Test Coverage; placing a pointer here catches the agent at the moment it would otherwise skip ahead to manual-check suggestions.
+
 > "Suggest checks that require human observation: visual behaviour, user experience flows, real-device interaction, external system responses."
 
 Rationale: Concrete examples prevent the agent from suggesting vague "test the feature" checks. Each category represents something the agent cannot observe.
 
-> "Do not suggest checks that can be verified through automated tests or tool output."
+> "Do not suggest a manual check for behaviour that automated tests or tool output can verify."
 
-Rationale: Manual verification is expensive. Wasting the human's time on checks the agent could automate undermines the workflow's efficiency.
+Rationale: Manual verification is expensive. Wasting the human's time on behaviour the agent could automate undermines the workflow's efficiency. Worded to target behaviour rather than "checks" so the agent cannot reframe an automatable behaviour as a non-automatable "check."
 
 > "State the success signal for each check."
 
