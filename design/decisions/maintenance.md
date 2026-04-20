@@ -24,7 +24,7 @@ Update the version on every user-facing edit so session logs can be tied to a sp
 
 Every change to the `Version:` header requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
 
-Changes to non-user-facing files (design decisions, `observed-ai-failings.md`, `README.md`, test scripts) do not require a version bump.
+Changes to non-user-facing files (design decisions, `observations/observed-ai-failings.md`, `README.md`, test scripts) do not require a version bump.
 
 **Tagged releases.**
 Create a tagged release for any minor or major version bump.

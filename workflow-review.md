@@ -44,7 +44,7 @@ A thin-data review must end at this point. Do not paper over the gap.
 - **Loki session logs** for Claude Code sessions tagged with `workflow_version` and `ruleset_hash`. Query via the Loki HTTP API or via the Grafana stack in `telemetry/`.
 - **Prometheus aggregates** for the same labels. Query via PromQL.
 - **Sampled transcripts** if retained by the harness or by separate session capture.
-- **observed-ai-failings.md** for human-recorded qualitative patterns. Use only as supplementary evidence; this file pre-dates the data loop and represents intuition-era observations.
+- **observations/observed-ai-failings.md** for human-recorded qualitative patterns. Use only as supplementary evidence; this file pre-dates the data loop and represents intuition-era observations.
 
 ## Analyses to run
 

@@ -26,13 +26,13 @@ No quantitative finding can be drawn from this state.
 
 ## Illustrative qualitative-only proposal (format demonstration)
 
-This proposal is **not for issue creation**. It demonstrates the proposal format using qualitative evidence from `observed-ai-failings.md`.
+This proposal is **not for issue creation**. It demonstrates the proposal format using qualitative evidence from `observations/observed-ai-failings.md`.
 
 ### Proposal 1 (illustrative): scope drift during conflict resolution
 
 - **Classification:** `skill`
 - **Problem observed:**
-  Multiple `observed-ai-failings.md` entries describe the agent silently expanding scope while resolving cherry-pick or merge conflicts — folding adjacent fixes into the resolution commit where review attention is lower than for a normal feature commit.
+  Multiple `observations/observed-ai-failings.md` entries describe the agent silently expanding scope while resolving cherry-pick or merge conflicts — folding adjacent fixes into the resolution commit where review attention is lower than for a normal feature commit.
 - **Evidence:**
   Qualitative-only. Cited entry: Entry 20 (cherry-pick conflict scope drift). Pattern is consistent with general scope-control risks already noted in `ai-workflow.md` Scope Control section. No quantitative data because the minimum-data gate is not met.
 - **Proposed change:**

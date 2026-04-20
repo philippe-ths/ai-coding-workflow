@@ -144,7 +144,7 @@ Rationale: Validation after every code change catches regressions immediately. D
 
 > "Attempt automated coverage for non-functional categories before suggesting manual checks."
 
-Rationale: Prevents the workflow's most common blindspot, where the agent passes functional tests while UI responsiveness, latency, or security behaviour degrades silently (Entry 21 in `observed-ai-failings.md`). Forces the automation attempt up front rather than letting manual verification become the default coverage path.
+Rationale: Prevents the workflow's most common blindspot, where the agent passes functional tests while UI responsiveness, latency, or security behaviour degrades silently (Entry 21 in `observations/observed-ai-failings.md`). Forces the automation attempt up front rather than letting manual verification become the default coverage path.
 
 > "Suggest manual checks only for what automation cannot cover."
 
@@ -498,7 +498,7 @@ Rationale: Defers detailed test-writing guidance to a skill that loads on demand
 
 > "Use when the change touches UI state transitions, reactive rerender paths, caching, memoisation, debouncing, manual state resets, or heavy data-processing loops."
 
-Rationale: Defines the primary activation condition from the trigger patterns in Entry 21 of `observed-ai-failings.md`. These are the code shapes where functional tests mask real-world performance regressions.
+Rationale: Defines the primary activation condition from the trigger patterns in Entry 21 of `observations/observed-ai-failings.md`. These are the code shapes where functional tests mask real-world performance regressions.
 
 > "Use when the change introduces a caching workaround or manual state reset to patch a symptom."
 

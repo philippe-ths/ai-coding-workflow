@@ -23,7 +23,7 @@ Version: 1.6.0
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
 - Provides agent skills for code-aware planning, failure analysis, issue creation, test construction, performance profiling, and project context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code). Both directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`).
-- Records observed AI agent failure patterns (`observed-ai-failings.md`) to inform workflow rule changes.
+- Records observed AI agent failure patterns (`observations/observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Provides an optional local telemetry stack (`telemetry/`) with OTEL Collector, Prometheus, Loki, Grafana, redaction processors, and four pre-provisioned dashboards for evaluating workflow changes from Claude Code session telemetry.
 - Provides user-facing documentation (`docs/telemetry-setup.md`, `docs/telemetry-schema.md`) for running the stack and the baseline-harness session JSON contract.
@@ -61,7 +61,7 @@ Version: 1.6.0
 - `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook.
 - `ai-workflow-design-decisions/`: maintenance rules and rationale for editing `ai-workflow.md`, split into topic-scoped files.
 - `project-context-design-decisions.md`: maintenance rules for keeping `project-context.md` factual and concise.
-- `observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
+- `observations/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`, `aiw-performance-profiling`, `aiw-project-context-management`, `aiw-telemetry-setup`), each self-contained in a `SKILL.md` file. Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
@@ -106,4 +106,4 @@ Version: 1.6.0
 - Update this file when the project structure, key files, or policy rules change.
 - Keep this file aligned with the current codebase, not planned architecture.
 - Keep this file concise and under 300 lines.
-- When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `ai-workflow-design-decisions/maintenance.md`.
+- When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.

@@ -18,12 +18,12 @@ The first layer was a single monolithic workflow file — one document that told
 
 The current focus is finding the right split between always-on global rules and on-demand rules that are loaded only when relevant. After that: formally defined rules, and eventually multi-agent coordination.
 
-Tipping points are a judgement call. They come from real-world usage in other repositories — observing where agents actually fail, recording those patterns, and learning which new methods work. The `observed-ai-failings.md` file is where those lessons accumulate.
+Tipping points are a judgement call. They come from real-world usage in other repositories — observing where agents actually fail, recording those patterns, and learning which new methods work. The `observations/observed-ai-failings.md` file is where those lessons accumulate.
 
 ## History
 
 1. **Single workflow file.** The project started as one document — `ai-workflow.md` — that told the agent what to do: confirm the task, plan, implement, validate, get approval. No enforcement, no tooling.
-2. **Failures drove new rules.** Real-world usage across multiple repos and agents surfaced repeated failures: agents skipping branches, bypassing checkpoints, running validation in parallel, pushing without approval. Each pattern was recorded in `observed-ai-failings.md` and addressed with a targeted workflow rule.
+2. **Failures drove new rules.** Real-world usage across multiple repos and agents surfaced repeated failures: agents skipping branches, bypassing checkpoints, running validation in parallel, pushing without approval. Each pattern was recorded in `observations/observed-ai-failings.md` and addressed with a targeted workflow rule.
 3. **Deterministic enforcement.** Workflow rules alone were not enough — agents ignored them under momentum. The `.ai-policy/` layer and `.githooks/` were added to block protected-branch writes and require passed validation before commit or push, without relying on the agent to comply.
 4. **Agent-specific enforcement.** Git hooks only cover the shell path. Agents that use MCP connectors bypass hooks entirely. Enforcement was extended to Claude Code (PreToolUse hooks) and Codex (disabled_tools + PreToolUse hooks) to cover both execution paths.
 5. **On-demand skills.** The monolithic workflow file grew too large for agent context budgets. Planning and failure analysis were split into standalone skill files loaded only when the workflow step requires them.
@@ -64,7 +64,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 - `ai-workflow-design-decisions/` — scoped maintenance rules and rationale for editing `ai-workflow.md`.
 - `project-context-design-decisions.md` — maintenance rules for keeping `project-context.md` factual and concise.
-- `observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
+- `observations/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
 - `workflow-review.md` — calendar-driven periodic review process: defines how an agent analyses accumulated telemetry plus baseline results to produce classified workflow improvement proposals. Runs outside the per-task workflow. See `docs/workflow-review-example-2026-04-19.md` for the first worked example.
 
 ## Installation by Tool
