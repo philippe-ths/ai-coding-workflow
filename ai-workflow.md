@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.13.0
+Version: 2.14.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -69,12 +69,11 @@ After the human merges the pull request, run post-merge cleanup and return to St
 
 8. **Checkpoint 8: human reviews validation results and manual verification.**
 
-9. **Step 9: If the human reports issues, fix and revalidate.**
+9. **Step 9: If the human reports issues, check [Failure Analysis Mode](#failure-analysis-mode) before proposing a fix.**
 
-   - Fix reported issues.
-   - Rerun relevant validation checks after each fix.
+   - If any failure-analysis trigger matches, enter failure analysis mode first.
+   - Otherwise fix the reported issue and rerun relevant validation checks after each fix.
    - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
-   - If a fix fails or manual verification fails, enter [Failure Analysis Mode](#failure-analysis-mode).
 
 10. **Step 10: Summarise.**
 
@@ -236,7 +235,9 @@ Manual verification covers what only a human can verify.
 
 ## Failure Analysis Mode
 
-Enter failure analysis mode when manual verification fails, runtime behaviour contradicts the implementation, or test results conflict with observed behaviour.
+Enter failure analysis mode when the user says the behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported.
+Enter failure analysis mode when manual verification fails or runtime behaviour contradicts the implementation.
+If uncertain whether to enter, enter.
 Do not make further code changes until failure analysis is complete.
 
 Load the `aiw-failure-analysis` skill.

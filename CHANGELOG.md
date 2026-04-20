@@ -4,6 +4,15 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.14.0 - 2026-04-20
+
+### Changed
+
+- `ai-workflow.md` Step 9 header reframed from "fix and revalidate" to "check [Failure Analysis Mode] before proposing a fix" so the trigger check runs ahead of the fix; the bullet count drops from four to three ([#98]).
+- `ai-workflow.md` Failure Analysis Mode section rewritten to name the dominant trigger inline (user says behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported), retain the manual-verification and runtime-contradiction triggers, and add an explicit "if uncertain, enter" line; total length held to five short sentences ([#98]).
+- `aiw-failure-analysis` skill in both `.agents/skills/` and `.claude/skills/` updated: the frontmatter description now names concrete user phrases ("still broken", "still doesn't work", "didn't help", "the bug remains", "not working", "doing the wrong thing") to raise Claude Code auto-surface salience, and the em-dash construction is removed. The skill body is unchanged; triggers live once, in the description, and the body describes the process after entry ([#98]).
+- `lite-monolithic/ai-workflow.md` mirrors the Step 9 reframe and the leaner Failure Analysis Mode wording inline; `Version:` header bumped to `2.14.0` ([#98]).
+
 ## 2.13.0 - 2026-04-19
 
 ### Changed
