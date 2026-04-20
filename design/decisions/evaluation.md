@@ -1,5 +1,7 @@
 # Evaluation
 
+Covers the periodic review process: when to run it, the minimum-data gate, how to analyse telemetry and baseline results, and how to produce and approve classified workflow improvement proposals.
+
 ## Periodic review process
 
 The periodic review is calendar-driven, not per-task.
