@@ -18,7 +18,7 @@ Version: 1.6.0
 ## Scope
 - Defines a reusable AI coding workflow (`ai-workflow.md`) with planning, validation, scope-control, failure-analysis, and GitHub handoff rules.
 - Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
-- Provides a calendar-driven periodic review process (`workflow-review.md`) executed outside the per-task workflow; analyses accumulated telemetry and baseline results and produces classified workflow improvement proposals (hook, skill, rule, step, multi).
+- Provides a calendar-driven periodic review process (`design/decisions/evaluation.md`) executed outside the per-task workflow; analyses accumulated telemetry and baseline results and produces classified workflow improvement proposals (hook, skill, rule, step, multi).
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
 - Provides agent skills for code-aware planning, failure analysis, issue creation, test construction, performance profiling, and project context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code). Both directories contain the same skills.
@@ -56,12 +56,11 @@ Version: 1.6.0
 
 ## Project Structure
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent. Its `Version:` header is the canonical project version.
-- `workflow-review.md`: calendar-driven periodic review process executed outside the per-task workflow. Defines the minimum-data gate, inputs read, analyses run, proposal output format with five classifications (hook, skill, rule, step, multi), disqualifying conditions, and approval workflow.
-- `docs/workflow-review-example-2026-04-19.md`: first worked example produced under the periodic review process; demonstrates the gate refusing on quantitative thinness and includes one illustrative qualitative-only proposal.
 - `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook.
-- `ai-workflow-design-decisions/`: maintenance rules and rationale for editing `ai-workflow.md`, split into topic-scoped files.
-- `project-context-design-decisions.md`: maintenance rules for keeping `project-context.md` factual and concise.
+- `design/`: maintenance documentation for the repository. `design/decisions/` holds concern-scoped authoring and design rationale files. `design/research/` holds primary-source notes with stable anchor IDs cited by the decisions files.
 - `observations/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
+- `observations/workflow-reviews/`: archived periodic review outputs. Each file is named by date (e.g. `2026-04-19.md`).
+- `design/decisions/evaluation.md`: periodic review process — minimum-data gate, inputs, analyses, proposal format, and approval workflow.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`, `aiw-performance-profiling`, `aiw-project-context-management`, `aiw-telemetry-setup`), each self-contained in a `SKILL.md` file. Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.

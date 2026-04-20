@@ -62,10 +62,9 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Maintenance documents
 
-- `ai-workflow-design-decisions/` — scoped maintenance rules and rationale for editing `ai-workflow.md`.
-- `project-context-design-decisions.md` — maintenance rules for keeping `project-context.md` factual and concise.
+- `design/` — concern-scoped design decisions and primary-source research. See `design/README.md` for a file index.
 - `observations/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
-- `workflow-review.md` — calendar-driven periodic review process: defines how an agent analyses accumulated telemetry plus baseline results to produce classified workflow improvement proposals. Runs outside the per-task workflow. See `docs/workflow-review-example-2026-04-19.md` for the first worked example.
+- `observations/workflow-reviews/` — archived periodic review outputs. The review process is defined in `design/decisions/evaluation.md`.
 
 ## Installation by Tool
 
