@@ -1,6 +1,6 @@
 ---
 name: aiw-failure-analysis
-description: "Structured investigation process for when the user reports that something is broken or not working, especially after the agent believed implementation was complete. Use this skill when the user's observed behaviour contradicts what the agent expected — tests passed but the feature doesn't work, a fix didn't help, or the app is visibly broken despite validation succeeding. The skill exists to prevent the agent from jumping to quick fixes and instead force a structured pause: acknowledge the gap between the agent's perspective and the user's reality, then investigate before changing more code."
+description: "Structured investigation for when the user reports something is broken or not working, especially after tests passed or a fix was applied. Trigger phrases include 'still broken', 'still doesn't work', 'still fails', 'didn't help', 'didn't work', 'the bug remains', 'not working', 'doing the wrong thing'. Other triggers: tests pass but the user reports the feature is broken; a fix did not resolve the behaviour; a user report contradicts validation output; runtime behaviour contradicts the implementation or plan; manual verification fails. Load on any of these conditions before proposing a fix. The skill forces a structured pause to acknowledge the gap between agent expectations and user reality, then investigate before changing more code."
 ---
 
 # Failure Analysis Mode

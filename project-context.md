@@ -106,4 +106,4 @@ Version: 1.6.0
 - Update this file when the project structure, key files, or policy rules change.
 - Keep this file aligned with the current codebase, not planned architecture.
 - Keep this file concise and under 300 lines.
-- When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `ai-workflow-design-decisions/context-budget-and-maintenance.md`.
+- When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `ai-workflow-design-decisions/maintenance.md`.
