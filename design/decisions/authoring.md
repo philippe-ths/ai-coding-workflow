@@ -167,7 +167,7 @@ When reviewing a line for its optimal enforcement mechanism and home, classify i
 
 - **Global rule.** Correct candidate for `ai-workflow.md`, always in context, needed across all phases and tasks.
 - **Bright line rule.** Machine-checkable boundary; correct candidate for deterministic enforcement in `.ai-policy/` hooks. Keep the advisory form once in `ai-workflow.md`; the hook enforces it.
-- **Dynamic rule.** Condition-specific; correct candidate for extraction to an agent-specific skill loaded on demand. A section qualifies when it activates under a specific identifiable condition, is self-contained, and is not needed during the majority of sessions.
+- **Dynamic rule.** Condition-specific; correct candidate for extraction to an agent-specific skill loaded on demand. For qualification criteria see `design/decisions/maintenance.md` under **File Splitting**.
 - **Human-owned rule.** Describes human behaviour or responsibility; belongs in "The Human is Responsible For" or as an explicit numbered checkpoint, not in agent instruction flow.
 - **Advisory redundancy.** An advisory statement that duplicates a rule already fully enforced deterministically by `.ai-policy/`; candidate for removal or reduction to a single short pointer. Distinct from the Redundant cross-contamination category, which covers duplication within the advisory layer itself.
 - **Candidate to remove.** The agent could infer this from the codebase or task context; does not need to be stated explicitly; consuming context budget without adding compliance value.

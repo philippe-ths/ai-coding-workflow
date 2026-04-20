@@ -5,11 +5,12 @@ Covers how much to include in `ai-workflow.md`, versioning, file splitting, sess
 ## Version Number
 
 **Version number.**
-The `Version:` header in `ai-workflow.md` is the canonical version for the project. It tracks the project's user-facing behaviour, not just the workflow file itself.
+The `Version:` header in `ai-workflow.md` is the canonical version for the project.
+It tracks changes that affect how AI coding agents behave when the shipped files are installed in a target repository.
 No other file holds a release-level version number; subordinate files (for example `lite-monolithic/ai-workflow.md`) carry this same version so they can be identified against the canonical anchor, but they are not independent sources of truth.
 
-A change is user-facing if it can alter how the agent behaves, what the human sees, or what rules are enforced.
-User-facing files include:
+A change requires a version bump if it affects agent behaviour in a target repo.
+Files whose changes require a bump:
 
 - `ai-workflow.md` (workflow steps, rules, reference sections).
 - Skill files in `.agents/skills/` and `.claude/skills/`.
@@ -17,14 +18,18 @@ User-facing files include:
 - Agent entry points (`.github/copilot-instructions.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`).
 - `lite-monolithic/ai-workflow.md`.
 
-Bump the patch version (Z) for any user-facing change that corrects wording, fixes a gap, or removes duplication without altering intent.
-Bump the minor version (Y) for any user-facing change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.
+Files whose changes do not require a bump:
+
+- Design decisions in `design/` — maintenance docs for this repo, not shipped to target repos.
+- `project-context.md` in this repo — this repo's own context document, not shipped. Only bump if the `aiw-project-context-management` skill changes.
+- `README.md`, `observations/`, test scripts — not shipped as workflow instructions.
+
+Bump the patch version (Z) for any change that corrects wording, fixes a gap, or removes duplication without altering intent.
+Bump the minor version (Y) for any change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.
 Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps, or fundamentally restructures the skill or policy layer.
-Update the version on every user-facing edit so session logs can be tied to a specific file state.
+Update the version on every qualifying edit so session logs can be tied to a specific file state.
 
 Every change to the `Version:` header requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
-
-Changes to non-user-facing files (design decisions, `observations/observed-ai-failings.md`, `README.md`, test scripts) do not require a version bump.
 
 **Tagged releases.**
 Create a tagged release for any minor or major version bump.

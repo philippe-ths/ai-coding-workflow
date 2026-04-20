@@ -12,7 +12,7 @@ The workflow file instructs the agent, but instruction compliance degrades as co
 Bright-line mechanical rules (do not commit on a protected branch, do not commit without passing validation) are too important to rely on instruction-following alone.
 The `.ai-policy/` directory moves these rules into deterministic enforcement: shell scripts that block the action at the Git level regardless of whether the agent remembered the rule.
 
-This follows the maintenance rule "When a rule has both an advisory form and an enforcement form, keep the advisory form once in `ai-workflow.md` and keep the enforcement form in repo-local deterministic policy."
+This follows the dual-form placement rule in `design/decisions/rule-placement.md` under **One canonical location per rule**.
 The advisory form helps the agent plan correctly; the deterministic form catches it when it does not.
 
 ### Why policy.env exists

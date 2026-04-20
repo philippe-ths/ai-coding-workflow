@@ -14,8 +14,8 @@ Do not run extended thinking on every step of a multi-step workflow; reserve it 
 Language models exhibit RLHF length bias: they tend to produce longer responses than necessary because verbose responses were rewarded during training.
 (See `design/research/token-efficiency-in-agentic-workflows.md#rlhf-length-bias`.)
 Output brevity instructions reduce this noise.
-Place brevity instructions close to the point of generation — in the system prompt or immediately before the relevant task instruction — rather than at the top of a long file where they decay.
-(See `design/decisions/context-economics.md#context-budget` for why instruction position matters.)
+Place brevity instructions close to the point of generation — in the system prompt or immediately before the relevant task instruction — rather than buried in a long file where context rot degrades their effect.
+(See `design/research/token-efficiency-in-agentic-workflows.md#chroma-context-rot`.)
 
 ## Prompt caching structure
 

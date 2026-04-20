@@ -16,16 +16,15 @@ Prefer fewer, higher-quality rules over comprehensive coverage.
 
 ## Progressive disclosure via lean steps
 
-Workflow steps should be lean: sequenced actions and pointers to reference sections, not inline detail.
-If a line in a workflow step reads like a rule rather than a sequenced action, it probably belongs in a reference section or boundary section.
-This keeps the always-loaded step list short and defers the token cost of detailed rules to the reference sections that are only parsed when the step points to them.
+The placement rule for lean steps is in `design/decisions/rule-placement.md` under **Workflow steps should be lean**.
+The economic rationale: keeping always-loaded steps short defers the token cost of detailed rules to reference sections, which are only parsed when the step points to them.
 Long context degrades retrieval and instruction adherence even when the content is present.
 (See `design/research/token-efficiency-in-agentic-workflows.md#chroma-context-rot`.)
 
 ## Skill loading as a context budget tool
 
 Skills are the on-demand variant of reference sections.
-A section qualifies for extraction to a skill when it activates under a specific identifiable condition, is self-contained, and is not needed during the majority of sessions.
+For the qualification criteria for skill extraction, see `design/decisions/maintenance.md` under **File Splitting**.
 Extracting a section to a skill means its token cost is paid only in the sessions that need it.
 For how to configure and sequence skill loading, see `design/decisions/runtime-configuration.md`.
 Subagent context isolation is a stronger form of this tool: spawning a subagent for a bounded subtask gives it a clean context window with no accumulated session noise.
