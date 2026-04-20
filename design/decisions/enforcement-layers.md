@@ -1,6 +1,8 @@
-# Policy and Hooks — AI Workflow Design Decisions
+# Enforcement Layers
 
 Covers the design decisions behind the `.ai-policy/` deterministic enforcement layer and the `.githooks/` git hooks.
+
+The canonical rule for where in `ai-workflow.md` a deterministic boundary should be mentioned is in `design/decisions/rule-placement.md` under **Deterministic policy placement**.
 
 ## Deterministic Policy System (.ai-policy/)
 
