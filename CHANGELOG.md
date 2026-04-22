@@ -4,6 +4,24 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.15.0 - 2026-04-22
+
+### Changed
+
+- `aiw-telemetry-setup` skill in both `.agents/skills/` and `.claude/skills/` rewritten so that invoking it is the only user-facing action required to turn on telemetry in a target repository. Phase 1 now catches poisoned identity (an `OTEL_RESOURCE_ATTRIBUTES` whose `workflow_repo` does not match the target directory basename, or `workflow_repo=ai-coding-workflow` outside the upstream repo), missing exporters (`OTEL_LOGS_EXPORTER` or `OTEL_METRICS_EXPORTER` absent while telemetry is enabled), protocol/endpoint mismatch, stale identity in tracked `.claude/settings.json`, and local-stack reachability for Prometheus and Loki. Phase 2 always writes both exporters and always bases `workflow_repo` on the target directory. Phase 3 writes to gitignored `.envrc` (direnv path) or `.claude/settings.local.json` (IDE path), never to tracked `.claude/settings.json`. Phase 4 gains a fourth probe layer that emits a synthetic OTLP counter and verifies round-trip via Prometheus, so a configuration that passes but emits no metrics can no longer be mistaken for success ([#136]).
+- `.claude/settings.json` no longer carries `env.OTEL_RESOURCE_ATTRIBUTES`. Telemetry identity moves to gitignored `.envrc`, so copying this repository's files into a target repository cannot silently propagate `workflow_repo=ai-coding-workflow` into that target ([#136]).
+- `.ai-policy/scripts/update-session-tags.sh` retargets to `.envrc` and inserts/updates a sentinel-delimited managed block idempotently. The `--check` drift mode is removed because there is no longer a tracked file to drift. The script self-scopes to the `ai-coding-workflow` repository by directory-basename check and exits 0 in any other repo ([#136]).
+- `README.md` promotes `aiw-telemetry-setup` from an "Optional" extra to the standard telemetry install step for Claude Code. The "Session Telemetry" reference section is rewritten to reflect `.envrc`-hosted identity and the removal of the pre-commit drift check ([#136]).
+- `docs/telemetry-setup.md` restructured so the target-repo path points at the skill and the `ai-coding-workflow` path points at `.envrc.example`; both list `OTEL_METRICS_EXPORTER=otlp` and `OTEL_LOGS_EXPORTER=otlp` as required-together ([#136]).
+- `.envrc.example` now declares `OTEL_RESOURCE_ATTRIBUTES` alongside the exporter variables so enabling telemetry in this repo sets identity in one place ([#136]).
+- `.envrc.example`, the `aiw-telemetry-setup` skill's required change set, README, and `docs/telemetry-setup.md` now require `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`. Claude Code defaults to delta temporality, but the shipped `prometheusremotewrite` exporter requires cumulative — without the override, real Claude Code sessions emit logs to Loki but metrics silently fail to reach Prometheus, leaving the Session Overview, Tool Usage, and Version Comparison dashboards empty. Discovered while post-implementation-verifying that real telemetry (not just the synthetic probe) was reaching both backends ([#136]).
+
+### Removed
+
+- `.ai-policy/hooks/check-session-tags.sh` pre-commit hook and its invocation from `.githooks/pre-commit`. The drift it caught was drift in a tracked file; now that identity is no longer tracked, the drift class does not exist ([#136]).
+- `.ai-policy/scripts/test-session-tags-hook.sh` — covered the deleted hook ([#136]).
+- Session-tags test gating in `.ai-policy/scripts/project-validation.sh` ([#136]).
+
 ## 2.14.0 - 2026-04-20
 
 ### Changed

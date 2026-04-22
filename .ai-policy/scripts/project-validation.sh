@@ -12,7 +12,7 @@ for t in ./.ai-policy/scripts/test-*.sh; do
   [ -x "$t" ] || continue
   base="$(basename "$t" .sh)"
   case "$base" in
-    test-claude-code-enforcement|test-session-tags-hook)
+    test-claude-code-enforcement)
       [ -d ./.claude ] || { echo "Skipping $base (no ./.claude/ — Claude Code not installed)"; continue; }
       ;;
     test-codex-enforcement)

@@ -13,7 +13,7 @@ telemetry/data/baseline/<workflow_version>/<ruleset_hash>/<task_id>/<run_id>.jso
 ```
 
 - `workflow_version` — matches `Version:` in `ai-workflow.md` at run time.
-- `ruleset_hash` — matches the 8-hex `ruleset_hash` written to `.claude/settings.json` by `.ai-policy/scripts/update-session-tags.sh`.
+- `ruleset_hash` — matches the 8-hex `ruleset_hash` written into this repo's gitignored `.envrc` by `.ai-policy/scripts/update-session-tags.sh`.
 - `task_id` — stable identifier of the frozen baseline task (e.g. `t-001-add-logging`).
 - `run_id` — 8-hex random, generated per run.
 

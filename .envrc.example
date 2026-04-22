@@ -1,8 +1,11 @@
 # Example direnv config for enabling Claude Code session telemetry.
-# Copy to `.envrc`, edit the endpoint for your collector, then run `direnv allow`.
-# `.envrc` is gitignored — the three variables below are deliberately not committed.
-# The committed .claude/settings.json provides the workflow_version and ruleset_hash
-# tags; this file decides whether telemetry is on and where it goes.
+# Copy to `.envrc`, adjust values if needed, then run `direnv allow`.
+# `.envrc` is gitignored — none of these values are committed.
+#
+# In the ai-coding-workflow repo itself, ./.ai-policy/scripts/update-session-tags.sh
+# can be run to inject or refresh the OTEL_RESOURCE_ATTRIBUTES block automatically
+# based on the current workflow version and ruleset hash. In downstream repos,
+# the aiw-telemetry-setup skill owns the content of .envrc.
 
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
@@ -10,10 +13,17 @@ export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
+# Required for metrics to reach the shipped Prometheus pipeline. Claude Code
+# defaults to delta temporality, but the OTel Collector's prometheusremotewrite
+# exporter expects cumulative — without this override, metrics silently fail to
+# appear in Prometheus while logs continue to flow to Loki.
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
+
+# Identifies the session in Loki/Prometheus. Downstream repos set
+# workflow_repo to their own directory name so their data is distinguishable.
+export OTEL_RESOURCE_ATTRIBUTES="workflow_repo=ai-coding-workflow"
+
 # Uncomment if your collector is HTTP-only (port 4318 is the OTLP/HTTP default)
 # and comment out the gRPC endpoint/protocol above:
 # export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 # export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-
-# Uncomment if the downstream collector requires cumulative temporality:
-# export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
