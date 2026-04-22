@@ -4,6 +4,9 @@
 # Local settings
 *.local.json
 
+# Claude Code runtime artifacts (per-session, per-process state)
+.claude/*.lock
+
 # direnv (per-repo shell env, e.g. telemetry enablement)
 .envrc
 
