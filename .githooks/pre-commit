@@ -12,6 +12,4 @@ if [ "$REQUIRE_VALIDATION_BEFORE_COMMIT" = "true" ]; then
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
 fi
 
-"$ROOT_DIR/.ai-policy/hooks/check-session-tags.sh"
-
 exit 0

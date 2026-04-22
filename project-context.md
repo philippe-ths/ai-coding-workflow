@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.6.0
+Version: 1.7.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -68,8 +68,8 @@ Version: 1.6.0
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
-- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, testing enforcement, and keeping Claude Code session tags in sync via `update-session-tags.sh`. `project-validation.sh` is the portable policy-layer check: shell-script syntax plus enforcement tests gated on the agent entry points installed in the repo; it invokes `scripts/repo-validation.sh` afterwards when present.
-- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`. Includes `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry) and `check-session-tags.sh` (pre-commit, rejects drift between `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` and the current ruleset).
+- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, testing enforcement, and keeping Claude Code session tags in sync via `update-session-tags.sh` (which writes a sentinel-delimited managed block into this repo's gitignored `.envrc`; self-scoped to the `ai-coding-workflow` repository by directory basename). `project-validation.sh` is the portable policy-layer check: shell-script syntax plus enforcement tests gated on the agent entry points installed in the repo; it invokes `scripts/repo-validation.sh` afterwards when present.
+- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`. Includes `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry).
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
 - `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration and tool permission defaults.
@@ -96,7 +96,7 @@ Version: 1.6.0
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
-- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` and `test-session-tags-hook.sh` require `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh` and `test-pre-push-hook.sh` always run.
+- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh` and `test-pre-push-hook.sh` always run.
 - Repo-specific validation for this repo lives in `scripts/repo-validation.sh` and is invoked by the policy-layer validator when present: `bash -n` on `telemetry/*.sh` and `scripts/run-baseline.sh`, Python `py_compile` on `evals/` + `scripts/`, YAML syntax checks on telemetry configs when `python3` + `pyyaml` are present, JSON syntax checks on Grafana dashboards, and `docker compose config -q` in `telemetry/` when Docker is installed.
 - No unit test framework exists; there are no automated tests for documentation content or Grafana dashboard correctness.
 - Manual verification is the primary check for documentation changes and telemetry dashboard behaviour.

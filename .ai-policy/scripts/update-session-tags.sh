@@ -1,13 +1,26 @@
 #!/usr/bin/env bash
 set -eu
 
-# Updates .claude/settings.json's env.OTEL_RESOURCE_ATTRIBUTES to match
-# the current ai-workflow.md version and a ruleset hash computed from
-# the rule-defining files.
+# Updates this repo's .envrc to carry an OTEL_RESOURCE_ATTRIBUTES export line
+# that matches the current ai-workflow.md version and a ruleset hash computed
+# from the rule-defining files.
 #
 # Usage:
-#   update-session-tags.sh          # writes if drift
-#   update-session-tags.sh --check  # exits 1 on drift, does not write
+#   update-session-tags.sh
+#
+# Scope:
+#   This script exists to keep the ai-coding-workflow upstream repository's own
+#   Claude Code session telemetry tags in sync with its current ruleset. It is
+#   not intended for downstream repositories — the aiw-telemetry-setup skill
+#   owns downstream .envrc content.
+#
+# Target file:
+#   .envrc  (gitignored; maintainer-local).
+#
+# The script inserts or replaces a block delimited by these sentinels:
+#   # >>> aiw session tags (managed, do not edit) >>>
+#   export OTEL_RESOURCE_ATTRIBUTES="..."
+#   # <<< aiw session tags <<<
 #
 # Tag format:
 #   workflow_version=X.Y.Z,workflow_repo=ai-coding-workflow,ruleset_hash=<8hex>
@@ -23,12 +36,19 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 cd "$ROOT_DIR"
 
 WORKFLOW_FILE="ai-workflow.md"
-SETTINGS_FILE=".claude/settings.json"
+ENVRC_FILE=".envrc"
 REPO_NAME="ai-coding-workflow"
+BEGIN_SENTINEL="# >>> aiw session tags (managed, do not edit) >>>"
+END_SENTINEL="# <<< aiw session tags <<<"
 
-MODE="write"
-if [ "${1:-}" = "--check" ]; then
-  MODE="check"
+# Self-scope: only run in the upstream ai-coding-workflow repo itself.
+# Downstream repos use the aiw-telemetry-setup skill to populate .envrc.
+if [ ! -f "$WORKFLOW_FILE" ] || ! grep -q "^# AI Workflow" "$WORKFLOW_FILE" 2>/dev/null; then
+  exit 0
+fi
+repo_basename="$(basename "$ROOT_DIR")"
+if [ "$repo_basename" != "$REPO_NAME" ]; then
+  exit 0
 fi
 
 sha256_hex() {
@@ -59,21 +79,6 @@ if [ -z "$version" ]; then
   exit 2
 fi
 
-if [ ! -f "$SETTINGS_FILE" ]; then
-  echo "update-session-tags: $SETTINGS_FILE not found" >&2
-  exit 2
-fi
-
-# Self-scope to the ai-coding-workflow upstream repo. Downstream repos that
-# copy .ai-policy/ wholesale set their own OTEL_RESOURCE_ATTRIBUTES via the
-# aiw-telemetry-setup skill; their tag string does not carry
-# workflow_repo=ai-coding-workflow and must not be overwritten or drift-checked
-# against the upstream ruleset hash.
-existing="$(jq -r '.env.OTEL_RESOURCE_ATTRIBUTES // ""' "$SETTINGS_FILE")"
-if [ -n "$existing" ] && ! printf '%s' "$existing" | grep -q 'workflow_repo=ai-coding-workflow'; then
-  exit 0
-fi
-
 tmp_input="$(mktemp)"
 trap 'rm -f "$tmp_input"' EXIT
 
@@ -84,24 +89,48 @@ while IFS= read -r f; do
 done < <(collect_rule_files)
 
 ruleset_hash="$(sha256_hex < "$tmp_input" | cut -c1-8)"
-
 new_attrs="workflow_version=${version},workflow_repo=${REPO_NAME},ruleset_hash=${ruleset_hash}"
 
-current="$(jq -r '.env.OTEL_RESOURCE_ATTRIBUTES // ""' "$SETTINGS_FILE")"
+export_line="export OTEL_RESOURCE_ATTRIBUTES=\"${new_attrs}\""
 
-if [ "$current" = "$new_attrs" ]; then
+write_block() {
+  local target="$1"
+  printf '%s\n%s\n%s\n' "$BEGIN_SENTINEL" "$export_line" "$END_SENTINEL" >> "$target"
+}
+
+if [ ! -f "$ENVRC_FILE" ]; then
+  : > "$ENVRC_FILE"
+  write_block "$ENVRC_FILE"
+  echo "update-session-tags: created $ENVRC_FILE with $new_attrs"
   exit 0
 fi
 
-if [ "$MODE" = "check" ]; then
-  echo "update-session-tags: drift detected in $SETTINGS_FILE" >&2
-  echo "  current:  $current" >&2
-  echo "  expected: $new_attrs" >&2
-  echo "  run: ./.ai-policy/scripts/update-session-tags.sh" >&2
-  exit 1
+if grep -qF "$BEGIN_SENTINEL" "$ENVRC_FILE"; then
+  # Check whether the existing block already matches.
+  current_export="$(awk -v b="$BEGIN_SENTINEL" -v e="$END_SENTINEL" '
+    $0 == b { inblock = 1; next }
+    $0 == e { inblock = 0; next }
+    inblock { print }
+  ' "$ENVRC_FILE")"
+  if [ "$current_export" = "$export_line" ]; then
+    exit 0
+  fi
+  tmp_out="$(mktemp)"
+  awk -v b="$BEGIN_SENTINEL" -v e="$END_SENTINEL" '
+    $0 == b { skip = 1; next }
+    skip && $0 == e { skip = 0; next }
+    skip { next }
+    { print }
+  ' "$ENVRC_FILE" > "$tmp_out"
+  # Strip trailing blank lines from the kept content, then append fresh block.
+  awk 'NF { n = NR } { lines[NR] = $0 } END { for (i = 1; i <= n; i++) print lines[i] }' "$tmp_out" > "$tmp_out.trim"
+  mv "$tmp_out.trim" "$ENVRC_FILE"
+  rm -f "$tmp_out"
+  printf '\n' >> "$ENVRC_FILE"
+  write_block "$ENVRC_FILE"
+  echo "update-session-tags: updated $ENVRC_FILE to $new_attrs"
+else
+  printf '\n' >> "$ENVRC_FILE"
+  write_block "$ENVRC_FILE"
+  echo "update-session-tags: appended managed block to $ENVRC_FILE with $new_attrs"
 fi
-
-tmp_out="$(mktemp)"
-jq --arg v "$new_attrs" '.env.OTEL_RESOURCE_ATTRIBUTES = $v' "$SETTINGS_FILE" > "$tmp_out"
-mv "$tmp_out" "$SETTINGS_FILE"
-echo "update-session-tags: wrote $new_attrs to $SETTINGS_FILE"

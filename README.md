@@ -68,7 +68,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ## Installation by Tool
 
-Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow and context files, and the policy enforcement layer.
+Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow file, and the policy enforcement layer. `project-context.md` is not copied — it is authored in the target repository by invoking the `aiw-project-context-management` skill.
 
 ### Claude Code
 
@@ -78,7 +78,6 @@ CLAUDE.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-context.md       # author via the project-context-management skill
 ```
 
 ### VS Code Copilot
@@ -90,7 +89,6 @@ project-context.md       # author via the project-context-management skill
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-context.md       # author via the project-context-management skill
 ```
 
 ### Codex
@@ -102,7 +100,6 @@ AGENTS.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-context.md       # author via the project-context-management skill
 ```
 
 ### Gemini CLI
@@ -114,7 +111,6 @@ GEMINI.md
 .ai-policy/
 .githooks/
 ai-workflow.md
-project-context.md       # author via the project-context-management skill
 ```
 
 After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.
@@ -137,48 +133,60 @@ The shipped validator (`./.ai-policy/scripts/project-validation.sh`) checks only
 
 To add repo-specific checks (tests, linters, type checks, etc.) that run as part of the same validation, create an executable `./scripts/repo-validation.sh` at the root of your repo. The shipped validator invokes it automatically when present. The file is not part of the shipped policy layer, so each repo owns its own.
 
-### Optional: enable session telemetry (Claude Code only)
+### Enable session telemetry (Claude Code)
 
-To start recording Claude Code session data from the target repository into the local stack shipped in this repo, invoke the `aiw-telemetry-setup` skill from a Claude Code session in the target repo, for example:
+Session telemetry is a standard part of the Claude Code install. From a Claude Code session started in the target repository, invoke the `aiw-telemetry-setup` skill:
 
 > "use the aiw-telemetry-setup skill to start recording telemetry here"
 
-The skill auto-detects the environment (collector reachability, `direnv` presence, terminal vs IDE launch context, existing configuration), proposes one consolidated set of file changes, and — after a single confirmation — writes the configuration and verifies round-trip by sending a synthetic OTLP record carrying a fresh UUID and re-querying it from Loki. It reports PASS or FAIL with the specific phase that failed and leaves no partial state on failure. It never enables telemetry as a default side effect. The local stack itself lives in this repo's `telemetry/` — see [Session Telemetry](#session-telemetry-claude-code) below.
+The skill is the single user-facing action required to turn on telemetry. It auto-detects the environment (collector reachability, local stack readiness, `direnv` presence, terminal vs IDE launch context, and any existing configuration), catches inherited identity from files copied in from other repositories, and proposes one consolidated set of file changes. After a single confirmation, it writes the configuration and verifies end-to-end round-trip for every signal the shipped Grafana dashboards consume — logs via Loki and metrics via Prometheus — by emitting synthetic records carrying fresh UUIDs and re-querying each backend. It reports SUCCESS or FAIL with the specific phase that failed and leaves no partial state on failure. It never enables telemetry as a default side effect.
 
-## Session Telemetry (Claude Code)
+Identity (the `workflow_repo` tag and friends) lives in a gitignored `.envrc`, never in any tracked file, so copying this repo's files into a target repository cannot silently propagate the wrong identity. The local stack itself lives in this repo's `telemetry/` — see [Session Telemetry (this repo)](#session-telemetry-this-repo) for the stack and reference material.
 
-Every Claude Code session started in this repository emits OTEL events tagged with the current workflow version and an 8-character ruleset hash. The tag fragment lives in `.claude/settings.json`'s `env.OTEL_RESOURCE_ATTRIBUTES` block and is kept in sync with the rule files by `.ai-policy/scripts/update-session-tags.sh`. A pre-commit check blocks commits when the fragment drifts.
+## Session Telemetry (this repo)
 
-The repository file declares **what the tags mean**. The maintainer's shell declares **whether telemetry is enabled and where it goes**. The three enablement variables are intentionally not committed, so cloning the repo does not start emitting telemetry.
+This section describes how telemetry works in the `ai-coding-workflow` repository itself. In downstream target repositories, the `aiw-telemetry-setup` skill owns this setup end-to-end — the notes below are reference material for maintainers of this repository.
 
-To enable telemetry locally, copy the example direnv config and allow it:
+Every Claude Code session started in this repository emits OTEL events tagged with the current workflow version, the repo identifier, and an 8-character ruleset hash computed from the rule files. The tag string and the enablement variables both live in a gitignored `.envrc`. No tracked file carries telemetry identity.
+
+To enable telemetry locally in this repository, copy the example direnv config and allow it:
 
 ```bash
 cp .envrc.example .envrc
 direnv allow
 ```
 
-The three exported variables are:
+The variables exported are:
 
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+export OTEL_RESOURCE_ATTRIBUTES="workflow_repo=ai-coding-workflow"
 ```
 
 `OTEL_EXPORTER_OTLP_PROTOCOL` must be set explicitly; Claude Code's OTEL SDK does not infer it from the endpoint and fails init without it. Use `grpc` with port 4317, or `http/protobuf` with port 4318.
 
-`OTEL_LOGS_EXPORTER=otlp` is required for event logs (`user_prompt`, `tool_result`, `api_request`) to reach the collector. Without it, only metrics flow.
+Both `OTEL_LOGS_EXPORTER=otlp` and `OTEL_METRICS_EXPORTER=otlp` are required: the shipped Grafana dashboards read both signals. Without one, the dashboards that consume that signal are empty.
 
-`.envrc` is gitignored so these values stay on your machine. You can also export them in `~/.zshrc` or the current shell instead of using direnv.
+`OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` is also required. Claude Code defaults to delta temporality, but the shipped Prometheus pipeline forwards via remote-write, which expects cumulative. Without this override metrics fail silently — logs continue to flow to Loki, but Prometheus-backed dashboards stay empty.
+
+To keep the full tag string (with `workflow_version` and `ruleset_hash`) in sync with the current rule files in this repo, run:
+
+```bash
+./.ai-policy/scripts/update-session-tags.sh
+```
+
+This inserts or updates a managed block in `.envrc` delimited by sentinels. It only runs in the `ai-coding-workflow` repository itself; downstream repositories are owned by the skill.
 
 Caveats:
 
 - Some downstream collectors require `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`.
 - Claude Code's `-p` one-shot mode may not flush telemetry reliably before exit; use an interactive session to verify emission.
-- After bumping the `Version:` header in `ai-workflow.md` or editing any rule file, run `./.ai-policy/scripts/update-session-tags.sh` to refresh the tag fragment.
+- After bumping the `Version:` header in `ai-workflow.md` or editing any rule file, re-run `update-session-tags.sh` to refresh the managed block.
 
 ### Local storage and dashboards
 

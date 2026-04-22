@@ -30,22 +30,30 @@ Or use `docker compose` directly inside `telemetry/`.
 
 ## Enable Claude Code emission
 
-The repository ships `.envrc.example` with the three shell variables Claude Code needs. Copy and activate it:
+**In a target repository** (any repo other than `ai-coding-workflow` itself), invoke the `aiw-telemetry-setup` skill from a Claude Code session. The skill is the supported way to enable emission: it detects the environment, proposes a single change set, writes to gitignored `.envrc` (preferred) or `.claude/settings.local.json` (IDE launch), and verifies end-to-end round-trip for both logs (Loki) and metrics (Prometheus) before reporting success.
+
+**In this repository (`ai-coding-workflow`)**, copy the shipped `.envrc.example` and activate it:
 
 ```bash
 cp .envrc.example .envrc
 direnv allow
 ```
 
-The three variables that must be exported in the shell that runs `claude`:
+Both paths set the same variables in the shell that runs `claude`:
 
 ```bash
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
 export OTEL_METRICS_EXPORTER=otlp
 export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+export OTEL_RESOURCE_ATTRIBUTES="workflow_repo=<repo-name>"
 ```
+
+Both `OTEL_METRICS_EXPORTER=otlp` and `OTEL_LOGS_EXPORTER=otlp` are required — Prometheus-backed dashboards read the first, Loki-backed dashboards read the second. Missing either leaves part of Grafana empty.
+
+`OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` is also required. Claude Code defaults to delta temporality, but the shipped Prometheus pipeline forwards via `prometheusremotewrite`, which expects cumulative — without this override, metrics silently fail to appear in Prometheus while logs continue to flow to Loki.
 
 If your Collector is HTTP-only, use `http://localhost:4318` with `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf`.
 
