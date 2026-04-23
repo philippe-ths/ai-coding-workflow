@@ -7,7 +7,8 @@ Covers where rules belong within `ai-workflow.md`: canonical location, section b
 **One canonical location per rule.**
 Every rule should exist in exactly one place.
 If the same rule appears in two sections, decide which section owns it and remove the other.
-Duplication causes drift over time and wastes context tokens.
+Duplication causes drift over time and wastes context tokens: every added line dilutes compliance across all other rules.
+(See `design/research/token-efficiency-in-agentic-workflows.md#ifscale-instruction-compliance-decay` for the measured compliance decay as instruction count grows, and `#chroma-context-rot` for retrieval and adherence degradation under long context.)
 When a rule has both an advisory form and an enforcement form, keep the advisory form once in `ai-workflow.md` and keep the enforcement form in repo-local deterministic policy.
 
 **Deterministic policy placement.**
@@ -23,6 +24,7 @@ Do not restate the same mechanically enforced boundary across multiple workflow 
 A workflow step should contain sequenced actions and pointers to reference sections.
 It should not contain detailed rules, principles, or human responsibility statements.
 If a line in a workflow step reads like a rule rather than a sequenced action, it probably belongs in a reference section or boundary section.
+(See `design/research/token-efficiency-in-agentic-workflows.md#chroma-context-rot` for why long always-loaded content degrades compliance even when the content is present, and `design/decisions/context-economics.md` for the progressive-disclosure economic argument.)
 
 **Human responsibilities do not belong in workflow steps.**
 Lines describing what the human does (e.g. "Human reviews the results") should not appear inline in workflow steps.
@@ -47,3 +49,4 @@ This keeps the boundary sections lean and genuinely global.
 **Keep First Principles minimal.**
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
 If a principle can live in a reference section instead, put it there.
+(See `design/research/prompt-engineering.md#lost-in-the-middle` for U-shaped positional attention, and `#mosaic-primacy-recency` for the caveat that primacy and recency effects are model-specific. The First Principles section is a high-salience location, but the effect depends on the model, so treat the section as a place for genuinely foundational rules rather than for any rule marked important.)

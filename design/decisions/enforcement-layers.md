@@ -10,7 +10,9 @@ The canonical rule for where in `ai-workflow.md` a deterministic boundary should
 
 The workflow file instructs the agent, but instruction compliance degrades as context grows and task complexity increases.
 Bright-line mechanical rules (do not commit on a protected branch, do not commit without passing validation) are too important to rely on instruction-following alone.
+(See `design/research/deterministic-enforcement.md#hierarchical-safety-cost-of-compliance` for measured inconsistency of prompt-level safety directives, `#longsafety-long-context-degradation` for safety-rate collapse under long context even when short-context safety is intact, and `#lifbench-instruction-stability` for instruction-following instability across input length intervals.)
 The `.ai-policy/` directory moves these rules into deterministic enforcement: shell scripts that block the action at the Git level regardless of whether the agent remembered the rule.
+(See `design/research/deterministic-enforcement.md#camel-control-flow-enforcement` for a measured example of external control-flow enforcement providing provable safety where prompt-level rules do not, and `#nemo-guardrails-programmable-rails` for the framework-level argument that runtime rails independent of the underlying LLM complement alignment rather than replace it.)
 
 This follows the dual-form placement rule in `design/decisions/rule-placement.md` under **Rule Placement**.
 The advisory form helps the agent plan correctly; the deterministic form catches it when it does not.
@@ -90,6 +92,7 @@ Having both hooks means the feedback is early (at commit time) but the enforceme
 Pre-commit gives fast feedback: the agent learns immediately that it cannot commit without validation.
 Pre-push provides a safety net: if pre-commit was bypassed, the invalid state does not reach the remote.
 The cost of running both is negligible (two shell script invocations), and the benefit is defence in depth.
+(See `design/research/deterministic-enforcement.md#google-sre-defense-in-depth` for the independent-layers-and-compartmentalization principle applied to system reliability.)
 
 ## Tool Permission Defaults
 
@@ -112,6 +115,7 @@ Tool permission configs and git hooks serve complementary roles:
 Neither layer is sufficient alone.
 Tool permissions without hooks rely on instruction-following for safety-critical rules.
 Hooks without tool permissions create constant approval prompts that add no safety value for read-only or local operations.
+(See `design/research/deterministic-enforcement.md#claude-code-sandbox` for a first-party example of OS-level sandboxing complementing tool-side permissions, and `#nemo-guardrails-programmable-rails` for the framework argument that runtime rails are independent of and complementary to model alignment.)
 
 ### Per-tool configuration
 

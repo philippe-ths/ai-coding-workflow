@@ -28,6 +28,7 @@ Bump the patch version (Z) for any change that corrects wording, fixes a gap, or
 Bump the minor version (Y) for any change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.
 Bump the major version (X) for a structural overhaul that changes the number or order of workflow steps, or fundamentally restructures the skill or policy layer.
 Update the version on every qualifying edit so session logs can be tied to a specific file state.
+The X.Y.Z scheme follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html), adapted here so that "public API" means "observable agent behaviour in a target repo" rather than source code interface.
 
 Every change to the `Version:` header requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
 
@@ -53,6 +54,8 @@ A section qualifies for extraction when all of the following are true:
 1. It activates under a specific, identifiable condition or phase.
 2. It is self-contained and has no dependencies on other sections during its active phase.
 3. It is not needed in context during the majority of sessions or phases.
+
+(See `design/research/skills.md#anthropic-agent-skills-progressive-disclosure` for the three-level progressive-disclosure model that this extraction pattern implements, and `#itr-on-demand-loading-savings` for measured savings from loading only what's needed per step.)
 
 Loading is agent-driven: the core workflow instructs the agent to read the file at the right moment.
 This approach works across all agent tools because file reading is a universal capability.
