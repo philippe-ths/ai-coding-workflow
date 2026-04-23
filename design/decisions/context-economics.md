@@ -26,5 +26,6 @@ Long context degrades retrieval and instruction adherence even when the content 
 Skills are the on-demand variant of reference sections.
 For the qualification criteria for skill extraction, see `design/decisions/maintenance.md` under **File Splitting**.
 Extracting a section to a skill means its token cost is paid only in the sessions that need it.
+(See `design/research/skills.md#anthropic-agent-skills-progressive-disclosure` for the three-level disclosure model and `#itr-on-demand-loading-savings` for measured savings: 95% per-step context reduction, 70% end-to-end episode cost reduction, 32% relative improvement in tool routing accuracy on a controlled benchmark.)
 Subagent context isolation is a stronger form of this tool: spawning a subagent for a bounded subtask gives it a clean context window with no accumulated session noise.
 For when to use subagents, see `design/decisions/runtime-configuration.md`.

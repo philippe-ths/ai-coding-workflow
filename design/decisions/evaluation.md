@@ -31,6 +31,9 @@ Do not produce proposals unless **all** of the following hold:
 - The baseline runs cover the same set of tasks across versions, so paired McNemar comparison is possible.
 - The `ruleset_hash` is consistent within each version, so the data measures one ruleset state, not a mid-flight change.
 
+The specific n=20 session threshold is a practical floor rather than a figure traceable to one canonical paper; the underlying principle is that single-test p-values become unreliable at small sample sizes and when many tests run in parallel.
+(See `design/research/evaluation-methodology.md#multiple-comparisons-correction` for the family-wise error rate inflating to ~64% when running 20 independent tests at alpha=0.05.)
+
 If any condition fails, do not produce proposals. Report instead:
 
 - Which condition is not met.
@@ -54,6 +57,8 @@ For pass/fail comparison between two workflow versions:
 - Run `python scripts/compare-versions.py <version_a> <version_b>` to produce per-task `pass^k`, aggregate `pass^k`, McNemar's test on paired pass/fail outcomes, and mean/median deltas on duration, cost, tokens, and fix cycles.
 - Treat McNemar p < 0.05 as a candidate signal, not a conclusion. Confirm with at least one of: a transcript snippet, a `prompt.id` cluster, or a clear continuous-metric delta in the same period.
 
+(See `design/research/evaluation-methodology.md#dietterich-mcnemar-paired-test` for the canonical justification of McNemar's test as the paired comparison for classifier pass/fail outcomes, including the demonstration that two unpaired tests have unacceptable Type I error rates for this design.)
+
 For event-level signals from telemetry:
 
 - Scan `tool_decision` events for elevated rejection rates by tool name. Group by workflow step where determinable.
@@ -65,6 +70,8 @@ For transcript-level signals:
 - Use LLM-as-judge on a sampled subset of transcripts.
 - Each judge call must answer one focused question (for example: "did the agent appear to revisit Step 5 because Step 6 failed?") and must cite the snippet supporting its answer.
 - Treat LLM-judge output as a hypothesis. A judge claim that cannot be backed by a quoted transcript snippet is not evidence.
+
+(See `design/research/evaluation-methodology.md#zheng-llm-judge-biases` for measured position bias, verbosity bias, and self-enhancement bias in LLM judges; `#panickssery-self-preference` for the causal link between self-recognition capability and self-preference magnitude; `#shankar-criteria-drift` for how judge criteria drift over time and why LLM-graded output is fragile without human validation; `#g-eval-llm-bias` for independent replication of judge bias toward LLM-generated text.)
 
 ### Proposal output format
 
@@ -122,3 +129,34 @@ Reject a proposal at review if any apply:
 ### Worked examples
 
 The first executed worked example is `observations/workflow-reviews/2026-04-19.md`. It demonstrates the gate refusing on quantitative thinness and produces one illustrative qualitative-only proposal that would itself be rejected under the disqualifying conditions.
+
+## Line review taxonomies
+
+The proposal classification above (hook, skill, rule, step, multi) classifies a proposed change.
+The taxonomies below classify lines within `ai-workflow.md` during a line-by-line audit of the file itself.
+Section type definitions (preamble, First Principles, workflow, reference, boundary, human responsibilities) are in `design/decisions/authoring.md` under **ai-workflow.md**.
+
+### Cross-contamination categories
+
+When reviewing the file for structural problems, classify each line as one of:
+
+- **OK.** Line is in the right place.
+- **Cross-contaminated.** Content type does not match the section's purpose (e.g. a rule in the preamble, a principle in a workflow step).
+- **Redundant.** The same rule is stated in multiple places.
+- **Misplaced.** The line belongs in a different specific section (e.g. a human responsibility in a workflow step).
+- **Candidate to move.** The line could be offloaded to a reference section with a pointer left behind.
+
+### Enforcement / placement categories
+
+When reviewing a line for its optimal enforcement mechanism and home, classify it as one of:
+
+- **Global rule.** Correct candidate for `ai-workflow.md`, always in context, needed across all phases and tasks.
+- **Bright line rule.** Machine-checkable boundary; correct candidate for deterministic enforcement in `.ai-policy/` hooks. Keep the advisory form once in `ai-workflow.md`; the hook enforces it.
+- **Dynamic rule.** Condition-specific; correct candidate for extraction to an agent-specific skill loaded on demand. For qualification criteria see `design/decisions/maintenance.md` under **File Splitting**.
+- **Human-owned rule.** Describes human behaviour or responsibility; belongs in "The Human is Responsible For" or as an explicit numbered checkpoint, not in agent instruction flow.
+- **Advisory redundancy.** An advisory statement that duplicates a rule already fully enforced deterministically by `.ai-policy/`; candidate for removal or reduction to a single short pointer. Distinct from the Redundant cross-contamination category, which covers duplication within the advisory layer itself.
+- **Candidate to remove.** The agent could infer this from the codebase or task context; does not need to be stated explicitly; consuming context budget without adding compliance value.
+
+**Note on cluster detection.**
+The Enforcement / Placement categories apply per line, but clusters of Global rules around the same topic are a signal the topic deserves its own reference section.
+When four or more Global rules share a context, flag the cluster as a whole rather than classifying each line individually.
