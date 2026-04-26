@@ -1,6 +1,6 @@
 ---
 name: aiw-planning
-description: "Structured planning process for producing a code-aware implementation plan before writing code. Use this skill when the agent needs to plan an implementation approach — identifying what files to touch, what assumptions to verify, what risks exist, and how to validate the change. The skill exists to prevent the agent from jumping straight into coding without thinking through scope, assumptions, and consequences."
+description: "Structured planning process for producing a code-aware implementation plan before writing code. Use this skill when the agent needs to plan an implementation approach: identifying what files to touch, what assumptions to verify, what risks exist, and how to validate the change. The skill exists to prevent the agent from jumping straight into coding without thinking through scope, assumptions, and consequences."
 ---
 
 # Code-Aware Planning
@@ -10,10 +10,10 @@ This file contains the full requirements for a valid plan and for handling human
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections — consult them when building the plan:
+This skill works alongside these workflow sections. Consult them when building the plan:
 
-- **Scope Control** — plans must respect scope boundaries; flag multi-area changes or unrelated objectives.
-- **Validation Requirements** — plans must account for how the change will be validated, including baseline comparison.
+- **Scope Control**: plans must respect scope boundaries; flag multi-area changes or unrelated objectives.
+- **Validation Requirements**: plans must account for how the change will be validated, including baseline comparison.
 
 ## What the Plan Must Contain
 

@@ -10,11 +10,11 @@ This file contains rules for writing automated performance and UI-state-transiti
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections — consult them when writing performance tests:
+This skill works alongside these workflow sections. Consult them when writing performance tests:
 
-- **Non-Functional Test Coverage** — defines when automated coverage must be attempted before manual verification.
-- **aiw-testing** — general test construction rules. This skill covers the performance-specific subset.
-- **aiw-logging-and-observability** — covers ad-hoc runtime diagnostics. This skill covers pre-commit automated tests.
+- **Non-Functional Test Coverage**: defines when automated coverage must be attempted before manual verification.
+- **aiw-testing**: general test construction rules. This skill covers the performance-specific subset.
+- **aiw-logging-and-observability**: covers ad-hoc runtime diagnostics. This skill covers pre-commit automated tests.
 
 ## When This Skill Applies
 

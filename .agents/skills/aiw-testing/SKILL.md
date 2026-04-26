@@ -10,12 +10,12 @@ This file contains rules for test construction that serve the implementation fee
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections — consult them when writing tests:
+This skill works alongside these workflow sections. Consult them when writing tests:
 
-- **Validation Requirements** — covers when to run tests, baseline comparison, and result reporting. This skill covers how to write them.
-- **Test Readiness** — covers the pre-implementation check for test infrastructure gaps. This skill covers filling those gaps when approved.
-- **Non-Functional Test Coverage** — covers when automated coverage for UI state transitions, latency, and security must be attempted before manual verification.
-- **aiw-performance-profiling** — detailed rules for writing performance and UI-state-transition tests. Load it in addition to this skill when the change triggers those conditions.
+- **Validation Requirements**: covers when to run tests, baseline comparison, and result reporting. This skill covers how to write them.
+- **Test Readiness**: covers the pre-implementation check for test infrastructure gaps. This skill covers filling those gaps when approved.
+- **Non-Functional Test Coverage**: covers when automated coverage for UI state transitions, latency, and security must be attempted before manual verification.
+- **aiw-performance-profiling**: detailed rules for writing performance and UI-state-transition tests. Load it in addition to this skill when the change triggers those conditions.
 
 ## Non-Functional Coverage
 
