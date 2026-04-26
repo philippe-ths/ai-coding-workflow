@@ -10,14 +10,14 @@ This file contains the full process for investigating and resolving contradictio
 
 ## Why This Mode Exists
 
-When tests pass and validation succeeds, you believe the implementation is correct. If the user then reports that the feature is broken or the app doesn't work, there is a gap between your understanding and reality. Your natural response is to jump to the nearest quick fix — but if your understanding of the system was wrong enough for the tests to miss the problem, a quick fix is likely to be wrong too. This mode forces a structured pause: stop, describe the contradiction, list what could be wrong, and gather evidence before writing more code.
+When tests pass and validation succeeds, you believe the implementation is correct. If the user then reports that the feature is broken or the app doesn't work, there is a gap between your understanding and reality. Your natural response is to jump to the nearest quick fix. But if your understanding of the system was wrong enough for the tests to miss the problem, a quick fix is likely to be wrong too. This mode forces a structured pause: stop, describe the contradiction, list what could be wrong, and gather evidence before writing more code.
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections — consult them during investigation:
+This skill works alongside these workflow sections. Consult them during investigation:
 
-- **Validation Requirements** — understand what validation should have caught; compare post-change results against the baseline.
-- **Logging and Observability** — load the `aiw-logging-and-observability` skill when diagnostic approaches are needed during investigation.
+- **Validation Requirements**: understand what validation should have caught; compare post-change results against the baseline.
+- **Logging and Observability**: load the `aiw-logging-and-observability` skill when diagnostic approaches are needed during investigation.
 
 ## Process
 

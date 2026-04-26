@@ -1,6 +1,6 @@
 ---
 name: aiw-logging-and-observability
-description: "Ensures the agent has enough runtime observability to validate its changes. Use this skill when automated tests alone cannot prove the change works correctly — it covers which changes need observability, how to add logging, and how to write diagnostics for runtime investigation."
+description: "Ensures the agent has enough runtime observability to validate its changes. Use this skill when automated tests alone cannot prove the change works correctly. It covers which changes need observability, how to add logging, and how to write diagnostics for runtime investigation."
 ---
 
 # Logging and Observability

@@ -6,7 +6,7 @@ description: "Guided, mostly-automated process for enabling Claude Code session 
 # Telemetry Setup
 
 Read this file when the user wants to start recording Claude Code session telemetry in a repository.
-The telemetry stack itself lives in the `ai-coding-workflow` repository under `telemetry/`; this skill configures a repository — the current one or any other — to emit into that stack.
+The telemetry stack itself lives in the `ai-coding-workflow` repository under `telemetry/`; this skill configures a repository (the current one or any other) to emit into that stack.
 
 This skill is the single user-facing action required to enable telemetry in a target repository. After running it, copied-in upstream files must not carry foreign identity, every signal the shipped Grafana dashboards consume must be emitted, and every enabled signal must have its round-trip verified end to end.
 
@@ -19,26 +19,26 @@ This skill is the single user-facing action required to enable telemetry in a ta
 - On any failure, leave the repository in the state it was in before the skill ran.
 - Report SUCCESS or FAIL with the specific phase that failed and the next thing for the user to check.
 
-## Phase 1 — Pre-flight detection (automated, read-only)
+## Phase 1: Pre-flight detection (automated, read-only)
 
 Run all of these before asking the user anything. Collect findings and present them together.
 
-- Resolve the target repository root. Report it, along with the directory's basename — this basename is the expected `workflow_repo` tag value.
+- Resolve the target repository root. Report it, along with the directory's basename. This basename is the expected `workflow_repo` tag value.
 - Detect collector reachability by probing the local OTLP endpoints on the host running the user's shell. Do not probe remote endpoints. Probe both `4317` (gRPC) and `4318` (HTTP).
-- Detect whether the full local telemetry stack is up: Prometheus (`http://localhost:9090/-/ready`), Loki (`http://localhost:3100/ready`), and Grafana. If any is down, record which — the skill must not claim success for a signal whose backend is unreachable.
+- Detect whether the full local telemetry stack is up: Prometheus (`http://localhost:9090/-/ready`), Loki (`http://localhost:3100/ready`), and Grafana. If any is down, record which. The skill must not claim success for a signal whose backend is unreachable.
 - Detect whether `direnv` is installed and whether the target repository contains an existing `.envrc`.
 - Detect the launch context of the current Claude Code process and of the likely future launches: terminal vs IDE. Check standard IDE indicator variables, the process parent, and the binary path. State confidence.
 - Detect whether the target repository already has `.claude/settings.json` and whether it has an `env` block carrying `OTEL_RESOURCE_ATTRIBUTES`. Also read any existing `.envrc` for the same variable and the required exporter variables.
 - Check the existing configuration for every known failure mode before treating it as valid:
   - **Poisoned identity.** If `OTEL_RESOURCE_ATTRIBUTES` contains `workflow_repo=<name>` and `<name>` does not match the target directory basename, the configuration was inherited from a copy of another repo (typically `ai-coding-workflow`). Flag as MISCONFIGURED and plan to replace the tag string.
   - **Missing exporters.** If `CLAUDE_CODE_ENABLE_TELEMETRY=1` is set but either `OTEL_METRICS_EXPORTER=otlp` or `OTEL_LOGS_EXPORTER=otlp` is absent, flag as MISCONFIGURED. Both are required because the shipped Grafana dashboards read Prometheus metrics **and** Loki logs.
-  - **Missing metric temporality override.** If `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` is absent, flag as MISCONFIGURED. Claude Code's OTEL SDK defaults to delta temporality, but the shipped collector pipeline forwards to Prometheus via remote-write, which requires cumulative — without this override, logs reach Loki normally while metrics silently fail to appear in Prometheus.
+  - **Missing metric temporality override.** If `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` is absent, flag as MISCONFIGURED. Claude Code's OTEL SDK defaults to delta temporality, but the shipped collector pipeline forwards to Prometheus via remote-write, which requires cumulative. Without this override, logs reach Loki normally while metrics silently fail to appear in Prometheus.
   - **Protocol/endpoint mismatch.** If `OTEL_EXPORTER_OTLP_ENDPOINT` is set without a matching `OTEL_EXPORTER_OTLP_PROTOCOL`, or the protocol does not match the port (`grpc` with 4317, `http/protobuf` with 4318), flag as MISCONFIGURED.
   - **Stale tracked identity.** If `.claude/settings.json` carries an `env.OTEL_RESOURCE_ATTRIBUTES` value at all, this is a tracked file and propagates to anyone who clones the repo. Flag as MISCONFIGURED and plan to move identity to gitignored `.envrc`.
 - Only if none of those checks flag anything, treat the repository as "already configured" and offer a re-probe instead of proposing changes.
 - Do not launch Claude Code, do not send any network traffic other than the collector-reachability and stack-readiness probes, and do not write files during this phase.
 
-## Phase 2 — Propose a single change set
+## Phase 2: Propose a single change set
 
 Based on Phase 1, decide the propagation mechanism:
 
@@ -49,10 +49,10 @@ Based on Phase 1, decide the propagation mechanism:
 Define the full change set:
 
 - `CLAUDE_CODE_ENABLE_TELEMETRY=1`
-- `OTEL_LOGS_EXPORTER=otlp` **and** `OTEL_METRICS_EXPORTER=otlp` — both always, regardless of which signal the user is focused on.
-- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` — always. The shipped Prometheus pipeline drops Claude Code's default delta-temporality counters silently.
+- `OTEL_LOGS_EXPORTER=otlp` **and** `OTEL_METRICS_EXPORTER=otlp`. Both always, regardless of which signal the user is focused on.
+- `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`. Always. The shipped Prometheus pipeline drops Claude Code's default delta-temporality counters silently.
 - `OTEL_EXPORTER_OTLP_ENDPOINT` paired with an explicit `OTEL_EXPORTER_OTLP_PROTOCOL`. Default to `grpc` with `http://localhost:4317` when Phase 1 detected 4317 open. Fall back to `http/protobuf` with `http://localhost:4318` when only 4318 is open.
-- `OTEL_RESOURCE_ATTRIBUTES` with, at minimum, `workflow_repo=<target-directory-basename>`. If the target repo has its own `ai-workflow.md` with a `Version:` header, also include `workflow_version=<that version>`. Do not include `ruleset_hash` — that machinery belongs to the `ai-coding-workflow` repository itself.
+- `OTEL_RESOURCE_ATTRIBUTES` with, at minimum, `workflow_repo=<target-directory-basename>`. If the target repo has its own `ai-workflow.md` with a `Version:` header, also include `workflow_version=<that version>`. Do not include `ruleset_hash`. That machinery belongs to the `ai-coding-workflow` repository itself.
 
 Never propose a value that contains `workflow_repo=ai-coding-workflow` unless the target repository's directory basename is literally `ai-coding-workflow`.
 
@@ -66,7 +66,7 @@ Present the change set as a single summary:
 
 Ask the user to approve this summary once. Proceed only on explicit approval. On approval, proceed through Phases 3 and 4 without further prompts.
 
-## Phase 3 — Apply changes (after single confirmation)
+## Phase 3: Apply changes (after single confirmation)
 
 - Back up any file the skill modifies before writing. Restore the backup if any later step in this phase or Phase 4 fails.
 - When writing `.envrc`, read any existing file first and merge rather than overwrite. Never remove user-authored exports that the skill did not add. Delimit the skill-managed variables with a sentinel block (`# >>> aiw telemetry (managed, do not edit) >>>` and matching closing sentinel) so re-invocation can replace the block in place.
@@ -74,20 +74,20 @@ Ask the user to approve this summary once. Proceed only on explicit approval. On
 - Never modify `.claude/settings.json` to add telemetry identity or exporter values. If a prior version of this skill wrote such values there, remove them as part of the change set and record the removal in the summary.
 - After writing, if direnv is the chosen mechanism, instruct the user to run `direnv allow` and confirm the environment propagates. This is the only user action the skill requests after the confirmation gate.
 
-## Phase 4 — Probe (automated, reported layer by layer)
+## Phase 4: Probe (automated, reported layer by layer)
 
 Run the probe layers in order. Report each layer's result as it completes. Stop and report FAIL at the first failing layer.
 
-- **Layer 1 — Collector reachability.** Send an HTTP probe to the OTLP endpoint the configuration selected and require a success response.
-- **Layer 2 — Shell environment propagation.** Start a child shell under the same context the user will launch Claude Code from, and verify that every configured variable is present with the expected value: `CLAUDE_CODE_ENABLE_TELEMETRY`, `OTEL_LOGS_EXPORTER`, `OTEL_METRICS_EXPORTER`, `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and `OTEL_RESOURCE_ATTRIBUTES`. Missing or mismatched values fail the layer.
-- **Layer 3 — Logs round-trip via Loki.** From the same propagation context, send a synthetic OTLP log record that carries a freshly generated UUID in its body. After a short wait, query Loki for that UUID and confirm the returned record carries the expected resource attributes, including the target directory's `workflow_repo` value.
-- **Layer 4 — Metrics round-trip via Prometheus.** From the same propagation context, emit a synthetic OTLP counter (`aiw_telemetry_probe_total`) labelled with a freshly generated UUID and the target directory's `workflow_repo`. After a short wait (account for the collector's scrape and the Prometheus scrape interval), query Prometheus `/api/v1/query` for the counter filtered by the UUID label and confirm the returned series carries the expected `workflow_repo` label.
+- **Layer 1: Collector reachability.** Send an HTTP probe to the OTLP endpoint the configuration selected and require a success response.
+- **Layer 2: Shell environment propagation.** Start a child shell under the same context the user will launch Claude Code from, and verify that every configured variable is present with the expected value: `CLAUDE_CODE_ENABLE_TELEMETRY`, `OTEL_LOGS_EXPORTER`, `OTEL_METRICS_EXPORTER`, `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and `OTEL_RESOURCE_ATTRIBUTES`. Missing or mismatched values fail the layer.
+- **Layer 3: Logs round-trip via Loki.** From the same propagation context, send a synthetic OTLP log record that carries a freshly generated UUID in its body. After a short wait, query Loki for that UUID and confirm the returned record carries the expected resource attributes, including the target directory's `workflow_repo` value.
+- **Layer 4: Metrics round-trip via Prometheus.** From the same propagation context, emit a synthetic OTLP counter (`aiw_telemetry_probe_total`) labelled with a freshly generated UUID and the target directory's `workflow_repo`. After a short wait (account for the collector's scrape and the Prometheus scrape interval), query Prometheus `/api/v1/query` for the counter filtered by the UUID label and confirm the returned series carries the expected `workflow_repo` label.
 
 Each probe layer must use a fresh UUID so a stale matching record cannot produce a false positive. The probes must not emit any real session data.
 
 If Phase 1 found a backend unreachable (Prometheus or Loki), the corresponding layer must FAIL with a message naming the missing backend. The skill may not claim success by skipping a layer whose backend is down.
 
-## Phase 5 — Report
+## Phase 5: Report
 
 - On full success, report the repository root, the propagation mechanism chosen, the tag string in effect, and the exact Loki query **and** Prometheus query the user can re-run later to confirm tagged sessions are arriving.
 - On any failure, report the phase that failed, the specific check that failed, the observed output, and the next thing for the user to verify manually. Leave no partial state behind: if Phase 3 wrote files, restore from the pre-change backup before reporting.
