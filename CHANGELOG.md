@@ -4,6 +4,19 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 2.16.0 - 2026-04-26
+
+### Added
+
+- `aiw-security-testing` skill in both `.agents/skills/` and `.claude/skills/`: automated security testing rules for changes that touch authentication, authorisation, untrusted input, file-path or shell-command construction, secret handling, external API consumers, or data-access boundaries. Names the trigger surface explicitly and prescribes negative-path coverage, boundary testing, threat-model-aligned assertions, attack-corpus testing for path and command construction, parser/escaper round-trip testing, fixture-secret hygiene, redaction-boundary assertions for log leak coverage, bypass-path testing for trusted-caller exemptions, a feasibility-fallback rule that forbids silent reversion to manual, and a rule against weakening failing security tests without investigation. Motivated by issue #129: security coverage was previously a single negative-path bullet inside `aiw-testing`, which is too narrow for projects with real security surface ([#129]).
+- `Security Testing` loader section in `ai-workflow.md`: names the trigger conditions under which `aiw-security-testing` must be loaded, including the catch-all for novel trust boundaries introduced during implementation ([#129]).
+
+### Changed
+
+- `aiw-testing` skill in both skill directories now cross-references `aiw-security-testing` from its `Related Workflow Sections` block and from its `Non-Functional Coverage` security paragraph; the existing one-line negative-path summary remains in place as a minimum bar so `aiw-testing` is still useful when read on its own ([#129]).
+- `design/decisions/ai-workflow-line-by-line.md` gains a `### Security Testing` block with rationale entries for each new line in the loader, mirroring the structure used for `Performance and UI-State Profiling` ([#129]).
+- `project-context.md` Project Structure section lists `aiw-security-testing`; `Version:` header bumped to `1.8.0` ([#129]).
+
 ## 2.15.0 - 2026-04-22
 
 ### Changed

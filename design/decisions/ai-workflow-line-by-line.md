@@ -510,6 +510,22 @@ Rationale: Extracts the detailed performance and UI-state-transition test constr
 
 ---
 
+### Security Testing
+
+> "Use when the change touches authentication, authorisation, untrusted input handling, file-path or shell-command construction, secret handling, external API consumption, or data-access boundaries."
+
+Rationale: Names the trigger surface explicitly so the agent recognises the conditions without inferring them. Each item maps to a class of bug the happy-path test cannot catch: missing authn check, missing authz check, validator gap, injection sink, secret leak, untrusted external response, cross-tenant read. Listing the surface inline keeps the workflow lean while still pulling the skill in when it matters.
+
+> "Use when the change introduces a new boundary between trusted and untrusted data."
+
+Rationale: Catches the case the explicit list misses: a novel boundary the agent invents during implementation, such as a new webhook handler, a new file uploader, or a new admin RPC. Without this line, the agent would only load the skill when editing existing surfaces and would skip it on greenfield additions, which is exactly when threat-model thinking pays off most.
+
+> "Load the `aiw-security-testing` skill."
+
+Rationale: Extracts the detailed security test construction rules to an on-demand skill. Keeps the core workflow lean while making negative-path coverage, boundary testing, threat-model-aligned assertions, and feasibility-fallback discipline available when the triggers fire. Mirrors the structure of `aiw-performance-profiling` so the loader pattern stays uniform across non-functional categories.
+
+---
+
 ### Non-Functional Test Coverage
 
 > "Attempt automated coverage for the following categories before suggesting manual verification:"
