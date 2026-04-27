@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 2.15.0
+Version: 2.16.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -210,6 +210,13 @@ Use when the change touches UI state transitions, reactive rerender paths, cachi
 Use when the change introduces a caching workaround or manual state reset to patch a symptom.
 
 Load the `aiw-performance-profiling` skill.
+
+## Security Testing
+
+Use when the change touches authentication, authorisation, untrusted input handling, file-path or shell-command construction, secret handling, external API consumption, or data-access boundaries.
+Use when the change introduces a new boundary between trusted and untrusted data.
+
+Load the `aiw-security-testing` skill.
 
 ## Non-Functional Test Coverage
 
