@@ -82,9 +82,11 @@ Version: 1.8.0
 - `telemetry/otel-collector-config.yaml`: OTLP receivers on `:4317`/`:4318`, redaction processors (identity-attribute strip, body regex scrub, attribute truncation), and exporters to Prometheus and Loki.
 - `telemetry/prometheus/prometheus.yml`, `telemetry/loki/loki-config.yaml`: backend configs with 30-day retention.
 - `telemetry/grafana/provisioning/`: auto-wired datasources and dashboard provider.
-- `telemetry/grafana/dashboards/`: four pre-built dashboards — `session-overview.json`, `tool-usage.json`, `fix-cycles.json` (placeholder until Sub-issue D), `version-comparison.json`.
+- `telemetry/grafana/dashboards/`: five pre-built dashboards — `session-overview.json`, `tool-usage.json`, `fix-cycles.json` (placeholder), `version-comparison.json` (PromQL), `version-comparison-loki.json` (LogQL cross-version comparison driven by Loki structured metadata).
 - `telemetry/up.sh`, `telemetry/down.sh`: convenience wrappers around `docker compose`.
-- `telemetry/.gitignore`: blocks captured data from being committed.
+- `telemetry/install-autostart.sh`: idempotent installer that registers `~/Library/LaunchAgents/com.aiw.telemetry.plist` so the stack starts on Mac login and every 5 minutes thereafter.
+- `telemetry/launchd/`: launchd plist template, `ensure-stack-up.sh` wrapper (no-ops when Docker isn't running), and runtime stdout/stderr logs (gitignored).
+- `telemetry/.gitignore`: blocks captured data and launchd runtime logs from being committed.
 - `docs/telemetry-setup.md`: maintainer-facing setup, redaction, and troubleshooting guide for the telemetry stack.
 - `docs/telemetry-schema.md`: baseline-harness per-session JSON contract (v0.2, locked by #112).
 - `evals/harness/`: Python baseline harness — runner, JSON writer, workflow-version / ruleset-hash reader, pytest grader, `mock` and `claude-code` agents, plus `Dockerfile` + `compose.yaml` for the sandbox used by the `claude-code` agent.

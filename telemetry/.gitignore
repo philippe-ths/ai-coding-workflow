@@ -8,3 +8,7 @@ grafana/data/
 # Per-machine compose override (e.g. remap ports when 3000/9090/3100 are busy).
 # docker-compose picks this up automatically; keep it out of the repo.
 docker-compose.override.yml
+
+# launchd autostart runtime logs (per-machine).
+launchd/stdout.log
+launchd/stderr.log
