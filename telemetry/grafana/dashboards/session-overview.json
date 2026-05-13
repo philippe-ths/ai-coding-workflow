@@ -28,7 +28,7 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum(increase(claude_code_session_count_total{workflow_version=~\"$workflow_version\"}[$__range]))",
+          "expr": "count(group by (session_id) (last_over_time(claude_code_session_count_total{workflow_version=~\"$workflow_version\"}[$__range])))",
           "refId": "A"
         }
       ],
@@ -56,7 +56,7 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum(increase(claude_code_active_time_total{workflow_version=~\"$workflow_version\"}[$__range]))",
+          "expr": "sum(increase(claude_code_active_time_seconds_total{workflow_version=~\"$workflow_version\"}[$__range]))",
           "refId": "A"
         }
       ],

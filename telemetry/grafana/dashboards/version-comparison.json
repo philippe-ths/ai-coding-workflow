@@ -16,7 +16,7 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum by (workflow_version, ruleset_hash) (increase(claude_code_session_count_total[$__range]))",
+          "expr": "count by (workflow_version, ruleset_hash) (group by (workflow_version, ruleset_hash, session_id) (last_over_time(claude_code_session_count_total[$__range])))",
           "format": "table",
           "instant": true,
           "refId": "A"
@@ -31,7 +31,7 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
-          "expr": "sum by (workflow_version) (increase(claude_code_cost_usage_USD_total[$__range])) / clamp_min(sum by (workflow_version) (increase(claude_code_session_count_total[$__range])), 1)",
+          "expr": "sum by (workflow_version) (increase(claude_code_cost_usage_USD_total[$__range])) / clamp_min(count by (workflow_version) (group by (workflow_version, session_id) (last_over_time(claude_code_session_count_total[$__range]))), 1)",
           "format": "table",
           "instant": true,
           "refId": "A"

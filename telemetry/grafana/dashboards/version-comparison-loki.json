@@ -1,0 +1,191 @@
+{
+  "uid": "aiw-version-comparison-loki",
+  "title": "Version Comparison (Loki)",
+  "tags": ["ai-coding-workflow", "claude-code", "loki"],
+  "schemaVersion": 39,
+  "timezone": "browser",
+  "time": { "from": "now-30d", "to": "now" },
+  "refresh": "1m",
+  "description": "Cross-version comparison driven by Loki structured metadata. Includes every session whose logs landed, even when Prometheus metrics did not. Pair this with the PromQL Version Comparison dashboard to spot metric-side data loss.",
+  "panels": [
+    {
+      "id": 100,
+      "type": "text",
+      "title": "How to read",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "Counts and rates are derived directly from Loki event logs (every Claude Code session emits one log entry per event). This bypasses the Prometheus metrics pipeline, which has dropped ~80% of sessions in the current data.\n\n**For \"is version B better than version A?\"** read these panels in order: (1) Distinct sessions — confirm both versions have enough data; (2) Reject rate / API error rate / Tool failure rate — direction-of-arrow signals; (3) Tool latency p50/p95 — speed signal; (4) Events per session — effort signal, but heavily confounded by task mix. Watch for within-version variance bigger than between-version delta — that's noise > effect."
+      }
+    },
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Distinct sessions per (repo, version)",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "count by (workflow_repo, workflow_version) (max by (workflow_repo, workflow_version, session_id) (count_over_time({service_name=\"claude-code\"} | session_id!=\"\" [$__range])))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "align": "left" } } },
+      "transformations": [
+        { "id": "organize", "options": { "excludeByName": { "Time": true }, "renameByName": { "Value": "sessions" } } },
+        { "id": "sortBy", "options": { "fields": {}, "sort": [ { "field": "workflow_repo" }, { "field": "workflow_version" } ] } }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Total tool decisions + reject rate by version",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_repo, workflow_version) (count_over_time({service_name=\"claude-code\"} | event_name=\"tool_decision\" [$__range]))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "total",
+          "refId": "TOTAL"
+        },
+        {
+          "expr": "sum by (workflow_repo, workflow_version) (count_over_time({service_name=\"claude-code\"} | event_name=\"tool_decision\" | decision=\"reject\" [$__range]))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "rejects",
+          "refId": "REJECT"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": { "byField": "workflow_version", "mode": "outer" }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time 1": true, "Time 2": true, "workflow_repo 2": true },
+            "renameByName": {
+              "workflow_repo 1": "repo",
+              "workflow_version": "version",
+              "Value #TOTAL": "decisions",
+              "Value #REJECT": "rejects"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "barchart",
+      "title": "Mean events per session, by version",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 13 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "avg by (workflow_repo, workflow_version) (sum by (workflow_repo, workflow_version, session_id) (count_over_time({service_name=\"claude-code\"} | session_id!=\"\" [$__range])))",
+          "legendFormat": "{{workflow_repo}} {{workflow_version}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "decimals": 0, "unit": "short" } }
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Tool latency by version (p50 / p95, ms)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 13 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "quantile_over_time(0.5, {service_name=\"claude-code\"} | event_name=\"tool_result\" | duration_ms!=\"\" | unwrap duration_ms [$__range]) by (workflow_repo, workflow_version)",
+          "format": "table",
+          "instant": true,
+          "refId": "P50"
+        },
+        {
+          "expr": "quantile_over_time(0.95, {service_name=\"claude-code\"} | event_name=\"tool_result\" | duration_ms!=\"\" | unwrap duration_ms [$__range]) by (workflow_repo, workflow_version)",
+          "format": "table",
+          "instant": true,
+          "refId": "P95"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": { "byField": "workflow_version", "mode": "outer" }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time 1": true, "Time 2": true, "workflow_repo 2": true },
+            "renameByName": {
+              "workflow_repo 1": "repo",
+              "workflow_version": "version",
+              "Value #P50": "p50_ms",
+              "Value #P95": "p95_ms"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "API errors and tool failures by version",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 22 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_repo, workflow_version) (count_over_time({service_name=\"claude-code\"} | event_name=\"api_error\" [$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "APIERR"
+        },
+        {
+          "expr": "sum by (workflow_repo, workflow_version) (count_over_time({service_name=\"claude-code\"} | event_name=\"tool_result\" | success=\"false\" [$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "TOOLFAIL"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": { "byField": "workflow_version", "mode": "outer" }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time 1": true, "Time 2": true, "workflow_repo 2": true },
+            "renameByName": {
+              "workflow_repo 1": "repo",
+              "workflow_version": "version",
+              "Value #APIERR": "api_errors",
+              "Value #TOOLFAIL": "tool_failures"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Events per hour by version",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 22 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "expr": "sum by (workflow_repo, workflow_version) (count_over_time({service_name=\"claude-code\"} [1h]))",
+          "legendFormat": "{{workflow_repo}} {{workflow_version}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
