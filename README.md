@@ -198,6 +198,14 @@ The `telemetry/` directory ships a local OpenTelemetry Collector + Prometheus + 
 ./telemetry/down.sh -v     # stop and wipe captured data
 ```
 
+To start the stack automatically on every Mac login (so sessions aren't silently lost when the stack is down), run the autostart installer once per machine:
+
+```bash
+./telemetry/install-autostart.sh
+```
+
+This installs a launchd agent at `~/Library/LaunchAgents/com.aiw.telemetry.plist` that runs `docker compose up -d` at login and every 5 minutes. The wrapper exits cleanly when Docker isn't reachable, so it's safe to leave installed even when you don't want to start Docker right now. To uninstall: `launchctl unload ~/Library/LaunchAgents/com.aiw.telemetry.plist && rm ~/Library/LaunchAgents/com.aiw.telemetry.plist`.
+
 Grafana is at <http://localhost:3000>. See [`docs/telemetry-setup.md`](docs/telemetry-setup.md) for the full setup, redaction rules, and troubleshooting. See [`docs/telemetry-schema.md`](docs/telemetry-schema.md) for the baseline-harness session JSON contract.
 
 ## What This Repository Optimizes For
