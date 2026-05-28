@@ -196,11 +196,87 @@ c4b_poisoned_json="$(echo "$c4b_raw" | jq '
   else [] end')"
 c4b_status=$(echo "$c4b_poisoned_json" | jq -r 'if length == 0 then "pass" else "fail" end')
 
+# ---------- Condition 5: .envrc tags are current ----------
+# Recomputes the hash deterministically from the ruleset files and compares
+# to what .envrc currently exports. Catches drift after a workflow bump.
+
+c5_status="fail"
+c5_detail=""
+c5_envrc_version=""
+c5_envrc_hash=""
+c5_actual_version=""
+c5_actual_hash=""
+
+if [ ! -f .envrc ]; then
+  c5_detail=".envrc not found (run ./.ai-policy/scripts/update-session-tags.sh)"
+else
+  c5_envrc_attrs="$(grep -oE 'OTEL_RESOURCE_ATTRIBUTES="[^"]*"' .envrc | head -1 | sed 's/^OTEL_RESOURCE_ATTRIBUTES="//; s/"$//')"
+  for pair in ${c5_envrc_attrs//,/ }; do
+    case "$pair" in
+      workflow_version=*) c5_envrc_version="${pair#workflow_version=}" ;;
+      ruleset_hash=*)     c5_envrc_hash="${pair#ruleset_hash=}" ;;
+    esac
+  done
+
+  c5_actual_version="$(awk '/^Version:[[:space:]]*/ { print $2; exit }' ai-workflow.md 2>/dev/null || true)"
+
+  c5_tmp="$(mktemp)"
+  c5_files="$(
+    {
+      [ -f ai-workflow.md ]        && echo ai-workflow.md
+      [ -f CLAUDE.md ]             && echo CLAUDE.md
+      [ -f .ai-policy/policy.env ] && echo .ai-policy/policy.env
+      for f in .ai-policy/hooks/*.sh; do [ -f "$f" ] && echo "$f"; done
+      for f in .claude/skills/*/SKILL.md; do [ -f "$f" ] && echo "$f"; done
+    } | LC_ALL=C sort -u
+  )"
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    printf '===%s===\n' "$f" >> "$c5_tmp"
+    cat "$f" >> "$c5_tmp"
+    printf '\n' >> "$c5_tmp"
+  done <<< "$c5_files"
+  if command -v sha256sum >/dev/null 2>&1; then
+    c5_actual_hash="$(sha256sum < "$c5_tmp" | awk '{print $1}' | cut -c1-8)"
+  else
+    c5_actual_hash="$(shasum -a 256 < "$c5_tmp" | awk '{print $1}' | cut -c1-8)"
+  fi
+  rm -f "$c5_tmp"
+
+  if [ "$c5_envrc_version" = "$c5_actual_version" ] && [ "$c5_envrc_hash" = "$c5_actual_hash" ]; then
+    c5_status="pass"
+    c5_detail="version=$c5_actual_version hash=$c5_actual_hash"
+  else
+    c5_detail=".envrc has version=$c5_envrc_version hash=$c5_envrc_hash; actual version=$c5_actual_version hash=$c5_actual_hash. Run ./.ai-policy/scripts/update-session-tags.sh"
+  fi
+fi
+
+# ---------- Condition 6: harness can resolve workflow_version and ruleset_hash ----------
+# Catches code-side breakage in evals/harness/context.py (e.g. wrong source file).
+
+c6_status="fail"
+c6_detail=""
+c6_py="evals/.venv/bin/python"
+if [ ! -x "$c6_py" ]; then
+  c6_detail="evals/.venv not found (run ./scripts/run-baseline.sh once to create it)"
+else
+  c6_err="$(PYTHONPATH="$ROOT_DIR" "$c6_py" -c \
+    'from evals.harness.context import workflow_version, ruleset_hash; workflow_version(); ruleset_hash()' \
+    2>&1 >/dev/null || true)"
+  if [ -z "$c6_err" ]; then
+    c6_status="pass"
+    c6_detail="workflow_version() and ruleset_hash() both resolved"
+  else
+    c6_detail="$(echo "$c6_err" | tail -1)"
+  fi
+fi
+
 # ---------- Overall ----------
 
 if [ "$c1_status" = "pass" ] && [ "$c2_status" = "pass" ] \
    && [ "$c3_status" = "pass" ] && [ "$c4a_status" = "pass" ] \
-   && [ "$c4b_status" = "pass" ]; then
+   && [ "$c4b_status" = "pass" ] && [ "$c5_status" = "pass" ] \
+   && [ "$c6_status" = "pass" ]; then
   overall="pass"
   exit_code=0
 else
@@ -229,6 +305,14 @@ jq -n \
   --argjson c4a_hashes "$c4a_hashes_json" \
   --arg c4b_status "$c4b_status" \
   --argjson c4b_poisoned "$c4b_poisoned_json" \
+  --arg c5_status "$c5_status" \
+  --arg c5_detail "$c5_detail" \
+  --arg c5_envrc_version "$c5_envrc_version" \
+  --arg c5_envrc_hash "$c5_envrc_hash" \
+  --arg c5_actual_version "$c5_actual_version" \
+  --arg c5_actual_hash "$c5_actual_hash" \
+  --arg c6_status "$c6_status" \
+  --arg c6_detail "$c6_detail" \
   '{
     generated_at: $now,
     loki_reachable: true,
@@ -264,6 +348,20 @@ jq -n \
         status: $c4b_status,
         poisoned_repos: $c4b_poisoned,
         rule: "external repos must not emit ruleset_hash (scoped to this repo only)"
+      },
+      tags_current: {
+        status: $c5_status,
+        envrc_workflow_version: $c5_envrc_version,
+        envrc_ruleset_hash: $c5_envrc_hash,
+        actual_workflow_version: $c5_actual_version,
+        actual_ruleset_hash: $c5_actual_hash,
+        detail: $c5_detail,
+        rule: ".envrc OTEL_RESOURCE_ATTRIBUTES must match current ai-workflow.md Version and recomputed ruleset_hash"
+      },
+      harness_producible: {
+        status: $c6_status,
+        detail: $c6_detail,
+        rule: "evals/harness/context.py must resolve workflow_version() and ruleset_hash() without error"
       }
     }
   }' > "$OUT_JSON"
@@ -295,6 +393,9 @@ jq -n \
 
   c4b_str="$(echo "$c4b_poisoned_json" | jq -r 'if length == 0 then "no poisoned repos" else "poisoned: " + join(", ") end')"
   echo "| 4b. external repos do NOT emit ruleset_hash | $c4b_status | $c4b_str |"
+
+  echo "| 5. .envrc tags match current rules | $c5_status | $c5_detail |"
+  echo "| 6. harness can resolve workflow_version + ruleset_hash | $c6_status | $c6_detail |"
 
   echo
   if [ "$overall" = "pass" ]; then

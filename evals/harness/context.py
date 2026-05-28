@@ -6,7 +6,6 @@ comparison joins.
 """
 from __future__ import annotations
 
-import json
 import re
 import subprocess
 from functools import lru_cache
@@ -30,13 +29,25 @@ def workflow_version() -> str:
 
 
 def ruleset_hash() -> str:
-    settings = json.loads((repo_root() / ".claude" / "settings.json").read_text())
-    attrs = settings.get("env", {}).get("OTEL_RESOURCE_ATTRIBUTES", "")
-    for pair in attrs.split(","):
+    envrc = repo_root() / ".envrc"
+    if not envrc.exists():
+        raise RuntimeError(
+            ".envrc not found. Run ./.ai-policy/scripts/update-session-tags.sh first."
+        )
+    text = envrc.read_text()
+    m = re.search(
+        r'OTEL_RESOURCE_ATTRIBUTES\s*=\s*"([^"]*)"', text
+    )
+    if not m:
+        raise RuntimeError(
+            "OTEL_RESOURCE_ATTRIBUTES export not found in .envrc. "
+            "Run ./.ai-policy/scripts/update-session-tags.sh first."
+        )
+    for pair in m.group(1).split(","):
         k, _, v = pair.partition("=")
         if k.strip() == "ruleset_hash":
             return v.strip()
     raise RuntimeError(
-        "ruleset_hash not found in .claude/settings.json env.OTEL_RESOURCE_ATTRIBUTES. "
+        "ruleset_hash not found in .envrc OTEL_RESOURCE_ATTRIBUTES. "
         "Run ./.ai-policy/scripts/update-session-tags.sh first."
     )
