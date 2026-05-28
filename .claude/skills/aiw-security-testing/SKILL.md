@@ -12,11 +12,13 @@ This file contains rules for writing automated security tests before deferring t
 
 This skill works alongside these workflow sections. Consult them when writing security tests:
 
-- **Non-Functional Test Coverage**: defines when automated coverage must be attempted before manual verification.
+- **Non-Functional Dimensions**: defines when automated coverage must be attempted before manual verification.
 - **aiw-testing**: general test construction rules. This skill covers the security-specific subset.
 - **aiw-failure-analysis**: covers what to do when a reported behaviour contradicts what a security test claims.
 
 ## When This Skill Applies
+
+The triggers below are broader than they look: any change to input handling, even a cosmetic one, can cross a trust boundary. Err toward invoking the skill rather than under-invoking it — the cost of an unneeded security review is small, the cost of a missed boundary is not.
 
 Load this skill when the change does any of the following:
 
