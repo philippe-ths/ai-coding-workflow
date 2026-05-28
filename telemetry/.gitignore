@@ -12,6 +12,11 @@ docker-compose.override.yml
 # launchd autostart runtime logs (per-machine).
 launchd/stdout.log
 launchd/stderr.log
+launchd/eval-readiness.stdout.log
+launchd/eval-readiness.stderr.log
+
+# Per-machine runtime state for the eval-readiness launchd agent.
+launchd/eval-readiness.state
 
 # Per-machine runtime artifacts written by scripts/eval-preflight.sh.
 eval-readiness.json
