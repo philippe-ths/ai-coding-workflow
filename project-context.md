@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.8.0
+Version: 1.9.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -92,14 +92,15 @@ Version: 1.8.0
 - `evals/harness/`: Python baseline harness — runner, JSON writer, workflow-version / ruleset-hash reader, pytest grader, `mock` and `claude-code` agents, plus `Dockerfile` + `compose.yaml` for the sandbox used by the `claude-code` agent.
 - `evals/tasks/<task_id>/`: frozen baseline tasks. Each has `spec.md` (prompt + acceptance criteria), `starter/` (code the agent sees), `grader/` (hidden pytest applied after the agent completes), and `solution/` (reference solution used only by the `mock` agent).
 - `evals/requirements.txt`: Python dependencies for the harness (`pytest`, `scipy`).
-- `scripts/repo-validation.sh`: this repo's repo-specific validation (telemetry YAML/JSON syntax, baseline-harness Python `py_compile`, `bash -n` on `telemetry/*.sh` and `scripts/run-baseline.sh`, `docker compose config -q`). Not part of the shipped policy layer; target repos supply their own.
+- `scripts/repo-validation.sh`: this repo's repo-specific validation (telemetry YAML/JSON syntax, baseline-harness Python `py_compile`, `bash -n` on `telemetry/*.sh`, `scripts/run-baseline.sh`, and `scripts/eval-preflight.sh`, `docker compose config -q`). Not part of the shipped policy layer; target repos supply their own.
 - `scripts/run-baseline.sh`: creates `evals/.venv`, runs `N` tasks × `k` repeats, writes results under `telemetry/data/baseline/<version>/<ruleset_hash>/<task>/<run>.json`.
+- `scripts/eval-preflight.sh`: between-review readiness check for the periodic evaluation process. Probes Loki and on-disk baseline; writes `telemetry/eval-readiness.{json,md}` (gitignored). Distinct exit codes for gate-pass (0), gate-fail (1), Loki-unreachable (2), misconfiguration (3).
 - `scripts/compare-versions.py`: reads two versions' results and prints per-task pass^k, aggregate pass^k, McNemar's test on paired outcomes, and mean/median deltas on duration, cost, tokens, and fix cycles.
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
 - Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh` and `test-pre-push-hook.sh` always run.
-- Repo-specific validation for this repo lives in `scripts/repo-validation.sh` and is invoked by the policy-layer validator when present: `bash -n` on `telemetry/*.sh` and `scripts/run-baseline.sh`, Python `py_compile` on `evals/` + `scripts/`, YAML syntax checks on telemetry configs when `python3` + `pyyaml` are present, JSON syntax checks on Grafana dashboards, and `docker compose config -q` in `telemetry/` when Docker is installed.
+- Repo-specific validation for this repo lives in `scripts/repo-validation.sh` and is invoked by the policy-layer validator when present: `bash -n` on `telemetry/*.sh`, `scripts/run-baseline.sh`, and `scripts/eval-preflight.sh`, Python `py_compile` on `evals/` + `scripts/`, YAML syntax checks on telemetry configs when `python3` + `pyyaml` are present, JSON syntax checks on Grafana dashboards, and `docker compose config -q` in `telemetry/` when Docker is installed.
 - No unit test framework exists; there are no automated tests for documentation content or Grafana dashboard correctness.
 - Manual verification is the primary check for documentation changes and telemetry dashboard behaviour.
 
