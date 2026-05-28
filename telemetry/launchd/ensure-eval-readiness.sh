@@ -62,8 +62,8 @@ fi
 
 echo "$LOG_PREFIX: preflight=$current (previous=${previous:-<none>})"
 
-# Notify only on green->red transitions. First-run (no previous), red->green,
-# and steady-state ticks are silent.
+# Notify on both transitions. First-run (no previous) and steady-state ticks
+# are silent.
 if [ "$previous" = "pass" ] && [ "$current" = "fail" ]; then
     detail=""
     if [ -f telemetry/eval-readiness.json ] && command -v jq >/dev/null 2>&1; then
@@ -79,4 +79,9 @@ if [ "$previous" = "pass" ] && [ "$current" = "fail" ]; then
     osascript -e "display notification \"$msg\" with title \"AIW Eval Readiness\"" 2>/dev/null || \
         echo "$LOG_PREFIX: osascript notification failed (non-fatal)" >&2
     echo "$LOG_PREFIX: notified (green->red transition)"
+elif [ "$previous" = "fail" ] && [ "$current" = "pass" ]; then
+    msg="Eval readiness gate is GREEN. Periodic review is unblocked."
+    osascript -e "display notification \"$msg\" with title \"AIW Eval Readiness\"" 2>/dev/null || \
+        echo "$LOG_PREFIX: osascript notification failed (non-fatal)" >&2
+    echo "$LOG_PREFIX: notified (red->green transition)"
 fi
