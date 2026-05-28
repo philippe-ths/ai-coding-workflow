@@ -4,6 +4,33 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.0.0 - 2026-05-28
+
+Major redesign of the workflow structure. The 14-step numbered workflow plus reference sections in `ai-workflow.md` is replaced by a leaner four-section structure (First Principles, Task Flow, Boundary Rules, The Human is Responsible For) that delegates enforcement to a refactored skill set. Three new core skills own concerns previously fused into a single workflow document.
+
+### Added
+
+- `aiw-verification` skill in both `.agents/skills/` and `.claude/skills/`: owns the required justification step before any "done" claim, the evidence hierarchy from static checks through end-to-end runs on real artifacts, the rules for when end-to-end execution is mandatory, modality-aware verification requirements, and the scoping step that names what was not checked.
+- `aiw-ground-truth` skill in both directories: establishes where trusted inputs and expected outputs come from during coding tasks. Owns the canonical task modality decision procedure (New, Feature, Fix, Refactor, Improve, Investigate, Migrate, Configure, Delete) shared across `aiw-planning`, `aiw-testing`, and `aiw-verification`.
+- `aiw-github` skill in both directories: rules for every GitHub and git history action during a task, including branch safety, rebase discipline, and the rule that commit, push, and PR creation are separate human-approved actions.
+- `ai-workflow.md` Task Flow section: six high-level steps that delegate enforcement to the skill set at each step.
+- `ai-workflow.md` Non-Functional Dimensions section: conditional loading triggers for `aiw-performance-profiling` and `aiw-security-testing`.
+- `ai-workflow.md` Reactive Rules section: explicit override stating that `aiw-failure-analysis` runs when a "done" claim is contradicted, before any fix is proposed; this rule overrides the rest of the workflow when triggered.
+- Entry-point files (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.github/copilot-instructions.md`) now require the agent to confirm reading both `ai-workflow.md` and `project-context.md` and being able to invoke the `aiw-*` project skills before responding to the first task message.
+- `observations/workflow-reviews/2026-05-28.md`: second worked-example execution of the periodic review process; demonstrates the gate refusing on structural data thinness rather than just sample-size thinness.
+
+### Changed
+
+- `ai-workflow.md` restructured around four sections (First Principles, Task Flow, Boundary Rules, The Human is Responsible For) plus a Reactive Rules override and a Non-Functional Dimensions loader. Replaces the prior 14-step numbered workflow plus reference-section structure.
+- `aiw-planning` skill rewritten to own the pre-planning codebase baseline checks (smoke tests, global suite, test readiness, bounded-change confirmation), the task modality classification step that hooks into `aiw-ground-truth`, oracle naming, assumption classification (issue-sourced vs codebase-confirmed), higher-risk flagging, and verification-approach expectations.
+- `aiw-testing` skill rewritten to focus on test mechanics, test-level selection, modality-specific testing emphasis (cross-referenced into `aiw-ground-truth`), the anti-patterns that produce misleading green bars, and the hygiene rules that keep a test suite a reliable signal. Ground-truth concerns move to `aiw-ground-truth`; verification-sufficiency concerns move to `aiw-verification`.
+- `aiw-failure-analysis` skill rewritten to own the structured pause after a contradicted "done" claim, the audit of the three core skills (`aiw-ground-truth`, `aiw-testing`, `aiw-verification`) to locate where the gap opened, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check for when repeated fixes are not working, and plan-level flaw detection.
+- `aiw-performance-profiling` and `aiw-security-testing` skills retained with light edits to align with the new section structure.
+
+### Removed
+
+- `aiw-logging-and-observability` skill: content redistributed into `aiw-verification` (runtime-output reading as evidence) and `aiw-failure-analysis` (diagnostic logging during investigation). No standalone observability skill remains; the obligations are owned by the verification and failure-analysis skills that consume them.
+
 ## 2.16.0 - 2026-04-26
 
 ### Added

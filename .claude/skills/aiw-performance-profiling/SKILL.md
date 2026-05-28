@@ -12,20 +12,22 @@ This file contains rules for writing automated performance and UI-state-transiti
 
 This skill works alongside these workflow sections. Consult them when writing performance tests:
 
-- **Non-Functional Test Coverage**: defines when automated coverage must be attempted before manual verification.
+- **Non-Functional Dimensions**: defines when automated coverage must be attempted before manual verification.
 - **aiw-testing**: general test construction rules. This skill covers the performance-specific subset.
-- **aiw-logging-and-observability**: covers ad-hoc runtime diagnostics. This skill covers pre-commit automated tests.
+- **aiw-verification**: owns the rule for adding observability when automated tests cannot reach the runtime path. This skill covers the pre-commit automated-test side of that evidence.
+- **aiw-failure-analysis**: owns ad-hoc diagnostics added during a post-failure audit. This skill covers automated performance coverage written before completion, not diagnostics added after a contradicted "done" claim.
 
 ## When This Skill Applies
 
 Load this skill when the change does any of the following:
 
-- Touches a UI state transition, reactive subscription, or view-layer rerender path.
+- Touches code paths where runtime speed affects usability.
 - Introduces or modifies caching, memoisation, debouncing, or throttling.
-- Introduces or modifies manual state resets or session invalidation.
 - Adds or modifies a data-processing loop over non-trivial input.
-- Adds a UI decorator or wrapper that affects render frequency.
 - Converts a synchronous path to asynchronous or vice versa.
+- Affects any other path where latency or throughput is a stated requirement.
+
+Examples of platform-specific paths that fall under the first trigger: UI state transitions, reactive subscriptions, view-layer rerenders, manual state resets, session invalidation, and UI decorators or wrappers that affect render frequency. The trigger list itself is project-agnostic; treat platform examples as illustrations rather than the boundary of the rule.
 
 If any of these apply and no automated performance coverage exists for the affected path, add coverage as part of the change.
 
