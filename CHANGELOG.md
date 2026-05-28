@@ -4,6 +4,16 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.1.0 - 2026-05-28
+
+### Added
+
+- `aiw-evaluation` skill in both `.agents/skills/` and `.claude/skills/`: enforces the between-review readiness gate before the periodic workflow review process can produce proposals. Reads `telemetry/eval-readiness.json` (produced by `scripts/eval-preflight.sh`), refuses to run the review past a red gate, and writes a thin-data report under `observations/workflow-reviews/<date>.md` instead. Hands off to `design/decisions/evaluation.md` only when the preflight returns exit 0 ([#145]).
+
+### Changed
+
+- `project-context.md` Project Structure section lists `aiw-evaluation`; `Version:` header bumped to `1.10.0` ([#145]).
+
 ## 3.0.0 - 2026-05-28
 
 Major redesign of the workflow structure. The 14-step numbered workflow plus reference sections in `ai-workflow.md` is replaced by a leaner four-section structure (First Principles, Task Flow, Boundary Rules, The Human is Responsible For) that delegates enforcement to a refactored skill set. Three new core skills own concerns previously fused into a single workflow document.
