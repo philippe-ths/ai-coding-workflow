@@ -4,6 +4,18 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.2.0 - 2026-05-28
+
+### Added
+
+- `scripts/eval-preflight.sh` Condition 5: `.envrc` `OTEL_RESOURCE_ATTRIBUTES` must match the values recomputed from current ruleset files. Catches the recurring tagging-staleness class where a workflow bump or rule edit was never propagated to `.envrc`, so the current session's data was being emitted under the wrong tag.
+- `scripts/eval-preflight.sh` Condition 6: the baseline harness must be able to resolve `workflow_version` and `ruleset_hash` at import time. Catches code-side breakage in `evals/harness/context.py` before the next review walks into it.
+- `design/decisions/evaluation.md` minimum-data gate updated to document Conditions 5 and 6.
+
+### Fixed
+
+- `evals/harness/context.py` was reading `ruleset_hash` from `.claude/settings.json`'s `env` block, which the telemetry policy (`aiw-telemetry-setup/SKILL.md`) explicitly forbids and `update-session-tags.sh` never writes there. The baseline harness raised `RuntimeError` on every invocation. Now reads from `.envrc`, which is the policy-mandated source.
+
 ## 3.1.0 - 2026-05-28
 
 ### Added
