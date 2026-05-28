@@ -4,7 +4,7 @@
 # Target repos should supply their own scripts/repo-validation.sh (tests, linters, etc.).
 set -eu
 
-bash -n ./telemetry/*.sh ./scripts/run-baseline.sh
+bash -n ./telemetry/*.sh ./scripts/run-baseline.sh ./scripts/eval-preflight.sh
 
 if command -v python3 >/dev/null 2>&1; then
   PY_TARGETS=""

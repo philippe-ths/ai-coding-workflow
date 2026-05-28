@@ -26,10 +26,12 @@ Periodic review belongs on a calendar cadence: monthly, or whenever enough new t
 
 Do not produce proposals unless **all** of the following hold:
 
-- At least two workflow versions have baseline harness data on disk under `telemetry/data/baseline/<workflow_version>/`.
-- At least 20 real Claude Code sessions per version are present in Loki for the corresponding `workflow_version` label.
-- The baseline runs cover the same set of tasks across versions, so paired McNemar comparison is possible.
-- The `ruleset_hash` is consistent within each version, so the data measures one ruleset state, not a mid-flight change.
+1. At least two workflow versions have baseline harness data on disk under `telemetry/data/baseline/<workflow_version>/`.
+2. At least 20 real Claude Code sessions per version are present in Loki for the corresponding `workflow_version` label, **scoped to `workflow_repo="ai-coding-workflow"`**. External-repo sessions are excluded from this count because cross-version comparison of external-repo data conflates ruleset change with repo and task change (a version-A session from repo X and a version-B session from repo Y cannot be paired). External-repo session counts remain useful as an adoption signal but are not evidence of ruleset effect.
+3. The baseline runs cover the same set of tasks across versions, so paired McNemar comparison is possible.
+4. **`ruleset_hash` is present and consistent on `workflow_repo="ai-coding-workflow"` sessions, and absent on every other repo's sessions.** Scope: `ruleset_hash` is computed and emitted only inside the `ai-coding-workflow` repo (`update-session-tags.sh`); downstream repos are instructed not to emit it (`aiw-telemetry-setup` skill). The gate condition therefore reads: (a) each version's this-repo sessions emit exactly one non-empty `ruleset_hash`; (b) no external-repo session emits a `ruleset_hash` (a non-empty value on an external-repo session indicates a poisoned-identity configuration, not a workflow signal).
+
+Between-review readiness for these conditions is checked by `scripts/eval-preflight.sh`, which writes its result to `telemetry/eval-readiness.{json,md}`. The skill that drives the periodic review reads that artifact before producing proposals.
 
 The specific n=20 session threshold is a practical floor rather than a figure traceable to one canonical paper; the underlying principle is that single-test p-values become unreliable at small sample sizes and when many tests run in parallel.
 (See `design/research/evaluation-methodology.md#multiple-comparisons-correction` for the family-wise error rate inflating to ~64% when running 20 independent tests at alpha=0.05.)
@@ -41,6 +43,14 @@ If any condition fails, do not produce proposals. Report instead:
 - The earliest date the gate could be expected to pass given current capture rate.
 
 A thin-data review must end at this point. Do not paper over the gap.
+
+### What `workflow_version` on an external-repo session means
+
+A Claude Code session emitted from a repository other than `ai-coding-workflow` carries the `workflow_version` value taken from that repository's own `ai-workflow.md` `Version:` header (set by the maintainer's `.envrc` or local settings). It signals **which version of the workflow that repository has adopted**, not which version of this repository's workflow ruleset is in flight. For the periodic review, external-repo `workflow_version` is useful for tracking adoption and for spotting repos still on old versions; it is not evidence that this repo's ruleset is producing one outcome versus another. The data loop's experimental signal is the this-repo session population (the one the gate's condition 2 scopes to), plus the baseline harness output, both of which run against this repo's current ruleset.
+
+### Loki query-range limit
+
+Loki rejects `query_range` calls whose window exceeds 30 days (`HTTP 400` with `query length: ...h, limit: 30d1h`). Every query the periodic review runs against Loki must either fit within a 30-day window or be issued as repeated paginated queries that each fit. `scripts/eval-preflight.sh` uses a 30-day window by default; widen it only via paginated queries, never by passing a longer range in a single call.
 
 ### Inputs the review reads
 
