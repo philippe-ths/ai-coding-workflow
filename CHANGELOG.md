@@ -4,6 +4,12 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.2.1 - 2026-05-29
+
+### Fixed
+
+- Shortened the frontmatter `description` of five skills (`aiw-planning`, `aiw-ground-truth`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`) in both `.agents/skills/` and `.claude/skills/` to under 1024 characters. OpenAI Codex enforces a 1024-character maximum on skill descriptions and was silently skipping these five at load time, leaving Codex users running the workflow without its core planning, ground-truth, testing, verification, and failure-analysis disciplines. Intent and triggering content are preserved; the repo's own authoring rule (`design/decisions/authoring.md`) already mandated the 1024-character limit ([#152]).
+
 ## 3.2.0 - 2026-05-28
 
 ### Added
