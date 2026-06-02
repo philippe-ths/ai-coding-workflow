@@ -1,9 +1,0 @@
-services:
-  default:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["sleep", "infinity"]
-    init: true
-    extra_hosts:
-      - "host.docker.internal:host-gateway"

@@ -7,7 +7,7 @@
 # Claude Code runtime artifacts (per-session, per-process state)
 .claude/*.lock
 
-# direnv (per-repo shell env, e.g. telemetry enablement)
+# direnv (per-repo shell env)
 .envrc
 
 # OS artifacts
@@ -22,11 +22,6 @@ Thumbs.db
 # Logs
 *.log
 
-# Captured telemetry (stack volumes and any local harness output)
-telemetry/data/
-telemetry/**/data/
-
-# Baseline-harness virtualenv and Python caches
-evals/.venv/
+# Python caches
 **/__pycache__/
 *.pyc

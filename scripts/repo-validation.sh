@@ -2,44 +2,51 @@
 # Repo-specific validation for ai-coding-workflow.
 # Invoked by ./.ai-policy/scripts/project-validation.sh when this file exists and is executable.
 # Target repos should supply their own scripts/repo-validation.sh (tests, linters, etc.).
+#
+# This repo's only runtime code is the session-observation tooling under ./observation
+# (see docs/adr/0001 and docs/adr/0002). Each check below is guarded so the validator
+# stays green whether or not a given surface is present.
 set -eu
 
-bash -n ./telemetry/*.sh ./telemetry/launchd/*.sh ./scripts/run-baseline.sh ./scripts/eval-preflight.sh
+# --- shell syntax: any shell scripts shipped with the observation tooling ---
+shell_targets=()
+while IFS= read -r f; do shell_targets+=("$f"); done < <(
+  find ./observation -name '*.sh' -type f 2>/dev/null
+)
+if [ "${#shell_targets[@]}" -gt 0 ]; then
+  bash -n "${shell_targets[@]}"
+fi
 
+# --- python: byte-compile the observation tooling ---
 if command -v python3 >/dev/null 2>&1; then
-  PY_TARGETS=""
-  for d in ./evals/harness ./evals/tasks ./evals/spikes ./scripts; do
-    [ -d "$d" ] || continue
-    while IFS= read -r f; do PY_TARGETS="$PY_TARGETS $f"; done < <(find "$d" -name '*.py' -type f)
-  done
-  if [ -n "$PY_TARGETS" ]; then
-    # shellcheck disable=SC2086
-    python3 -m py_compile $PY_TARGETS
+  py_targets=()
+  while IFS= read -r f; do py_targets+=("$f"); done < <(
+    find ./observation -name '*.py' -type f 2>/dev/null
+  )
+  if [ "${#py_targets[@]}" -gt 0 ]; then
+    python3 -m py_compile "${py_targets[@]}"
   fi
 fi
 
-if command -v python3 >/dev/null 2>&1 && python3 -c "import yaml" >/dev/null 2>&1; then
-  for yaml_file in \
-    ./telemetry/docker-compose.yml \
-    ./telemetry/otel-collector-config.yaml \
-    ./telemetry/prometheus/prometheus.yml \
-    ./telemetry/loki/loki-config.yaml \
-    ./telemetry/grafana/provisioning/datasources/datasources.yml \
-    ./telemetry/grafana/provisioning/dashboards/dashboards.yml; do
-    python3 -c "import yaml,sys; yaml.safe_load(open('$yaml_file'))" || { echo "YAML syntax error in $yaml_file" >&2; exit 1; }
-  done
+# --- parser regression test: guards the one place the transcript format lives ---
+if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
+  python3 ./observation/test_parse.py
 fi
 
-for dash in ./telemetry/grafana/dashboards/*.json; do
-  python3 -c "import json; json.load(open('$dash'))" 2>/dev/null || {
-    if command -v jq >/dev/null 2>&1; then
-      jq empty "$dash" || { echo "JSON syntax error in $dash" >&2; exit 1; }
-    else
-      echo "Cannot validate $dash (no python3 or jq)" >&2
-    fi
-  }
-done
-
-if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-  (cd ./telemetry && docker compose config -q) || { echo "docker compose config failed" >&2; exit 1; }
+# --- the checked-in transcript fixture must be valid JSONL ---
+if command -v python3 >/dev/null 2>&1 && [ -f ./observation/fixtures/sample-transcript.jsonl ]; then
+  python3 - <<'PY'
+import json, sys
+path = "./observation/fixtures/sample-transcript.jsonl"
+with open(path) as fh:
+    for n, line in enumerate(fh, 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+        except json.JSONDecodeError as e:
+            print(f"Invalid JSONL in {path} line {n}: {e}", file=sys.stderr)
+            sys.exit(1)
+PY
 fi

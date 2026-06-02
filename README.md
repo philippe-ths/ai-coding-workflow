@@ -46,7 +46,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`aiw-planning`, `aiw-failure-analysis`, `aiw-logging-and-observability`, `aiw-issue-creation`, `aiw-testing`). Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`). Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement
@@ -64,7 +64,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 - `design/` — concern-scoped design decisions and primary-source research. See `design/README.md` for a file index.
 - `observations/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
-- `observations/workflow-reviews/` — archived periodic review outputs. The review process is defined in `design/decisions/evaluation.md`.
+- `observations/workflow-reviews/` — archived outputs from earlier periodic workflow reviews.
 
 ## Installation by Tool
 
@@ -133,80 +133,29 @@ The shipped validator (`./.ai-policy/scripts/project-validation.sh`) checks only
 
 To add repo-specific checks (tests, linters, type checks, etc.) that run as part of the same validation, create an executable `./scripts/repo-validation.sh` at the root of your repo. The shipped validator invokes it automatically when present. The file is not part of the shipped policy layer, so each repo owns its own.
 
-### Enable session telemetry (Claude Code)
+## Session Observation (this repo)
 
-Session telemetry is a standard part of the Claude Code install. From a Claude Code session started in the target repository, invoke the `aiw-telemetry-setup` skill:
+This repository hosts a local, single-developer tool for observing your own Claude Code usage across all your repos. It is descriptive only: it shows how metrics move over time and across workflow versions and leaves the judgement to you, deliberately replacing an earlier statistical telemetry-and-evaluation stack. See [`docs/adr/0001`](docs/adr/0001-descriptive-session-observation-over-statistical-comparison.md) for why, and [`observation/README.md`](observation/README.md) for details.
 
-> "use the aiw-telemetry-setup skill to start recording telemetry here"
-
-The skill is the single user-facing action required to turn on telemetry. It auto-detects the environment (collector reachability, local stack readiness, `direnv` presence, terminal vs IDE launch context, and any existing configuration), catches inherited identity from files copied in from other repositories, and proposes one consolidated set of file changes. After a single confirmation, it writes the configuration and verifies end-to-end round-trip for every signal the shipped Grafana dashboards consume — logs via Loki and metrics via Prometheus — by emitting synthetic records carrying fresh UUIDs and re-querying each backend. It reports SUCCESS or FAIL with the specific phase that failed and leaves no partial state on failure. It never enables telemetry as a default side effect.
-
-Identity (the `workflow_repo` tag and friends) lives in a gitignored `.envrc`, never in any tracked file, so copying this repo's files into a target repository cannot silently propagate the wrong identity. The local stack itself lives in this repo's `telemetry/` — see [Session Telemetry (this repo)](#session-telemetry-this-repo) for the stack and reference material.
-
-## Session Telemetry (this repo)
-
-This section describes how telemetry works in the `ai-coding-workflow` repository itself. In downstream target repositories, the `aiw-telemetry-setup` skill owns this setup end-to-end — the notes below are reference material for maintainers of this repository.
-
-Every Claude Code session started in this repository emits OTEL events tagged with the current workflow version, the repo identifier, and an 8-character ruleset hash computed from the rule files. The tag string and the enablement variables both live in a gitignored `.envrc`. No tracked file carries telemetry identity.
-
-To enable telemetry locally in this repository, copy the example direnv config and allow it:
+Install capture once into your global Claude config (a SessionStart hook plus a `/rate` skill). Requires `python3`:
 
 ```bash
-cp .envrc.example .envrc
-direnv allow
+./observation/install-observation.sh
 ```
 
-The variables exported are:
+Then work normally — capture is automatic in every repo, with nothing to remember. Optionally record a quality rating during or after any session:
+
+```
+/rate 3        # 1 bad, 2 fine, 3 good, 4 excellent
+```
+
+When you want to look, rebuild the store and open the dashboard from this repo:
 
 ```bash
-export CLAUDE_CODE_ENABLE_TELEMETRY=1
-export OTEL_METRICS_EXPORTER=otlp
-export OTEL_LOGS_EXPORTER=otlp
-export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-export OTEL_RESOURCE_ATTRIBUTES="workflow_repo=ai-coding-workflow"
+make observe
 ```
 
-`OTEL_EXPORTER_OTLP_PROTOCOL` must be set explicitly; Claude Code's OTEL SDK does not infer it from the endpoint and fails init without it. Use `grpc` with port 4317, or `http/protobuf` with port 4318.
-
-Both `OTEL_LOGS_EXPORTER=otlp` and `OTEL_METRICS_EXPORTER=otlp` are required: the shipped Grafana dashboards read both signals. Without one, the dashboards that consume that signal are empty.
-
-`OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` is also required. Claude Code defaults to delta temporality, but the shipped Prometheus pipeline forwards via remote-write, which expects cumulative. Without this override metrics fail silently — logs continue to flow to Loki, but Prometheus-backed dashboards stay empty.
-
-To keep the full tag string (with `workflow_version` and `ruleset_hash`) in sync with the current rule files in this repo, run:
-
-```bash
-./.ai-policy/scripts/update-session-tags.sh
-```
-
-This inserts or updates a managed block in `.envrc` delimited by sentinels. It only runs in the `ai-coding-workflow` repository itself; downstream repositories are owned by the skill.
-
-Caveats:
-
-- Some downstream collectors require `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`.
-- Claude Code's `-p` one-shot mode may not flush telemetry reliably before exit; use an interactive session to verify emission.
-- After bumping the `Version:` header in `ai-workflow.md` or editing any rule file, re-run `update-session-tags.sh` to refresh the managed block.
-
-### Local storage and dashboards
-
-The `telemetry/` directory ships a local OpenTelemetry Collector + Prometheus + Loki + Grafana stack with pre-provisioned dashboards for session overview, tool usage, fix cycles, and cross-version comparison. The Collector applies redaction rules (email/path/API-key scrubbing, identity-attribute stripping) before anything reaches storage, so screenshots and backups stay safe.
-
-```bash
-./telemetry/up.sh          # docker compose up -d
-./telemetry/down.sh        # stop
-./telemetry/down.sh -v     # stop and wipe captured data
-```
-
-To start the stack automatically on every Mac login (so sessions aren't silently lost when the stack is down), run the autostart installer once per machine:
-
-```bash
-./telemetry/install-autostart.sh
-```
-
-This installs a launchd agent at `~/Library/LaunchAgents/com.aiw.telemetry.plist` that runs `docker compose up -d` at login and every 5 minutes. The wrapper exits cleanly when Docker isn't reachable, so it's safe to leave installed even when you don't want to start Docker right now. To uninstall: `launchctl unload ~/Library/LaunchAgents/com.aiw.telemetry.plist && rm ~/Library/LaunchAgents/com.aiw.telemetry.plist`.
-
-Grafana is at <http://localhost:3000>. See [`docs/telemetry-setup.md`](docs/telemetry-setup.md) for the full setup, redaction rules, and troubleshooting. See [`docs/telemetry-schema.md`](docs/telemetry-schema.md) for the baseline-harness session JSON contract.
+This reads every transcript already on disk under `~/.claude/projects/`, writes a JSONL Session Store and a self-contained `dashboard.html` under `~/.claude/aiw-observation/`, and opens it. No Docker, no server, nothing running in the background. The store holds metrics only — token usage, estimated cost, tool calls, skill activations, session length, user turns, and your rating — never prompt or code content.
 
 ## What This Repository Optimizes For
 

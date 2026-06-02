@@ -4,6 +4,26 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.3.0 - 2026-06-02
+
+### Removed
+
+- The entire telemetry stack (`telemetry/`): OTEL Collector, Prometheus, Loki, Grafana, the five dashboards, the redaction pipeline, and both launchd autostart installers. The OTLP/Prometheus pipeline was silently dropping ~80% of sessions and required a babysitting skill to keep alive.
+- The baseline evaluation harness (`evals/`), `scripts/run-baseline.sh`, `scripts/compare-versions.py`, and `scripts/eval-preflight.sh`. The statistical A/B apparatus (pass^k, McNemar, the n=20 readiness gate) could not produce trustworthy verdicts from a single developer's sparse, cross-repo data.
+- The `aiw-evaluation` and `aiw-telemetry-setup` skills (both `.agents/skills/` and `.claude/skills/`), `design/decisions/evaluation.md`, `docs/telemetry-setup.md`, `docs/telemetry-schema.md`, `docs/spikes/d0-sandbox-otel.md`, `.envrc.example`, and `.ai-policy/scripts/update-session-tags.sh`.
+
+### Added
+
+- `observation/`: a local, single-developer session-observation tool that reads Claude Code transcripts already on disk into a JSONL Session Store and a self-contained static HTML dashboard. Descriptive only, no Docker, no server, nothing running in the background. Captures token usage, estimated cost, tool calls, skill activations, session length, and user turns per session across all repos.
+- Global capture installed by `observation/install-observation.sh`: a defensive SessionStart Manifest hook (records `workflow_version` per session) and a `/rate` skill (records a 1-4 quality Rating). Capture is per-developer and global; only the reader and dashboard live in this repo.
+- `docs/adr/0001` and `docs/adr/0002` recording the move from statistical comparison to descriptive observation and the global-not-per-repo capture decision; `CONTEXT.md` glossary for the observation domain.
+
+### Changed
+
+- `project-context.md` rewritten to describe the observation tool and corrected skill inventory; `Version:` header bumped to `1.12.0`.
+- `scripts/repo-validation.sh` now validates `observation/` (shell syntax, `py_compile`, the parser regression test, JSONL fixture validity) instead of the removed telemetry and harness surface.
+- `README.md` and `design/README.md` updated to drop the removed telemetry and evaluation surface.
+
 ## 3.2.1 - 2026-05-29
 
 ### Fixed
