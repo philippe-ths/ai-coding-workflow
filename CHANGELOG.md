@@ -4,6 +4,12 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.6.0 - 2026-06-07
+
+### Added
+
+- Vendored the third-party `grill-with-docs` skill (from `mattpocock/skills`) into both `.agents/skills/` and `.claude/skills/`. It runs a plan-grilling session that challenges a plan against the domain model and updates `CONTEXT.md`/ADRs inline. The skill is multi-file (`SKILL.md`, `CONTEXT-FORMAT.md`, `ADR-FORMAT.md`) and is not part of the `aiw-*` workflow set. This resolves the previously dangling references to `grill-with-docs` from the `improve-codebase-architecture` skill. `project-context.md` updated to record it (`Version:` header bumped to `1.12.2`).
+
 ## 3.5.0 - 2026-06-07
 
 ### Added
