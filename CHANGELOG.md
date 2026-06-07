@@ -4,6 +4,12 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.4.0 - 2026-06-07
+
+### Changed
+
+- `aiw-issue-creation` skill (both `.agents/skills/` and `.claude/skills/`): issues may now reference relevant files by path to locate a concern, while restating, pasting, or paraphrasing file contents is forbidden. This reconciles the former blanket "no file paths" rule into a single coherent boundary — a bare path locates the concern (allowed); file contents, an implementation approach, or a function/line reference bias the implementing agent (forbidden). Issues may also carry an optional, non-binding list of suggested workflow skills to orient whoever implements them ([#156]).
+
 ## 3.3.0 - 2026-06-02
 
 ### Removed
@@ -304,3 +310,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#104]: https://github.com/philippe-ths/ai-coding-workflow/issues/104
 [#109]: https://github.com/philippe-ths/ai-coding-workflow/issues/109
 [#110]: https://github.com/philippe-ths/ai-coding-workflow/issues/110
+[#156]: https://github.com/philippe-ths/ai-coding-workflow/issues/156
