@@ -4,6 +4,12 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.5.0 - 2026-06-07
+
+### Added
+
+- Vendored the third-party `improve-codebase-architecture` skill (from `mattpocock/skills`) into both `.agents/skills/` and `.claude/skills/`. It surfaces architecture and refactoring "deepening" opportunities, keyed off `CONTEXT.md` and `docs/adr/`. The skill is multi-file (`SKILL.md`, `DEEPENING.md`, `HTML-REPORT.md`, `INTERFACE-DESIGN.md`, `LANGUAGE.md`) and is not part of the `aiw-*` workflow set. `project-context.md` updated to record it (`Version:` header bumped to `1.12.1`).
+
 ## 3.4.0 - 2026-06-07
 
 ### Changed

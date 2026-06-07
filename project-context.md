@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.12.0
+Version: 1.12.1
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -27,6 +27,7 @@ Version: 1.12.0
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
 - Provides agent skills for code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, and project-context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
 - Both skill directories contain the same skills.
+- Vendors one third-party skill (`improve-codebase-architecture`, from `mattpocock/skills`) in both skill directories; it surfaces codebase architecture and refactoring opportunities and is not part of the `aiw-*` workflow set.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`).
 - Records observed AI agent failure patterns (`observations/observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
@@ -68,6 +69,7 @@ Version: 1.12.0
 - `observations/workflow-reviews/`: archived periodic review outputs, each named by date.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
+- `improve-codebase-architecture/` (in both skill directories): vendored third-party skill from `mattpocock/skills`; a multi-file skill (`SKILL.md` plus `DEEPENING.md`, `HTML-REPORT.md`, `INTERFACE-DESIGN.md`, `LANGUAGE.md`) for finding architecture deepening opportunities, not part of the `aiw-*` set.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
