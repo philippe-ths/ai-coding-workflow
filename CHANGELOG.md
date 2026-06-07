@@ -4,6 +4,16 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.4.0 - 2026-06-07
+
+### Added
+
+- `handoff` skill in `.agents/skills/` and `.claude/skills/`: a vendored third-party skill (from [mattpocock/skills](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md)) that compacts the current conversation into a handoff document for the next agent, saved to the OS temp directory. Uses an un-prefixed name by design; the `aiw-` prefix is reserved for core workflow skills.
+
+### Changed
+
+- `project-context.md` skill inventory updated to list the vendored `handoff` skill alongside the `aiw-*` set.
+
 ## 3.3.0 - 2026-06-02
 
 ### Removed

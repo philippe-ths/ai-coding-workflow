@@ -25,7 +25,7 @@ Version: 1.12.0
 - Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, and project-context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
+- Provides agent skills for code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, and project-context management, plus the vendored third-party `handoff` skill (compacts a conversation into a handoff document for the next agent), located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
 - Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`).
 - Records observed AI agent failure patterns (`observations/observed-ai-failings.md`) to inform workflow rule changes.
@@ -66,7 +66,7 @@ Version: 1.12.0
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files and `design/research/` holds primary-source notes with stable anchor IDs.
 - `observations/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
 - `observations/workflow-reviews/`: archived periodic review outputs, each named by date.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`), each self-contained in a `SKILL.md` file.
+- `.agents/skills/`: cross-platform skill definitions (`aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, and the vendored `handoff`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
