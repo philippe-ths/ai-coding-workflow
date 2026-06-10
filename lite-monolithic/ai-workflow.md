@@ -1,30 +1,33 @@
 # AI Workflow
 
-Version: 2.14.0
+Version: 3.4.1
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
 The human reviews and approves at defined checkpoints.
+This is a single, self-contained file: it inlines rules that the full version splits into on-demand skills.
 
 ## First Principles
 
-- The codebase provides implementation truth.
-- Runtime behaviour is the final source of truth.
+- The codebase is the truth about what the system does.
+- The spec or issue is the truth about what the system should do.
+- Runtime behaviour is the final truth about what actually happens.
+- Documentation, plans, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
+- When code, spec, and runtime conflict, reconcile them — none wins by default.
 
 ## Workflow
 
 1. **Step 1: Confirm the task and inputs.**
 
-   - Confirm the GitHub issue number.
-   - Read the issue.
+   - Confirm the GitHub issue number and read the issue.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
    - Check branch state and confirm the branch is up to date with the target branch.
    - See [GitHub Workflow](#github-workflow).
-   - Run baseline validation.
+   - Run baseline validation and record what passes and fails.
    - See [Validation Requirements](#validation-requirements).
    - Confirm the task is a bounded change.
    - See [Scope Control](#scope-control).
-   - If the GitHub issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding.
+   - If the issue number, issue context, active branch, or baseline validation state is missing or unclear, stop and resolve before proceeding.
 
 2. **Step 2: Review project context.**
 
@@ -32,62 +35,113 @@ The human reviews and approves at defined checkpoints.
    - Review the code areas the task is likely to touch.
    - Extract the intended outcome from the issue.
 
-3. **Step 3: Produce a code-aware plan.**
+3. **Step 3: Classify the task modality and name the oracle.**
+
+   - See [Task Modality](#task-modality) and [Ground Truth and the Oracle](#ground-truth-and-the-oracle).
+   - Modality and oracle determine what counts as correct and what evidence will be required to declare done.
+
+4. **Step 4: Produce a code-aware plan.**
 
    - See [Planning Requirements](#planning-requirements).
 
-4. **Checkpoint 4: human reviews the plan.**
+5. **Checkpoint 5: human reviews the plan.**
 
-   - Update the plan if the human requests changes.
+   - Update the plan if the human requests changes, then re-present it.
 
-5. **Step 5: Implement the approved scope.**
+6. **Step 6: Implement the approved scope.**
 
    - Implement the work defined in the approved plan.
-   - See [Implementation Rules](#implementation-rules).
-   - See [Scope Control](#scope-control).
+   - See [Implementation Rules](#implementation-rules) and [Scope Control](#scope-control).
 
-6. **Step 6: Run validation.**
+7. **Step 7: Run validation.**
 
-   - Run validation checks.
    - See [Validation Requirements](#validation-requirements).
 
-7. **Step 7: Support manual verification.**
+8. **Step 8: Verify before declaring done.**
+
+   - Produce the verification justification.
+   - See [Verification Before Done](#verification-before-done).
+
+9. **Step 9: Support manual and non-functional verification.**
 
    - Attempt automated coverage for non-functional categories before suggesting manual checks.
    - See [Non-Functional Test Coverage](#non-functional-test-coverage).
    - Suggest manual checks only for what automation cannot cover.
    - See [Manual Verification Requirements](#manual-verification-requirements).
 
-8. **Checkpoint 8: human reviews validation results and manual verification.**
+10. **Checkpoint 10: human reviews verification results and manual verification.**
 
-9. **Step 9: If the human reports issues, check [Failure Analysis Mode](#failure-analysis-mode) before proposing a fix.**
+11. **Step 11: If a "done" claim is contradicted, enter failure analysis before proposing a fix.**
 
-   - If any failure-analysis trigger matches, enter failure analysis mode first.
-   - Otherwise fix the reported issue and rerun relevant validation checks after each fix.
-   - Return to Step 5 if further implementation is needed, or Step 6 if only validation is needed.
+    - See [Failure Analysis Mode](#failure-analysis-mode) and [Reactive Rules](#reactive-rules).
+    - Otherwise fix the reported issue and rerun relevant validation after each fix.
+    - Return to Step 6 if further implementation is needed, or Step 7 if only validation is needed.
 
-10. **Step 10: Summarise.**
+12. **Step 12: Summarise.**
 
-    - Report what changed, what was tested, and what was not tested.
-    - Report remaining risks and follow-up work.
+    - Report what changed, what was tested, what was not tested, remaining risks, and follow-up work.
 
-11. **Step 11: Pre-PR readiness check.**
+13. **Step 13: Pre-PR readiness check.**
 
     - Complete all readiness checks before proposing the first remote GitHub action.
+    - Confirm the verification justification is complete.
     - Check parent and sub-issue closure status.
     - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
     - State which GitHub action would be next if the human wants to publish the work.
     - See [GitHub Workflow](#github-workflow).
 
-12. **Checkpoint 12: human approves the next GitHub action.**
+14. **Checkpoint 14: human approves the next GitHub action.**
 
     - Stop after the summary until the human explicitly approves the next GitHub action in the current session.
 
-13. **Step 13: Run the approved GitHub action and stop.**
+15. **Step 15: Run the approved GitHub action and stop.**
 
     - Run only the single GitHub action the human explicitly approved.
     - See [GitHub Workflow](#github-workflow).
-    - If the human approves another GitHub action, return to Step 12.
+    - If the human approves another GitHub action, return to Checkpoint 14.
+
+## Task Modality
+
+Classify the task before planning. The modality decides the oracle, the testing emphasis, and the evidence needed to declare done.
+
+The nine modalities:
+
+- **New.** No prior code in this area; building from scratch.
+- **Feature.** Adding capability to existing code.
+- **Fix.** Correcting broken behaviour.
+- **Refactor.** Changing structure while preserving observable behaviour exactly.
+- **Improve.** Non-behavioural quality work: readability, simplification, naming.
+- **Investigate.** Producing understanding rather than code.
+- **Migrate.** Translating to a new substrate: library, framework, version, language.
+- **Configure.** Wiring up external systems, integrations, or environment-specific setup.
+- **Delete.** Removing code or capability.
+
+How to classify:
+
+- Name the primary outcome and pick the modality whose definition fits.
+- If more than one outcome applies, the task is compound: list every modality and apply the union of their rules; when rules conflict, the stricter one wins.
+- State the classification before any oracle decision. If classification is genuinely ambiguous, name the candidates and ask the human. Do not pick the modality that minimises required ground truth.
+
+Watch the common misclassifications: a Fix written as a Feature (new code that paves over the bug instead of diagnosing it), a Migrate treated as a Refactor (preserving behaviour that was only a workaround for the old substrate), and a Delete treated as trivial (its oracle is the absence of remaining dependencies).
+
+## Ground Truth and the Oracle
+
+The same actor writes the code, the fixtures, and the tests, and reads the results. A passing test proves only internal consistency unless its oracle — the inputs and expected outputs it compares against — has authority the agent did not invent.
+
+Trust hierarchy for any input or expected value the work relies on, highest first:
+
+1. Real production data or captured runs from real usage.
+2. Real artifacts from the upstream tool or system that produces the inputs.
+3. Snapshots of previous known-good runs of the system itself.
+4. Hand-constructed minimal examples the user has explicitly confirmed represent real behaviour.
+5. Synthetic fixtures the agent invented — useful for exercising logic, not authoritative about what the system should do.
+
+Rules:
+
+- Name the oracle before implementing. It depends on the modality: a Fix is judged against the reported bug, a Refactor against the captured prior behaviour, a Migrate against prior behaviour on real inputs with an explicit exception list, a Configure against the real external system (not a mock), a Delete against the absence of remaining dependencies.
+- Never invent ground truth or expected values. If the trust level the task needs is unavailable, stop and ask — do not fabricate a substitute or silently downgrade to a lower level.
+- Mark synthetic fixtures visibly so no later read mistakes them for higher-trust data.
+- A failing test against real ground truth is a signal about the code. Do not modify the oracle to make it pass.
 
 ## Planning Requirements
 
@@ -95,18 +149,15 @@ When producing a plan:
 
 - State the branch the work will be implemented on.
 - State the goal and the user-visible behaviour that must change.
+- State the modality classification and the oracle (what counts as correct, at what trust level, from what source).
 - State the files and code areas the change will touch.
-- State the proposed implementation approach.
-- State assumptions and classify each as issue-sourced (unverified) or codebase-confirmed (verified by reading the code).
-- State how each issue-sourced assumption will be verified.
+- State the proposed implementation approach at the level of what will be done, not how every line is written.
+- State assumptions and classify each as issue-sourced (unverified) or codebase-confirmed (verified by reading the code), and how each issue-sourced assumption will be verified.
 - If a codebase-confirmed assumption turns out to be wrong during implementation, stop and revise the plan.
 - State remaining uncertainties, risks, and edge cases.
-- Mark the change as higher-risk if it affects routing, persistence, sync, caching, reactive subscriptions, or state transitions.
-- Include at least one runtime validation step for higher-risk changes.
-- State the validation approach.
-- Do not include implementation detail that belongs in the code or restate the issue verbatim.
-- Treat the issue goal as authoritative but treat implementation suggestions as provisional until the codebase confirms them.
-- If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
+- Mark the change as higher-risk if it crosses real seams between components, touches external systems, modifies data flow between processes or pipeline stages, or affects state other parts of the system depend on. Include at least one runtime validation step for higher-risk changes.
+- State the verification approach: what evidence will be required to declare done.
+- Treat the issue goal as authoritative but implementation suggestions as provisional until the codebase confirms them. If the issue and the codebase disagree, prioritise the codebase and flag the mismatch.
 
 ## Implementation Rules
 
@@ -123,114 +174,110 @@ Keep the change focused on the approved task:
 - If the issue contains multiple unrelated objectives or would require changes across many unrelated areas, flag this and suggest decomposition.
 - Extract the intended outcome from the issue before using implementation suggestions.
   (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative leads to implementing the wrong thing.)
-- Do only the work required to complete the task.
-- Do not treat "while I am here" changes as free.
+- Do only the work required to complete the task. Do not treat "while I am here" changes as free.
   (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
 - Separate fixes, refactors, and feature work unless the task clearly requires them together.
-  (Why: Mixing change types obscures the commit's intent and makes review harder.)
-- If a larger problem is discovered, flag it as follow-up work instead of silently broadening the implementation.
-  (Why: Unreviewed scope expansions break the human approval model and introduce unvalidated changes.)
+- If a larger problem is discovered, surface it as follow-up work instead of silently broadening the implementation. A follow-up issue may reference a relevant file by path to locate the concern, but must not paste, paraphrase, or prescribe the file's contents or an implementation approach.
+  (Why: Unreviewed scope expansion breaks the human approval model; implementation detail in an issue biases whoever picks it up.)
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
 ## Validation Requirements
 
 Before implementation, run a baseline validation:
 
-1. Run smoke tests.
+1. Run smoke tests (confirm the app builds and starts).
 2. Run the global test suite.
-3. Record which tests pass and which tests fail.
-4. Treat any pre-existing failure as a known failure for the duration of the task.
-5. Do not attempt to fix pre-existing failures unless the task requires it.
+3. Record which tests pass and which fail.
+4. Treat any pre-existing failure as a known failure for the duration of the task; do not fix it unless the task requires it.
 
-When comparing post-implementation results against the baseline:
+Run validation after every code change, in order:
 
-- If a test that passed in the baseline now fails, treat the change as wrong until proven otherwise.
-- If a test that failed in the baseline still fails, do not attribute it to the change.
-- Report pre-existing failures separately from change-related failures.
+1. **Smoke tests.** Confirm the app still builds and starts without errors.
+2. **Global test suite.** Run the full existing suite.
+3. **Targeted tests.** Run tests specific to the changed area; if none exist, flag this.
+4. **New tests.** Add and run tests if the change introduces behaviour existing tests do not cover.
 
-Run validation after every code change.
-Run the following checks in order:
+When running and reporting validation:
 
-1. **Smoke tests.**
-   - Confirm the app builds and starts without errors.
+- Do not modify smoke tests or the global suite unless the task explicitly requires it.
+- Compare against the baseline: a test that passed in the baseline and now fails means the change is wrong until proven otherwise; a test that failed in the baseline and still fails is not attributable to the change.
+- If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path. If no automated test exercises the real user path, say so explicitly.
+- Report what was tested and passed, what failed and whether it relates to the change, and what was not tested and why.
+- Do not claim code is tested when it is not, and do not ignore failing tests and continue as if the task is complete.
 
-2. **Global test suite.**
-   - Run the full existing test suite.
+## Verification Before Done
 
-3. **Targeted tests.**
-   - Run tests specific to the changed area.
-   - If no targeted tests exist, flag this.
+Passing tests are not proof the change works — only that the checks the agent chose to run passed. Before declaring done, produce an explicit justification with three parts:
 
-4. **New tests.**
-   - Add tests if the change introduces behaviour that existing tests do not cover.
-   - Run the new tests.
+1. **What could plausibly have broken** as a result of this change — the surfaces it touches and the surfaces downstream of them.
+2. **What evidence shows those things did not break** — the specific checks run and what they actually observed.
+3. **What was not checked, and why** — name the unverified surface as a risk, not as silence.
 
-When running validation:
+If part 1 surfaces something part 2 does not cover, the change is not verified: either run more checks or move the gap explicitly into part 3 and tell the human.
 
-- Do not modify smoke tests or the global test suite unless the task explicitly requires it.
-- Do not treat passing smoke tests and the global test suite as proof that the requested behaviour works.
-- Treat existing passing tests as evidence of stability.
-- If the change affects state transitions, sync, routing, caching, or reactive UI updates, include validation that follows the full user path.
-- If no automated test exercises the real user path, say so explicitly.
+Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
-When reporting validation:
+Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is impractical, say so and treat the unverified path as a known risk.
 
-- Report what was tested and what passed.
-- Report what failed and whether the failure is related to the change.
-- Report what was not tested and why.
-- Do not claim code is tested when it is not or ignore failing tests and continue as if the task is complete.
+Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass.
+
+Modality-specific checks:
+
+- **Fix.** A check that failed before the fix and passes after is non-negotiable. Confirm adjacent inputs still work.
+- **Refactor / Improve (behavioural).** A before/after comparison on real inputs; equivalence claimed without comparison is not verified.
+- **Migrate.** End-to-end comparison of old against new on real inputs, with the exception list individually accounted for.
+- **Configure.** Exercise the real external system at least once; a green test against a mock is not verification.
+- **Delete.** A dependency search across the whole codebase, including dynamic references (strings, reflection, config, generated code), confirming nothing still relies on what was removed.
 
 ## Non-Functional Test Coverage
 
-Attempt automated coverage for the following categories before suggesting manual verification:
+Attempt automated coverage for these categories before suggesting manual verification:
 
 - UI state transitions and reactive rerender paths.
 - Execution latency and throughput on the affected code path.
 - Security-relevant behaviour: authorisation checks, input validation, escaping, secret handling, and data-access boundaries.
 
-A passing functional test is not proof of performance, responsiveness, or security.
-If automated coverage is not feasible for a category, state the reason in writing in the plan or summary before falling back to a manual check.
-Do not treat manual verification as the default coverage path for non-functional behaviour.
+A passing functional test is not proof of performance, responsiveness, or security. If automated coverage is not feasible for a category, state the reason in writing in the plan or summary before falling back to a manual check. Do not treat manual verification as the default for non-functional behaviour.
 
 When a change touches UI state transitions, reactive rerenders, caching, memoisation, debouncing, manual state resets, or heavy data loops:
 
-- Capture a baseline measurement before writing the test.
-- Write latency assertions against the baseline plus a stated tolerance.
-- Run benchmarks multiple times and assert on a stable statistic, not a single sample.
-- Isolate the timed section from setup, teardown, and unrelated I/O.
+- Capture a baseline measurement before writing the test, and write latency assertions against that baseline plus a stated tolerance.
+- Run benchmarks multiple times and assert on a stable statistic, not a single sample, with the timed section isolated from setup, teardown, and unrelated I/O.
 - For UI state transitions, assert on both the transition outcome and the input-to-rendered-state time.
-- When a caching workaround or manual state reset is added, write a test that proves it does not reintroduce the problem it is patching.
-- Do not weaken a failing performance threshold before investigating the cause.
-- Do not claim performance coverage based on a functional test that happens to pass quickly.
+- When a caching workaround or manual state reset is added, write a test that proves it does not reintroduce the problem it patches.
+- Do not weaken a failing performance threshold before investigating the cause, and do not claim performance coverage from a functional test that happens to pass quickly.
+
+When a change crosses a trust boundary or handles untrusted input (authentication, authorisation, file-path or shell-command construction, secret handling, external API consumers, data-access boundaries):
+
+- Cover the negative paths and boundaries, not just the happy path: rejected input, unauthorised access, malformed or hostile payloads.
+- Test path and command construction against an attack corpus; round-trip parsers and escapers.
+- Keep fixture secrets hygienic and assert that logs redact sensitive values.
+- Do not weaken a failing security test without investigating the cause.
 
 ## Manual Verification Requirements
 
 Manual verification covers what only a human can verify.
 
 - Before suggesting a manual check, attempt automated coverage per [Non-Functional Test Coverage](#non-functional-test-coverage).
-- Suggest checks that require human observation: visual behaviour, user experience flows, real-device interaction, external system responses.
-- Do not suggest a manual check for behaviour that automated tests or tool output can verify.
-- State the success signal for each check.
-- State the failure signal for each check.
+- Suggest checks that require human observation: visual behaviour, user-experience flows, real-device interaction, external system responses.
+- Do not suggest a manual check for behaviour automated tests or tool output can verify.
+- State the success signal and the failure signal for each check.
 
 ## Failure Analysis Mode
 
-Enter failure analysis mode when the user says the behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported.
-Enter failure analysis mode when manual verification fails or runtime behaviour contradicts the implementation.
-If uncertain whether to enter, enter.
-Stop implementation and do not make further code changes until failure analysis is complete.
+Enter failure analysis mode when the user says the behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported; when manual verification fails; or when runtime behaviour contradicts the implementation. If uncertain whether to enter, enter. Stop implementation and make no further code changes until failure analysis is complete.
+
+A contradicted "done" claim means the oracle, the tests, or the verification that should have caught the problem did not. Do not trust them until each is audited.
 
 When in failure analysis mode:
 
-- Stop making speculative fixes until the contradiction is described clearly.
-- Restate the contradiction: observed behaviour, expected behaviour, strongest conflicting evidence, and what remains unknown.
+- Stop making speculative fixes until the contradiction is described clearly: observed behaviour, expected behaviour, the strongest conflicting evidence, and what remains unknown.
+- Audit where the gap opened: was the oracle wrong or invented, did the tests not exercise the changed path, or did verification mistake weak evidence for sufficient evidence?
 - List the assumptions the implementation relied on and mark each as verified, unverified, or disproved.
 - List plausible failure causes across issue interpretation, code path, persistence, sync, caching, routing, UI binding, environment, and test coverage.
-- Identify the cheapest next observation that can eliminate one or more hypotheses.
-- Name the single leading hypothesis and its supporting evidence before proposing the next step.
-- Gather evidence before proposing another fix.
+- Identify the cheapest next observation that can eliminate one or more hypotheses, name the single leading hypothesis with its supporting evidence, and gather evidence before proposing another fix.
 - Test at least one concrete hypothesis before asking the human to retry.
-- If the plan was based on incorrect assumptions, state what was assumed versus what the codebase does and what a revised approach needs.
+- If repeated fixes are not converging, stop and reconsider whether the root cause — or the plan itself — is wrong, rather than trying another variation. If the plan was based on incorrect assumptions, state what was assumed versus what the codebase does and what a revised approach needs.
 
 ## Handling Parent and Sub-Issues
 
@@ -245,8 +292,7 @@ When the issue has sub-issues (it is a parent):
 
 When the issue is a sub-issue:
 
-- Read the direct parent issue and its comments for context.
-- Do not read further up the hierarchy.
+- Read the direct parent issue and its comments for context; do not read further up the hierarchy.
 - Implement only the sub-issue scope.
 - When completing the sub-issue, check whether it is the last open sub-issue under the parent and flag this to the human.
 
@@ -255,18 +301,25 @@ When the issue is a sub-issue:
 Every task must follow the GitHub branching workflow:
 
 - Link every task to a GitHub issue before implementation.
-- Do not work directly on `main`.
-- If the current branch is `main`, stop before implementation and create or switch to an issue-scoped branch.
-- Do not edit files, run issue validation, or make commits until the issue-scoped branch is active.
+- Do not work directly on `main`. If the current branch is `main`, stop and create or switch to an issue-scoped branch before editing files, running issue validation, or making commits.
 - Use the branch naming format `type/short-description` (`feature/`, `fix/`, `refactor/`).
-- Keep branch work focused on the issue scope.
-- Rebase the issue branch onto the target branch before starting implementation.
-- Rebase the issue branch onto the target branch before creating a pull request.
-- If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
-- If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
-- Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
-- Do not infer approval for one GitHub action from approval for another.
+- Rebase the issue branch onto the target branch before starting implementation and again before creating a pull request. If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
+- Before any operation that moves the working tree to a different branch state (rebase, checkout, switch), check for untracked or gitignored files at paths the target state tracks; if a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
+- Treat commit creation, push to remote, and pull request creation as separate GitHub actions. Do not infer approval for one from approval for another.
 - Do not push to remote or create a pull request without explicit human confirmation in the current session.
+- After merge: confirm the branch is merged before deleting it, switch to the main branch, pull the latest, and close the issue.
+
+## The Human is Responsible For
+
+These are the human's to do; the AI cannot:
+
+- Make judgements that depend on lived human experience: visual quality, UX flow, real-device behaviour, subjective response.
+- Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
+- Authorise actions that affect systems or people beyond the local working tree: pushing to remote, deploying, opening or commenting on PRs, posting to external services, modifying CI.
+- Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
+- Merge pull requests.
+- Interrupt the AI when it is chasing the wrong root cause, looping on failed approaches, or about to act against intent.
+- Decide when the work is complete.
 
 ## Boundary Rules
 
@@ -274,10 +327,10 @@ Every task must follow the GitHub branching workflow:
 
 The following apply to every task without exception:
 
-- ALWAYS follow the workflow steps in order.
-- ALWAYS stop and ask when anything is unclear, risky, or out of scope.
-- ALWAYS flag uncertainty, guessed behaviour, and incomplete validation explicitly.
-- ALWAYS stop and ask the human before continuing if two commands in a row do not reduce uncertainty.
+- ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision.
+- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
+- ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
+- ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
 - ALWAYS state what a command does and why before requesting approval to run it.
 
 ### Ask First
@@ -285,15 +338,13 @@ The following apply to every task without exception:
 Stop and ask the human before doing any of the following:
 
 - ASK before adding a new dependency.
-- ASK before changing architecture, established patterns, or conventions.
-- ASK before changing database schema or sync-related behaviour.
-- ASK before changing public interfaces or shared contracts.
-- ASK before making broad refactors.
-- ASK before deleting files or removing significant code paths.
+- ASK before changing architecture, established patterns, or documented conventions.
+- ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
+- ASK before refactoring code that is not required by the task.
+- ASK before deleting any file, function, class, or module.
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
-- ASK before introducing a new logging library or pattern.
-- ASK before making assumptions or proceeding when the task, expected behaviour, or project constraints are unclear.
+- ASK before proceeding when the task, expected behaviour, or project constraints are unclear.
 
 ### Never Do
 
@@ -303,3 +354,7 @@ Do not do any of the following under any circumstances:
 - NEVER silently expand scope or introduce unrelated changes.
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
+
+## Reactive Rules
+
+If a "done" claim is contradicted — by the user, by runtime behaviour, or by manual verification — stop and enter [Failure Analysis Mode](#failure-analysis-mode) before proposing another fix or requesting a retry. This rule overrides the rest of the workflow when triggered.
