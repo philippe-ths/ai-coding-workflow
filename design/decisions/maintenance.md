@@ -38,6 +38,9 @@ Bump it whenever the document is updated to reflect a change in the codebase it 
 Apply the same X.Y.Z scheme: patch (Z) for a small factual correction or wording fix, minor (Y) for adding or restructuring a section or documenting newly added project structure, major (X) for a wholesale rewrite.
 Changes to `project-context.md` do not require a `CHANGELOG.md` entry or a tagged release.
 
+**Derived files.**
+`lite-monolithic/ai-workflow.md` is a standalone condensation of `ai-workflow.md` plus the `aiw-*` skills into a single file. It is not authored independently for content: whenever a change to the full workflow or the skills alters the rules an agent follows, re-condense the lite file in the same change and set its `Version:` header equal to the new canonical version. Because the lite version is held equal to canonical by this rule, a lite `Version:` that lags the canonical version is a drift signal — it means the lite file has not been re-synced and may no longer reflect the current rules. Treat that gap as a defect to resolve by re-condensing, not by editing the version header alone.
+
 **Tagged releases.**
 Create a tagged release for any minor or major version bump.
 Patch bumps do not require a tagged release unless they fix a defect that users need to identify by version.
