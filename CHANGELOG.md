@@ -4,6 +4,16 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.4.1 - 2026-06-09
+
+### Fixed
+
+- `.ai-policy/scripts/project-validation.sh` now warns loudly when no `./scripts/repo-validation.sh` is wired, instead of silently skipping it. A fresh install previously reported "Validation passed" while running only the policy-layer self-checks — none of the host project's tests, linters, or type checks — implying coverage that was not there. The validator now prints an unmistakable `WARNING` whenever repo-specific checks are absent (and announces them when present), so a fresh install can no longer present a silently-empty green gate. Behaviour is unchanged for repos that have wired their own checks ([#155]).
+
+### Added
+
+- `.ai-policy/scripts/test-project-validation.sh`: sandbox regression test asserting the validator warns and still passes when `./scripts/repo-validation.sh` is absent, and runs it without warning when present.
+
 ## 3.4.0 - 2026-06-07
 
 ### Changed
@@ -311,3 +321,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#109]: https://github.com/philippe-ths/ai-coding-workflow/issues/109
 [#110]: https://github.com/philippe-ths/ai-coding-workflow/issues/110
 [#156]: https://github.com/philippe-ths/ai-coding-workflow/issues/156
+[#155]: https://github.com/philippe-ths/ai-coding-workflow/issues/155

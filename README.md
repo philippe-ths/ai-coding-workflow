@@ -131,7 +131,9 @@ Run validation:
 
 The shipped validator (`./.ai-policy/scripts/project-validation.sh`) checks only the policy layer itself: shell-script syntax in `.ai-policy/` and `.githooks/`, plus the enforcement tests that match the agent entry points installed in your repo (tests for agents you did not install are skipped).
 
-To add repo-specific checks (tests, linters, type checks, etc.) that run as part of the same validation, create an executable `./scripts/repo-validation.sh` at the root of your repo. The shipped validator invokes it automatically when present. The file is not part of the shipped policy layer, so each repo owns its own.
+**Wire in your project's own checks — required for the gate to mean anything.** Out of the box the validator runs *none* of your project's tests, linters, or type checks, so a "passed" result only attests to the policy layer. Until you wire your own checks in, every run prints a `WARNING` saying exactly this, so a fresh install can never present a silently-empty green gate.
+
+To close that gap, create an executable `./scripts/repo-validation.sh` at the root of your repo and have it run your tests, linters, and type checks. The shipped validator invokes it automatically when present (and the warning disappears once it is). The file is not part of the shipped policy layer, so each repo owns its own; see this repo's `scripts/repo-validation.sh` for a worked example.
 
 ## Session Observation (this repo)
 

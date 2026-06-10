@@ -73,7 +73,7 @@ Version: 1.12.0
 - `CLAUDE.md`: Claude Code agent instructions; structure mirrors `.github/copilot-instructions.md`.
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
-- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement; `project-validation.sh` is the portable policy-layer check (shell-script syntax plus enforcement tests gated on the agent entry points installed) and invokes `scripts/repo-validation.sh` afterwards when present.
+- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement; `project-validation.sh` is the portable policy-layer check (shell-script syntax plus enforcement tests gated on the agent entry points installed) and invokes `scripts/repo-validation.sh` afterwards when present, warning loudly when it is absent.
 - `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry).
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
@@ -99,7 +99,8 @@ Version: 1.12.0
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
-- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh` and `test-pre-push-hook.sh` always run.
+- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh`, `test-pre-push-hook.sh`, and `test-project-validation.sh` always run.
+- When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
 - Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, and a JSONL validity check on the fixture.
 - No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
 - Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
