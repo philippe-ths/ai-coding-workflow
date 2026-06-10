@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.12.0
+Version: 1.13.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -110,3 +110,4 @@ Version: 1.12.0
 - Keep this file aligned with the current codebase, not planned architecture.
 - Keep this file concise and under 300 lines.
 - When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.
+- When this file changes, bump its own `Version:` header per the `project-context.md` version rule in `design/decisions/maintenance.md`.

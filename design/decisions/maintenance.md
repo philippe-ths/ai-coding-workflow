@@ -21,7 +21,7 @@ Files whose changes require a bump:
 Files whose changes do not require a bump:
 
 - Design decisions in `design/` — maintenance docs for this repo, not shipped to target repos.
-- `project-context.md` in this repo — this repo's own context document, not shipped. Only bump if the `aiw-project-context-management` skill changes.
+- `project-context.md` in this repo — this repo's own context document, not shipped. It carries its own independent version (see "`project-context.md` version" below); changes to it never require a canonical bump.
 - `README.md`, `observations/`, test scripts — not shipped as workflow instructions.
 
 Bump the patch version (Z) for any change that corrects wording, fixes a gap, or removes duplication without altering intent.
@@ -30,7 +30,16 @@ Bump the major version (X) for a structural overhaul that changes the number or 
 Update the version on every qualifying edit so session logs can be tied to a specific file state.
 The X.Y.Z scheme follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html), adapted here so that "public API" means "observable agent behaviour in a target repo" rather than source code interface.
 
-Every change to the `Version:` header requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
+Every change to the canonical `Version:` header in `ai-workflow.md` requires a matching entry in `CHANGELOG.md` at the repo root. The pre-push hook (`.ai-policy/hooks/check-changelog.sh`) rejects pushes that bump the version without adding a matching entry. The changelog follows [Common Changelog](https://common-changelog.org/).
+
+**`project-context.md` version.**
+`project-context.md` carries its own `Version:` header, independent of the canonical `ai-workflow.md` version, identifying the state of this repo's context document.
+Bump it whenever the document is updated to reflect a change in the codebase it describes; it is not shipped to target repos, so its version neither affects nor is affected by the canonical version.
+Apply the same X.Y.Z scheme: patch (Z) for a small factual correction or wording fix, minor (Y) for adding or restructuring a section or documenting newly added project structure, major (X) for a wholesale rewrite.
+Changes to `project-context.md` do not require a `CHANGELOG.md` entry or a tagged release.
+
+**Derived files.**
+`lite-monolithic/ai-workflow.md` is a standalone condensation of `ai-workflow.md` plus the `aiw-*` skills into a single file. It is not authored independently for content: whenever a change to the full workflow or the skills alters the rules an agent follows, re-condense the lite file in the same change and set its `Version:` header equal to the new canonical version. Because the lite version is held equal to canonical by this rule, a lite `Version:` that lags the canonical version is a drift signal — it means the lite file has not been re-synced and may no longer reflect the current rules. Treat that gap as a defect to resolve by re-condensing, not by editing the version header alone.
 
 **Tagged releases.**
 Create a tagged release for any minor or major version bump.

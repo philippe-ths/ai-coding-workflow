@@ -16,13 +16,13 @@ Developers who want lightweight AI coding guardrails they can drop into any repo
 2. Point your AI coding agent at the file (e.g. via agent instructions or conversation context).
 3. Run tasks through the workflow. The agent follows the steps; you review at checkpoints.
 
-## What's Different from the Full Version
+## Relationship to the Full Project
 
-The full version includes:
+`ai-workflow.md` here is a self-contained condensation of the [full AI Coding Workflow](https://github.com/philippe-ths/ai-coding-workflow): the same workflow steps, planning discipline, validation gates, scope control, and failure analysis, inlined into one file with no external dependencies. It is a *derived* artifact — re-condensed from the full workflow and its skills — and its `Version:` header is kept equal to the full project's canonical version, so you can tell which release it was distilled from. A lite version that lags the canonical version means it has not yet been re-synced.
+
+Step up to the full version when you want what a single file cannot carry:
 
 - A policy enforcement layer (`.ai-policy/` scripts and git hooks) that blocks commits and pushes when rules are violated.
-- Separate skill files loaded on demand for planning, failure analysis, logging/observability, and issue creation.
+- Skills loaded on demand (planning, ground truth, testing, verification, failure analysis, GitHub handoff, issue creation, project-context management, and more).
 - Multi-agent entry points for VS Code Copilot, Claude Code, Codex, and Gemini CLI.
-- A project-context template for documenting implementation truth in target repositories.
-
-This lite version strips all of that down to a single file with the essential rules inlined. If you need deterministic enforcement or multi-agent configuration, use the [full version](https://github.com/philippe-ths/ai-coding-workflow).
+- A maintained `project-context.md` documenting your repository's implementation truth, authored with the `aiw-project-context-management` skill.
