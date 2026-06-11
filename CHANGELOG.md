@@ -4,6 +4,12 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+## 3.5.0 - 2026-06-11
+
+### Added
+
+- `ai-workflow.md` and `lite-monolithic/ai-workflow.md`: new "Asking for Guidance" section. Whenever the agent asks the human a question or requests guidance on a decision, it must present it as a short framing paragraph, a list of options each with an explanation, a clear recommendation, and the rationale for that recommendation.
+
 ## 3.4.1 - 2026-06-09
 
 ### Fixed
