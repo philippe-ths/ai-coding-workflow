@@ -4,6 +4,8 @@ This changelog follows [Common Changelog](https://common-changelog.org/).
 
 The canonical version is the `Version:` header in `ai-workflow.md`. Every bump of that header requires a matching entry here; the pre-push hook enforces this.
 
+Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
+
 ## 3.5.0 - 2026-06-11
 
 ### Added
@@ -30,9 +32,21 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 ### Removed
 
-- The entire telemetry stack (`telemetry/`): OTEL Collector, Prometheus, Loki, Grafana, the five dashboards, the redaction pipeline, and both launchd autostart installers. The OTLP/Prometheus pipeline was silently dropping ~80% of sessions and required a babysitting skill to keep alive.
-- The baseline evaluation harness (`evals/`), `scripts/run-baseline.sh`, `scripts/compare-versions.py`, and `scripts/eval-preflight.sh`. The statistical A/B apparatus (pass^k, McNemar, the n=20 readiness gate) could not produce trustworthy verdicts from a single developer's sparse, cross-repo data.
-- The `aiw-evaluation` and `aiw-telemetry-setup` skills (both `.agents/skills/` and `.claude/skills/`), `design/decisions/evaluation.md`, `docs/telemetry-setup.md`, `docs/telemetry-schema.md`, `docs/spikes/d0-sandbox-otel.md`, `.envrc.example`, and `.ai-policy/scripts/update-session-tags.sh`.
+- `telemetry/` — the entire local OTEL Collector + Prometheus + Loki + Grafana stack, the five dashboards, the redaction pipeline, and both launchd autostart installers. The OTLP/Prometheus pipeline was silently dropping ~80% of sessions and required a babysitting skill to keep alive.
+- `evals/` — the baseline evaluation harness. The statistical A/B apparatus (pass^k, McNemar, the n=20 readiness gate) could not produce trustworthy verdicts from a single developer's sparse, cross-repo data.
+- `scripts/run-baseline.sh` — baseline harness runner.
+- `scripts/compare-versions.py` — pass^k / McNemar comparison.
+- `scripts/eval-preflight.sh` — between-review readiness gate.
+- `.agents/skills/aiw-evaluation/` — review-readiness skill.
+- `.claude/skills/aiw-evaluation/` — review-readiness skill.
+- `.agents/skills/aiw-telemetry-setup/` — telemetry enablement skill.
+- `.claude/skills/aiw-telemetry-setup/` — telemetry enablement skill.
+- `design/decisions/evaluation.md` — evaluation gate rationale.
+- `docs/telemetry-setup.md` — telemetry setup guide.
+- `docs/telemetry-schema.md` — per-session JSON contract.
+- `docs/spikes/d0-sandbox-otel.md` — sandbox OTEL spike.
+- `.envrc.example` — telemetry env template.
+- `.ai-policy/scripts/update-session-tags.sh` — session-tag writer.
 
 ### Added
 
@@ -99,7 +113,8 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 
 ### Removed
 
-- `aiw-logging-and-observability` skill: content redistributed into `aiw-verification` (runtime-output reading as evidence) and `aiw-failure-analysis` (diagnostic logging during investigation). No standalone observability skill remains; the obligations are owned by the verification and failure-analysis skills that consume them.
+- `.agents/skills/aiw-logging-and-observability/` — content redistributed into `aiw-verification` (runtime-output reading as evidence) and `aiw-failure-analysis` (diagnostic logging during investigation). No standalone observability skill remains; the obligations are owned by the verification and failure-analysis skills that consume them.
+- `.claude/skills/aiw-logging-and-observability/` — content redistributed into `aiw-verification` and `aiw-failure-analysis`.
 
 ## 2.16.0 - 2026-04-26
 
@@ -128,9 +143,9 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 
 ### Removed
 
-- `.ai-policy/hooks/check-session-tags.sh` pre-commit hook and its invocation from `.githooks/pre-commit`. The drift it caught was drift in a tracked file; now that identity is no longer tracked, the drift class does not exist ([#136]).
+- `.ai-policy/hooks/check-session-tags.sh` — pre-commit hook (and its invocation from `.githooks/pre-commit`). The drift it caught was drift in a tracked file; now that identity is no longer tracked, the drift class does not exist ([#136]).
 - `.ai-policy/scripts/test-session-tags-hook.sh` — covered the deleted hook ([#136]).
-- Session-tags test gating in `.ai-policy/scripts/project-validation.sh` ([#136]).
+- `.ai-policy/scripts/project-validation.sh` — removed the session-tags test gating from it ([#136]).
 
 ## 2.14.0 - 2026-04-20
 

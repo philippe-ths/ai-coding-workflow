@@ -28,6 +28,29 @@ if command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
+# --- manifest integrity: the product/factory boundary must stay honest ---
+if [ -x ./scripts/check-manifest.sh ]; then
+  ./scripts/check-manifest.sh
+fi
+
+# --- install: sandbox test of the installer against throwaway target repos ---
+if [ -x ./scripts/test-install.sh ]; then
+  ./scripts/test-install.sh
+fi
+
+# --- changelog removals: enforce the leading-path convention (factory-only) ---
+if [ -x ./scripts/check-changelog-removals.sh ]; then
+  ./scripts/check-changelog-removals.sh
+fi
+if [ -x ./scripts/test-changelog-removals.sh ]; then
+  ./scripts/test-changelog-removals.sh
+fi
+
+# --- update: sandbox test of the update path against a real historical version pair ---
+if [ -x ./scripts/test-update.sh ]; then
+  ./scripts/test-update.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py

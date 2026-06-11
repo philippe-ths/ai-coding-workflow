@@ -66,64 +66,39 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `observations/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
 - `observations/workflow-reviews/` — archived outputs from earlier periodic workflow reviews.
 
-## Installation by Tool
+## Product vs Factory
 
-Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow file, and the policy enforcement layer. `project-context.md` is not copied — it is authored in the target repository by invoking the `aiw-project-context-management` skill.
+This repository is two things at once: the **product** (the workflow files that install into a target repository) and the **factory** (this repo's own machinery for developing, validating, and observing the workflow). Because the repo runs its own workflow, the product files live at the root alongside the factory files rather than in a separate directory.
 
-### Claude Code
+`install-manifest.json` is the single source of truth for that boundary. It declares, per profile and per tool, which files are product, which are authored fresh in each target, and which are factory-only and must never be copied. `scripts/check-manifest.sh` (run in validation) guarantees every git-tracked file is classified, so nothing can drift out of the boundary unnoticed.
 
-```
-CLAUDE.md
-.claude/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### VS Code Copilot
-
-```
-.github/copilot-instructions.md
-.agents/skills/
-.vscode/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### Codex
-
-```
-AGENTS.md
-.agents/skills/
-.codex/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### Gemini CLI
-
-```
-GEMINI.md
-.agents/skills/
-.gemini/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.
-
-### Post-install setup
-
-Install the git hooks:
+To see the current classification, read the manifest or run:
 
 ```bash
-./.ai-policy/scripts/install-hooks.sh
+make classify
 ```
 
-Run validation:
+## Installation
+
+Point an AI coding agent at this repository — a local path or its URL — and say "install the AI workflow" (or "upgrade the AI workflow"). The agent follows [`INSTALL.md`](INSTALL.md), which drives the installer: it asks which tool (`claude`, `codex`, `gemini`, `copilot`) and profile (`full` or `lite`), copies the right files, records them in the target's `.gitignore`, and installs the git hooks. No hand-copying.
+
+To run it directly instead:
+
+```bash
+# fresh install
+scripts/install.sh --target <target-repo> --tool claude --profile full
+
+# update an installed copy (auto-detects the installed tool and profile)
+scripts/update.sh --target <target-repo>
+```
+
+Which files each tool and profile receives is defined in `install-manifest.json` (run `make classify` to print it); see [Product vs Factory](#product-vs-factory). The installer copies only product files. `project-context.md` is not copied — author it in the target with the `aiw-project-context-management` skill so it describes the target repo.
+
+Governance files are **vendored**: the installer adds them to the target's `.gitignore` so they are not committed into the target's history. The full profile also wires the git hooks (`core.hooksPath`) automatically.
+
+### Wiring in your project's own checks
+
+After installing, run validation in the target:
 
 ```bash
 ./.ai-policy/scripts/run-validation.sh
