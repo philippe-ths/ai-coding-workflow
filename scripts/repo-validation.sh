@@ -46,6 +46,11 @@ if [ -x ./scripts/test-changelog-removals.sh ]; then
   ./scripts/test-changelog-removals.sh
 fi
 
+# --- update: sandbox test of the update path against a real historical version pair ---
+if [ -x ./scripts/test-update.sh ]; then
+  ./scripts/test-update.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py
