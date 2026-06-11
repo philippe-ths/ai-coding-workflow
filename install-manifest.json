@@ -1,0 +1,39 @@
+{
+  "$comment": "Boundary between product files (copied into a target repo on install) and factory files (this repo's own machinery, never copied). Source-side: this manifest is itself factory-only and is never installed. scripts/check-manifest.sh validates it against git-tracked files; untracked artifacts (e.g. telemetry/, .envrc, .DS_Store) are out of scope by design. Directory entries end with '/'; file entries do not.",
+  "profiles": {
+    "full": {
+      "shared": ["ai-workflow.md", ".ai-policy/", ".githooks/"],
+      "tools": {
+        "claude": ["CLAUDE.md", ".claude/"],
+        "codex": ["AGENTS.md", ".codex/", ".agents/skills/"],
+        "gemini": ["GEMINI.md", ".gemini/", ".agents/skills/"],
+        "copilot": [".github/copilot-instructions.md", ".github/hooks/", ".vscode/", ".agents/skills/"]
+      }
+    },
+    "lite": {
+      "shared": ["lite-monolithic/ai-workflow.md"],
+      "entry_filenames": {
+        "claude": "CLAUDE.md",
+        "codex": "AGENTS.md",
+        "gemini": "GEMINI.md",
+        "copilot": ".github/copilot-instructions.md"
+      }
+    }
+  },
+  "authored_in_target": ["project-context.md"],
+  "factory_only": [
+    "install-manifest.json",
+    ".gitignore",
+    "CHANGELOG.md",
+    "CONTEXT.md",
+    "LICENSE",
+    "Makefile",
+    "README.md",
+    "design/",
+    "docs/",
+    "observation/",
+    "observations/",
+    "scripts/",
+    "lite-monolithic/README.md"
+  ]
+}

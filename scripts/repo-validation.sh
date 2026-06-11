@@ -28,6 +28,11 @@ if command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
+# --- manifest integrity: the product/factory boundary must stay honest ---
+if [ -x ./scripts/check-manifest.sh ]; then
+  ./scripts/check-manifest.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py
