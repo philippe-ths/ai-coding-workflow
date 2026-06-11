@@ -33,6 +33,11 @@ if [ -x ./scripts/check-manifest.sh ]; then
   ./scripts/check-manifest.sh
 fi
 
+# --- install: sandbox test of the installer against throwaway target repos ---
+if [ -x ./scripts/test-install.sh ]; then
+  ./scripts/test-install.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py

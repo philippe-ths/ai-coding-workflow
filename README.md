@@ -66,6 +66,18 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `observations/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
 - `observations/workflow-reviews/` — archived outputs from earlier periodic workflow reviews.
 
+## Product vs Factory
+
+This repository is two things at once: the **product** (the workflow files that install into a target repository) and the **factory** (this repo's own machinery for developing, validating, and observing the workflow). Because the repo runs its own workflow, the product files live at the root alongside the factory files rather than in a separate directory.
+
+`install-manifest.json` is the single source of truth for that boundary. It declares, per profile and per tool, which files are product, which are authored fresh in each target, and which are factory-only and must never be copied. `scripts/check-manifest.sh` (run in validation) guarantees every git-tracked file is classified, so nothing can drift out of the boundary unnoticed.
+
+To see the current classification, read the manifest or run:
+
+```bash
+make classify
+```
+
 ## Installation by Tool
 
 Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow file, and the policy enforcement layer. `project-context.md` is not copied — it is authored in the target repository by invoking the `aiw-project-context-management` skill.
