@@ -21,7 +21,7 @@ set -eu
 SOURCE=""
 TARGET=""
 TOOL=""
-PROFILE="full"
+PROFILE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -38,8 +38,6 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 [ -n "$SOURCE" ] || SOURCE="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 [ -n "$TARGET" ] || { echo "error: --target is required" >&2; exit 2; }
-case "$TOOL" in claude|codex|gemini|copilot) ;; *) echo "error: --tool must be claude|codex|gemini|copilot" >&2; exit 2 ;; esac
-case "$PROFILE" in full|lite) ;; *) echo "error: --profile must be full or lite" >&2; exit 2 ;; esac
 
 command -v jq >/dev/null 2>&1 || { echo "error: jq is required" >&2; exit 1; }
 
@@ -53,6 +51,27 @@ TARGET="$(cd "$TARGET" && git rev-parse --show-toplevel)"
 read_version() { awk '/^Version:[[:space:]]*/ { print $2; exit }' "$1" 2>/dev/null; }
 
 [ -f "$TARGET/ai-workflow.md" ] || { echo "error: no installed workflow found in target (ai-workflow.md missing); use install.sh" >&2; exit 1; }
+
+# Auto-detect tool and profile from the installed target when not given.
+if [ -z "$PROFILE" ]; then
+  if [ -d "$TARGET/.ai-policy" ]; then PROFILE="full"; else PROFILE="lite"; fi
+fi
+if [ -z "$TOOL" ]; then
+  detected=""
+  [ -f "$TARGET/CLAUDE.md" ] && detected="$detected claude"
+  [ -f "$TARGET/AGENTS.md" ] && detected="$detected codex"
+  [ -f "$TARGET/GEMINI.md" ] && detected="$detected gemini"
+  [ -f "$TARGET/.github/copilot-instructions.md" ] && detected="$detected copilot"
+  detected="$(echo $detected | xargs)"
+  case "$detected" in
+    "")     echo "error: could not detect installed tool; pass --tool" >&2; exit 2 ;;
+    *" "*)  echo "error: multiple tools installed ($detected); pass --tool to choose" >&2; exit 2 ;;
+    *)      TOOL="$detected" ;;
+  esac
+fi
+case "$TOOL" in claude|codex|gemini|copilot) ;; *) echo "error: --tool must be claude|codex|gemini|copilot" >&2; exit 2 ;; esac
+case "$PROFILE" in full|lite) ;; *) echo "error: --profile must be full or lite" >&2; exit 2 ;; esac
+
 installed_version="$(read_version "$TARGET/ai-workflow.md")"
 source_version="$(read_version "$SOURCE/ai-workflow.md")"
 [ -n "$installed_version" ] || { echo "error: target ai-workflow.md has no Version header" >&2; exit 1; }

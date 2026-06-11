@@ -23,6 +23,7 @@
   "authored_in_target": ["project-context.md"],
   "factory_only": [
     "install-manifest.json",
+    "INSTALL.md",
     ".gitignore",
     "CHANGELOG.md",
     "CONTEXT.md",

@@ -78,64 +78,27 @@ To see the current classification, read the manifest or run:
 make classify
 ```
 
-## Installation by Tool
+## Installation
 
-Copy the relevant files into your target repository. Each agent needs its own instruction entry point, the shared workflow file, and the policy enforcement layer. `project-context.md` is not copied — it is authored in the target repository by invoking the `aiw-project-context-management` skill.
+Point an AI coding agent at this repository — a local path or its URL — and say "install the AI workflow" (or "upgrade the AI workflow"). The agent follows [`INSTALL.md`](INSTALL.md), which drives the installer: it asks which tool (`claude`, `codex`, `gemini`, `copilot`) and profile (`full` or `lite`), copies the right files, records them in the target's `.gitignore`, and installs the git hooks. No hand-copying.
 
-### Claude Code
-
-```
-CLAUDE.md
-.claude/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### VS Code Copilot
-
-```
-.github/copilot-instructions.md
-.agents/skills/
-.vscode/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### Codex
-
-```
-AGENTS.md
-.agents/skills/
-.codex/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-### Gemini CLI
-
-```
-GEMINI.md
-.agents/skills/
-.gemini/
-.ai-policy/
-.githooks/
-ai-workflow.md
-```
-
-After copying, add the governance files and folders to the target repository's `.gitignore` if they should not be committed there.
-
-### Post-install setup
-
-Install the git hooks:
+To run it directly instead:
 
 ```bash
-./.ai-policy/scripts/install-hooks.sh
+# fresh install
+scripts/install.sh --target <target-repo> --tool claude --profile full
+
+# update an installed copy (auto-detects the installed tool and profile)
+scripts/update.sh --target <target-repo>
 ```
 
-Run validation:
+Which files each tool and profile receives is defined in `install-manifest.json` (run `make classify` to print it); see [Product vs Factory](#product-vs-factory). The installer copies only product files. `project-context.md` is not copied — author it in the target with the `aiw-project-context-management` skill so it describes the target repo.
+
+Governance files are **vendored**: the installer adds them to the target's `.gitignore` so they are not committed into the target's history. The full profile also wires the git hooks (`core.hooksPath`) automatically.
+
+### Wiring in your project's own checks
+
+After installing, run validation in the target:
 
 ```bash
 ./.ai-policy/scripts/run-validation.sh

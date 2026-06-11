@@ -70,11 +70,26 @@ set_version "$T/ai-workflow.md" 99.0.0
 if [ "$?" -ne 0 ]; then ok "refuses to downgrade"; else bad "should refuse downgrade"; fi
 present "$T" ai-workflow.md
 
-echo "lite update:"
+echo "auto-detect tool and profile (full/claude):"
+T="$(new_target detect)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+set_version "$T/ai-workflow.md" 2.14.0
+"$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1 || bad "auto-detect update exited non-zero"
+v="$(awk '/^Version:[[:space:]]*/ {print $2; exit}' "$T/ai-workflow.md")"
+if [ "$v" = "$SRC_VERSION" ]; then ok "auto-detected full/claude and updated"; else bad "auto-detect failed (v=$v)"; fi
+
+echo "ambiguous tool requires --tool:"
+T="$(new_target ambig)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+touch "$T/AGENTS.md"
+"$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1
+if [ "$?" -ne 0 ]; then ok "ambiguous tool errors without --tool"; else bad "should error on ambiguous tool"; fi
+
+echo "lite update (auto-detected):"
 T="$(new_target lite)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile lite >/dev/null 2>&1
 set_version "$T/ai-workflow.md" 2.14.0
-"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile lite >/dev/null 2>&1 || bad "lite update exited non-zero"
+"$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1 || bad "lite update exited non-zero"
 present "$T" ai-workflow.md
 present "$T" CLAUDE.md
 
