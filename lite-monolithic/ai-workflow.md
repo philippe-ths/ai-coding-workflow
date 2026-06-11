@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.4.1
+Version: 3.5.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -354,6 +354,10 @@ Do not do any of the following under any circumstances:
 - NEVER silently expand scope or introduce unrelated changes.
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
+
+## Asking for Guidance
+
+When asking the human a question or requesting guidance on a decision, present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation.
 
 ## Reactive Rules
 
