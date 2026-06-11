@@ -38,6 +38,14 @@ if [ -x ./scripts/test-install.sh ]; then
   ./scripts/test-install.sh
 fi
 
+# --- changelog removals: enforce the leading-path convention (factory-only) ---
+if [ -x ./scripts/check-changelog-removals.sh ]; then
+  ./scripts/check-changelog-removals.sh
+fi
+if [ -x ./scripts/test-changelog-removals.sh ]; then
+  ./scripts/test-changelog-removals.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py
