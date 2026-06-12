@@ -89,13 +89,24 @@ write_gitignore_block() {
   local begin="# >>> ai-workflow (vendored, managed by installer) >>>"
   local end="# <<< ai-workflow <<<"
   touch "$gi"
-  if grep -qF "$begin" "$gi"; then
-    awk -v b="$begin" -v e="$end" '
-      $0==b {skip=1}
-      skip==0 {print}
-      $0==e {skip=0}
-    ' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
-  fi
+  # Drop our previous managed block, and also any pre-existing unmarked lines
+  # that exactly match a vendored path (ignoring trailing slashes). The latter
+  # folds entries from an earlier manual install into the managed block instead
+  # of leaving the same path listed twice.
+  local joined; joined="$(printf '%s|' "$@")"
+  awk -v b="$begin" -v e="$end" -v paths="$joined" '
+    BEGIN {
+      n = split(paths, parr, "|")
+      for (i = 1; i <= n; i++) { k = parr[i]; sub(/\/+$/, "", k); if (k != "") drop[k] = 1 }
+    }
+    $0==b {skip=1}
+    skip==0 {
+      key = $0
+      sub(/^[ \t]+/, "", key); sub(/[ \t]+$/, "", key); sub(/\/+$/, "", key)
+      if (!(key in drop)) print
+    }
+    $0==e {skip=0}
+  ' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
   if [ -s "$gi" ] && [ -n "$(tail -c1 "$gi" 2>/dev/null)" ]; then
     printf '\n' >> "$gi"
   fi
