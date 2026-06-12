@@ -28,6 +28,20 @@ if command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
+# --- lite parity: the lite-monolithic version must track the canonical version ---
+# A lagging lite Version: header is the documented drift signal that the lite
+# condensation was not re-synced when the canonical workflow changed
+# (design/decisions/maintenance.md). Fail loudly so the gap cannot stay silent.
+if [ -f ./ai-workflow.md ] && [ -f ./lite-monolithic/ai-workflow.md ]; then
+  canon_ver="$(awk '/^Version:[[:space:]]*/ { print $2; exit }' ./ai-workflow.md)"
+  lite_ver="$(awk '/^Version:[[:space:]]*/ { print $2; exit }' ./lite-monolithic/ai-workflow.md)"
+  if [ "$canon_ver" != "$lite_ver" ]; then
+    echo "error: lite-monolithic/ai-workflow.md Version ($lite_ver) does not match canonical ai-workflow.md Version ($canon_ver)." >&2
+    echo "       Re-condense the lite file to absorb the canonical change, then set its Version header equal to $canon_ver." >&2
+    exit 1
+  fi
+fi
+
 # --- manifest integrity: the product/factory boundary must stay honest ---
 if [ -x ./scripts/check-manifest.sh ]; then
   ./scripts/check-manifest.sh
