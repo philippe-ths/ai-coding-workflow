@@ -52,6 +52,26 @@ present "$T" .ai-policy/scripts/project-validation.sh
 v="$(awk '/^Version:[[:space:]]*/ {print $2; exit}' "$T/ai-workflow.md")"
 if [ "$v" = "$SRC_VERSION" ]; then ok "version bumped to $SRC_VERSION"; else bad "version is '$v', expected $SRC_VERSION"; fi
 
+echo "pre-prefix update (installed 1.0.0 -> $SRC_VERSION, drops un-prefixed skills):"
+T="$(new_target preprefix)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+set_version "$T/ai-workflow.md" 1.0.0
+# simulate the superseded un-prefixed skill dirs an old install left behind:
+for s in planning testing failure-analysis issue-creation project-spec-management logging-and-observability; do
+  mkdir -p "$T/.claude/skills/$s" "$T/.agents/skills/$s"
+  echo old > "$T/.claude/skills/$s/SKILL.md"
+  echo old > "$T/.agents/skills/$s/SKILL.md"
+done
+# a genuine local addition under the same vendored path must survive:
+mkdir -p "$T/.claude/skills/my-local-skill"; echo mine > "$T/.claude/skills/my-local-skill/SKILL.md"
+"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "pre-prefix update exited non-zero"
+for s in planning testing failure-analysis issue-creation project-spec-management logging-and-observability; do
+  absent "$T" ".claude/skills/$s"
+  absent "$T" ".agents/skills/$s"
+done
+present "$T" .claude/skills/my-local-skill/SKILL.md
+present "$T" .claude/skills/aiw-planning/SKILL.md
+
 echo "already up-to-date (no-op):"
 T="$(new_target current)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1

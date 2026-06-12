@@ -6,6 +6,27 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.5.1 - 2026-06-12
+
+### Fixed
+
+- The update path now removes the superseded un-prefixed skill directories left behind when upgrading an install that predates the `aiw-` skill-name prefix. The prefix rename ([#100], [#105]) and the project-spec to project-context rename ([#99], [#107]) were recorded only under `### Changed`, never as removable paths, so the updater treated the old directories as local additions and kept them next to the current `aiw-*` skills. They are now recorded as `### Removed` paths below, so the existing directory-removal reconciliation in `scripts/update.sh` deletes them while still preserving genuine local additions (skill directories with no current-product counterpart) ([#165]).
+
+### Removed
+
+- `.claude/skills/planning/` — superseded by `aiw-planning` in the `aiw-` prefix rename; left behind on upgrades from pre-prefix installs.
+- `.claude/skills/testing/` — superseded by `aiw-testing`.
+- `.claude/skills/failure-analysis/` — superseded by `aiw-failure-analysis`.
+- `.claude/skills/issue-creation/` — superseded by `aiw-issue-creation`.
+- `.claude/skills/project-spec-management/` — superseded by `aiw-project-context-management` (renamed in the project-spec to project-context move).
+- `.claude/skills/logging-and-observability/` — content redistributed into `aiw-verification` and `aiw-failure-analysis`; no standalone skill remains.
+- `.agents/skills/planning/` — superseded by `aiw-planning`.
+- `.agents/skills/testing/` — superseded by `aiw-testing`.
+- `.agents/skills/failure-analysis/` — superseded by `aiw-failure-analysis`.
+- `.agents/skills/issue-creation/` — superseded by `aiw-issue-creation`.
+- `.agents/skills/project-spec-management/` — superseded by `aiw-project-context-management`.
+- `.agents/skills/logging-and-observability/` — content redistributed into `aiw-verification` and `aiw-failure-analysis`.
+
 ## 3.5.0 - 2026-06-11
 
 ### Added
@@ -343,3 +364,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#110]: https://github.com/philippe-ths/ai-coding-workflow/issues/110
 [#156]: https://github.com/philippe-ths/ai-coding-workflow/issues/156
 [#155]: https://github.com/philippe-ths/ai-coding-workflow/issues/155
+[#99]: https://github.com/philippe-ths/ai-coding-workflow/issues/99
+[#165]: https://github.com/philippe-ths/ai-coding-workflow/issues/165
