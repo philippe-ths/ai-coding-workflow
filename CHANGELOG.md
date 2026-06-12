@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.5.2 - 2026-06-12
+
+### Fixed
+
+- `lite-monolithic/ai-workflow.md`: closed the remaining content drift against the canonical workflow and skills. The lite condensation had silently fallen behind on a handful of agent-facing rules; the genuine gaps are now inlined: a new "Test Construction" section (write the failing test first for a Fix, propose a broader class-of-bug test and name the coverage gap, do not mock the boundary a Configure/Migrate must exercise, assert on observable behaviour, and the mutation-style spot check that a suite turns red under deliberate breakage); ground-truth provenance metadata; duplicate-issue search before creating a follow-up; the back-up-the-working-tree safeguard before a risky branch transition; adding observability when the runtime path has no output to read; and the post-merge issue comment and checkbox steps ([#114]).
+
+### Added
+
+- `scripts/repo-validation.sh` now fails when `lite-monolithic/ai-workflow.md`'s `Version:` header does not equal the canonical `ai-workflow.md` version. The lite parity rule was documentation-only and drifted unnoticed; this turns a lagging lite version into a loud validation failure so a canonical bump cannot silently leave the lite file unsynced ([#114]).
+
 ## 3.5.1 - 2026-06-12
 
 ### Fixed
@@ -366,3 +376,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#155]: https://github.com/philippe-ths/ai-coding-workflow/issues/155
 [#99]: https://github.com/philippe-ths/ai-coding-workflow/issues/99
 [#165]: https://github.com/philippe-ths/ai-coding-workflow/issues/165
+[#114]: https://github.com/philippe-ths/ai-coding-workflow/issues/114

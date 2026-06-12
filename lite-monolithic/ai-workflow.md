@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.5.0
+Version: 3.5.2
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -141,6 +141,7 @@ Rules:
 - Name the oracle before implementing. It depends on the modality: a Fix is judged against the reported bug, a Refactor against the captured prior behaviour, a Migrate against prior behaviour on real inputs with an explicit exception list, a Configure against the real external system (not a mock), a Delete against the absence of remaining dependencies.
 - Never invent ground truth or expected values. If the trust level the task needs is unavailable, stop and ask — do not fabricate a substitute or silently downgrade to a lower level.
 - Mark synthetic fixtures visibly so no later read mistakes them for higher-trust data.
+- When you capture or reuse real ground-truth artifacts, record their provenance alongside them: trust level, origin, capture date, any modifications, and what would make them stale. Do not assume provenance can be reconstructed from a filename later.
 - A failing test against real ground truth is a signal about the code. Do not modify the oracle to make it pass.
 
 ## Planning Requirements
@@ -177,7 +178,7 @@ Keep the change focused on the approved task:
 - Do only the work required to complete the task. Do not treat "while I am here" changes as free.
   (Why: Each unplanned change introduces untested risk and dilutes commit traceability.)
 - Separate fixes, refactors, and feature work unless the task clearly requires them together.
-- If a larger problem is discovered, surface it as follow-up work instead of silently broadening the implementation. A follow-up issue may reference a relevant file by path to locate the concern, but must not paste, paraphrase, or prescribe the file's contents or an implementation approach.
+- If a larger problem is discovered, surface it as follow-up work instead of silently broadening the implementation. A follow-up issue may reference a relevant file by path to locate the concern, but must not paste, paraphrase, or prescribe the file's contents or an implementation approach. Before creating it, search existing open issues for overlap; if any overlaps, surface it and get the human's confirmation it is not a duplicate before creating.
   (Why: Unreviewed scope expansion breaks the human approval model; implementation detail in an issue biases whoever picks it up.)
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
@@ -205,6 +206,16 @@ When running and reporting validation:
 - Report what was tested and passed, what failed and whether it relates to the change, and what was not tested and why.
 - Do not claim code is tested when it is not, and do not ignore failing tests and continue as if the task is complete.
 
+## Test Construction
+
+When writing or changing tests:
+
+- Assert on observable behaviour and outputs, not on internal calls, private state, or implementation details. One test makes one clear claim; keep tests independent of each other's order and shared state.
+- Tests must fail when the code is broken. Periodically apply a mutation-style spot check: deliberately break a piece of code the suite covers and confirm a test goes red. A suite that never turns red under deliberate breakage is decoration.
+- Consume ground truth from the trust hierarchy above; never assert against values the same actor invented for the test.
+- **Fix.** Write the failing test first and confirm it fails for the reported reason; then fix the code and confirm it passes. A test written after the fix confirms the patch, not the bug. Also propose at least one broader test that would have caught this class of bug, and name the coverage gap that let the bug ship.
+- **Configure / Migrate.** Do not mock the external boundary the code is meant to integrate with in place of exercising it. If a mock must exist, it lives alongside a real-system smoke test, never as a replacement for one.
+
 ## Verification Before Done
 
 Passing tests are not proof the change works — only that the checks the agent chose to run passed. Before declaring done, produce an explicit justification with three parts:
@@ -220,6 +231,8 @@ Evidence runs from weak to strong: static checks < unit tests < integration test
 Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is impractical, say so and treat the unverified path as a known risk.
 
 Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass.
+
+When the runtime path has no output to read, add observability as part of the change — temporary or permanent — especially for changes touching writes, sync, state transitions, integration points, or reactive UI paths. Remove any temporary diagnostics before declaring done.
 
 Modality-specific checks:
 
@@ -304,10 +317,10 @@ Every task must follow the GitHub branching workflow:
 - Do not work directly on `main`. If the current branch is `main`, stop and create or switch to an issue-scoped branch before editing files, running issue validation, or making commits.
 - Use the branch naming format `type/short-description` (`feature/`, `fix/`, `refactor/`).
 - Rebase the issue branch onto the target branch before starting implementation and again before creating a pull request. If new commits have landed on the target branch since the last rebase, rebase again before the next remote GitHub action.
-- Before any operation that moves the working tree to a different branch state (rebase, checkout, switch), check for untracked or gitignored files at paths the target state tracks; if a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
+- Before any operation that moves the working tree to a different branch state (rebase, checkout, switch), check for untracked or gitignored files at paths the target state tracks; if a rebase produces modify/delete conflicts, stop and discuss with the human before resolving. Before a transition that could lose work, back up the working tree (excluding `.git/`) first, and delete the backup once you confirm no files were lost.
 - Treat commit creation, push to remote, and pull request creation as separate GitHub actions. Do not infer approval for one from approval for another.
 - Do not push to remote or create a pull request without explicit human confirmation in the current session.
-- After merge: confirm the branch is merged before deleting it, switch to the main branch, pull the latest, and close the issue.
+- After merge: confirm the branch is merged before deleting it, switch to the main branch, pull the latest, and close the issue. If the issue uses checkboxes, tick the completed items, and comment on the issue with key findings or any direction changes.
 
 ## The Human is Responsible For
 
