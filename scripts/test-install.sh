@@ -17,6 +17,7 @@ bad()  { echo "  FAIL: $1" >&2; fail=$((fail + 1)); }
 present() { if [ -e "$1/$2" ]; then ok "present: $2"; else bad "missing: $2"; fi; }
 absent()  { if [ -e "$1/$2" ]; then bad "should be absent: $2"; else ok "absent: $2"; fi; }
 has_line() { if grep -qF "$2" "$1/.gitignore" 2>/dev/null; then ok ".gitignore has $2"; else bad ".gitignore missing $2"; fi; }
+exactly_once() { local c; c="$(grep -cxF "$2" "$1/.gitignore" 2>/dev/null || true)"; if [ "${c:-0}" -eq 1 ]; then ok ".gitignore has exactly one '$2'"; else bad ".gitignore has $c '$2' (expected 1)"; fi; }
 
 SANDBOX="$(mktemp -d 2>/dev/null || mktemp -d -t aiw-install)"
 trap 'rm -rf "$SANDBOX"' EXIT
@@ -60,6 +61,25 @@ echo "idempotency (re-run):"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
 n="$(grep -cF "# >>> ai-workflow (vendored, managed by installer) >>>" "$T/.gitignore")"
 if [ "$n" -eq 1 ]; then ok "single managed block after re-run"; else bad "managed block count = $n"; fi
+
+echo "pre-existing unmarked .gitignore entries (no duplicates):"
+T="$(new_target preexisting-gitignore)"
+cat > "$T/.gitignore" <<'GI'
+# user's own ignores
+node_modules/
+ai-workflow.md
+.claude/
+.ai-policy
+.githooks/
+CLAUDE.md
+GI
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+exactly_once "$T" "ai-workflow.md"
+exactly_once "$T" ".claude/"
+exactly_once "$T" ".ai-policy/"
+exactly_once "$T" ".githooks/"
+exactly_once "$T" "CLAUDE.md"
+has_line   "$T" "node_modules/"
 
 echo "full / codex (tool specificity):"
 T="$(new_target full-codex)"
