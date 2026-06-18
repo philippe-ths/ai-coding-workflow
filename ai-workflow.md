@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.5.2
+Version: 3.6.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -36,6 +36,14 @@ Two skills load conditionally when their triggers apply, alongside the Task Flow
 - aiw-security-testing for changes crossing trust boundaries or handling untrusted input.
 
 When these dimensions apply, attempt automated coverage before falling back to manual verification.
+
+## Resource Discipline
+
+Protect your context window and the human's quota — but never by doing less than the task requires.
+
+- Efficiency governs *how* you discharge a required step, never *whether*. Never skip, weaken, or defer a required step to save context or quota.
+- Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
+- A subagent spends quota for parallelism or clean context — use one when it earns that cost, not as a reflex to empty your own context window.
 
 ## Boundary Rules
 
