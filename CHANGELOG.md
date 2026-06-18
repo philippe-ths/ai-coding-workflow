@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.6.0 - 2026-06-18
+
+### Added
+
+- `ai-workflow.md`: new `Resource Discipline` section instructing the agent to protect its context window and the human's quota without doing less than the task requires. It establishes a single priority order (minimise total token cost, with correctness as an absolute floor), a general floor rule that efficiency governs how a required step is discharged and never whether, narrow reading qualified by need, and subagent use tied to the sanctioned parallelism/clean-context purposes rather than spawned as a reflex to empty the main context. The companion rationale and misuse analysis are recorded in `design/decisions/context-economics.md`.
+
 ## 3.5.2 - 2026-06-12
 
 ### Fixed

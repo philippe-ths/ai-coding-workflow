@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.5.2
+Version: 3.6.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -167,6 +167,16 @@ During implementation:
 - Prefer extending current patterns over introducing new ones.
   (Why: New patterns increase review surface, reduce predictability, and create maintenance drift.)
 - Keep changes focused and relevant to the approved plan.
+
+## Resource Discipline
+
+Protect your context window and the human's quota — but never by doing less than the task requires:
+
+- Efficiency governs how you discharge a required step, never whether. Never skip, weaken, or defer a required step to save context or quota.
+  (Why: An efficiency directive is easy to misread as licence to thin verification, ground truth, or failure analysis; the cost saving is illusory when it lets a defect through.)
+- Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
+- A subagent spends quota for parallelism or clean context. Use one when it earns that cost, not as a reflex to empty your own context window.
+  (Why: Offloading to a subagent keeps the main context lean but multiplies total tokens; spawning to empty context rather than for real leverage maximises spend.)
 
 ## Scope Control
 
