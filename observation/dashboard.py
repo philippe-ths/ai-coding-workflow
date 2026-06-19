@@ -42,6 +42,19 @@ _TEMPLATE = r"""<!DOCTYPE html>
   .muted { color: #5f6b7c; }
   .est { color: #c9a227; }
   svg { background: #12161d; border-radius: 6px; }
+  .vwrap { overflow-x: auto; border: 1px solid #20262f; border-radius: 8px; }
+  .vtable { border-collapse: collapse; font-size: 12px; width: 100%; }
+  .vtable th, .vtable td { padding: 7px 14px; border-bottom: 1px solid #20262f; text-align: right; white-space: nowrap; vertical-align: top; }
+  .vtable th:first-child, .vtable td:first-child { text-align: left; color: #b9c6da; }
+  .vtable thead th { color: #8b97a8; font-weight: 500; position: sticky; top: 0; background: #0f1115; }
+  .vtable td .val { font-weight: 600; }
+  .delta { display: block; font-size: 11px; margin-top: 2px; }
+  .delta.up { color: #4ade80; }
+  .delta.down { color: #f87171; }
+  .delta.flat { color: #8b97a8; }
+  .vtag { font-size: 10px; color: #5f6b7c; text-transform: uppercase; letter-spacing: .04em; }
+  .vnote { color: #8b97a8; font-size: 12px; margin: 0 0 10px; }
+  .vsub { font-size: 11px; color: #8b97a8; text-transform: uppercase; letter-spacing: .05em; margin: 16px 0 6px; }
 </style>
 </head>
 <body>
@@ -68,6 +81,18 @@ _TEMPLATE = r"""<!DOCTYPE html>
 </div>
 
 <div class="cards" id="cards"></div>
+
+<section>
+  <h2>Version comparison</h2>
+  <p class="vnote">Each column is one workflow version in the current filter; cells show the value plus the change vs the baseline (&Delta; absolute &middot; &Delta;%).
+  Raw totals (cost, tokens, tools, skills) scale with the <b>Sessions</b> row &mdash; read them against it, not on their own.
+  <b style="color:#4ade80;">Green</b> means the value rose vs baseline, <b style="color:#f87171;">red</b> means it fell &mdash; direction only, not a verdict (a green cost rise is still more spend).
+  Comparison is only meaningful filtered to the repo where you actually edit the workflow.</p>
+  <div class="controls" style="padding:0 0 12px;"><div><label>Baseline version</label><select id="f-baseline"></select></div></div>
+  <div class="vwrap" id="vcompare"></div>
+  <div class="vsub">Skill activations by version</div>
+  <div class="vwrap" id="vcompare-skills"></div>
+</section>
 
 <section>
   <h2>Sessions per day</h2>
@@ -177,6 +202,117 @@ function renderCharts(rows){
   $("chart-cost").innerHTML = barChartSVG(perDay(rows, s=>s.estimated_cost_usd||0), {color:"#c9a227", dp:2});
 }
 
+function median(nums){ if(!nums.length) return null; const s=[...nums].sort((a,b)=>a-b); const m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function vcmp(a,b){ const pa=a.split('.').map(Number), pb=b.split('.').map(Number); for(let i=0;i<3;i++){ if((pa[i]||0)!==(pb[i]||0)) return (pa[i]||0)-(pb[i]||0); } return 0; }
+
+function aggregateByVersion(rows){
+  const groups=new Map();
+  rows.forEach(s=>{ const v=s.workflow_version; if(!v) return; if(!groups.has(v)) groups.set(v,[]); groups.get(v).push(s); });
+  const out={};
+  for(const [v,ss] of groups){
+    const ratings=ss.filter(s=>s.rating!=null).map(s=>s.rating);
+    const durs=ss.filter(s=>s.duration_seconds!=null).map(s=>s.duration_seconds/60);
+    out[v]={
+      n: ss.length,
+      rating: ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : null,
+      mins: median(durs),
+      cost: ss.reduce((a,s)=>a+(s.estimated_cost_usd||0),0),
+      tokens: ss.reduce((a,s)=>a+totalTokens(s),0),
+      tools: ss.reduce((a,s)=>a+((s.tool_calls&&s.tool_calls.total)||0),0),
+      skills: ss.reduce((a,s)=>a+((s.skills&&s.skills.total)||0),0),
+    };
+  }
+  return out;
+}
+
+const VMETRICS=[
+  {key:"n",      label:"Sessions",                 fmt:n=>fmt(n)},
+  {key:"rating", label:"Avg rating",               fmt:n=>n==null?"&mdash;":fmt(n,2)},
+  {key:"mins",   label:"Median mins",              fmt:n=>n==null?"&mdash;":fmt(n,1)},
+  {key:"cost",   label:"Est cost (total)",         fmt:n=>"$"+fmt(n,2)},
+  {key:"tokens", label:"Tokens (total)",           fmt:n=>fmt(n)},
+  {key:"tools",  label:"Tool calls (total)",       fmt:n=>fmt(n)},
+  {key:"skills", label:"Skill activations (total)", fmt:n=>fmt(n)},
+];
+
+function skillsByVersion(rows){
+  const out={};
+  rows.forEach(s=>{
+    const v=s.workflow_version; if(!v) return;
+    const by=(s.skills&&s.skills.by_skill)||{};
+    if(!out[v]) out[v]={};
+    for(const k in by) out[v][k]=(out[v][k]||0)+by[k];
+  });
+  return out;
+}
+
+function skillCell(val, baseVal){
+  if(!val && !baseVal) return '<div class="val muted">&middot;</div>';
+  let html='<div class="val">'+fmt(val)+'</div>';
+  if(baseVal!=null && !(val===0 && baseVal===0)){
+    const d=val-baseVal;
+    const cls = d>0?"up":(d<0?"down":"flat");
+    const pctTxt = baseVal===0 ? "new" : (d>0?"+":"")+fmt(d/baseVal*100,1)+"%";
+    html+='<span class="delta '+cls+'">'+(d<0?"-":"+")+fmt(Math.abs(d))+' &middot; '+pctTxt+'</span>';
+  }
+  return html;
+}
+
+function signedAbs(metric, d){ return (d<0?"-":"+")+metric.fmt(Math.abs(d)); }
+
+function compareCell(metric, val, baseVal){
+  if(val==null) return '<div class="val">&mdash;</div>';
+  let html='<div class="val">'+metric.fmt(val)+'</div>';
+  if(baseVal!=null){
+    const d=val-baseVal;
+    const pct = baseVal!==0 ? d/baseVal*100 : null;
+    const cls = d>0?"up":(d<0?"down":"flat");
+    const pctTxt = pct==null ? "&mdash;" : (pct>0?"+":"")+fmt(pct,1)+"%";
+    html+='<span class="delta '+cls+'">'+signedAbs(metric,d)+' &middot; '+pctTxt+'</span>';
+  }
+  return html;
+}
+
+function renderCompare(rows){
+  const agg=aggregateByVersion(rows);
+  const versions=Object.keys(agg).sort(vcmp);
+  const sel=$("f-baseline");
+  const keep = versions.includes(sel.value) ? sel.value : (versions[0]||"");
+  sel.innerHTML="";
+  versions.forEach(v=>{ const o=document.createElement("option"); o.value=v; o.textContent=v; sel.appendChild(o); });
+  sel.value=keep;
+  if(versions.length<2){
+    const msg='<div class="muted" style="padding:14px;">Filter to at least two workflow versions (ideally within one repo) to compare.</div>';
+    $("vcompare").innerHTML=msg; $("vcompare-skills").innerHTML=msg;
+    return;
+  }
+  const baseV=keep;
+  const vhead='<tr><th>%COL%</th>'+versions.map(v=>'<th>'+v+(v===baseV?' <span class="vtag">baseline</span>':'')+'</th>').join("")+'</tr>';
+  const metricBody=VMETRICS.map(m=>{
+    const cells=versions.map(v=>'<td>'+compareCell(m, agg[v][m.key], v===baseV?null:agg[baseV][m.key])+'</td>').join("");
+    return '<tr><td>'+m.label+'</td>'+cells+'</tr>';
+  }).join("");
+  $("vcompare").innerHTML='<table class="vtable"><thead>'+vhead.replace("%COL%","Metric")+'</thead><tbody>'+metricBody+'</tbody></table>';
+
+  const sk=skillsByVersion(rows);
+  const totals=new Map();
+  versions.forEach(v=>{ const by=sk[v]||{}; for(const k in by) totals.set(k,(totals.get(k)||0)+by[k]); });
+  const names=[...totals.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  if(!names.length){
+    $("vcompare-skills").innerHTML='<div class="muted" style="padding:14px;">No skill activations in range.</div>';
+    return;
+  }
+  const skillBody=names.map(name=>{
+    const cells=versions.map(v=>{
+      const val=(sk[v]&&sk[v][name])||0;
+      const baseVal=v===baseV?null:((sk[baseV]&&sk[baseV][name])||0);
+      return '<td>'+skillCell(val, baseVal)+'</td>';
+    }).join("");
+    return '<tr><td>'+name+'</td>'+cells+'</tr>';
+  }).join("");
+  $("vcompare-skills").innerHTML='<table class="vtable"><thead>'+vhead.replace("%COL%","Skill")+'</thead><tbody>'+skillBody+'</tbody></table>';
+}
+
 function renderSkills(rows){
   const m = new Map();
   rows.forEach(s => { const by=(s.skills&&s.skills.by_skill)||{}; for(const k in by) m.set(k,(m.get(k)||0)+by[k]); });
@@ -203,6 +339,7 @@ function renderTable(rows){
 function render(){
   const rows = applyFilters();
   renderCards(rows);
+  renderCompare(rows);
   renderCharts(rows);
   renderSkills(rows);
   renderTable(rows);
@@ -213,6 +350,7 @@ function init(){
   fillMulti($("f-repo"), uniq(SESSIONS.map(s=>s.repo)));
   fillMulti($("f-version"), uniq(SESSIONS.map(s=>s.workflow_version)));
   ["f-repo","f-version","f-from","f-to"].forEach(id=>$(id).addEventListener("change",render));
+  $("f-baseline").addEventListener("change",render);
   $("f-reset").addEventListener("click",()=>{ ["f-repo","f-version"].forEach(id=>{[...$(id).options].forEach(o=>o.selected=false);}); $("f-from").value=""; $("f-to").value=""; render(); });
   render();
 }
