@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.7.1 - 2026-07-10
+
+### Changed
+
+- `aiw-issue-creation`: collapsed the four-item "What the Issue Must Not Contain" enumeration and its rationale note into a single class-level principle folded into the "may contain" path guidance. The prohibitions (reproducing file contents, code snippets, function/line references, prescribing an approach) were four instances of one class the skill's own note already named; they now read as one rule built on the leading word "peg", stated once, so the guidance also covers cases the list did not enumerate. Applied identically to `.claude/skills/` and `.agents/skills/`; the lite condensation already stated the class-level form, so only its `Version:` header is synced ([#175]).
+
 ## 3.7.0 - 2026-07-10
 
 ### Added
@@ -391,3 +397,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#114]: https://github.com/philippe-ths/ai-coding-workflow/issues/114
 [#170]: https://github.com/philippe-ths/ai-coding-workflow/issues/170
 [#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
+[#175]: https://github.com/philippe-ths/ai-coding-workflow/issues/175
