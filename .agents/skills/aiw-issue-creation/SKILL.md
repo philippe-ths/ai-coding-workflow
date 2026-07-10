@@ -21,16 +21,8 @@ Read this file when creating a follow-up or spin-off GitHub issue.
 
 ## What the Issue May Contain
 
-- Reference relevant files by path to locate the concern, so the implementing agent can open current truth in the codebase. Point at the file; never restate, paste, or paraphrase its contents.
+- Reference a relevant file by path to locate the concern. A path locates; carrying the code into the issue pegs it. Do not reproduce what a file says or prescribe how to change it. Both peg the issue to today's implementation and bias whoever picks it up toward an approach that may not fit by then.
 - Optionally, a short list of workflow skills that may help whoever implements it. Frame this as a hint to orient the implementing agent, not a mandate or a prescribed solution.
-
-## What the Issue Must Not Contain
-
-- Do not restate, paste, or paraphrase the contents of any file. A path that locates the concern is allowed (see above); reproducing what the file says is not.
-- Do not include code snippets or implementation approaches.
-- Do not reference specific functions, variables, or line numbers.
-- Do not prescribe how the implementing agent should solve the problem.
-  (Why: A bare path only locates the concern, but restated file contents, an implementation approach, or a function/line reference peg the issue to the current codebase state and bias the implementing agent toward an approach that may not match the codebase when the issue is picked up.)
 
 ## Keeping Issues Concise
 
