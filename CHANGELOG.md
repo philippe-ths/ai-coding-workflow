@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.7.0 - 2026-07-10
+
+### Added
+
+- `aiw-prompt-smith` skill added to `.claude/skills/` and `.agents/skills/`: a meta-authoring skill for writing and repairing prompting artifacts (system prompts, `CLAUDE.md`, `AGENTS.md`/`AGENT.md`, and other skills). It is organised around *altitude* — fixing the class an instance belongs to rather than appending a narrow rule per failure — and covers a write mode and a repair mode over a shared set of principles. It ships in the full profile to all four tools and is pulled by its description rather than wired into the numbered task flow, like `aiw-issue-creation`. The `lite-monolithic` condensation is unchanged in content because prompt-smith is orthogonal to the coding task flow it condenses; only its `Version:` header is synced to the canonical anchor ([#173]).
+
 ## 3.6.0 - 2026-06-18
 
 ### Added
@@ -384,3 +390,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#165]: https://github.com/philippe-ths/ai-coding-workflow/issues/165
 [#114]: https://github.com/philippe-ths/ai-coding-workflow/issues/114
 [#170]: https://github.com/philippe-ths/ai-coding-workflow/issues/170
+[#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
