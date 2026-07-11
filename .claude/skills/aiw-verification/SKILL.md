@@ -93,13 +93,3 @@ For any non-trivial change, name the unverified surface as risk, not as absence.
 Hiding unverified surface produces false confidence: the human reading the report assumes everything the agent did not mention was checked. Naming it produces calibrated confidence: the human knows what to look at, what to ask about, and where to direct manual verification if any is warranted.
 
 If the unverified surface is large enough that the change cannot be trusted without more work, say so. Recommending additional verification is not weakness; it is the correct output.
-
-## Anti-Patterns
-
-These produce reports that read like verification but are not.
-
-- **Treating a passing test suite as sufficient without considering whether tests cover the change.** A green suite proves the suite passes. It proves nothing about the change unless the change has a corresponding check inside it.
-- **Declaring done after static analysis without running anything.** Types and lints do not exercise behaviour. A change that type-checks and is wrong is still wrong.
-- **Running tests but not the real system on real inputs when the change crosses a real seam.** Mocks at the seam confirm the agent's model of the seam, not the seam itself.
-- **Treating "the script ran without error" as success.** Silence is not success. Active inspection of outputs is required.
-- **Burying unverified surface area rather than naming it.** "Tests pass" with no mention of what was not tested is a failure of the justification step, even when the tests really did pass.

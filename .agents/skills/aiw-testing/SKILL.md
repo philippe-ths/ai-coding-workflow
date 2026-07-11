@@ -75,6 +75,7 @@ These rules apply across modalities.
 4. **Prefer testing patterns already established in the project.** Do not introduce a new test framework, runner, or convention without asking. Consistency makes the suite legible; inconsistency hides signal.
 5. **One test, one claim.** A test that bundles three assertions about three different behaviours fails ambiguously. Split into three tests, each with a clear name.
 6. **Name the test after what it checks, not what it does.** "rejects_request_with_expired_token" beats "test_token_validation_3".
+7. **The component under test must actually run.** Do not mock the thing the test exists to exercise; a parser test that mocks the parser confirms only that the mock behaves like the mock.
 
 ## Test Suite Hygiene
 
@@ -84,14 +85,3 @@ A test suite is only a reliable signal if a green bar means the code works and a
 - **Tests must fail when the code is broken.** Periodically apply a mutation-style spot check: deliberately break a piece of code that should be covered and confirm a test fails. A green suite that does not turn red under deliberate breakage is not a test suite, it is decoration.
 - **Slow tests are tagged.** Tests that take materially longer than the rest of the suite get a marker so aiw-verification can decide whether to include them in a given run. Slow tests should not be skipped silently; they should be opted into deliberately.
 - **Do not duplicate existing coverage without adding new signal.** A second test of the same path with the same fixture adds maintenance cost and no information.
-
-## Anti-Patterns
-
-These patterns produce green tests that prove nothing about the code under test.
-
-- **Mocking the thing being tested.** A parser test that mocks the parser confirms only that the mock behaves like the mock. The thing under test must run for the test to mean anything.
-- **Asserting on implementation details rather than observable behaviour.** Tests coupled to internals break on every refactor and trap the code in its current shape. They also miss the bugs that matter, which live in observable behaviour.
-- **Tests written after the code that simply restate what the code does.** A test that mirrors the implementation is a tautology; it passes by construction. Fix-modality tests in particular must be written before the fix and confirmed to fail.
-- **Tests passing by accident through shared state.** A test that relies on another test having run is unreliable; a test that relies on global mutable state is worse.
-- **Mocking the external boundary the code is supposed to integrate with.** In Configure modality especially, a mock at the boundary the code is meant to talk to is the opposite of verification. See the Configure modality rule above.
-- **Generating real-system fixtures inline.** If the input represents something the real system would actually encounter, it is ground truth and must come from aiw-ground-truth. Inline-generating it inside the test is the closed-loop failure mode this entire skill set exists to prevent.

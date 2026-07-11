@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.7.2 - 2026-07-11
+
+### Changed
+
+- Removed the redundant negative-restatement tail sections ("Anti-Patterns", "What Not to Do", "What Not to Include") from seven skills, where each mostly re-stated in "don't" form a rule the body already gives positively. `aiw-planning`, `aiw-failure-analysis`, and `aiw-verification` lost the section outright (every bullet was a restatement). `aiw-testing`, `aiw-performance-profiling`, `aiw-security-testing`, and `aiw-project-context-management` kept their genuinely net-new items, promoted into the body as positive rules: the component under test must actually run (testing); host-independent assertions and non-production input (performance); testing the project's own use of a framework rather than the framework itself (security); and excluding issue/PR references and process documentation (project-context). No rule's intent was lost. Surfaced by running the `aiw-prompt-smith` skill across the skill set. Applied identically to `.claude/skills/` and `.agents/skills/` ([#178]).
+
 ## 3.7.1 - 2026-07-10
 
 ### Changed
@@ -398,3 +404,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#170]: https://github.com/philippe-ths/ai-coding-workflow/issues/170
 [#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
 [#175]: https://github.com/philippe-ths/ai-coding-workflow/issues/175
+[#178]: https://github.com/philippe-ths/ai-coding-workflow/issues/178

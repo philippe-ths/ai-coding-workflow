@@ -167,12 +167,3 @@ This skill's job is done when:
 The next step is typically a fresh task — Fix or Investigate modality — that runs through the three core skills normally. This skill is the place where the right next step is identified, not where the fix is written. Hand off to the new task at this point.
 
 If the audit produces work that should be tracked separately — a coverage gap, a deeper bug surfaced by the investigation, a plan-level rework — use aiw-issue-creation to create the new issue. Do not bundle unrelated work into the current task.
-
-## Anti-Patterns
-
-- **Jumping to a speculative fix before describing the contradiction.** The contradiction must be stated structurally before reasoning about it; jumping skips the only part of the process that grounds the rest.
-- **Asking the user to retry, refresh, or repeat the flow before testing a hypothesis.** Retry without evidence produces more cycles of the same uncertainty.
-- **Producing a list of possible causes and treating that as the output.** Analysis ends in a commitment, not an enumeration. A list of three hypotheses without ranking is a failure to analyse.
-- **Treating the audit as a formality.** Vague audit answers ("ground truth was probably fine") are the same posture that produced the contradicted claim. Specific answers or it is not an audit.
-- **Continuing to iterate on fixes when nothing is converging.** Three plausible-but-failed hypotheses is evidence, not a coincidence. Name the convergence failure.
-- **Patching the symptom without checking for a plan-level flaw.** If the audit reveals the plan was based on wrong assumptions about the codebase or system, no patch under the same plan will be correct. Escalate, do not patch.
