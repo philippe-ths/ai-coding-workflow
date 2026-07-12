@@ -73,10 +73,5 @@ If any of these apply and no automated security coverage exists for the affected
 10. Do not weaken, skip, or delete a failing security test before investigating the cause.
     A failing security assertion is, by default, a security regression until proven otherwise.
     Loosening the assertion to make CI green hides exactly the class of bug the test was written to catch.
-
-## What Not to Do
-
-- Do not claim security coverage from a happy-path test that happens to use authenticated credentials. Authenticated traffic exercises the success path, not the boundary.
-- Do not test framework-provided protections by reimplementing the attack against the framework. Test the project's own use of the framework: wrong CSRF scope, missing cookie flag, misconfigured CORS, unsigned webhook accepted. Do not test the framework's CSRF middleware itself.
-- Do not paste real production tokens, keys, or personal data into test files, even temporarily during local development.
-- Do not write security tests that depend on test execution order or on shared mutable state. A test that only passes when run after a specific seed leaves the actual security boundary unverified, because nothing pinned the boundary in place.
+11. Test the project's own use of a framework protection, not the framework itself.
+    Assert on the project's misuse surface: wrong CSRF scope, a missing cookie flag, misconfigured CORS, an unsigned webhook accepted. Do not reimplement an attack against the framework's own middleware.

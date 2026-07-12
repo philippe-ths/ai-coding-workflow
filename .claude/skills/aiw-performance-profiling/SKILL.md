@@ -66,9 +66,7 @@ If any of these apply and no automated performance coverage exists for the affec
 
 10. Keep only benchmarks that run in the regular test suite.
     Remove one-off benchmark scripts before completion.
-
-## What Not to Do
-
-- Do not claim performance coverage based on a functional test that happens to pass quickly.
-- Do not assert on absolute numbers that depend on the host machine without documenting the host assumption.
-- Do not write a performance test that requires production data or credentials.
+11. Keep assertions host-independent.
+    Anchor to the measured baseline; if an absolute number is unavoidable, document the host assumption it depends on.
+12. Run performance tests on representative, non-production input.
+    Do not require production data or credentials.

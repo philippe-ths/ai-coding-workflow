@@ -34,6 +34,7 @@ Use these sections, in order; omit one only when the repository has no reliable 
 - Keep module, path, and entity names identical to the codebase.
 - Omit rationale unless it is required for correctness.
 - Do not duplicate the same fact across sections.
+- Record implementation facts only; exclude issue or PR references and workflow or process documentation (how the team works, not what the code does).
 
 ## Scanning the Codebase
 
@@ -58,12 +59,6 @@ For large codebases, skim at the directory level first and only open files that 
 - Merge overlapping bullets when they describe the same fact.
 - If the file approaches 300 lines, drop low-value detail before adding new content.
 - Do not turn the context file into a changelog; recent history belongs in git.
-
-## What Not to Include
-
-- Planned features, future refactors, open questions, issue or PR references.
-- Multi-sentence bullets or prose paragraphs.
-- Workflow or process documentation. The context file records implementation facts, not how the team works.
 
 ## Before Handing Off
 
