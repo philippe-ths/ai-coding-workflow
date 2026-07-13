@@ -9,13 +9,7 @@ Read this file when producing or revising an implementation plan at the start of
 
 ## Where This Skill Sits in the Workflow
 
-Planning runs at the start of every task, before any implementation. It establishes what currently works in the codebase, classifies the task, names the oracle, and produces an implementation plan with high-level testing and verification expectations.
-
-The plan does not reproduce the rules of the other four skills. It identifies what each skill will need to address during implementation and defers the mechanics to them. The plan is the entry point; aiw-ground-truth, aiw-testing, and aiw-verification are invoked as the work proceeds. If a "done" claim is later contradicted, aiw-failure-analysis runs and may re-plan.
-
-## The Full Skill Sequence
-
-For orientation, the skills are invoked across a task in roughly this order:
+Planning is step 2 of the task sequence. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. The full sequence, for orientation:
 
 1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
 2. **aiw-planning** (this skill): establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
