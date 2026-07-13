@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.7.3 - 2026-07-13
+
+### Changed
+
+- Trimmed skill-body openings that restated the frontmatter `description` the loader already matches on, so the body starts at what it uniquely adds. `aiw-github` lost its intro line outright (pure restatement of the description's action enumeration, already the section headings below). `aiw-ground-truth`, `aiw-performance-profiling`, and `aiw-security-testing` kept only the part beyond the description (the re-entry trigger, the added scope of sync/async conversion and stated latency requirement plus platform examples, and the "broader than they look" amplification), dropping the trigger-recap framing. `aiw-planning` collapsed its two adjacent orientation sections ("Where This Skill Sits" and "The Full Skill Sequence") into one, keeping the numbered sequence and the defers-to-other-skills principle. No trigger or rule intent was lost. Surfaced by running the `aiw-prompt-smith` skill across the skill set. Applied identically to `.claude/skills/` and `.agents/skills/`; the lite condensation carries no skill intros, so only its `Version:` header is synced ([#180]).
+
 ## 3.7.2 - 2026-07-11
 
 ### Changed
@@ -405,3 +411,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
 [#175]: https://github.com/philippe-ths/ai-coding-workflow/issues/175
 [#178]: https://github.com/philippe-ths/ai-coding-workflow/issues/178
+[#180]: https://github.com/philippe-ths/ai-coding-workflow/issues/180

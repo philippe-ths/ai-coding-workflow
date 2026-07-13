@@ -5,8 +5,6 @@ description: "Rules for every GitHub and git history action during a task: start
 
 # GitHub Workflow
 
-Read this file before every GitHub or git history action: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, or responding to a parent or sub-issue hierarchy.
-
 ## Why this skill exists
 
 GitHub actions touch shared state. Each one becomes visible to others the moment it lands, and approval for one is not approval for another. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action gated by explicit human approval, anchored to an issue, and safe against working-tree surprises.

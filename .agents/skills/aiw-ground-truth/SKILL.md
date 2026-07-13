@@ -5,7 +5,7 @@ description: "Establishes where trusted inputs and expected outputs come from du
 
 # Ground Truth
 
-Read this file before generating, sourcing, or reusing any input or expected output that a test or validation will compare against. Read it again whenever the task's modality is unclear, when the agent is about to invent example data, or when reusing fixtures from earlier in the session.
+Read this file again whenever the task's modality is unclear, when the agent is about to invent example data, or when reusing fixtures from earlier in the session.
 
 ## Why This Skill Exists
 

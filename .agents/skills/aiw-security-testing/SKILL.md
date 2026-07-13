@@ -18,7 +18,7 @@ This skill works alongside these workflow sections. Consult them when writing se
 
 ## When This Skill Applies
 
-The triggers below are broader than they look: any change to input handling, even a cosmetic one, can cross a trust boundary. Err toward invoking the skill rather than under-invoking it — the cost of an unneeded security review is small, the cost of a missed boundary is not.
+The triggers below are broader than they look: any change to input handling, even a cosmetic one, can cross a trust boundary.
 
 Load this skill when the change does any of the following:
 

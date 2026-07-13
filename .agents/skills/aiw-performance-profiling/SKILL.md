@@ -5,8 +5,7 @@ description: "Automated performance and UI-state-transition coverage rules. Use 
 
 # Performance Profiling and Latency Coverage
 
-Read this file when the change touches runtime paths where speed or responsiveness matters.
-This file contains rules for writing automated performance and UI-state-transition tests before deferring to manual verification.
+Rules for writing automated performance and UI-state-transition tests before deferring to manual verification.
 
 ## Related Workflow Sections
 
@@ -19,17 +18,15 @@ This skill works alongside these workflow sections. Consult them when writing pe
 
 ## When This Skill Applies
 
-Load this skill when the change does any of the following:
+The description names the broad triggers. Add these to what counts:
 
-- Touches code paths where runtime speed affects usability.
-- Introduces or modifies caching, memoisation, debouncing, or throttling.
-- Adds or modifies a data-processing loop over non-trivial input.
-- Converts a synchronous path to asynchronous or vice versa.
-- Affects any other path where latency or throughput is a stated requirement.
+- Introducing or modifying caching, memoisation, debouncing, or throttling.
+- Converting a synchronous path to asynchronous or vice versa.
+- Any path where latency or throughput is a stated requirement.
 
-Examples of platform-specific paths that fall under the first trigger: UI state transitions, reactive subscriptions, view-layer rerenders, manual state resets, session invalidation, and UI decorators or wrappers that affect render frequency. The trigger list itself is project-agnostic; treat platform examples as illustrations rather than the boundary of the rule.
+Platform-specific paths that commonly trigger this skill: UI state transitions, reactive subscriptions, view-layer rerenders, manual state resets, session invalidation, and UI decorators or wrappers that affect render frequency. The trigger list is project-agnostic; treat platform examples as illustrations rather than the boundary of the rule.
 
-If any of these apply and no automated performance coverage exists for the affected path, add coverage as part of the change.
+If a trigger applies and no automated performance coverage exists for the affected path, add coverage as part of the change.
 
 ## Rules
 
