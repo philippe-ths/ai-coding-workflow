@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.8.0 - 2026-07-13
+
+### Changed
+
+- Reframed the workflow's stance on sub-agents from a single cost-to-justify warning into positive routing guidance, and named the built-in tools at the skill moments where fan-out or clean context pays. `ai-workflow.md` Resource Discipline now routes work to a sub-agent by its shape (broad multi-file search, mechanical or parallelisable work, distillable output, isolated parallel edits) while keeping judgment, design, and review of every returned result in the main loop. Skill triggers added at their fan-out moments: `aiw-planning` routes multi-area codebase reconnaissance to parallel read-only search sub-agents; `aiw-ground-truth` exhausts real sources via search sub-agents and web search before falling back to asking the user; `aiw-verification` folds a fresh clean-context sub-agent into its mandatory end-to-end run, on the leading idea that you are the worst verifier of your own change. Every trigger carries the main-loop-review guard inline, so encouragement does not become blind deference. Concrete Claude Code tool names (Explore, general-purpose, worktree isolation, web search) live in `CLAUDE.md` only; the mirrored skills stay capability-framed and identical across `.claude/skills/` and `.agents/skills/`. Design input drawn from the maintainer's knowledge base; the KB itself does not ship. Re-condensed into `lite-monolithic/ai-workflow.md` ([#183]).
+
 ## 3.7.3 - 2026-07-13
 
 ### Changed
@@ -412,3 +418,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#175]: https://github.com/philippe-ths/ai-coding-workflow/issues/175
 [#178]: https://github.com/philippe-ths/ai-coding-workflow/issues/178
 [#180]: https://github.com/philippe-ths/ai-coding-workflow/issues/180
+[#183]: https://github.com/philippe-ths/ai-coding-workflow/issues/183

@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.7.3
+Version: 3.8.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -43,7 +43,8 @@ Protect your context window and the human's quota — but never by doing less th
 
 - Efficiency governs *how* you discharge a required step, never *whether*. Never skip, weaken, or defer a required step to save context or quota.
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
-- A subagent spends quota for parallelism or clean context — use one when it earns that cost, not as a reflex to empty your own context window.
+- Route work to a sub-agent by its shape: broad multi-file search, mechanical or parallelisable work, output you would only distil, or parallel edits that need isolation. Reaching for one on that work is the disciplined move, not an indulgence to justify.
+- Keep judgment, design, and the review of every returned result in the main loop. A sub-agent's result is evidence to weigh, never a verdict to accept unread. A thin brief returns confident, wrong work, and an orchestrator that defers inherits the error.
 
 ## Boundary Rules
 
