@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.9.0
+Version: 3.10.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -54,6 +54,7 @@ The AI must raise these without being asked, so the human has the information ne
 
 - ALWAYS run aiw-verification's justification step before presenting work for the human's done decision.
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
+- ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
 - ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.
 - ALWAYS surface security concerns observed in the code paths the task touched, with the concrete signal that prompted them.
@@ -83,7 +84,7 @@ Do not do any of the following under any circumstances:
 
 ## Asking for Guidance
 
-When asking the human a question or requesting guidance on a decision, present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation.
+Every question or decision you put to the human leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them. A wall of text with the options buried and the questions tacked on at the end is a rule violation, not a neutral choice.
 
 ## Reactive Rules
 
