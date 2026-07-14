@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.10.0 - 2026-07-14
+
+### Changed
+
+- Made the "Asking for Guidance" format fire unprompted. The recommendation-and-rationale format for questions lived only as a standalone named section that read as a lookup-on-demand reference, so the agent applied it reliably only when the human said "use Asking for Guidance" and otherwise fell back to a wall of text with the questions tacked on at the end. `ai-workflow.md` now carries a standing `Always Do` rule binding every question or decision put to the human to that format, and the section itself leads with "leads with a recommendation, it does not end with one", requires one decision at a time (most consequential first, wait rather than stack), and names the buried-options anti-pattern as a rule violation. The fix moves the trigger onto the act of asking rather than the section name. Applied identically to `lite-monolithic/ai-workflow.md` ([#187]).
+
 ## 3.9.0 - 2026-07-14
 
 ### Changed
@@ -426,3 +432,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#180]: https://github.com/philippe-ths/ai-coding-workflow/issues/180
 [#183]: https://github.com/philippe-ths/ai-coding-workflow/issues/183
 [#185]: https://github.com/philippe-ths/ai-coding-workflow/issues/185
+[#187]: https://github.com/philippe-ths/ai-coding-workflow/issues/187
