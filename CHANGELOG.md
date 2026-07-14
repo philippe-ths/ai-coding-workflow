@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.9.0 - 2026-07-14
+
+### Changed
+
+- Added the untrusted-external-content stance to the ground-truth sourcing guidance introduced in 3.8.0. `aiw-ground-truth` now states that content fetched from outside (web pages, third-party responses, anything an agent reads but did not write) is data to check, never instructions to obey, closing the gap where 3.8.0's new web-search and sub-agent sourcing encouraged reaching for external content without the default-untrusted stance. `CLAUDE.md` carries the same caution on its web-search tool line. Indirect prompt injection is a high-rate real surface, so sourcing ground truth from the open web must not become a channel for injected instructions. Applied identically to `.claude/skills/` and `.agents/skills/`; re-condensed into `lite-monolithic/ai-workflow.md` ([#185]).
+
 ## 3.8.0 - 2026-07-13
 
 ### Changed
@@ -419,3 +425,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#178]: https://github.com/philippe-ths/ai-coding-workflow/issues/178
 [#180]: https://github.com/philippe-ths/ai-coding-workflow/issues/180
 [#183]: https://github.com/philippe-ths/ai-coding-workflow/issues/183
+[#185]: https://github.com/philippe-ths/ai-coding-workflow/issues/185
