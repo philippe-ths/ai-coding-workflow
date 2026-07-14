@@ -56,6 +56,8 @@ Run the full system end-to-end, on real ground-truth artifacts where the modalit
 
 End-to-end execution is cheap for an agent. Humans optimise testing practice to avoid the cost of standing up the full system, restarting services, or waiting for slow runs. The agent does not pay those costs the same way and should not inherit human shortcuts. When in doubt, run the whole thing. (Why: the cost of a missed regression dwarfs the cost of one more end-to-end run.)
 
+Drive that end-to-end run with a fresh sub-agent, one that did not write the change and carries none of its context, and have it report what it observed. You are the worst verifier of your own change: you exercise what you expected to build and read the output through the same assumptions that shaped the code, the self-referential loop aiw-ground-truth exists to break, reappearing at verification time. A clean-context agent reaches the surface a real user would. Weigh its report in the main loop as evidence, not a verdict.
+
 If end-to-end execution is impractical for a specific change, name why in the justification step's part 3 and treat the unverified end-to-end path as a known risk.
 
 ## Reading Runtime Output

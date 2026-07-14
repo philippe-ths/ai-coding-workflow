@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.7.3
+Version: 3.8.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -175,8 +175,9 @@ Protect your context window and the human's quota — but never by doing less th
 - Efficiency governs how you discharge a required step, never whether. Never skip, weaken, or defer a required step to save context or quota.
   (Why: An efficiency directive is easy to misread as licence to thin verification, ground truth, or failure analysis; the cost saving is illusory when it lets a defect through.)
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
-- A subagent spends quota for parallelism or clean context. Use one when it earns that cost, not as a reflex to empty your own context window.
-  (Why: Offloading to a subagent keeps the main context lean but multiplies total tokens; spawning to empty context rather than for real leverage maximises spend.)
+- Route work to a sub-agent by its shape: broad multi-file search, mechanical or parallelisable work, output you would only distil, or parallel edits that need isolation. Reaching for one on that work is the disciplined move, not an indulgence to justify.
+- Keep judgment, design, and the review of every returned result in the main loop. A sub-agent's result is evidence to weigh, never a verdict to accept unread.
+  (Why: routing down in capability re-introduces blind deference and context loss. A thin brief returns confident, wrong work, and an orchestrator that rubber-stamps it inherits the error.)
 
 ## Scope Control
 
@@ -239,6 +240,8 @@ If part 1 surfaces something part 2 does not cover, the change is not verified: 
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
 Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is impractical, say so and treat the unverified path as a known risk.
+
+Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
 
 Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass.
 

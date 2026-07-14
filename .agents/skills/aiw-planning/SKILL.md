@@ -24,6 +24,8 @@ This skill owns step 2. The overview exists so the full sequence is visible at a
 
 Before drafting the plan, establish what the codebase currently does, what the test infrastructure tells you, and what is actually being asked. The plan depends on these facts.
 
+When establishing what the codebase does spans several files or areas, route the reconnaissance to parallel read-only search sub-agents rather than reading serially, and synthesise their findings yourself. The map you plan against must be one you built in the main loop, not one you accepted unread.
+
 ### Read project context
 
 - If `project-context.md` exists in the repository, read it as part of the baseline check.
