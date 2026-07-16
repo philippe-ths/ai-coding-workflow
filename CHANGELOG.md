@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.11.0 - 2026-07-16
+
+### Changed
+
+- Added a "Write for the fresh reader, not the edit" principle to `aiw-prompt-smith`. The skill's Shared principles covered altitude, narrow-patching, leading words, demonstrate-don't-describe, positive framing, and reason-free-constrain-late, but nothing about audience: it did not warn against version-transition meta-commentary ("this replaces the old X", "the gates are unchanged", "what changed is…", asides about the editing process) that only makes sense as a diff from a prior version the fresh reader never saw. This is a distinct failure class (an audience error, not an altitude error), observed when prompt-smith was applied to itself. The new principle instructs the author to state the current instruction as if the artifact always said it. Applied identically to `.claude/skills/` and `.agents/skills/`; `lite-monolithic/ai-workflow.md` does not condense prompt-smith, so its version is bumped to stay in canonical parity with no content change ([#189]).
+
 ## 3.10.0 - 2026-07-14
 
 ### Changed
@@ -433,3 +439,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#183]: https://github.com/philippe-ths/ai-coding-workflow/issues/183
 [#185]: https://github.com/philippe-ths/ai-coding-workflow/issues/185
 [#187]: https://github.com/philippe-ths/ai-coding-workflow/issues/187
+[#189]: https://github.com/philippe-ths/ai-coding-workflow/issues/189
