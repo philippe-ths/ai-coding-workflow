@@ -7,6 +7,11 @@
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/warn-codex-mcp-limitation.sh\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-context-drift.sh\"",
+            "timeout": 5
           }
         ]
       }

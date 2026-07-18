@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.12.0 - 2026-07-17
+
+### Added
+
+- Added a `SessionStart` drift-reminder hook (`.ai-policy/hooks/check-context-drift.sh`) that injects a reminder when `project-context.md` has not been touched in `CONTEXT_DRIFT_THRESHOLD` or more commits (default 10, configurable in `.ai-policy/policy.env`). The workflow already instructs the agent to read `project-context.md` at task start and flag staleness, but that soft instruction is easily skipped, so context drifts unnoticed in frequently-used repos. The hook adds a deterministic commit-count signal in the repo's existing policy-check pattern; it cannot judge drift (that stays with `aiw-project-context-management`) and is advisory only, always exiting 0 and staying silent when it cannot measure drift (no git repo, or the context file is absent or never committed). Wired into `SessionStart` for Claude Code (`.claude/settings.json`) and Codex (`.codex/hooks.json`), the two tools that expose a session-start event; Gemini and Copilot have no such event and keep relying on the task-start rule. Covered by a new sandbox test (`.ai-policy/scripts/test-context-drift-hook.sh`) auto-discovered by `project-validation.sh`. `lite-monolithic/ai-workflow.md` has no policy layer, so its version is bumped to stay in canonical parity with no content change ([#191]).
+
 ## 3.11.0 - 2026-07-16
 
 ### Changed
@@ -440,3 +446,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#185]: https://github.com/philippe-ths/ai-coding-workflow/issues/185
 [#187]: https://github.com/philippe-ths/ai-coding-workflow/issues/187
 [#189]: https://github.com/philippe-ths/ai-coding-workflow/issues/189
+[#191]: https://github.com/philippe-ths/ai-coding-workflow/issues/191
