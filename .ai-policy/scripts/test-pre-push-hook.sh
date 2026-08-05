@@ -43,6 +43,16 @@ exit 2
 STUB
 chmod +x .ai-policy/scripts/check-protected-branch.sh
 
+# Stub: check-push-refs.sh — allows by default so the tests below exercise
+# pre-push's own tag-vs-branch logic. Its real behaviour is covered by
+# test-push-refs.sh; the final test here swaps this stub to prove the wiring.
+cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
+#!/usr/bin/env bash
+cat >/dev/null
+exit 0
+STUB
+chmod +x .ai-policy/scripts/check-push-refs.sh
+
 # Stub: check-validation.sh — not invoked because REQUIRE_VALIDATION_BEFORE_PUSH=false.
 cat > .ai-policy/scripts/check-validation.sh <<'STUB'
 #!/usr/bin/env bash
@@ -113,6 +123,42 @@ assert_exit "tag deletion skips branch check" 0 "$rc"
 rc=0
 printf '' | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
 assert_exit "empty stdin invokes branch check" 2 "$rc"
+
+# 8. The ref-target check is actually wired in, and runs even for a tag-only
+# push (it needs no tag guard of its own, so it must not be skipped). Swap the
+# stub for one with a distinctive exit code and confirm pre-push propagates it.
+cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
+#!/usr/bin/env bash
+cat >/dev/null
+exit 3
+STUB
+chmod +x .ai-policy/scripts/check-push-refs.sh
+
+rc=0
+printf 'refs/heads/feature abc refs/heads/feature def\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "branch push reaches check-push-refs" 3 "$rc"
+
+rc=0
+printf 'refs/tags/v1.0.0 abc refs/tags/v1.0.0 0000000000000000000000000000000000000000\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "tag-only push also reaches check-push-refs" 3 "$rc"
+
+# 9. The refs reach the check on stdin rather than arriving empty.
+cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
+#!/usr/bin/env bash
+input="$(cat)"
+case "$input" in
+  *refs/heads/main*) exit 4 ;;
+  *) exit 0 ;;
+esac
+STUB
+chmod +x .ai-policy/scripts/check-push-refs.sh
+
+rc=0
+printf 'HEAD abc refs/heads/main def\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "push refs are piped to check-push-refs" 4 "$rc"
 
 # ── Summary ──
 

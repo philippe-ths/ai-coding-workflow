@@ -23,6 +23,14 @@ done <<EOF
 $PUSH_REFS
 EOF
 
+# Authoritative check: does any ref being pushed target a protected branch?
+# This runs first and unconditionally. Tag refs pass it by construction, so it
+# needs no tag-only guard of its own.
+printf '%s\n' "$PUSH_REFS" | "$ROOT_DIR/.ai-policy/scripts/check-push-refs.sh"
+
+# Usability check: are we standing on a protected branch? Narrower than the
+# check above and kept for the plain `git push` case, where no refspec is
+# given and the target is implied by the current branch.
 if [ "$HAS_ANY_REF" = "false" ] || [ "$TAG_ONLY" = "false" ]; then
   "$ROOT_DIR/.ai-policy/scripts/check-protected-branch.sh"
 fi
