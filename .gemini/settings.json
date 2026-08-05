@@ -16,6 +16,12 @@
             "timeout": 10000
           },
           {
+            "name": "block-pr-approve",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-approve.sh\"",
+            "timeout": 10000
+          },
+          {
             "name": "block-protected-branch-mcp",
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\"",
@@ -30,6 +36,12 @@
             "name": "block-pr-merge",
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-merge.sh\"",
+            "timeout": 10000
+          },
+          {
+            "name": "block-pr-approve",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-approve.sh\"",
             "timeout": 10000
           },
           {
