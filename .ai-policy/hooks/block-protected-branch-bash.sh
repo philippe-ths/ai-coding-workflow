@@ -20,8 +20,12 @@ case "$COMMAND" in
 esac
 
 # Tag-only pushes do not modify a branch and are allowed on protected branches.
-# The authoritative safety net is the pre-push git hook, which inspects the
-# actual refs being pushed. This is a usability-layer heuristic.
+# The authoritative safety net is check-push-refs.sh, invoked by the pre-push
+# git hook, which inspects the resolved refs git is actually about to write.
+# Everything in this file is a usability-layer heuristic working from a command
+# string: it fires before the command runs, so it gives a better error, but it
+# can be defeated by shell constructs it cannot parse. When the two disagree,
+# the pre-push check is correct.
 is_tag_push() {
   local cmd="$1"
   # git commit never creates a tag push; only applies to push commands.
@@ -74,6 +78,57 @@ is_tag_push() {
 
 if is_tag_push "$COMMAND"; then
   exit 0
+fi
+
+# Does an explicit refspec name a protected branch as its target?
+# `git push origin HEAD:main` writes to a protected branch while the current
+# branch is unprotected, so the current-branch check below cannot see it.
+targets_protected_branch() {
+  local cmd="$1"
+  case "$cmd" in
+    git\ push*) ;;
+    *) return 1 ;;
+  esac
+
+  local args
+  args="$(printf '%s' "$cmd" | sed -E 's/^[[:space:]]*git[[:space:]]+push[[:space:]]*//')"
+
+  local seen_remote=false target
+  for token in $args; do
+    # Skip flags. A flag taking a separate value can shift the positional
+    # count and cause a miss; check-push-refs.sh is the backstop for that.
+    case "$token" in
+      -*) continue ;;
+    esac
+
+    # The first positional is the remote, not a refspec.
+    if [ "$seen_remote" = false ]; then
+      seen_remote=true
+      continue
+    fi
+
+    # Refspec forms: <dst>, <src>:<dst>, :<dst> (delete), +<src>:<dst> (force).
+    target="${token#+}"
+    case "$target" in
+      *:*) target="${target##*:}" ;;
+    esac
+    target="${target#refs/heads/}"
+
+    for protected in $PROTECTED_BRANCHES; do
+      if [ "$target" = "$protected" ]; then
+        return 0
+      fi
+    done
+  done
+
+  return 1
+}
+
+if targets_protected_branch "$COMMAND"; then
+  echo "Blocked: '$COMMAND' targets protected branch." >&2
+  echo "The refspec writes to a protected branch even though the current branch is not one." >&2
+  echo "Open a pull request instead; merging it is the human's decision." >&2
+  exit 2
 fi
 
 CURRENT_BRANCH="$("$ROOT_DIR/.ai-policy/scripts/current-branch.sh")"

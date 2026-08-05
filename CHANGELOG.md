@@ -6,6 +6,21 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.14.0 - 2026-08-05
+
+### Added
+
+- Added `.ai-policy/scripts/check-push-refs.sh`, invoked by `.githooks/pre-push`, which blocks a push when any ref being pushed targets a protected branch. Every existing guard asked "where am I standing?" rather than "what am I writing to", so from a feature branch `git push origin HEAD:main` was allowed by all of them: the agent hook checked the current branch, and the pre-push hook read the refs only to decide whether the push was tag-only before delegating to a current-branch check. This is the same design flaw as [#193] on a route [#194] did not close, and unlike a pull request merge the target is named explicitly in the command, so nothing but the absence of a refspec check let it through. The pre-push hook is the only layer that receives git's resolved refs, so it is the only place the real target can be checked rather than guessed; the new script runs there, first and unconditionally, since tag refs pass it by construction. Blocks `HEAD:main`, `feature:main`, `+HEAD:main`, `HEAD:refs/heads/main`, and `:main` (deleting the remote protected branch). Covered by `.ai-policy/scripts/test-push-refs.sh`, auto-discovered by `project-validation.sh` and run in every repo since neither layer is tool-specific ([#195]).
+
+### Changed
+
+- `.ai-policy/hooks/block-protected-branch-bash.sh` now parses a `git push` refspec and blocks when its target names a protected branch, independent of the current branch. This fires before the command runs, so the agent gets a better error than a rejected push, but it works from a command string and can be defeated by shell constructs it cannot parse (a flag taking a separate value shifts the positional count); `check-push-refs.sh` is the backstop. Tag pushes, plain `git push`, and pushes to non-protected branches are unaffected ([#195]).
+- Corrected the comment at `.ai-policy/hooks/block-protected-branch-bash.sh:22-24`, which stated that "the authoritative safety net is the pre-push git hook, which inspects the actual refs being pushed". The pre-push hook read the refs only to classify the push as tag-only, then delegated to a check that ignored them, so the layer described as authoritative did not perform the check attributed to it and a reader would reasonably conclude the route was already protected. The comment now names `check-push-refs.sh`, which does perform it, and states which layer wins when the two disagree ([#195]).
+
+### Fixed
+
+- Fixed a fail-open in `check-push-refs.sh` where a final input line with no trailing newline was silently skipped, allowing the very ref under inspection. Git's pre-push always terminates its lines, so this was not reachable through the hook, but a guard should not depend on its caller's formatting. Caught by a test written before the behaviour was checked ([#195]).
+
 ## 3.13.0 - 2026-08-04
 
 ### Added
@@ -460,3 +475,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#189]: https://github.com/philippe-ths/ai-coding-workflow/issues/189
 [#191]: https://github.com/philippe-ths/ai-coding-workflow/issues/191
 [#193]: https://github.com/philippe-ths/ai-coding-workflow/issues/193
+[#194]: https://github.com/philippe-ths/ai-coding-workflow/pull/194
+[#195]: https://github.com/philippe-ths/ai-coding-workflow/issues/195
