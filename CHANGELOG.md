@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.15.0 - 2026-08-05
+
+### Added
+
+- Added `.ai-policy/hooks/block-pr-approve.sh`, which blocks the agent from approving a pull request on the shell route (`gh pr review --approve`, bare `gh pr review`, and `gh api` POSTs to a `/pulls/N/reviews` endpoint) and the MCP route (review-creation and review-submission tools under any server prefix). [#194] narrowed the allow-list so approval prompted rather than running unattended, but a prompt is the wrong gate: approving review is a human judgement in the same category as merging. The failure this prevents is self-approval, where an agent opens a pull request and approves it, satisfying a human-shaped review requirement using only its own judgement; [#194] stops that loop completing at the merge step, but the approval is still a false signal recorded against a human process. Bare `gh pr review` is blocked because it is interactive and offers approval as an option. The MCP branch fails closed: an absent or unrecognised `event` is treated as an approval, since guessing the other way is precisely how `merge_pull_request` passed the branch guards before [#193]. Wired into all four agent entry points, and `Bash(gh pr review:*)` added to the Claude Code `deny` list. Covered by `.ai-policy/scripts/test-pr-approve-hook.sh` ([#197]).
+
+### Changed
+
+- Review comments and change requests are explicitly not blocked. `gh pr review --comment` and `--request-changes` pass this hook, as do the MCP equivalents with `event` set to `COMMENT` or `REQUEST_CHANGES`. Neither is auto-approved in the permission defaults, so both still prompt ([#197]).
+
 ## 3.14.0 - 2026-08-05
 
 ### Added
@@ -477,3 +487,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#193]: https://github.com/philippe-ths/ai-coding-workflow/issues/193
 [#194]: https://github.com/philippe-ths/ai-coding-workflow/pull/194
 [#195]: https://github.com/philippe-ths/ai-coding-workflow/issues/195
+[#197]: https://github.com/philippe-ths/ai-coding-workflow/issues/197

@@ -85,7 +85,8 @@
       "mcp__github__list_pull_requests"
     ],
     "deny": [
-      "Bash(gh pr merge:*)"
+      "Bash(gh pr merge:*)",
+      "Bash(gh pr review:*)"
     ]
   },
   "hooks": {
@@ -109,6 +110,10 @@
           },
           {
             "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-approve.sh\""
+          },
+          {
+            "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\""
           }
         ]
@@ -119,6 +124,10 @@
           {
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-merge.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-approve.sh\""
           },
           {
             "type": "command",

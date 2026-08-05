@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.18.0
+Version: 1.19.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -84,7 +84,7 @@ Version: 1.18.0
 - `GEMINI.md`: Gemini CLI agent instructions; structure mirrors `AGENTS.md`.
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, and validation command.
 - `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement; `project-validation.sh` is the portable policy-layer check (shell-script syntax plus enforcement tests gated on the agent entry points installed) and invokes `scripts/repo-validation.sh` afterwards when present, warning loudly when it is absent.
-- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry), `check-context-drift.sh` (SessionStart, advisory reminder when `project-context.md` is `CONTEXT_DRIFT_THRESHOLD`+ commits behind HEAD; wired for Claude Code and Codex only), and `block-pr-merge.sh` (PreToolUse, blocks agent pull-request merges on the shell and MCP routes unconditionally; wired for all four tools).
+- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry), `check-context-drift.sh` (SessionStart, advisory reminder when `project-context.md` is `CONTEXT_DRIFT_THRESHOLD`+ commits behind HEAD; wired for Claude Code and Codex only), `block-pr-merge.sh` (PreToolUse, blocks agent pull-request merges on the shell and MCP routes unconditionally; wired for all four tools), and `block-pr-approve.sh` (PreToolUse, blocks agent pull-request approvals on both routes, failing closed on an unreadable MCP review event; review comments and change requests pass).
 - `.ai-policy/scripts/check-push-refs.sh` is the authoritative protected-branch check for pushes; `.githooks/pre-push` pipes git's resolved refs to it, and it blocks when any pushed ref targets a protected branch.
 - Guards answer one of two questions. `check-push-refs.sh` and the refspec check in `block-protected-branch-bash.sh` ask what a write targets; `check-protected-branch.sh` and the current-branch check ask where the agent is standing; `block-pr-merge.sh` asks neither and blocks the action outright, because a pull-request merge names no branch and reaches a protected branch without writing to one locally.
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
@@ -117,7 +117,7 @@ Version: 1.18.0
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
-- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh`, `test-pre-push-hook.sh`, `test-project-validation.sh`, `test-context-drift-hook.sh`, `test-pr-merge-hook.sh`, and `test-push-refs.sh` always run.
+- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh`, `test-pre-push-hook.sh`, `test-project-validation.sh`, `test-context-drift-hook.sh`, `test-pr-merge-hook.sh`, `test-push-refs.sh`, and `test-pr-approve-hook.sh` always run.
 - When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
 - Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, a JSONL validity check on the fixture, the manifest integrity check, and the installer, updater, and changelog-removals sandbox tests.
 - No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
