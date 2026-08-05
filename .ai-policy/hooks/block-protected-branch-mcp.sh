@@ -36,7 +36,11 @@ if [ -z "$BRANCH" ]; then
 fi
 
 if [ -z "$BRANCH" ]; then
-  # No branch info available (e.g. merge_pull_request) — cannot check, allow.
+  # No branch info available — this hook cannot judge, so it allows.
+  # Tools that reach a protected branch without naming one are not covered
+  # here by design; merge_pull_request is handled unconditionally by
+  # block-pr-merge.sh, which asks "is this a merge?" instead of
+  # "which branch does this write to?".
   exit 0
 fi
 

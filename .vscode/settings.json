@@ -35,8 +35,18 @@
         "git pull": true,
 
         // GitHub CLI
+        // "gh pr" is deliberately NOT auto-approved as a family: it would
+        // cover "gh pr merge", which the human alone may run. Subcommands
+        // are listed individually so a consequential one cannot inherit
+        // approval granted to a trivial one.
         "gh issue": true,
-        "gh pr": true,
+        "gh pr view": true,
+        "gh pr list": true,
+        "gh pr diff": true,
+        "gh pr status": true,
+        "gh pr checks": true,
+        "gh pr checkout": true,
+        "gh pr create": true,
         "gh repo": true,
         "gh auth": true,
 

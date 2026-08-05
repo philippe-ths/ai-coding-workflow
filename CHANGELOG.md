@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.13.0 - 2026-08-04
+
+### Added
+
+- Added `.ai-policy/hooks/block-pr-merge.sh`, a hook that blocks the agent from merging a pull request on both the shell route (`gh pr merge`, and `gh api` against a `/pulls/N/merge` endpoint) and the MCP route (`merge_pull_request` under any server prefix). `ai-workflow.md` already listed merging and deploy authorisation under "The Human is Responsible For", but nothing enforced it: `.claude/settings.json` allowed `Bash(gh pr:*)` with an empty `deny`, so `gh pr merge` inherited the approval granted to `gh pr view`, and `block-protected-branch-bash.sh` filters to `git commit*|git push*` before evaluating any policy. The existing guards ask "which branch does this write to?", a question a pull request merge cannot answer — it is server-side, touches no local ref, and names no branch — so a merge passed every check while reaching the same end state as a push to a protected branch. This hook asks "is this a merge?" instead, and blocks unconditionally rather than consulting `PROTECTED_BRANCHES`; it deliberately does not look up the PR's base branch, since a network call inside a `PreToolUse` hook fails open on timeout. Wired into all four agent entry points (`.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, `.github/hooks/block-protected-branch.json`) with no command filter, so it is reached regardless of how each tool gates hook invocation. Covered by `.ai-policy/scripts/test-pr-merge-hook.sh`, auto-discovered by `project-validation.sh` and run in every repo since the hook is not tool-specific ([#193]).
+
+### Changed
+
+- Narrowed the auto-approved `gh pr` permission from a whole-family wildcard to named subcommands (`view`, `list`, `diff`, `status`, `checks`, `checkout`, `create`) in `.claude/settings.json` and `.vscode/settings.json`, and added `Bash(gh pr merge:*)` to the previously empty Claude Code `deny` list. Grouping a consequential command with trivial ones let the most destructive member of the family inherit the approval granted to the most harmless; `gh pr merge`, `gh pr close`, `gh pr edit`, `gh pr ready` and `gh pr review` now prompt. The `deny` entry is secondary to the hook, which is the load-bearing guard ([#193]).
+- Inverted the three enforcement-test assertions that certified this gap. `test-claude-code-enforcement.sh`, `test-vscode-copilot-enforcement.sh` and `test-gemini-enforcement.sh` each asserted `assert_allowed "merge_pull_request (no branch — known limitation)"`, so the green validation bar stated that an agent may merge a pull request and any fix closing the hole would have failed validation. Each now keeps the branch-hook assertion, relabelled to record *why* that hook alone was never sufficient, and adds assertions that `block-pr-merge.sh` blocks the merge on both routes. Updated the corresponding fail-open comment in `block-protected-branch-mcp.sh` to point at the new hook instead of describing the gap as a limitation ([#193]).
+- `lite-monolithic/ai-workflow.md` has no policy layer, so its version is bumped to stay in canonical parity with no content change ([#193]).
+
 ## 3.12.0 - 2026-07-17
 
 ### Added
@@ -447,3 +459,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#187]: https://github.com/philippe-ths/ai-coding-workflow/issues/187
 [#189]: https://github.com/philippe-ths/ai-coding-workflow/issues/189
 [#191]: https://github.com/philippe-ths/ai-coding-workflow/issues/191
+[#193]: https://github.com/philippe-ths/ai-coding-workflow/issues/193

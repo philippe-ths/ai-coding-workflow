@@ -60,6 +60,7 @@ assert_contains() {
 
 HOOK_JSON="$ROOT_DIR/.github/hooks/block-protected-branch.json"
 MCP_HOOK="$ROOT_DIR/.ai-policy/hooks/block-protected-branch-mcp.sh"
+MERGE_HOOK="$ROOT_DIR/.ai-policy/hooks/block-pr-merge.sh"
 BASH_HOOK="$ROOT_DIR/.ai-policy/hooks/block-protected-branch-bash.sh"
 
 # ── Prerequisite: config file exists and is valid JSON ──
@@ -120,11 +121,22 @@ printf '{"tool_name":"mcp__github__push_files","tool_input":{"branch":"feature/f
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "push_files to feature/foo" "$rc"
 
-# Test: merge_pull_request (no branch field) → allowed (known limitation)
+# Test: merge_pull_request names no branch, so the branch hook allows it.
+# block-pr-merge.sh is what blocks it, on both the MCP and shell routes.
 rc=0
 printf '{"tool_name":"mcp__github__merge_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1}}' \
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
-assert_allowed "merge_pull_request (no branch — known limitation)" "$rc"
+assert_allowed "merge_pull_request passes the branch hook (names no branch)" "$rc"
+
+rc=0
+printf '{"tool_name":"mcp__github__merge_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1}}' \
+  | "$MERGE_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "merge_pull_request blocked by block-pr-merge" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"gh pr merge 12 --squash"}}' \
+  | "$MERGE_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "gh pr merge blocked by block-pr-merge" "$rc"
 
 # Test: create_ref with tag ref → allowed (tags do not modify a branch)
 rc=0

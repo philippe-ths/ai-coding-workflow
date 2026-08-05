@@ -59,6 +59,7 @@ assert_contains() {
 }
 
 MCP_HOOK="$ROOT_DIR/.ai-policy/hooks/block-protected-branch-mcp.sh"
+MERGE_HOOK="$ROOT_DIR/.ai-policy/hooks/block-pr-merge.sh"
 BASH_HOOK="$ROOT_DIR/.ai-policy/hooks/block-protected-branch-bash.sh"
 SETTINGS_JSON="$ROOT_DIR/.gemini/settings.json"
 
@@ -125,7 +126,17 @@ assert_allowed "push_files to feature/foo" "$rc"
 rc=0
 printf '{"tool_name":"mcp_github_merge_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1}}' \
   | "$MCP_HOOK" >/dev/null 2>&1 || rc=$?
-assert_allowed "merge_pull_request (no branch — known limitation)" "$rc"
+assert_allowed "merge_pull_request passes the branch hook (names no branch)" "$rc"
+
+rc=0
+printf '{"tool_name":"mcp_github_merge_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1}}' \
+  | "$MERGE_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "merge_pull_request blocked by block-pr-merge" "$rc"
+
+rc=0
+printf '{"tool_name":"run_shell_command","tool_input":{"command":"gh pr merge 12 --squash"}}' \
+  | "$MERGE_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "gh pr merge blocked by block-pr-merge" "$rc"
 
 # Test: create_ref with tag ref → allowed (tags do not modify a branch)
 rc=0
