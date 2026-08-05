@@ -10,6 +10,12 @@
         "matcher": "mcp_.*github.*",
         "hooks": [
           {
+            "name": "block-pr-merge",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-merge.sh\"",
+            "timeout": 10000
+          },
+          {
             "name": "block-protected-branch-mcp",
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\"",
@@ -20,6 +26,12 @@
       {
         "matcher": "run_shell_command",
         "hooks": [
+          {
+            "name": "block-pr-merge",
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-merge.sh\"",
+            "timeout": 10000
+          },
           {
             "name": "block-protected-branch-bash",
             "type": "command",

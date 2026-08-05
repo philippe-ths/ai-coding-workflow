@@ -3,6 +3,10 @@
     "PreToolUse": [
       {
         "type": "command",
+        "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-pr-merge.sh\""
+      },
+      {
+        "type": "command",
         "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\""
       },
       {
