@@ -124,7 +124,40 @@ rc=0
 printf '' | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
 assert_exit "empty stdin invokes branch check" 2 "$rc"
 
-# 8. The ref-target check is actually wired in, and runs even for a tag-only
+# 8. Deleting a branch remotely (local_sha all zeros) — writes to no branch, so
+# the current-branch check must be skipped. This is post-merge cleanup: the
+# developer is standing on main when they delete the merged feature branch.
+rc=0
+printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "branch deletion skips branch check" 0 "$rc"
+
+# 9. Several branch deletions at once — still delete-only.
+rc=0
+{
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n'
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/y def\n'
+} | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "multiple branch deletions skip branch check" 0 "$rc"
+
+# 10. A deletion combined with a branch update is not delete-only: the update
+# writes to a branch, so the current-branch check applies → exit 2.
+rc=0
+{
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n'
+  printf 'refs/heads/feature/y abc refs/heads/feature/y def\n'
+} | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "deletion plus branch update invokes branch check" 2 "$rc"
+
+# 11. A branch deletion alongside a tag deletion — both exempt → exit 0.
+rc=0
+{
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n'
+  printf '(delete) 0000000000000000000000000000000000000000 refs/tags/v1.0.0 def\n'
+} | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "branch and tag deletion skip branch check" 0 "$rc"
+
+# 12. The ref-target check is actually wired in, and runs even for a tag-only
 # push (it needs no tag guard of its own, so it must not be skipped). Swap the
 # stub for one with a distinctive exit code and confirm pre-push propagates it.
 cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
@@ -144,7 +177,7 @@ printf 'refs/tags/v1.0.0 abc refs/tags/v1.0.0 0000000000000000000000000000000000
   | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
 assert_exit "tag-only push also reaches check-push-refs" 3 "$rc"
 
-# 9. The refs reach the check on stdin rather than arriving empty.
+# 13. The refs reach the check on stdin rather than arriving empty.
 cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
 #!/usr/bin/env bash
 input="$(cat)"
@@ -159,6 +192,13 @@ rc=0
 printf 'HEAD abc refs/heads/main def\n' \
   | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
 assert_exit "push refs are piped to check-push-refs" 4 "$rc"
+
+# 14. The delete-only exemption skips the current-branch check, not the ref-target
+# check. Deleting a protected branch must still reach check-push-refs.
+rc=0
+printf '(delete) 0000000000000000000000000000000000000000 refs/heads/main abc\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "deleting a protected branch still reaches check-push-refs" 4 "$rc"
 
 # ── Summary ──
 

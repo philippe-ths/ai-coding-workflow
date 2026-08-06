@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.19.0
+Version: 1.19.1
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -87,6 +87,7 @@ Version: 1.19.0
 - `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, `.gemini/settings.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry), `check-context-drift.sh` (SessionStart, advisory reminder when `project-context.md` is `CONTEXT_DRIFT_THRESHOLD`+ commits behind HEAD; wired for Claude Code and Codex only), `block-pr-merge.sh` (PreToolUse, blocks agent pull-request merges on the shell and MCP routes unconditionally; wired for all four tools), and `block-pr-approve.sh` (PreToolUse, blocks agent pull-request approvals on both routes, failing closed on an unreadable MCP review event; review comments and change requests pass).
 - `.ai-policy/scripts/check-push-refs.sh` is the authoritative protected-branch check for pushes; `.githooks/pre-push` pipes git's resolved refs to it, and it blocks when any pushed ref targets a protected branch.
 - Guards answer one of two questions. `check-push-refs.sh` and the refspec check in `block-protected-branch-bash.sh` ask what a write targets; `check-protected-branch.sh` and the current-branch check ask where the agent is standing; `block-pr-merge.sh` asks neither and blocks the action outright, because a pull-request merge names no branch and reaches a protected branch without writing to one locally.
+- The where-am-I-standing guards are skipped for pushes that write to no branch: tag-only and delete-only. `.githooks/pre-push` reads delete-only from the all-zero local sha in git's pre-push input; `block-protected-branch-bash.sh` reads it from the command string (`--delete`, `-d`, `:<ref>`). Both apply the exemption after the target check, so deleting a protected branch stays blocked.
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
 - `.gemini/settings.json`: Gemini CLI settings including BeforeTool hook configuration and tool permission defaults.

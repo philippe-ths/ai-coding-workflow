@@ -131,6 +131,60 @@ if targets_protected_branch "$COMMAND"; then
   exit 2
 fi
 
+# Does the command only delete refs? A deletion writes to no branch's contents,
+# so the current-branch rule below does not apply to it. A delete naming a
+# protected branch was already rejected above, so what reaches here removes
+# unprotected refs only. Post-merge cleanup deletes the merged branch from the
+# protected branch it just switched back to; without this it is always blocked.
+# Like every heuristic in this file it reads a command string, so a flag taking
+# a separate value can shift the positional count; check-push-refs.sh, which
+# rejects deletions of protected refs from the resolved refs, is the backstop.
+is_delete_push() {
+  local cmd="$1"
+  case "$cmd" in
+    git\ push*) ;;
+    *) return 1 ;;
+  esac
+
+  local args
+  args="$(printf '%s' "$cmd" | sed -E 's/^[[:space:]]*git[[:space:]]+push[[:space:]]*//')"
+
+  local delete_flag=false seen_remote=false refspecs=0 colon_forms=0
+  for token in $args; do
+    case "$token" in
+      --delete|-d) delete_flag=true; continue ;;
+      -*) continue ;;
+    esac
+
+    # The first positional is the remote, not a refspec.
+    if [ "$seen_remote" = false ]; then
+      seen_remote=true
+      continue
+    fi
+
+    refspecs=$((refspecs + 1))
+    # `:<dst>` with an empty source is the refspec form of a deletion.
+    case "$token" in
+      :?*) colon_forms=$((colon_forms + 1)) ;;
+    esac
+  done
+
+  # `git push --delete` with no ref names nothing; leave it to the rules below.
+  [ "$refspecs" -eq 0 ] && return 1
+
+  # With --delete, every listed ref is deleted.
+  [ "$delete_flag" = true ] && return 0
+
+  # Without it, only a push whose every refspec is a `:<dst>` deletion qualifies.
+  [ "$colon_forms" -eq "$refspecs" ] && return 0
+
+  return 1
+}
+
+if is_delete_push "$COMMAND"; then
+  exit 0
+fi
+
 CURRENT_BRANCH="$("$ROOT_DIR/.ai-policy/scripts/current-branch.sh")"
 
 for protected in $PROTECTED_BRANCHES; do

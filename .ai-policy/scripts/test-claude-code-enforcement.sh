@@ -211,6 +211,34 @@ printf '{"tool_name":"Bash","tool_input":{"command":"git push origin HEAD:main"}
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_blocked "git push origin HEAD:main on main" "$rc"
 
+# ── Branch-deletion cases (simulated main branch still active) ──
+#
+# Post-merge cleanup deletes the merged branch while standing on main, so the
+# deletion must be allowed from there. The exemption is for deletions only: an
+# ordinary push of the same branch from main stays blocked.
+
+echo "Branch-deletion cases on simulated main:"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin --delete feature/x"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin --delete feature/x on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin :feature/x"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin :feature/x on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin --delete main"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin --delete main on main" "$rc"
+
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin feature/x"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin feature/x on main (not a deletion)" "$rc"
+
 # ── Summary ──
 
 echo ""

@@ -30,6 +30,11 @@ Scripts source this file rather than hardcoding values.
 This enforces the workflow rule "Do not work directly on `main`" at the Git level.
 The agent may forget or rationalise working on main; the hook will not.
 
+It answers "where am I standing?", which is the right question at commit time, when the ref being written is the current branch.
+At push time the target is explicit, so `.githooks/pre-push` runs `check-push-refs.sh` first and skips this check for pushes that write to no branch: tag-only pushes and delete-only pushes.
+The delete exemption exists because post-merge cleanup runs from the protected branch by nature — you switch back to it, then delete the branch you just merged — so a current-branch rule rejects the normal cleanup path.
+Nothing is lost by the exemption: a deletion naming a protected branch has already been rejected by `check-push-refs.sh`, which reads the resolved refs.
+
 ### Validation state tracking
 
 The validation system uses a simple state file (`validation.status`) with three states: `running`, `passed`, `failed`.

@@ -5,19 +5,26 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 
 # Pre-push receives one line per ref being pushed on stdin:
 #   <local_ref> <local_sha> <remote_ref> <remote_sha>
-# If every remote_ref is under refs/tags/, this is a tag-only push and
-# the protected-branch check does not apply (no branch is being modified).
+# Two shapes of push modify no branch's contents and so do not need the
+# current-branch check:
+#   tag-only   — every remote_ref is under refs/tags/
+#   delete-only — every local_sha is all zeros, git's marker for a deletion
 # Otherwise run the protected-branch check.
 PUSH_REFS="$(cat || true)"
 TAG_ONLY=true
+DELETE_ONLY=true
 HAS_ANY_REF=false
 
-while IFS=' ' read -r _local_ref _local_sha remote_ref _remote_sha; do
+while IFS=' ' read -r _local_ref local_sha remote_ref _remote_sha; do
   [ -z "${remote_ref:-}" ] && continue
   HAS_ANY_REF=true
   case "$remote_ref" in
     refs/tags/*) ;;
     *) TAG_ONLY=false ;;
+  esac
+  # An absent or non-zero local sha means something is being written, not deleted.
+  case "${local_sha:-}" in
+    ""|*[!0]*) DELETE_ONLY=false ;;
   esac
 done <<EOF
 $PUSH_REFS
@@ -31,7 +38,14 @@ printf '%s\n' "$PUSH_REFS" | "$ROOT_DIR/.ai-policy/scripts/check-push-refs.sh"
 # Usability check: are we standing on a protected branch? Narrower than the
 # check above and kept for the plain `git push` case, where no refspec is
 # given and the target is implied by the current branch.
-if [ "$HAS_ANY_REF" = "false" ] || [ "$TAG_ONLY" = "false" ]; then
+#
+# Skipped for tag-only and delete-only pushes. A delete-only push writes to no
+# branch, and the check above has already rejected it if any deleted ref were
+# protected, so what reaches here removes unprotected refs only. Post-merge
+# cleanup runs from the protected branch by nature: you switch back to it,
+# then delete the merged branch. Asking where the pusher stands rejects that.
+if [ "$HAS_ANY_REF" = "false" ] ||
+  { [ "$TAG_ONLY" = "false" ] && [ "$DELETE_ONLY" = "false" ]; }; then
   "$ROOT_DIR/.ai-policy/scripts/check-protected-branch.sh"
 fi
 
