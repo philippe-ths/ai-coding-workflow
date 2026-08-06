@@ -35,6 +35,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
 - `project-context.md` — factual reference for this repository's implementation state, authored using the `aiw-project-context-management` skill.
+- `project-checks.md` — what this repository is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
 - `lite-monolithic/` — single-file version of the workflow with planning and failure analysis inlined, no policy layer, no skills, no multi-agent entry points. See `lite-monolithic/README.md`.
 
 ### Agent instruction entry points
@@ -46,7 +47,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`). Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`). Used by VS Code Copilot, Gemini CLI, and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement
@@ -92,7 +93,7 @@ scripts/install.sh --target <target-repo> --tool claude --profile full
 scripts/update.sh --target <target-repo>
 ```
 
-Which files each tool and profile receives is defined in `install-manifest.json` (run `make classify` to print it); see [Product vs Factory](#product-vs-factory). The installer copies only product files. `project-context.md` is not copied — author it in the target with the `aiw-project-context-management` skill so it describes the target repo.
+Which files each tool and profile receives is defined in `install-manifest.json` (run `make classify` to print it); see [Product vs Factory](#product-vs-factory). The installer copies only product files. `project-context.md` is not copied — author it in the target with the `aiw-project-context-management` skill so it describes the target repo. `project-checks.md` is not copied either; the `aiw-init` skill scaffolds it from the target on first run.
 
 Governance files are **vendored**: the installer adds them to the target's `.gitignore` so they are not committed into the target's history. The full profile also wires the git hooks (`core.hooksPath`) automatically.
 

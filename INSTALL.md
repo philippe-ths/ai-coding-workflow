@@ -42,7 +42,9 @@ as a local path instead.
 4. Author the target's `project-context.md` using the
    `aiw-project-context-management` skill. It must describe the **target** repo;
    the installer does not create it.
-5. Report what was installed.
+5. Report what was installed. Mention that invoking the `aiw-init` skill in the
+   target scaffolds its `project-checks.md`; the installer does not create that
+   one either.
 
 ## Update (already installed)
 

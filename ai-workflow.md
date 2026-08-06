@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.15.2
+Version: 3.16.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -27,6 +27,8 @@ The skill set enforces disciplines invoked at specific points in a task.
 Conditional skills (aiw-performance-profiling, aiw-security-testing) load alongside the above when their triggers apply — see Non-Functional Dimensions.
 
 `project-context.md`, if it exists, is read at task start. If stale, flag it. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
+
+Before a task is chosen, the human may invoke aiw-init. It runs the repository's declared checks read-only and reports state the human may not be aware of; it starts no work and proposes no fixes. `project-checks.md` records what this repository checks and what normal looks like for each. aiw-init owns it.
 
 ## Non-Functional Dimensions
 

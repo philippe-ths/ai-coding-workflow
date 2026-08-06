@@ -12,6 +12,8 @@
 #
 # project-context.md is NOT created here: it is authored in the target by the
 # aiw-project-context-management skill, since it must describe the target repo.
+# project-checks.md is NOT created here either, for the same reason: the aiw-init
+# skill scaffolds it from the target's own services, logs, and configuration.
 #
 # Update of an already-installed copy is a separate path (see --update, added
 # in a later phase); this script performs a fresh install.
@@ -158,3 +160,4 @@ if [ "$PROFILE" = "full" ]; then
   echo "Git hooks installed (core.hooksPath = .githooks)"
 fi
 echo "Next: author project-context.md in the target via the aiw-project-context-management skill."
+echo "Then: invoke the aiw-init skill in the target to scaffold its project-checks.md."
