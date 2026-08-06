@@ -99,6 +99,29 @@ judge "git push origin HEAD:master" 2 "$(cmd_exit 'git push origin HEAD:master')
 judge "git push origin main:refs/heads/main" 2 \
   "$(cmd_exit 'git push origin main:refs/heads/main')"
 
+# Deleting an unprotected branch writes to no branch, so it is allowed from any
+# branch including a protected one — post-merge cleanup runs from exactly there.
+# Asserted unconditionally: "regardless of the current branch" is the point.
+echo "block-protected-branch-bash — unprotected deletion allowed from any branch:"
+
+judge "git push origin --delete feature/x" 0 \
+  "$(cmd_exit 'git push origin --delete feature/x')"
+judge "git push origin -d feature/x" 0 "$(cmd_exit 'git push origin -d feature/x')"
+judge "git push --delete origin feature/x" 0 \
+  "$(cmd_exit 'git push --delete origin feature/x')"
+judge "git push origin :feature/x (refspec delete)" 0 \
+  "$(cmd_exit 'git push origin :feature/x')"
+judge "git push origin --delete feature/x feature/y" 0 \
+  "$(cmd_exit 'git push origin --delete feature/x feature/y')"
+
+echo "block-protected-branch-bash — protected deletion blocked from any branch:"
+
+judge "git push origin --delete main" 2 "$(cmd_exit 'git push origin --delete main')"
+judge "git push --delete origin main" 2 "$(cmd_exit 'git push --delete origin main')"
+judge "git push origin -d master" 2 "$(cmd_exit 'git push origin -d master')"
+judge "git push origin --delete feature/x main" 2 \
+  "$(cmd_exit 'git push origin --delete feature/x main')"
+
 CURRENT_BRANCH="$("$ROOT_DIR/.ai-policy/scripts/current-branch.sh")"
 IS_PROTECTED=false
 # shellcheck disable=SC1091

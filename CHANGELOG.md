@@ -6,6 +6,13 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.15.1 - 2026-08-06
+
+### Fixed
+
+- `.githooks/pre-push` no longer runs the current-branch check on a delete-only push, so deleting a merged feature branch from `main` is allowed. Post-merge cleanup runs from the protected branch by nature: you switch back to it, then delete the branch you just merged. Asking "where am I standing?" rejects that, which made CLI branch cleanup structurally impossible; it went unnoticed only because GitHub's auto-delete-on-merge had been removing branches server-side. A deletion writes to no branch, and `check-push-refs.sh` runs first and unconditionally, so a delete naming a protected branch is already rejected before the exemption is reached. Delete-only is read from git's own pre-push input, where a deleted ref carries an all-zero local sha; a deletion combined with any branch update is not delete-only and still gets the check ([#177]).
+- `.ai-policy/hooks/block-protected-branch-bash.sh` allows `git push --delete`, `-d`, and `:<ref>` deletions of non-protected branches from a protected branch, matching the pre-push hook. Fixing only the git hook would have left the symptom in place on the route that produced it, since post-merge cleanup is run by the agent and this hook blocks the command before git sees it. The exemption is applied after the refspec check, so `git push origin --delete main` still blocks, and it covers deletions only: `git push origin feature/x` from `main` is still rejected ([#177]).
+
 ## 3.15.0 - 2026-08-05
 
 ### Added
@@ -488,3 +495,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#194]: https://github.com/philippe-ths/ai-coding-workflow/pull/194
 [#195]: https://github.com/philippe-ths/ai-coding-workflow/issues/195
 [#197]: https://github.com/philippe-ths/ai-coding-workflow/issues/197
+[#177]: https://github.com/philippe-ths/ai-coding-workflow/issues/177
