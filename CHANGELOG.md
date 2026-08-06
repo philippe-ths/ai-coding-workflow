@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.15.2 - 2026-08-06
+
+### Changed
+
+- `.ai-policy/hooks/block-protected-branch-bash.sh` derives both of its questions about a `git push` — what branch it targets, and whether it is only deleting — from a single parse of the command, replacing two separate tokenisations of the same string. Both copies carried the same documented limitation, that a flag taking a separate value shifts the positional count, so anyone tightening it had to find both sites and a fix applied to one would leave the two disagreeing about the same command. A guard whose halves can disagree is the shape of problem [#193] and [#195] both turned out to be. The limitation is now stated once, on the parse it belongs to. `is_tag_push` keeps its own scan: it answers a different question and keys off the last positional including the remote, so folding it in would change behaviour rather than preserve it. No behaviour change, verified by running 47 push and non-push commands through the pre-refactor and refactored hooks under both a protected and an unprotected current branch, 94 combinations with no difference in verdict. Two cases pinning the parse semantics added to `.ai-policy/scripts/test-claude-code-enforcement.sh`: a refspec list mixing a deletion with an ordinary push is not delete-only, and `--delete` reads the same trailing as leading ([#200]).
+
 ## 3.15.1 - 2026-08-06
 
 ### Fixed
@@ -496,3 +502,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#195]: https://github.com/philippe-ths/ai-coding-workflow/issues/195
 [#197]: https://github.com/philippe-ths/ai-coding-workflow/issues/197
 [#177]: https://github.com/philippe-ths/ai-coding-workflow/issues/177
+[#200]: https://github.com/philippe-ths/ai-coding-workflow/issues/200

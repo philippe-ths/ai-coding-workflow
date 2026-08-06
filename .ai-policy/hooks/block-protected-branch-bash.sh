@@ -80,11 +80,28 @@ if is_tag_push "$COMMAND"; then
   exit 0
 fi
 
-# Does an explicit refspec name a protected branch as its target?
-# `git push origin HEAD:main` writes to a protected branch while the current
-# branch is unprotected, so the current-branch check below cannot see it.
-targets_protected_branch() {
+# One parse, two questions: what does this command write to, and is it only
+# deleting? Both are read from the same tokens so they cannot drift apart or
+# reach different conclusions about the same command.
+#
+# The parse works from a command string, so it is approximate: a flag taking a
+# separate value shifts the positional count, and the remote and every target
+# are then read one token out. The limitation belongs to the parse rather than
+# to either question, which is why it is stated here once. check-push-refs.sh
+# reads the refs git actually resolved and is unaffected by it; when the two
+# disagree, it is correct.
+#
+# Sets, for a `git push` command:
+#   PUSH_TARGETS    destination branch name per refspec, space-separated
+#   PUSH_REFSPECS   how many refspecs were given
+#   PUSH_DELETIONS  how many of those are deletions
+# Anything that is not a push leaves the counts at zero and returns 1.
+parse_push_command() {
   local cmd="$1"
+  PUSH_TARGETS=""
+  PUSH_REFSPECS=0
+  PUSH_DELETIONS=0
+
   case "$cmd" in
     git\ push*) ;;
     *) return 1 ;;
@@ -93,63 +110,7 @@ targets_protected_branch() {
   local args
   args="$(printf '%s' "$cmd" | sed -E 's/^[[:space:]]*git[[:space:]]+push[[:space:]]*//')"
 
-  local seen_remote=false target
-  for token in $args; do
-    # Skip flags. A flag taking a separate value can shift the positional
-    # count and cause a miss; check-push-refs.sh is the backstop for that.
-    case "$token" in
-      -*) continue ;;
-    esac
-
-    # The first positional is the remote, not a refspec.
-    if [ "$seen_remote" = false ]; then
-      seen_remote=true
-      continue
-    fi
-
-    # Refspec forms: <dst>, <src>:<dst>, :<dst> (delete), +<src>:<dst> (force).
-    target="${token#+}"
-    case "$target" in
-      *:*) target="${target##*:}" ;;
-    esac
-    target="${target#refs/heads/}"
-
-    for protected in $PROTECTED_BRANCHES; do
-      if [ "$target" = "$protected" ]; then
-        return 0
-      fi
-    done
-  done
-
-  return 1
-}
-
-if targets_protected_branch "$COMMAND"; then
-  echo "Blocked: '$COMMAND' targets protected branch." >&2
-  echo "The refspec writes to a protected branch even though the current branch is not one." >&2
-  echo "Open a pull request instead; merging it is the human's decision." >&2
-  exit 2
-fi
-
-# Does the command only delete refs? A deletion writes to no branch's contents,
-# so the current-branch rule below does not apply to it. A delete naming a
-# protected branch was already rejected above, so what reaches here removes
-# unprotected refs only. Post-merge cleanup deletes the merged branch from the
-# protected branch it just switched back to; without this it is always blocked.
-# Like every heuristic in this file it reads a command string, so a flag taking
-# a separate value can shift the positional count; check-push-refs.sh, which
-# rejects deletions of protected refs from the resolved refs, is the backstop.
-is_delete_push() {
-  local cmd="$1"
-  case "$cmd" in
-    git\ push*) ;;
-    *) return 1 ;;
-  esac
-
-  local args
-  args="$(printf '%s' "$cmd" | sed -E 's/^[[:space:]]*git[[:space:]]+push[[:space:]]*//')"
-
-  local delete_flag=false seen_remote=false refspecs=0 colon_forms=0
+  local delete_flag=false seen_remote=false target
   for token in $args; do
     case "$token" in
       --delete|-d) delete_flag=true; continue ;;
@@ -162,26 +123,71 @@ is_delete_push() {
       continue
     fi
 
-    refspecs=$((refspecs + 1))
+    PUSH_REFSPECS=$((PUSH_REFSPECS + 1))
+
+    # Refspec forms: <dst>, <src>:<dst>, :<dst> (delete), +<src>:<dst> (force).
+    target="${token#+}"
+    case "$target" in
+      *:*) target="${target##*:}" ;;
+    esac
+    PUSH_TARGETS="$PUSH_TARGETS ${target#refs/heads/}"
+
     # `:<dst>` with an empty source is the refspec form of a deletion.
     case "$token" in
-      :?*) colon_forms=$((colon_forms + 1)) ;;
+      :?*) PUSH_DELETIONS=$((PUSH_DELETIONS + 1)) ;;
     esac
   done
 
-  # `git push --delete` with no ref names nothing; leave it to the rules below.
-  [ "$refspecs" -eq 0 ] && return 1
+  # --delete applies to the whole command, wherever in it the flag appears, so
+  # it is settled after the loop rather than per token.
+  if [ "$delete_flag" = true ]; then
+    PUSH_DELETIONS="$PUSH_REFSPECS"
+  fi
 
-  # With --delete, every listed ref is deleted.
-  [ "$delete_flag" = true ] && return 0
+  return 0
+}
 
-  # Without it, only a push whose every refspec is a `:<dst>` deletion qualifies.
-  [ "$colon_forms" -eq "$refspecs" ] && return 0
+# Non-push commands leave the counts at zero, so both questions below answer no
+# and the command falls through to the current-branch rule, as it should.
+parse_push_command "$COMMAND" || :
+
+# Does an explicit refspec name a protected branch as its target?
+# `git push origin HEAD:main` writes to a protected branch while the current
+# branch is unprotected, so the current-branch check below cannot see it.
+targets_protected_branch() {
+  local target protected
+  for target in $PUSH_TARGETS; do
+    for protected in $PROTECTED_BRANCHES; do
+      if [ "$target" = "$protected" ]; then
+        return 0
+      fi
+    done
+  done
 
   return 1
 }
 
-if is_delete_push "$COMMAND"; then
+if targets_protected_branch; then
+  echo "Blocked: '$COMMAND' targets protected branch." >&2
+  echo "The refspec writes to a protected branch even though the current branch is not one." >&2
+  echo "Open a pull request instead; merging it is the human's decision." >&2
+  exit 2
+fi
+
+# Does the command only delete refs? A deletion writes to no branch's contents,
+# so the current-branch rule below does not apply to it. A deletion naming a
+# protected branch was already rejected above, so what reaches here removes
+# unprotected refs only. Post-merge cleanup deletes the merged branch from the
+# protected branch it just switched back to; without this it is always blocked.
+#
+# A command naming no refspec at all is not a deletion: `git push --delete` on
+# its own names nothing, and plain `git push` implies its target from the
+# current branch, which is exactly what the rule below is for.
+is_delete_only_push() {
+  [ "$PUSH_REFSPECS" -gt 0 ] && [ "$PUSH_DELETIONS" -eq "$PUSH_REFSPECS" ]
+}
+
+if is_delete_only_push; then
   exit 0
 fi
 

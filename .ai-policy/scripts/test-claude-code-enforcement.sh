@@ -239,6 +239,20 @@ printf '{"tool_name":"Bash","tool_input":{"command":"git push origin feature/x"}
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_blocked "git push origin feature/x on main (not a deletion)" "$rc"
 
+# A refspec list mixing a deletion with an ordinary push is not delete-only:
+# the second refspec writes to a branch, so the current-branch rule applies.
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin :feature/x feature/y"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_blocked "git push origin :feature/x feature/y on main (mixed)" "$rc"
+
+# --delete applies to the whole command wherever the flag sits, so a trailing
+# flag must read the same as a leading one.
+rc=0
+printf '{"tool_name":"Bash","tool_input":{"command":"git push origin feature/x --delete"}}' \
+  | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
+assert_allowed "git push origin feature/x --delete on main (trailing flag)" "$rc"
+
 # ── Summary ──
 
 echo ""
