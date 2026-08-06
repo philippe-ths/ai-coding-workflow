@@ -6,6 +6,13 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.16.0 - 2026-08-06
+
+### Added
+
+- Added the `aiw-init` skill, a user-invoked session preflight that runs a repository's declared checks read-only and reports state the human would otherwise discover too late: a red build, a dead dependency, work left in flight, an issue that already covers what they were about to start. It reports observations and never decides what to do about them, because a preflight that arrives with a plan attached has quietly made the human's call for them. Every command it runs must be non-mutating, which is why the checks it scaffolds reach for `git ls-remote` over `git fetch`. Log lines, service responses, and issue text are treated as data to report rather than instructions to follow, since reading logs is a natural prompt-injection surface. Findings must state what was observed rather than what was concluded: a trial run asserted that a directory held no log files when it held four empty ones, and a confident wrong finding costs more than a missing one because the human acts on it. Mirrored into `.claude/skills/` and `.agents/skills/` ([#202]).
+- Added `project-checks.md`, a per-repository record of what is worth checking and what normal looks like for each check, classified as authored-in-target alongside `project-context.md`. The skill carries the discipline and the file carries the specifics, because a fixed check list inside a skill does not survive contact with a second project. Every entry declares its normal so a run can report the deviation and stay silent about the rest; a check without one hands back raw output for the human to diff themselves, which is the noise the skill exists to prevent. The normal must also be one a run can evaluate unaided, since "rebuilt recently" or "an issue you already know about" rests on the human's memory and so passes silently every time. Surfaces a repository has no instance of are recorded rather than omitted, because an absent check is otherwise indistinguishable from a forgotten one. The installer creates neither this file nor `project-context.md`; `aiw-init` scaffolds it from the target's own configuration on first run ([#202]).
+
 ## 3.15.2 - 2026-08-06
 
 ### Changed
@@ -503,3 +510,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#197]: https://github.com/philippe-ths/ai-coding-workflow/issues/197
 [#177]: https://github.com/philippe-ths/ai-coding-workflow/issues/177
 [#200]: https://github.com/philippe-ths/ai-coding-workflow/issues/200
+[#202]: https://github.com/philippe-ths/ai-coding-workflow/issues/202
