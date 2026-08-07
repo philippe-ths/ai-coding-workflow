@@ -19,7 +19,12 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 if sh -c "$VALIDATION_COMMAND"; then
-  printf "passed" > "$STATE_FILE"
+  # Record which tree this result covers. Taken after the command returns, so it
+  # describes the content the gate will compare against. If the fingerprint
+  # cannot be computed, set -e aborts here with the state still "running" and the
+  # trap turns it into "failed" — the gate blocks rather than trusting an
+  # unattributed pass.
+  printf 'passed %s\n' "$("$ROOT_DIR/.ai-policy/scripts/tree-fingerprint.sh")" > "$STATE_FILE"
   trap - EXIT INT TERM
   echo "Validation passed."
   exit 0
