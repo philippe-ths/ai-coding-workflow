@@ -1,5 +1,5 @@
 {
-  "$comment": "Boundary between product files (copied into a target repo on install) and factory files (this repo's own machinery, never copied). Source-side: this manifest is itself factory-only and is never installed. scripts/check-manifest.sh validates it against git-tracked files; untracked artifacts (e.g. telemetry/, .envrc, .DS_Store) are out of scope by design. Directory entries end with '/'; file entries do not.",
+  "$comment": "Boundary between product files (copied into a target repo on install) and factory files (this repo's own machinery, never copied). Source-side: this manifest is itself factory-only and is never installed. scripts/check-manifest.sh validates it against git-tracked files; untracked artifacts (e.g. .envrc, .DS_Store, .ai-policy/state/) are out of scope by design. Directory entries end with '/'; file entries do not.",
   "profiles": {
     "full": {
       "shared": ["ai-workflow.md", ".ai-policy/", ".githooks/"],

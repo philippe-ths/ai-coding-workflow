@@ -11,8 +11,8 @@
 #   3. Coverage   — every git-tracked file is classified by exactly one category
 #                   (zero = unclassified new file; >1 = ambiguous/overlapping).
 #
-# Universe is git-tracked files only; untracked artifacts (telemetry/, .envrc,
-# .DS_Store) are out of scope by design, since the boundary governs what ships.
+# Universe is git-tracked files only; untracked artifacts (.envrc, .DS_Store,
+# .ai-policy/state/) are out of scope by design, since the boundary governs what ships.
 #
 # Categories: product (union of every profile's shared + per-tool paths),
 # authored_in_target, and factory_only. lite entry_filenames are target

@@ -65,6 +65,11 @@ if [ -x ./scripts/test-update.sh ]; then
   ./scripts/test-update.sh
 fi
 
+# --- observation capture: install/uninstall against a sandbox CLAUDE_HOME ---
+if [ -x ./scripts/test-observation-install.sh ]; then
+  ./scripts/test-observation-install.sh
+fi
+
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py

@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.18.0 - 2026-08-07
+
+### Changed
+
+- `aiw-verification`'s Delete requirement extends the dependency sweep beyond the repository, to state the removed code installed elsewhere: scheduled jobs, global or user-level config, registered hooks, files under `$HOME`, installed services. Deleting code does not unregister what it registered, and nothing in the repository can report the leftover, so it keeps firing against a path that no longer exists. The justification must now say either how that state was accounted for or that the subsystem installed none. Prompted by two launchd agents from the eval and telemetry stack removed in 3.3.0 ([#143], [#145]), still loaded and exiting 78 on every fire more than two months later, against scripts deleted with that stack. The sweep at the time was correct about the codebase and never looked outside it, which is why this belongs to verification rather than to the delete oracle: what "correct" means for a delete did not change, only where the evidence has to come from. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#204]).
+- The `telemetry/` residue is deleted from the working tree: four zero-byte `.log` files and five empty directories, three of them named `*.yaml` as docker bind-mount artifacts created when the host file was absent. None of it was tracked, which is why `git status` read clean and the residue survived unnoticed — git does not track empty directories and `*.log` covered the rest. Deliberately not recorded under `### Removed`: that section arms the updater to delete the named path from every target repo, and `telemetry/` was never a product file, so listing it would delete an unrelated directory of the same name from someone else's project ([#204]).
+
+### Added
+
+- Added `observation/uninstall-observation.sh`, the inverse of the installer that observation capture never had. Capture installs itself into the developer's global `~/.claude/` by design ([`docs/adr/0002`](docs/adr/0002-observation-capture-is-global-not-per-repo.md)), so deleting this repository alone would leave a SessionStart hook wired into global config, pointing at a path that no longer exists — the same shape as the launchd agents above, in the one subsystem here that is still live. It removes the helper scripts, the `/rate` skill, and the hook, unwiring only its own command from `settings.json` and leaving every other setting, hook event, and co-located hook in place. Recorded data is kept unless `--purge-data` is passed: `manifest.jsonl` and `ratings.jsonl` are append-only captures that cannot be rebuilt from transcripts, and the store directory is removed only once it is empty. An unparseable `settings.json` is left untouched rather than rewritten, since replacing a file that could not be read would destroy configuration that cannot be seen ([#204]).
+- Added `scripts/test-observation-install.sh`, sandbox coverage for the install and uninstall pair against a throwaway `CLAUDE_HOME`. The installer had no test at all, so nothing would have caught an uninstall that corrupted the developer's global settings or deleted months of recorded sessions. The cases that matter are the destructive ones: an unrelated skill, an unrelated SessionStart hook, an unrelated hook event, and an unrelated top-level setting all survive; a hook hand-merged into the same entry as ours survives while ours is removed; and the data files survive by default. Wired into `scripts/repo-validation.sh` ([#204]).
+
 ## 3.17.0 - 2026-08-06
 
 ### Fixed
@@ -521,4 +533,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#177]: https://github.com/philippe-ths/ai-coding-workflow/issues/177
 [#200]: https://github.com/philippe-ths/ai-coding-workflow/issues/200
 [#202]: https://github.com/philippe-ths/ai-coding-workflow/issues/202
+[#143]: https://github.com/philippe-ths/ai-coding-workflow/issues/143
+[#145]: https://github.com/philippe-ths/ai-coding-workflow/issues/145
+[#204]: https://github.com/philippe-ths/ai-coding-workflow/issues/204
 [#205]: https://github.com/philippe-ths/ai-coding-workflow/issues/205
