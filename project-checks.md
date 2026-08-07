@@ -58,6 +58,8 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Check: `launchctl list | grep -i aiw` and `ls ~/Library/LaunchAgents | grep -i aiw`
 - Normal: no entries, unless the job is one you installed deliberately and its status column reads `0`.
 - Matters: a launchd agent outlives the code it calls, so a removed subsystem leaves a job firing on a timer against a path that no longer exists. Nothing in the repository reports this, because the job lives in the user's global config, not here.
+- Remedy when one is found: `launchctl bootout gui/$(id -u)/<label>` then `rm ~/Library/LaunchAgents/<label>.plist`. Read the plist's `ProgramArguments` first to confirm what it calls; if that path still exists, the job is live and should be left alone.
+- The observation tool is the one subsystem here that installs outside the repository. `./observation/uninstall-observation.sh` removes what it registered; run it before deleting this repository.
 
 ## Expiry and Limits
 
@@ -80,7 +82,7 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 
 ## Not Covered Here
 
-- **Application logs and error tracking.** No runtime application exists to produce them. The four zero-byte `.log` files under `telemetry/launchd/` are residue from the removed eval stack, gitignored and never written to since; they are not a live surface.
+- **Application logs and error tracking.** No runtime application exists to produce them. The `telemetry/` residue that used to sit here — four zero-byte `.log` files and five empty directories left by the removed eval stack — was deleted in #204.
 - **Dependent services.** Nothing is called at runtime. `bash`, `git`, `jq`, and `python3` are developer tools, checked by their absence breaking validation rather than by a health probe.
 - **Deployment and CI.** `.github/` holds no workflows, so there is no remote build whose status could be red. The nearest equivalent is the local validation state above.
 - **Certificate and secret expiry.** No secrets are held; the only credential is the `gh` token, checked under Expiry and Limits.

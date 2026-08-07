@@ -40,7 +40,7 @@ Version: 1.21.0
 - Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Provides a local session-observation tool (`observation/`) that parses Claude Code transcripts into a JSONL Session Store and a self-contained static HTML dashboard.
 - The observation tool is descriptive only: it surfaces how metrics move across workflow versions and over time, and never computes a statistical comparison or pass/fail verdict.
-- Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo.
+- Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
 - Does not include a unit-test framework; validation covers shell-script syntax, Python `py_compile`, the observation parser regression test, enforcement integration tests, and JSONL fixture validity.
 
 ## Important Constraints
@@ -109,6 +109,8 @@ Version: 1.21.0
 - `observation/capture/record-rating.sh`: appends a 1-4 Rating row, invoked by the `/rate` skill.
 - `observation/capture/rate/SKILL.md`: the global `/rate` skill source.
 - `observation/install-observation.sh`: installs capture and the `/rate` skill into global `~/.claude/`, honoring `CLAUDE_HOME` for testing.
+- `observation/uninstall-observation.sh`: the inverse; removes the hook, skill, and helper scripts and unwires the hook from `settings.json`, keeping recorded data unless `--purge-data` is passed.
+- `scripts/test-observation-install.sh`: sandbox test of the install/uninstall pair against a throwaway `CLAUDE_HOME`.
 - `observation/README.md`: setup and usage for the observation tool.
 - `Makefile`: `observe` rebuilds the store and opens the dashboard; `observe-test` runs the parser test; `classify` prints the product/factory boundary.
 - `scripts/install.sh`: copies the product set for a tool and profile into a target repo, vendors it in the target's `.gitignore`, and installs hooks (full profile); lite copies the single file plus a generated entry.
@@ -123,7 +125,7 @@ Version: 1.21.0
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
 - Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh`, `test-pre-push-hook.sh`, `test-project-validation.sh`, `test-context-drift-hook.sh`, `test-pr-merge-hook.sh`, `test-push-refs.sh`, `test-pr-approve-hook.sh`, and `test-validation-state.sh` always run.
 - When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
-- Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, a JSONL validity check on the fixture, the manifest integrity check, and the installer, updater, and changelog-removals sandbox tests.
+- Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, a JSONL validity check on the fixture, the manifest integrity check, and the installer, updater, changelog-removals, and observation install/uninstall sandbox tests.
 - No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
 - Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
 

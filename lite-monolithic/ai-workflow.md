@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.17.0
+Version: 3.18.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -254,7 +254,7 @@ Modality-specific checks:
 - **Refactor / Improve (behavioural).** A before/after comparison on real inputs; equivalence claimed without comparison is not verified.
 - **Migrate.** End-to-end comparison of old against new on real inputs, with the exception list individually accounted for.
 - **Configure.** Exercise the real external system at least once; a green test against a mock is not verification.
-- **Delete.** A dependency search across the whole codebase, including dynamic references (strings, reflection, config, generated code), confirming nothing still relies on what was removed.
+- **Delete.** A dependency search across the whole codebase, including dynamic references (strings, reflection, config, generated code), confirming nothing still relies on what was removed. Extend the search outside the repository to state the removed code installed elsewhere — scheduled jobs, global config, registered hooks, files under `$HOME` — since deleting code does not unregister what it registered, and the leftover keeps firing against a path that no longer exists.
 
 ## Non-Functional Test Coverage
 

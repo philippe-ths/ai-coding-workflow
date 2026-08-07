@@ -30,6 +30,22 @@ This places a defensive SessionStart hook (writes the Manifest), the `/rate` ski
 helper scripts under `~/.claude/aiw-observation/`, and wires the hook into
 `~/.claude/settings.json`. Re-running is safe.
 
+## Uninstall
+
+```bash
+./observation/uninstall-observation.sh
+```
+
+Removes the hook, the `/rate` skill, and the helper scripts, and unwires the hook from
+`~/.claude/settings.json`, leaving every other setting and hook in place. Re-running is safe.
+
+Your recorded data is kept. Add `--purge-data` to remove `manifest.jsonl`, `ratings.jsonl`,
+`sessions.jsonl`, and `dashboard.html` as well. The Session Store and dashboard can be
+rebuilt from transcripts; the Manifest and Ratings cannot.
+
+Run this **before** deleting this repository. Capture installs itself outside the repo, so
+deleting the repo alone leaves the SessionStart hook wired into your global config.
+
 ## Daily use
 
 - Work normally. The hook records each session automatically in every repo.
@@ -55,6 +71,7 @@ All under `~/.claude/aiw-observation/` (global, gitignored by being outside any 
 - `fixtures/sample-transcript.jsonl` — real-shaped fixture for the test
 - `capture/` — the global hook, `/rate` skill, and rating recorder
 - `install-observation.sh` — global installer (honors `CLAUDE_HOME` for testing)
+- `uninstall-observation.sh` — the inverse; keeps recorded data unless `--purge-data`
 
 ## Maintenance
 
