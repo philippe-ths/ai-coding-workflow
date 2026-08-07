@@ -41,9 +41,9 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Matters: a branch cut from a stale `main` rebases onto surprises later. Uses `ls-remote` rather than `git fetch`, which writes remote-tracking refs.
 
 ### Validation state
-- Check: `cat .ai-policy/state/validation.status`, then compare its modification time against the newest file in `git status --porcelain`.
-- Normal: `passed`, written after the most recent working-tree edit.
-- Matters: commits and pushes are blocked until validation passes, so a failed state left from last session stops the first commit of this one. A `passed` older than the tree is worse than a failure: it is last session's result being read as this session's green.
+- Check: `./.ai-policy/scripts/check-validation.sh; echo "exit $?"`
+- Normal: `exit 0`.
+- Matters: commits and pushes are blocked until validation passes, so a failed state left from last session stops the first commit of this one. The gate itself compares the recorded pass against a fingerprint of the current tree, so running it reports staleness exactly rather than inferring it from modification times; a non-zero exit names which of the two cases applies. Read-only: the check reads the state file and hashes the tree without writing either.
 
 ## Policy Layer
 

@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.17.0 - 2026-08-06
+
+### Fixed
+
+- `.ai-policy/scripts/check-validation.sh` rejects a passing validation result that was computed against a different working tree, closing a gate that failed open. The state file recorded a bare `passed` with nothing tying it to the content that produced it, so an hour-old result satisfied the commit and push gates for a tree that had moved on since; the defect was observed with ten files edited after the recorded pass. The gate exists so that what is being committed has been validated, and a stale pass satisfied the mechanism while defeating its purpose. It also failed in the dangerous direction, reporting green, and the only workaround put the guarantee back on remembering to re-run validation immediately before every commit, which is what the gate was meant to remove. A new `.ai-policy/scripts/tree-fingerprint.sh` hashes the tracked and untracked-not-ignored content with git's own object hashing, so no external checksum tool is needed, and `run-validation.sh` records it alongside the result. Ignored files are excluded because validation does not read them; the state file is excluded explicitly rather than by ignore rules, since a target that has not ignored it would otherwise have each recorded result invalidate itself on the next read. `mark-validation-pass.sh` stamps the same fingerprint, so the manual override remains an escape hatch from running validation and not from the result belonging to the content being committed. The fingerprint covers path names and file contents only. Index state and HEAD are excluded deliberately: `git add` changes whether a modification is staged rather than what any file contains, and committing moves HEAD while leaving every file on disk identical. Including either was tried and both broke the ordinary edit-validate-stage-commit-push sequence, invalidating a pass that had just been recorded and demanding a second validation run before every push, with no change in what validation had read. A gate that fires on the normal path gets routed around. A path git reports in quoted form — one containing a quote, backslash, or control character — aborts the fingerprint with the path named, because such a file would drop out of content hashing while still appearing in the path list, reintroducing the same fail-open shape in a corner. Covered by `.ai-policy/scripts/test-validation-state.sh`, which drives a real `git commit` through the real hook rather than asserting on exit codes alone, and pins fingerprint stability first: a fingerprint that differed between two runs over an identical tree would block every commit in every repository that installs this ([#205]).
+
+### Changed
+
+- A validation result recorded before this version carries no fingerprint and no longer satisfies the gate. The first commit or push after updating blocks with a message naming the cause and the remedy, and `./.ai-policy/scripts/run-validation.sh` clears it. Failing closed is deliberate: a bare `passed` cannot be tied to any tree, so it is not evidence that what is about to be committed was validated ([#205]).
+
 ## 3.16.0 - 2026-08-06
 
 ### Added
@@ -511,3 +521,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#177]: https://github.com/philippe-ths/ai-coding-workflow/issues/177
 [#200]: https://github.com/philippe-ths/ai-coding-workflow/issues/200
 [#202]: https://github.com/philippe-ths/ai-coding-workflow/issues/202
+[#205]: https://github.com/philippe-ths/ai-coding-workflow/issues/205

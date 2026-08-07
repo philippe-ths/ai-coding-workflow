@@ -37,17 +37,53 @@ Nothing is lost by the exemption: a deletion naming a protected branch has alrea
 
 ### Validation state tracking
 
-The validation system uses a simple state file (`validation.status`) with three states: `running`, `passed`, `failed`.
+The validation system uses a state file (`validation.status`) with three states: `running`, `passed`, `failed`.
+A pass is recorded as `passed <fingerprint>`; the other two imply no particular tree and stay bare.
 
 `run-validation.sh` orchestrates the flow: it sets the state to `running`, runs the configured validation command, and sets the state to `passed` or `failed` based on the result.
-The `running` state plus a trap on exit ensures that if the script is interrupted or crashes, the state reverts to `failed` rather than remaining `passed` from a stale run.
+The `running` state plus a trap on exit ensures that if the script is interrupted or crashes, the state reverts to `failed` rather than remaining `passed` from an abandoned run.
 
-`check-validation.sh` reads the state file and blocks the Git action unless the state is `passed`.
-This enforces the workflow rule that validation must pass before commit or push.
+`check-validation.sh` reads the state file and blocks the Git action unless the state is `passed` **and** the recorded fingerprint matches the current working tree.
+
+### Why a pass is tied to a tree
+
+A bare result records that validation passed, not what it passed against.
+The gate then answers a weaker question than the one it exists to ask: it confirms that some validation run succeeded at some point, when what matters is whether the content being committed is the content that was validated.
+The two diverge the moment a file is edited after the run, and the gap is invisible because the state still reads `passed`.
+This failed in the direction that costs most — it reported green — and the only workaround was to remember to re-run validation immediately before every commit, putting the guarantee back on human memory, which is what the deterministic layer exists to remove.
+
+`tree-fingerprint.sh` produces the fingerprint, hashing tracked and untracked-not-ignored paths and their content through `git hash-object`.
+Using git's own hashing rather than `shasum` or `sha256sum` avoids a portability split between platforms, and git is already a hard dependency of every hook here.
+
+Three exclusions are deliberate.
+Ignored files are out because validation does not read them, so changing one is not a reason to revalidate.
+The state file itself is excluded by explicit path rather than by relying on the ignore rules, because the fingerprint is written into that file: in a target repository that had not ignored it, every recorded result would invalidate itself on the next read, bricking the gate.
+Deleted-but-tracked files are named by `git ls-files --deleted` rather than hashed, since hashing a missing path would abort the run on any ordinary deletion.
+
+Two further exclusions are what make the gate usable rather than merely correct.
+Index state is excluded, because `git add` changes whether a modification is staged and not what any file contains.
+HEAD is excluded, because committing moves it while leaving every file on disk identical.
+Including either was tried and both broke the ordinary sequence: staging invalidated the pass that had just been recorded, and committing invalidated it again so that every push demanded a second validation run.
+Neither block corresponded to any change in what validation had read.
+This matters more than the precision it gives up — a fingerprint keyed to history would distinguish the same edit before and after a rebase — because a gate that fires on the normal path gets routed around, and a bypassed gate enforces nothing.
+
+One case refuses outright.
+git reports a path containing a quote, a backslash, or a control character in quoted form, and that quoted string no longer names a file on disk.
+Such a file would drop out of the content hashing while still appearing in the path list, so edits to it would not move the fingerprint — the same fail-open shape this change exists to close, reintroduced in a corner.
+The script therefore aborts with the offending paths named rather than producing a fingerprint that covers less than it appears to.
+Paths containing spaces are not quoted and need no special handling.
+
+The fingerprint's stability is the load-bearing property, and the risk runs opposite to the defect it fixes.
+A fingerprint that differs between two runs over an identical tree would block every commit in every repository that installs this layer, so `test-validation-state.sh` pins stability before it tests anything that depends on it.
+
+Two limits are known and accepted.
+The fingerprint is taken after the validation command returns, so a validation run that mutated a tracked file would fold that mutation into the recorded result.
+The pre-commit gate fingerprints the working tree rather than the index, so committing a subset of a validated tree passes; this matches what validation actually ran against, which is the whole tree.
 
 `mark-validation-pass.sh` and `mark-validation-fail.sh` exist as manual overrides.
 They allow the human to set validation state directly when the automated flow is not appropriate (e.g. the project has no tests yet, or a known-failing test needs to be bypassed for a specific commit).
 These are escape hatches, not normal workflow paths.
+`mark-validation-pass.sh` still stamps the current fingerprint: the override exists to skip running validation, not to exempt the result from belonging to the content being committed.
 
 ### project-validation.sh
 
