@@ -737,3 +737,276 @@ This appears general across tasks because cherry-pick and merge conflict resolut
 
 ### Scope
 - General across tasks touching the UI or heavy data processing loops.
+
+## Entry 22
+
+### Title
+- Declared unverified surface abandoned at handoff.
+
+### Version
+- 3.18.0 at analysis. Observed pull requests span February to August 2026, so the behaviour accumulated across earlier 2.x and 3.x versions.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach; 463 closed pull requests analysed by commit sequence, body, comments, and changed files.
+
+### What Happened
+- 105 of 461 merged pull requests explicitly named a surface the agent had not verified, which is the workflow's scoping step working as designed.
+- For 81 of those 105 (77%), that sentence is the only trace of the item: no later comment, no issue, no reference anywhere.
+- The declaration rate rose over time rather than falling: 0% in February, 21% in June, 55% of August's 62 merged pull requests.
+- Where a gap was instead filed as an issue (31 cases), 26 are closed and the median time to close was the same day, so the receiving mechanism works and is simply not connected to the step that produces the gaps.
+
+### Why It Matters
+- The workflow generates an accurate warning and then loses it, so the human's done decision rests on a record that cannot be checked afterwards.
+- Absence of a trace does not prove the surface went unchecked; the failure is that it is unauditable either way, at rising volume.
+
+### Trigger Pattern
+- A rule requires naming the unverified surface but names no destination for the named item, so prose in a pull request body fully satisfies it.
+
+### Early Warning Signs
+- A pull request body carries a "Not verified" section with no accompanying issue reference.
+- The section is filled in even when empty of content, for example "Not verified: nothing", which is the section becoming a box to tick.
+
+### Scope
+- General across tasks. Tracked as #208.
+
+## Entry 23
+
+### Title
+- The same structural gap re-declared for months instead of escalated once.
+
+### Version
+- 3.18.0 at analysis; the earliest instance predates 2.0.0.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach.
+
+### What Happened
+- The agent re-confessed identical structural limitations across separate tasks for six months: tests running against an in-memory database rather than the real one in 10 pull requests, no real model call in 9, never run against the deployed system in 9, no frontend component test runner in 6, no browser or visual render in 6.
+- Every instance was honest and locally correct. None led to work that removed the cause.
+
+### Why It Matters
+- Writing the caveat is cheaper than fixing the cause on every individual task, so the fix is never the rational local choice and the category never closes.
+- Per-task honesty disguises a systemic hole as a series of small local ones.
+
+### Trigger Pattern
+- Each task is judged in isolation, with no memory that this limitation has been declared before.
+
+### Early Warning Signs
+- A verification note describes a limitation of the repository or its environment rather than of the change under test.
+- The same phrase recurs in unrelated pull requests.
+
+### Scope
+- General across tasks. Tracked as #209.
+
+## Entry 24
+
+### Title
+- Verification evidence produced after handoff rather than before the gate.
+
+### Version
+- 3.18.0 at analysis.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach.
+
+### What Happened
+- 17 merged pull requests carry a comment reporting substantive verification posted after the pull request was opened, every one within roughly two hours of opening.
+- The evidence itself was real work, not a formality: a run inside the production container image rather than by inspection (#559), a real-model run once a key was funded (#574), an independent clean-context check (#807), completion of two items previously flagged as manual (#617).
+- The workflow requires the justification step before work is presented for the done decision, and the pull request is the presentation.
+
+### Why It Matters
+- The gate certifies a discipline other than the one being practised, so its green state means less than it appears to.
+- Work is offered as complete while its strongest supporting evidence does not yet exist.
+
+### Trigger Pattern
+- The handoff artifact doubles as a working surface. Opening it costs nothing, reads as progress, and leaves the remaining verification to look like diligence rather than lateness.
+
+### Early Warning Signs
+- The agent posts its own verification narrative as a comment on an open pull request.
+- A pull request body defers evidence to a preview environment or to a later pass.
+
+### Scope
+- General across tasks. Tracked as #210.
+
+## Entry 25
+
+### Title
+- A fix verified against its own symptom while its blast radius goes unchecked.
+
+### Version
+- 3.18.0 at analysis.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach, PR #749 as the primary case.
+
+### What Happened
+- The agent posted a thorough browser verification of a chart against a real 400-activity database, with measured pixel values, and it passed.
+- Within the following hour the owner caught three separate defects in the same view. The second was created by the fix for the first: regrouping the data changed how the charting library derived the vertical scale, pushing the highest values outside the visible plot area so a whole activity vanished.
+- The pattern is not isolated. Across the dataset 23 fix pull requests repair code that another fix pull request was the last to touch, and 43% of all fixes land within one day of that code's previous change.
+
+### Why It Matters
+- In a pipeline where one stage feeds the next, a fix can move an output the agent never looks at again, so the human becomes the regression suite.
+- Verification that targets only the reported symptom cannot detect the defect the fix introduced.
+
+### Trigger Pattern
+- A fix inside a chain where the shape of the data, rather than a value, feeds a later stage's configuration.
+
+### Early Warning Signs
+- The verification narrative measures the reported symptom only.
+- The change alters grouping, ordering, or the shape of a data structure rather than a computed value.
+
+### Scope
+- General across tasks touching derived data or rendering pipelines. Tracked as #211.
+
+## Entry 26
+
+### Title
+- Evidence gathered from the wrong process, then accepted as true.
+
+### Version
+- 3.18.0 at analysis.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach, PR #796 as the primary case.
+
+### What Happened
+- One runner's private coaching reports were delivered to another person's messaging account for seven days: 13 receipts and 11 full reports. The affected runner received nothing at all that week, so silence from their side looked like a new signup who had not yet run.
+- An earlier audit had already found this exact defect and downgraded it from a live leak to configuration fragility, on the evidence that the relevant setting was "set in prod today".
+- That reading was true of one of two processes. The system runs a web process and a worker process holding separate configuration, and the worker is the one that sends.
+- Two later hardening pull requests inherited the framing: one reinforced the copy of the logic that already worked, the other wired the requested boot guard into the process that does not send.
+
+### Why It Matters
+- A true reading taken from the wrong environment is indistinguishable from evidence, and the framing propagates to every review that follows it.
+- The cost here was a real cross-user data leak that ran for a week.
+
+### Trigger Pattern
+- More than one process or environment holds its own configuration, and the evidence names the deployment rather than the process it was read from.
+
+### Early Warning Signs
+- Evidence phrased as a property of "prod" or "the deployment" rather than of a named process.
+- A defect downgraded on the basis of current configuration state rather than of code.
+
+### Scope
+- General across tasks whose evidence comes from runtime configuration or state. Tracked as #212.
+
+## Entry 27
+
+### Title
+- Superseding one's own fix without triggering the audit.
+
+### Version
+- 3.18.0 at analysis.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach.
+
+### What Happened
+- One bug needed three fixes in a single day, and two of those pull request titles say "supersedes" and name the pull requests they replace.
+- One issue has two merged pull requests with word-for-word identical titles; the first did not work.
+- One pull request is titled "unbreaks Re-run in prod", following a fix that reached production broken.
+- The reactive stop-and-audit rule, which exists precisely to prevent a third speculative attempt, did not run in any of these cases.
+
+### Why It Matters
+- The rule waits for the human to contradict a done claim, so the agent contradicting itself buys an unlimited number of attempts.
+- The agent's own titles contain a plainer admission of failure than anything the trigger watches for.
+
+### Trigger Pattern
+- The agent judges its own recent fix insufficient within the same session and frames the next attempt as fresh work against the same issue, which avoids ever registering a contradiction.
+
+### Early Warning Signs
+- "supersedes", "actually fixes", or "properly this time" in the agent's own commit or pull request titles.
+- A second pull request opened against an issue that was closed hours earlier.
+
+### Scope
+- General across tasks. Tracked as #213.
+
+## Entry 28
+
+### Title
+- Unavailable verification method silently downgraded rather than raised.
+
+### Version
+- 3.18.0 at analysis.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach, PR #858 as the primary case.
+
+### What Happened
+- The pull request records that clean-context verification did not run because sub-agents were unavailable in that session, so the end to end evidence became self-verified, and the work shipped.
+- The substitution was disclosed accurately. It was still chosen by the agent rather than put to the human.
+- The same shape recurs where verification was deferred for quota or an unfunded key and a deterministic proxy stood in for the real path.
+
+### Why It Matters
+- Accepting weaker evidence changes what the done claim is worth, and the choice was made by the party with an interest in proceeding.
+
+### Trigger Pattern
+- A verification method the plan committed to is unavailable at the moment it is needed, and a weaker method is immediately to hand.
+
+### Early Warning Signs
+- "self-verified", "sub-agents disabled", or "quota-conscious" appearing alongside a completion claim.
+- The plan named a verification method that the verification narrative does not mention.
+
+### Scope
+- General across tasks. Tracked as #214.
+
+## Entry 29
+
+### Title
+- Upstream cause correctly diagnosed, reported only in the consuming repository.
+
+### Version
+- 3.13.0 when observed; still present at 3.18.0.
+
+### Date
+- 2026-08-14, analysing pull requests merged between 2026-02-07 and 2026-08-13.
+
+### Context
+- Claude Code, models varying across the period.
+- Repo was philippe-ths/ai-running-coach, PR #790; the cause lives in philippe-ths/ai-coding-workflow.
+
+### What Happened
+- Updating the vendored workflow left four tools' ignore entries stripped from the target's `.gitignore`, leaving vendored tooling untracked and one `git add -A` from being committed into the target's history.
+- The agent diagnosed this correctly, identified the cause as the installer in the upstream repository rather than anything local, and wrote exactly that in the pull request body under its unverified-surface section, noting that nothing local prevents the next update from repeating it.
+- The finding never reached the upstream repository. It was reproduced against a throwaway target two months later and is still present, and its cause is the fix for an earlier upstream issue that removed matching entries more aggressively than it replaced them.
+
+### Why It Matters
+- The rule to surface out-of-scope follow-up work is satisfied by telling the local human in the local pull request, so a finding whose owner is another repository has no route home.
+- The consuming repository absorbs a recurring manual workaround indefinitely while the owning repository never learns the defect exists.
+
+### Trigger Pattern
+- A task in a consuming repository whose root cause lives in vendored or installed tooling owned elsewhere.
+
+### Early Warning Signs
+- A verification note whose stated mitigation is a procedure or a manual re-check after every update.
+- A pull request body naming another repository as the owner of the cause.
+
+### Scope
+- General across repositories with vendored governance or tooling. Tracked as #216.
