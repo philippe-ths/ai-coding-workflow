@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.18.0
+Version: 3.19.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -135,6 +135,8 @@ Trust hierarchy for any input or expected value the work relies on, highest firs
 3. Snapshots of previous known-good runs of the system itself.
 4. Hand-constructed minimal examples the user has explicitly confirmed represent real behaviour.
 5. Synthetic fixtures the agent invented — useful for exercising logic, not authoritative about what the system should do.
+
+Real is not the same as relevant. The hierarchy ranks how real an input is, not whether it describes the thing you are changing: evidence read from the wrong process, substrate, or environment is authentic and irrelevant at once. For any evidence drawn from a running system, name where you read it and confirm the code under test runs in that same place. One cross-user data leak ran for a week because "set in prod today" was true of the web process, while the worker that actually sends had no such setting.
 
 Rules:
 

@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.19.0 - 2026-08-14
+
+### Changed
+
+- `aiw-ground-truth`'s trust hierarchy now separates how real an input is from whether it describes the thing being changed, and requires evidence drawn from a running system to name where it was read and confirm the code under test runs in that same place. The hierarchy ranked authenticity only, and its top rung read as unconditional: an agent that scored its evidence level 1 had no further question to ask. Prompted by a seven-day cross-user data leak in a repository running this workflow, where an audit downgraded the defect to config fragility on the evidence that the recipient setting was "set in prod today". That reading was true, and taken from the web process, while the worker that sends had no such setting; the leak then outlived two hardening changes that inherited the same framing, one reinforcing the copy of the logic that already worked and one guarding the process that does not send. The rule is pitched at the locus of evidence rather than at processes, because the same blind spot produced three other instance families in the same repository: ten separate changes verified against an in-memory database standing in for the real one, a local seeded copy standing in for production rows, and a desktop automation window standing in for mobile layout. A rule naming processes would have caught one of the four. Level 1's wording lost "in real environments", the phrase that invited the error by letting authenticity read as sufficiency, and the Origin field of artifact provenance gains the process or environment a capture came from. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#212]).
+
 ## 3.18.0 - 2026-08-07
 
 ### Changed
@@ -537,3 +543,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#145]: https://github.com/philippe-ths/ai-coding-workflow/issues/145
 [#204]: https://github.com/philippe-ths/ai-coding-workflow/issues/204
 [#205]: https://github.com/philippe-ths/ai-coding-workflow/issues/205
+[#212]: https://github.com/philippe-ths/ai-coding-workflow/issues/212
