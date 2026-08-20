@@ -152,6 +152,8 @@ What "high level" means in practice:
 
 Reference aiw-verification for the modality-specific verification requirements that apply. The implementation will run through aiw-verification's full process at done time; the plan's job is to surface the expectation now so it is not a surprise then.
 
+What the plan names here is a commitment, not an aspiration. If the method turns out to be unavailable when verification runs, aiw-verification requires that to be put to the human as a decision rather than quietly met with something weaker.
+
 ## Testing Notes in the Plan
 
 The testing notes section is a report on infrastructure and gaps, not a plan of tests. aiw-testing handles what tests will be written during implementation.
