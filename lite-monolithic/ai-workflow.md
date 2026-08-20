@@ -246,7 +246,7 @@ Run the full system end-to-end on real inputs for: changes to data flowing betwe
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
 
-Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass.
+Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass. A reading taken from a running system — a config value, a live setting, a stored row — is a reading from one process in one environment: name which, and confirm the code under test runs there.
 
 When the runtime path has no output to read, add observability as part of the change — temporary or permanent — especially for changes touching writes, sync, state transitions, integration points, or reactive UI paths. Remove any temporary diagnostics before declaring done.
 
