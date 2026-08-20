@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.20.0
+Version: 3.21.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -296,7 +296,7 @@ Manual verification covers what only a human can verify.
 
 ## Failure Analysis Mode
 
-Enter failure analysis mode when the user says the behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported; when manual verification fails; or when runtime behaviour contradicts the implementation. If uncertain whether to enter, enter. Stop implementation and make no further code changes until failure analysis is complete.
+Enter failure analysis mode when the user says the behaviour is still broken, a fix didn't help, or what they see contradicts what validation reported; when manual verification fails; or when runtime behaviour contradicts the implementation. Enter it equally when the contradiction comes from you: when you are about to supersede, replace, redo, or properly fix your own recent attempt at the same defect, when you are about to touch code your own recent change was the last to touch for the same defect, or when a second branch or pull request is opening against an issue you already claimed done. Who noticed does not change what happened — the oracle, tests, and verification that signed off the first attempt were wrong either way — and framing attempt two as a fresh task is the most common way the audit gets skipped. If uncertain whether to enter, enter. Stop implementation and make no further code changes until failure analysis is complete.
 
 A contradicted "done" claim means the oracle, the tests, or the verification that should have caught the problem did not. Do not trust them until each is audited.
 
@@ -393,4 +393,4 @@ Every question or decision you put to the human leads with a recommendation, it 
 
 ## Reactive Rules
 
-If a "done" claim is contradicted — by the user, by runtime behaviour, or by manual verification — stop and enter [Failure Analysis Mode](#failure-analysis-mode) before proposing another fix or requesting a retry. This rule overrides the rest of the workflow when triggered.
+If a "done" claim is contradicted — by the user, by runtime behaviour, by manual verification, or by your own second attempt at the same defect — stop and enter [Failure Analysis Mode](#failure-analysis-mode) before proposing another fix or requesting a retry. This rule overrides the rest of the workflow when triggered.

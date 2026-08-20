@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.20.0
+Version: 3.21.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -91,6 +91,8 @@ Every question or decision you put to the human leads with a recommendation, it 
 ## Reactive Rules
 
 If a "done" claim is contradicted, stop. Invoke aiw-failure-analysis. Do not propose another fix or request a retry until the audit has run.
+
+The contradiction does not have to come from the human. Superseding, replacing, or redoing your own recent fix for the same defect is a contradicted "done" claim, and framing attempt two as a fresh task does not make it one. aiw-failure-analysis lists the signals.
 
 This rule overrides the rest of the workflow when triggered.
 
