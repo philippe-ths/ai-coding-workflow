@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.19.0
+Version: 3.20.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -240,6 +240,8 @@ Passing tests are not proof the change works — only that the checks the agent 
 
 If part 1 surfaces something part 2 does not cover, the change is not verified: either run more checks or move the gap explicitly into part 3 and tell the human.
 
+Part 1 fails most often on the word "downstream", read as "the other code that calls this". Ask two questions instead: what reads the value, shape, ordering, grouping, or type you changed, and what is derived from it that nobody wrote down — an axis scale, a total, a page count, a sort order, a cache key. Check what those return and stop there; the point is the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping.
+
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
 Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is impractical, say so and treat the unverified path as a known risk.
@@ -252,7 +254,7 @@ When the runtime path has no output to read, add observability as part of the ch
 
 Modality-specific checks:
 
-- **Fix.** A check that failed before the fix and passes after is non-negotiable. Confirm adjacent inputs still work.
+- **Fix.** A check that failed before the fix and passes after is non-negotiable. Confirm adjacent inputs still work, and confirm whatever is derived from what the fix changed still holds.
 - **Refactor / Improve (behavioural).** A before/after comparison on real inputs; equivalence claimed without comparison is not verified.
 - **Migrate.** End-to-end comparison of old against new on real inputs, with the exception list individually accounted for.
 - **Configure.** Exercise the real external system at least once; a green test against a mock is not verification.

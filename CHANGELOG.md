@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.20.0 - 2026-08-20
+
+### Changed
+
+- `aiw-verification` names the derivation check as a step of the justification rather than leaving it to one word. Part 1 already asked for "the surfaces downstream of those", and the failure it is meant to catch happened anyway, because "downstream" reads as "the other code that calls this" and the surface that broke was on the same screen, computed by a charting library that nothing in the codebase calls. Prompted by a pull request in a repository running this workflow that posted a thorough browser verification against a real 400-activity database, with measured values, and passed; within the hour the owner caught three defects in the same view, the second of them a regression created by the fix for the first, where regrouping the data changed how the library computed the vertical scale and pushed the highest values outside the plot area. Supporting the pattern rather than the incident: across 463 closed pull requests in that repository, 23 fix pull requests repair code another fix pull request was the last to touch, and 43% of fixes land within a day of the code's previous change. The new section replaces the single "what calls this?" question with two — what reads the value, shape, ordering, grouping, or type that moved, and what is derived from it that nobody wrote down, such as an axis scale, a total, a page count, a sort order, or a cache key — and bounds the answer explicitly, because the check is worthless if it reads as licence to re-verify everything and gets skipped for cost. The Fix modality requirement gains the derived surfaces alongside its existing adjacent-inputs clause. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#211]).
+
 ## 3.19.0 - 2026-08-20
 
 ### Changed
@@ -544,3 +550,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#204]: https://github.com/philippe-ths/ai-coding-workflow/issues/204
 [#205]: https://github.com/philippe-ths/ai-coding-workflow/issues/205
 [#212]: https://github.com/philippe-ths/ai-coding-workflow/issues/212
+[#211]: https://github.com/philippe-ths/ai-coding-workflow/issues/211
