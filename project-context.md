@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.23.0
+Version: 1.24.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
