@@ -19,7 +19,7 @@ Classify the task using the modality decision procedure defined in aiw-ground-tr
 
 Before declaring any task complete, produce a short, explicit argument with three parts:
 
-1. **What could plausibly have broken as a result of this change.** Name the surfaces the change touches and the surfaces downstream of those.
+1. **What could plausibly have broken as a result of this change.** Name what reads the value, shape, ordering, grouping, or type you altered, and what is derived from it that nobody wrote down — an axis scale, a total, a cache key. Downstream is not only the code that calls yours.
 2. **What evidence shows those things did not break.** Cite the specific checks run and what they actually observed.
 3. **What was not checked, and why.** Either because it was out of scope, because it was impractical, or because the agent did not think of it until now.
 
@@ -27,16 +27,7 @@ This step is non-skippable. The output is short — a few lines is usually enoug
 
 If part 1 surfaces something part 2 does not cover, the change is not verified. Either run additional checks or move the gap explicitly into part 3 and acknowledge the risk to the user.
 
-## What the Change Could Move
-
-Part 1 fails most often on the word "downstream". Read as "the other code that calls this", it misses the surface that actually breaks: something computed from the value or shape the change moved, often on the same screen, often by a library or the rendering layer that nothing in the codebase appears to call.
-
-Ask two questions, not one:
-
-- **What reads this?** Every consumer of the value, shape, ordering, grouping, or type the change altered: the next pipeline stage, the cache, the serialiser, the query that assumed the old shape.
-- **What is derived from this?** Every quantity computed from it that nobody wrote down: an axis scale, a total, a page count, a layout height, a sort order, a cache key.
-
-Check what those two questions return, and stop there. Proportion is the point — the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping. Nothing called that code. The grouping was its input.
+Part 1 is bounded by those two questions: check what they return and stop there, the surfaces that consume what the change moved rather than the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping. Nothing called that code. The grouping was its input.
 
 ## Evidence Hierarchy
 
