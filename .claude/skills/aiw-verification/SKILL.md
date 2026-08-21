@@ -122,3 +122,11 @@ Naming the surface is half the step. The other half is what became of it, settle
 - **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
 
 A label with no artifact behind it is not a resolution. (Why: it is the same undisclosed gap in a tidier format, and a column of correct-looking labels hides that better than plain prose did.)
+
+### A Gap You Have Declared Before
+
+Before writing a surface into part 3, look for it in the repository's own history: the merged pull requests, and the open and closed issues.
+
+**Name the gap by its cause, not by the task.** "No real external-model call — the API key is unfunded" is findable next time. "Could not fully test the coach for #712" is not, and a gap nobody can find is a gap that gets declared fresh forever. The name is what makes the search work, so write it for the search.
+
+**The third occurrence is not a caveat.** If the same gap already stands in two or more earlier merged pull requests, it is not a property of this task but a structural limitation of the repository that this task ran into, and another honest caveat does nothing about it. Escalate once, through aiw-issue-creation, to a single piece of work that removes the cause, citing the earlier occurrences as evidence of its priority; this task's part 3 then references that issue instead of restating the gap. Where the history is not searchable, say the recurrence check did not run rather than passing over it in silence.

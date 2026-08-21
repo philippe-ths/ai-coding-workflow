@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.24.0 - 2026-08-21
+
+### Changed
+
+- `aiw-verification`'s scoping step now looks for a gap in the repository's own history before declaring it, and escalates a repeat into work that removes its cause. Building on [#208], which made a declared gap carry a checkable artifact: once gaps are findable, recurrence is the thing worth acting on. Prompted by 463 closed pull requests in a repository running this workflow, where the same structural limitation was re-declared for six months — a suite standing in an in-memory database for the real one was declared in ten of them, across February to August — because the workflow had no notion of a gap it had seen before. Two rules follow. Gaps are named by their cause rather than by the task, since "could not fully test the coach for #712" is unfindable and so gets re-declared forever, and the name is what makes the search work. And the third occurrence stops being a caveat: with the same gap already standing in two or more earlier merged pull requests it is a property of the repository rather than of this task, so it escalates once through `aiw-issue-creation` to a single piece of work that removes the cause, and this task's part 3 references that issue instead of restating the gap. No new file or state is introduced, because the merged pull requests and issues are already the durable record. The rule names the record rather than a command for reading it: an invocation written for one vendor's tooling, in a file installed into arbitrary repositories, needs its own exemption clause, and a rule that needs an exemption is pitched at the wrong altitude. Where the history is not searchable the recurrence check is reported as not run rather than passed over in silence, since a gap seen ten times must not be indistinguishable from one seen once. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#209]).
+
 ## 3.23.0 - 2026-08-21
 
 ### Changed
@@ -572,3 +578,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213
 [#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214
 [#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208
+[#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
