@@ -50,6 +50,7 @@ Cover these surfaces, and add any the repository shows you that are not listed h
 - Errors: what recent logs and any error tracker show since the last session.
 - Expiry and limits: security advisories, certificates, tokens, quotas.
 - Drift: staleness in the project's own documents, quarantined or skipped tests.
+- Recurring gaps: the same unverified surface named across several merged pull requests with no issue tracking it. Normal is none; on a third appearance it is a limitation of the repository rather than of any one task.
 
 Run the checks as you write them, so a first run reports like any other rather than only producing a file. Then tell the human where the file is and what each section covers, without pasting it back. They will spot which checks are noise faster than you can infer it.
 
