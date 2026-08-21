@@ -53,6 +53,7 @@ Treat commit creation, push to remote, and pull request creation as separate Git
 Before proposing the first remote GitHub action, check:
 
 - Confirm aiw-verification's justification step has been completed for the work in this PR, and that the pull request body carries it. Pass the body from a file rather than leaving it to an editor or to commit messages, because the policy layer reads it there and blocks a body it cannot read. (Why: a pull request without a completed verification justification is a pull request opened on unverified work. The implementation pass is not done until verification has run; the PR comes after. See aiw-verification for the justification step itself.)
+- Scope what the body claims to the evidence that exists as you open it. Evidence you intend to gather is deferred in the justification, named with its method, never written up as though it has already run; post it on the pull request when it arrives, before the human's done decision. (Why: opening a pull request is not the done decision, so the pull request is part of the verification surface rather than the end of it.)
 - Whether documentation or README files need updating based on the change.
 - Whether version numbers need updating.
 - Whether a tagged release is needed.

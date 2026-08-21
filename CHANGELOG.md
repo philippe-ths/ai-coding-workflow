@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.26.0 - 2026-08-21
+
+### Changed
+
+- A named unverified surface can now end in a fourth state, **deferred**, and the workflow says where work is presented for the human's done decision. Across 489 merged pull requests in a repository running this workflow, 12 carry a comment reporting substantive verification posted after the pull request was opened, every one of them within two hours and half within fifteen minutes: a clean-context pass run once quota reset, a check performed inside the real production image rather than by inspection, manual items closed out. The rule required the justification before the work was presented for the done decision, practice treated opening the pull request as that presentation, and the two disagreed. Neither was wrong. Opening a pull request is not the moment the human decides, since they decide afterwards, so the pull request is part of the verification surface rather than the end of it. `aiw-verification` gains `deferred` beside checked, tracked and waived: the artifact is the method named, why it has not run, and that it runs before the human decides, and posting the result where the work is presented is what moves the item to checked in front of the person deciding. It is the existing Wait option kept visible rather than finished work held back, and it is explicitly not available for a method that cannot run at all, which stays the human's decision under "When the Committed Method Cannot Run". `aiw-github` gains the matching floor at the moment the pull request opens: scope what the body claims to the evidence that exists then, and never write up evidence you intend to gather as though it has already run. The alternative was to tighten the gate so all evidence had to exist before opening, which would have made the honest act of posting further evidence into a violation, and a rule that penalises disclosure produces less of it ([#210]).
+
 ## 3.25.0 - 2026-08-21
 
 ### Added
@@ -590,3 +596,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208
 [#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
 [#224]: https://github.com/philippe-ths/ai-coding-workflow/issues/224
+[#210]: https://github.com/philippe-ths/ai-coding-workflow/issues/210

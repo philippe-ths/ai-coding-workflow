@@ -115,11 +115,12 @@ If the unverified surface is large enough that the change cannot be trusted with
 
 ### Every Named Surface Gets a Resolution
 
-Naming the surface is half the step. The other half is what became of it, settled before the work is presented for the human's done decision. Each item in part 3 ends in one of three states, and a state is reached when its artifact exists, not when its word is written:
+Naming the surface is half the step. The other half is what became of it, settled before the work is presented for the human's done decision. Each item in part 3 ends in one of four states, and a state is reached when its artifact exists, not when its word is written:
 
 - **Checked.** You closed the gap during this task. The artifact is what you ran and what it showed; the item then belongs in part 2.
 - **Tracked.** An issue carries it, and the artifact is the issue number. Proposing that issue is yours; creating it is the human's, under aiw-issue-creation.
 - **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
+- **Deferred.** The method has not run yet and you can say when it will, before the human decides. The artifact is the method named, that timing, and the reason for the wait: "the clean-context end-to-end pass, once quota resets in an hour". Post the result where the work is presented when it arrives, which is what moves the item to Checked in front of the person deciding. This is the Wait option kept visible rather than finished work held back. If you cannot say when it runs, or it turns out it will not, it is not deferred: that is "When the Committed Method Cannot Run", and the choice there is the human's.
 
 Name the gap by its cause rather than by the task. "No real external-model call — the API key is unfunded" can be recognised the next time it appears; "could not fully test the coach for #712" cannot, and a gap nobody can find is a gap that gets declared fresh forever.
 
