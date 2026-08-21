@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.21.0 - 2026-08-20
+
+### Changed
+
+- `aiw-failure-analysis` gains a "What Counts as a Contradiction" section, so the stop-and-audit fires when the agent contradicts its own recent claim and not only when the human does. Every source the trigger named was external — the user, runtime behaviour, manual verification — and the agent's own second attempt at the same defect is the louder signal, because it is an explicit admission that the first attempt failed. Prompted by evidence from 463 closed pull requests in a repository running this workflow: one bug needed three fixes in a single day, two of those pull-request titles saying "supersedes" and naming the ones they replace; one issue has two merged pull requests with word-for-word identical titles; one is titled "unbreaks Re-run in prod"; and 23 fix pull requests repair code another fix pull request was the last to touch. The convergence check ran in none of them. The section names the mechanism as well as the signals, because the framing is what does the damage: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed there. It also says catching it yourself is the cheaper moment rather than a confession, since an agent that reads the trigger as an admission of fault will find reasons not to be the one who reports it. The skill's `description` carries the same signals so the skill is selected on them, and the Reactive Rules in `ai-workflow.md` say the contradiction need not come from the human. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#213]).
+
 ## 3.20.0 - 2026-08-20
 
 ### Changed
@@ -551,3 +557,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#205]: https://github.com/philippe-ths/ai-coding-workflow/issues/205
 [#212]: https://github.com/philippe-ths/ai-coding-workflow/issues/212
 [#211]: https://github.com/philippe-ths/ai-coding-workflow/issues/211
+[#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213

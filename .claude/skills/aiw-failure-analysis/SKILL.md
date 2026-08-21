@@ -1,11 +1,11 @@
 ---
 name: aiw-failure-analysis
-description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted by the user, by runtime behaviour, or by manual verification. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the three core skills (aiw-ground-truth, aiw-testing, aiw-verification) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the three core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
+description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted — by the user, by runtime behaviour, by manual verification, or by the agent itself. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Use it equally when the agent is about to supersede, replace, or redo its own recent attempt at the same defect, or to touch code its own recent change last touched for that defect, whoever noticed. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the three core skills (aiw-ground-truth, aiw-testing, aiw-verification) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the three core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
 ---
 
 # Failure Analysis
 
-Read this file the moment a "done" claim is contradicted. Read it before any further code change, any retry request, and any "let me try X" suggestion.
+Read this file the moment a "done" claim is contradicted, by anyone, including yourself. Read it before any further code change, any retry request, and any "let me try X" suggestion.
 
 ## Why This Skill Exists
 
@@ -18,6 +18,19 @@ This skill is reactive. The three core skills (aiw-ground-truth, aiw-testing, ai
 ## Relationship to the Investigate Modality
 
 The Investigate modality (defined in aiw-ground-truth) covers tasks where producing understanding is the deliverable from the start — diagnosing a bug, narrowing down a cause, deciding what to build. Failure analysis covers tasks where the agent thought it had finished and was wrong. The investigative posture is the same; the trigger is different. Failure analysis runs the audit specific to a contradicted "done" claim, then typically hands off to a fresh task — often in Fix or Investigate modality — that goes through the three core skills normally.
+
+## What Counts as a Contradiction
+
+The contradiction is usually reported: the user says it is still broken, manual verification fails, runtime disagrees with the tests. But who noticed does not change what happened. If the first fix did not work, the oracle, the tests, and the verification that signed it off were wrong at the moment they signed it off, and they were equally wrong whether the human found out or the agent did.
+
+So the trigger also fires on the agent's own signals. Any of these is a contradicted "done" claim:
+
+- You are about to change code your own recent change was the last to touch, for the same defect.
+- You are about to write a fix you would describe as superseding, replacing, redoing, or properly fixing an earlier attempt.
+- A second pull request, branch, or commit is opening against an issue you already closed or claimed done.
+- You found the defect yourself, before anyone reported it, while the first fix was still in flight.
+
+A second attempt framed as a fresh fix is the most common way the audit gets skipped. The framing is what does it: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed here. Notice the framing and treat it as the trigger. Catching it yourself is the cheaper moment, not a confession.
 
 ## The Hard Stop
 
