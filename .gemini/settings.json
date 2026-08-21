@@ -26,6 +26,10 @@
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-mcp.sh\"",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-pr-verification.sh\""
           }
         ]
       },
@@ -49,6 +53,10 @@
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-bash.sh\"",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-pr-verification.sh\""
           }
         ]
       }
