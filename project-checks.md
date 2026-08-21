@@ -33,6 +33,16 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: empty.
 - Matters: post-merge cleanup was skipped, and the leftover branch will be mistaken for live work.
 
+### Pushed branch with no pull request
+- Check: for each branch in `git ls-remote --heads origin` other than `main`, `gh pr list --head <branch> --state all`
+- Normal: every pushed branch has a pull request.
+- Matters: a branch pushed without a pull request is finished work that nothing will ever merge. The open-pull-request check above cannot see it, because an absent pull request reads there as nothing waiting on you.
+
+### Remote branches not merged into main
+- Check: `git ls-remote --heads origin`, then for each branch compare against `gh pr list --head <branch> --state all`
+- Normal: only `main` and branches with an open pull request.
+- Matters: a remote branch outlives the machine it was pushed from, so post-merge cleanup done locally leaves it behind. Resolving whether one is merged needs its objects, which a read-only run does not have; report the branch and say its merge status is unresolved rather than fetching.
+
 ## Repository Integrity
 
 ### Local main matches remote
@@ -79,6 +89,11 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Check: `python3 -c "import os,time;p=os.path.expanduser('~/.claude/aiw-observation/dashboard.html');print(int((time.time()-os.path.getmtime(p))/86400))"`
 - Normal: 30 or fewer days since the last `make observe`.
 - Matters: the dashboard is the only view of how workflow changes are landing across sessions, and a stale one invites conclusions drawn from old data.
+
+### Recurring unverified surface
+- Check: `gh pr list --state merged --limit 20 --json number,body`, then group the bodies' unverified-surface sections by the surface named and count repeats; for any surface named in three or more, `gh issue list --state all --search "<surface>"`.
+- Normal: no surface named in three or more of the last twenty merged pull requests without an issue tracking it.
+- Matters: a gap declared once is a task's limitation, and a gap declared across many tasks is the repository's. Left untracked it is re-declared indefinitely, which reads as honesty while nothing moves.
 
 ## Not Covered Here
 
