@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.22.0
+Version: 3.23.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -58,6 +58,7 @@ The AI must raise these without being asked, so the human has the information ne
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
+- ALWAYS drive every unverified surface named at verification to a resolution the human can see — checked, tracked as its own issue, or waived by the human — before presenting work for the done decision. A named gap with no resolution is the last trace of it.
 - ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.
 - ALWAYS surface security concerns observed in the code paths the task touched, with the concrete signal that prompted them.
 - ALWAYS surface refactoring opportunities directly relevant to the task code, without acting on them.

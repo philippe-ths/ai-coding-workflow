@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.23.0 - 2026-08-21
+
+### Changed
+
+- `aiw-verification`'s scoping step now drives every named unverified surface to one of three resolutions the human can see — checked, tracked as its own issue, or waived by the human — instead of leaving it as prose. Prompted by 463 closed pull requests in a repository running this workflow: 105 of 461 merged pull requests explicitly declared an unverified surface, and for 81 of them (77%) that declaration is the last trace of the item anywhere, with no later comment, issue, or reference. The declaration rate is rising rather than falling — 0% in February, 21% in June, 55% of August's 62 merged pull requests — so honesty was increasing the volume of untracked risk rather than reducing it. No new machinery is introduced, because the receiving mechanism already exists and works: where a gap was filed as an issue instead (31 cases), 26 are closed and the median time to close was the same day. It was simply never connected to the step that produces the gaps, so `aiw-issue-creation` now names the scoping step as a normal source and `ai-workflow.md` gains an Always Do entry. A waiver must be recorded as the human's decision together with what they were told, since an agent that may waive on the human's behalf has three states on paper and one in practice. A second subsection separates a surface that was not checked from a surface that does not exist: the first is a gap needing a resolution, the second is not a gap and needs a reason stated in terms of what the change is. One pull request in the dataset reads "Not verified: nothing", which is what part 3 looks like once it has become a box to tick. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#208]).
+
 ## 3.22.0 - 2026-08-20
 
 ### Changed
@@ -565,3 +571,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#211]: https://github.com/philippe-ths/ai-coding-workflow/issues/211
 [#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213
 [#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214
+[#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208

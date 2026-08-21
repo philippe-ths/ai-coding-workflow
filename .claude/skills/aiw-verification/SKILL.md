@@ -114,3 +114,20 @@ For any non-trivial change, name the unverified surface as risk, not as absence.
 Hiding unverified surface produces false confidence: the human reading the report assumes everything the agent did not mention was checked. Naming it produces calibrated confidence: the human knows what to look at, what to ask about, and where to direct manual verification if any is warranted.
 
 If the unverified surface is large enough that the change cannot be trusted without more work, say so. Recommending additional verification is not weakness; it is the correct output.
+
+### Every Named Surface Gets a Resolution
+
+Naming the surface is half the step. The other half is saying what became of it, before the work is presented for the human's done decision. Each item in part 3 ends in one of three states, written next to the item:
+
+- **Checked.** The gap was closed during this task. Say what you ran and what it showed. An item that reaches this state leaves part 3 and joins part 2.
+- **Tracked.** Filed as its own issue through aiw-issue-creation, with the issue number named. This is the default for a real gap you are not closing now.
+- **Waived.** The human decided to accept it. Record it as their decision and what they were told when they made it. You cannot waive on their behalf, and silence is not a waiver.
+
+An item carrying no state is not finished being verified, and the work is not ready to present. (Why: a named gap with no resolution is indistinguishable, a month later, from one that was quietly dropped — the declaration becomes the last trace of it, and nothing can audit whether it was handled.)
+
+### Not Every Change Has an Unverified Surface
+
+Part 3 is not a box, and "Not verified: nothing" is what it looks like once it has become one. A change genuinely can have no unverified surface, and saying so is correct — but say *why* there is none, in terms of what the change is. "This changes no runtime path, so there is nothing to exercise" is an argument. "Nothing" is an assertion.
+
+Hold the distinction: **a surface you did not check** is a gap, and needs a resolution. **A surface that does not exist** is not a gap, and needs a reason. Blurring the two is how an honest section decays into a formality.
+

@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.22.0
+Version: 3.23.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -242,6 +242,8 @@ If part 1 surfaces something part 2 does not cover, the change is not verified: 
 
 Check what those two questions return and stop there: the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping — nothing called that code.
 
+Naming a surface in part 3 is half the step. Before presenting the work, each named surface ends in one of three states, written next to it: **checked** (closed during this task — say what you ran; it then belongs in part 2), **tracked** (filed as its own issue, with the number named), or **waived** (the human decided to accept it — recorded as their decision and what they were told; silence is not a waiver). An item carrying no state is not finished being verified. Part 3 is also not a box to tick: a change genuinely can have no unverified surface, but say why in terms of what the change is — "this changes no runtime path, so there is nothing to exercise" is an argument, "nothing" is an assertion. A surface you did not check is a gap and needs a resolution; a surface that does not exist is not a gap and needs a reason.
+
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
 Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is disproportionate to the change, say so and treat the unverified path as a known risk; a method that simply cannot run is the next case, not this one.
@@ -364,6 +366,7 @@ The following apply to every task without exception:
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
+- ALWAYS drive every unverified surface named at verification to a resolution the human can see — checked, tracked as its own issue, or waived by the human — before presenting work for the done decision.
 - ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
 - ALWAYS state what a command does and why before requesting approval to run it.
 
