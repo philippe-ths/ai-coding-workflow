@@ -72,6 +72,45 @@ done
 present "$T" .claude/skills/my-local-skill/SKILL.md
 present "$T" .claude/skills/aiw-planning/SKILL.md
 
+echo "removed path is pruned from the managed .gitignore block:"
+# Fabricate a source repo carrying an extra top-level product path, install it,
+# then drop that path from the source and name it in a `### Removed` bullet.
+FAKE_SRC="$SANDBOX/fake-src"
+mkdir -p "$FAKE_SRC"
+git -C "$ROOT_DIR" archive HEAD | tar -x -C "$FAKE_SRC"
+mkdir -p "$FAKE_SRC/legacy-thing"
+echo legacy > "$FAKE_SRC/legacy-thing/note.md"
+tmp_manifest="$(mktemp)"
+jq '.profiles.full.shared += ["legacy-thing/"]' "$FAKE_SRC/install-manifest.json" > "$tmp_manifest" \
+  && mv "$tmp_manifest" "$FAKE_SRC/install-manifest.json"
+set_version "$FAKE_SRC/ai-workflow.md" 90.0.0
+( cd "$FAKE_SRC" && git init -q && git config user.email t@t && git config user.name t \
+    && git add -A && git commit -qm init ) >/dev/null 2>&1
+
+T="$(new_target pruned)"
+"$INSTALL" --source "$FAKE_SRC" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "fake-source install exited non-zero"
+if grep -qxF "legacy-thing/" "$T/.gitignore"; then ok "legacy-thing/ recorded in .gitignore before update"; else bad "legacy-thing/ not recorded before update"; fi
+
+# The source drops the path and declares the removal.
+rm -rf "$FAKE_SRC/legacy-thing"
+tmp_manifest="$(mktemp)"
+jq '.profiles.full.shared -= ["legacy-thing/"]' "$FAKE_SRC/install-manifest.json" > "$tmp_manifest" \
+  && mv "$tmp_manifest" "$FAKE_SRC/install-manifest.json"
+set_version "$FAKE_SRC/ai-workflow.md" 90.1.0
+tmp_changelog="$(mktemp)"
+{
+  printf '## 90.1.0\n\n### Removed\n\n- `legacy-thing/` no longer shipped.\n\n'
+  cat "$FAKE_SRC/CHANGELOG.md"
+} > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC/CHANGELOG.md"
+( cd "$FAKE_SRC" && git add -A && git commit -qm drop ) >/dev/null 2>&1
+
+"$UPDATE" --source "$FAKE_SRC" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "prune update exited non-zero"
+absent "$T" legacy-thing
+if grep -qxF "legacy-thing/" "$T/.gitignore"; then bad "legacy-thing/ still in .gitignore after update"; else ok "legacy-thing/ pruned from .gitignore"; fi
+for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/"; do
+  if grep -qxF "$p" "$T/.gitignore"; then ok "still ignored: $p"; else bad "wrongly pruned: $p"; fi
+done
+
 echo "already up-to-date (no-op):"
 T="$(new_target current)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1

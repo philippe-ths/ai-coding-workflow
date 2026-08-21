@@ -109,6 +109,107 @@ present "$T" .agents/skills
 absent  "$T" CLAUDE.md
 absent  "$T" GEMINI.md
 
+# --- multi-tool helpers ---------------------------------------------------
+manifest_paths() { # tool -> full-profile vendored paths, one per line
+  jq -r --arg t "$1" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$ROOT_DIR/install-manifest.json"
+}
+tool_paths() { # tools... -> deduplicated union of their vendored paths
+  local tool
+  for tool in "$@"; do manifest_paths "$tool"; done | sort -u
+}
+block_count() { grep -cF "# >>> ai-workflow (vendored, managed by installer) >>>" "$1/.gitignore" 2>/dev/null || echo 0; }
+outside_block() { # lines of .gitignore that are NOT inside the managed block
+  awk -v b="# >>> ai-workflow (vendored, managed by installer) >>>" \
+      -v e="# <<< ai-workflow <<<" \
+      '$0==b {skip=1} skip==0 {print} $0==e {skip=0}' "$1/.gitignore" 2>/dev/null
+}
+has_outside() { if outside_block "$1" | grep -qxF "$2"; then ok "kept outside block: $2"; else bad "lost outside block: $2"; fi; }
+one_block() { local n; n="$(block_count "$1")"; if [ "$n" -eq 1 ]; then ok "single managed block"; else bad "managed block count = $n"; fi; }
+no_untracked_vendored() { # target, then tools... : git status must not report vendored paths
+  local t="$1"; shift
+  local paths untracked p u pn un offenders=""
+  paths="$(tool_paths "$@")"
+  untracked="$(git -C "$t" status --porcelain 2>/dev/null | awk '/^\?\? /{print substr($0, 4)}')"
+  while IFS= read -r p; do
+    [ -z "$p" ] && continue
+    pn="${p%/}"
+    while IFS= read -r u; do
+      [ -z "$u" ] && continue
+      un="${u%/}"
+      case "$pn" in "$un"|"$un"/*) offenders="$offenders $p" ; continue ;; esac
+      case "$un" in "$pn"|"$pn"/*) offenders="$offenders $p" ;; esac
+    done <<UNTRACKED
+$untracked
+UNTRACKED
+  done <<PATHS
+$paths
+PATHS
+  if [ -z "$offenders" ]; then
+    ok "git status reports no vendored paths as untracked"
+  else
+    bad "git status reports vendored paths as untracked:$offenders"
+  fi
+}
+
+echo "multi-tool install (gemini then claude, same target):"
+T="$(new_target multi-gemini-claude)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
+while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
+$(tool_paths gemini claude)
+EOF
+exactly_once "$T" ".agents/skills/"
+exactly_once "$T" ".ai-policy/"
+exactly_once "$T" "ai-workflow.md"
+one_block "$T"
+no_untracked_vendored "$T" gemini claude
+
+echo "multi-tool install (third tool: codex on top):"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex --profile full >/dev/null 2>&1 || bad "codex install exited non-zero"
+while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
+$(tool_paths gemini claude codex)
+EOF
+exactly_once "$T" ".agents/skills/"
+one_block "$T"
+no_untracked_vendored "$T" gemini claude codex
+
+echo "hand-maintained entries outside the managed block survive a later install:"
+T="$(new_target hand-maintained)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+cat >> "$T/.gitignore" <<'GI'
+
+# keep these - hand maintained
+.agents/skills/
+build-output/
+GI
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex --profile full >/dev/null 2>&1 || bad "codex install exited non-zero"
+has_outside "$T" "# keep these - hand maintained"
+has_outside "$T" ".agents/skills/"
+has_outside "$T" "build-output/"
+one_block "$T"
+
+# The one moment the installer cannot tell a deliberate hand-maintained entry
+# from the residue of an earlier manual install is the first one, because there
+# is no managed block yet to date the file against. It folds on that run only
+# (#166's normalisation), and never again (#216). Pinned so the boundary is a
+# chosen behaviour rather than an accident.
+echo "a first install folds a pre-existing vendored path, and only that path:"
+T="$(new_target fold-on-first)"
+cat > "$T/.gitignore" <<'GI'
+# keep these - hand maintained
+.agents/skills/
+build-output/
+GI
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+exactly_once "$T" ".agents/skills/"
+has_outside  "$T" "build-output/"
+has_outside  "$T" "# keep these - hand maintained"
+if git -C "$T" status --porcelain 2>/dev/null | grep -qE '\.agents/|\.gemini/|GEMINI\.md'; then
+  bad "a vendored path is untracked after the fold"
+else
+  ok "no vendored path is untracked after the fold"
+fi
+
 echo "lite / claude:"
 T="$(new_target lite-claude)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile lite >/dev/null 2>&1

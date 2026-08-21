@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.25.1 - 2026-08-21
+
+### Fixed
+
+- Installing a second agent tool into the same target no longer strips the first tool's vendored paths from the target's `.gitignore`. The installer-managed block was rebuilt from only the current run's paths, so the documented multi-tool procedure — one installer run per tool, which `scripts/update.sh` requires by refusing to auto-detect an ambiguous target — left each run undoing the one before it. In a repository running this workflow with four tools installed, the result was `.claude/`, `.codex/`, `.gemini/`, `CLAUDE.md` and `AGENTS.md` all untracked, one `git add -A` away from being committed into a history that is supposed to vendor them. The block is now a union: entries already in it are kept in order and the current run's paths appended if absent. This is the opposite symptom of [#166], and [#166]'s fix is its cause — to stop duplicate entries the installer began deleting matching lines from anywhere in the file, and combined with each run knowing only one tool's paths, removal outran replacement. That file-wide deletion is now confined to the first install, the only run with no managed block to date the file against; once a block exists, a matching line outside it is hand-maintained and is left alone, so a section a human labelled as needing to survive updates does. `scripts/update.sh` prunes paths named in `### Removed` changelog bullets from the block, since a union would otherwise keep a path that had left the product forever, and never prunes one the current product still ships. The gap that let this run for two months was that both sandbox tests only ever installed a single tool; they now install three in sequence and assert on `git status --porcelain`, which is the hazard the issue actually describes rather than a proxy for it ([#216]).
+
 ## 3.25.0 - 2026-08-21
 
 ### Added
@@ -561,6 +567,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#155]: https://github.com/philippe-ths/ai-coding-workflow/issues/155
 [#99]: https://github.com/philippe-ths/ai-coding-workflow/issues/99
 [#165]: https://github.com/philippe-ths/ai-coding-workflow/issues/165
+[#166]: https://github.com/philippe-ths/ai-coding-workflow/issues/166
 [#114]: https://github.com/philippe-ths/ai-coding-workflow/issues/114
 [#170]: https://github.com/philippe-ths/ai-coding-workflow/issues/170
 [#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
@@ -590,3 +597,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208
 [#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
 [#224]: https://github.com/philippe-ths/ai-coding-workflow/issues/224
+[#216]: https://github.com/philippe-ths/ai-coding-workflow/issues/216
