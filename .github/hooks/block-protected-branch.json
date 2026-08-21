@@ -16,6 +16,10 @@
       {
         "type": "command",
         "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-protected-branch-bash.sh\""
+      },
+      {
+        "type": "command",
+        "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-pr-verification.sh\""
       }
     ]
   }

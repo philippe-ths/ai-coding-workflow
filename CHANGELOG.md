@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.25.0 - 2026-08-21
+
+### Added
+
+- Added `.ai-policy/hooks/check-pr-verification.sh`, a PreToolUse guard that blocks opening or editing a pull request whose body carries no verification justification, or whose unverified-surface section is a bare assertion. `aiw-github` already required the justification before the first remote action and `aiw-verification` already required an empty part 3 to be an argument rather than an assertion, but both were asked of the agent at the moment it is least able to hear them, and nothing checked whether either happened. Wired into all four agent entry points on both the shell and MCP routes, and covered by `.ai-policy/scripts/test-pr-verification-hook.sh`, which also asserts the wiring, since behaviour tests pass just as happily when nothing invokes the hook. A body the hook cannot read — an editor session, `--fill` from commit messages, a `--body-file` naming a path that does not exist — is blocked rather than passed over, because reporting green on an unread input is the shape of failure `check-validation.sh` was fixed for in 3.17.0; `aiw-github` now says to pass the body from a file ([#224]).
+
+### Changed
+
+- The guard deliberately does not require each named gap to carry an issue number, though that was the rule it was created to enforce. The twenty pull requests merged into this repository were run against a draft that did: every one of the six that built these rules declared an unverified surface, and none of those declarations carried an issue, because they were limitations of the evidence — "two runs per arm is indicative, not conclusive", "no automated test covers skill prose" — rather than gaps anyone should own. Only the author can tell those apart, so the rule would have fired on the normal path, and this repository has already recorded what happens then: a gate that fires on the normal path gets routed around. What survives are the two checks a script can make without that judgement. Three false-positive classes were found by running the guard against this repository's own workflow rather than by imagining what might go wrong, and each is now a test: a body file whose path is built from a shell variable, which a hook cannot expand; a body file the same command is about to write, which does not exist yet when a PreToolUse hook runs; and a command that merely quotes the pull-request-creating form, which is blocked because this matches the command string rather than parsing the shell, the same trade `block-pr-merge.sh` already makes. The first two are named separately in the block message, because "could not read the file" is a useless thing to tell someone whose command was about to work. Quoted spans are blanked before the bare-assertion check, because a body that quotes the bare form while discussing it is not declaring it, and the pull request for [#208] reads exactly that way; blanking can also swallow a real declaration when apostrophes pair across it, which is the direction to err in, since a missed box-tick costs a caveat and a false block costs the guard its credibility ([#224]).
+
 ## 3.24.0 - 2026-08-21
 
 ### Changed
@@ -579,3 +589,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214
 [#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208
 [#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
+[#224]: https://github.com/philippe-ths/ai-coding-workflow/issues/224
