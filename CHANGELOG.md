@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.22.0 - 2026-08-20
+
+### Changed
+
+- `aiw-verification` gains a "When the Committed Method Cannot Run" section, so a verification method becoming unavailable is raised as a decision instead of resolved by substitution. Prompted by a pull request in a repository running this workflow that records clean-context verification not running because sub-agents were unavailable in that session: the end-to-end evidence became self-verified and the work shipped. The substitution was disclosed and it was still made by the agent. The same shape appears elsewhere in that dataset as verification deferred for quota or an unfunded API key, with a deterministic proxy standing in for the real path. The section names why honest disclosure is the trap rather than the remedy — the sentence is true, the decision is still the agent's, and what a done claim is worth is the human's call — and gives the three options the human actually has: accept the weaker evidence with its reduced worth stated, wait for the committed method, or narrow the claim to what the available evidence supports. `aiw-ground-truth` already forbade silently substituting a lower trust level for an input; the rule was missing for evidence, which is the symmetry this restores. `aiw-planning` now says the verification approach the plan names is a commitment rather than an aspiration, and `ai-workflow.md` gains an Ask First entry. The mandatory-end-to-end rule is reworded to separate a check that is disproportionate to the change, which is named as a risk and carried, from one that cannot run at all, which is not the agent's to resolve — the two sat in consecutive paragraphs giving opposite instructions for what an agent would read as the same situation. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#214]).
+
 ## 3.21.0 - 2026-08-20
 
 ### Changed
@@ -558,3 +564,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#212]: https://github.com/philippe-ths/ai-coding-workflow/issues/212
 [#211]: https://github.com/philippe-ths/ai-coding-workflow/issues/211
 [#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213
+[#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214

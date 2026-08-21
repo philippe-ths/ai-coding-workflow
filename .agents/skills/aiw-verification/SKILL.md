@@ -60,7 +60,23 @@ End-to-end execution is cheap for an agent. Humans optimise testing practice to 
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the change and carries none of its context, and have it report what it observed. You are the worst verifier of your own change: you exercise what you expected to build and read the output through the same assumptions that shaped the code, the self-referential loop aiw-ground-truth exists to break, reappearing at verification time. A clean-context agent reaches the surface a real user would. Weigh its report in the main loop as evidence, not a verdict.
 
-If end-to-end execution is impractical for a specific change, name why in the justification step's part 3 and treat the unverified end-to-end path as a known risk.
+If end-to-end execution is disproportionate to the change, name why in the justification step's part 3 and treat the unverified path as a known risk. A method that is not disproportionate but simply cannot run is the next section, not this one.
+
+## When the Committed Method Cannot Run
+
+The plan named the evidence this task would produce. Sometimes that method is not available when the time comes: sub-agents are unavailable in this session, the API key is unfunded.
+
+Substituting a weaker method and disclosing it honestly is not the honest option it appears to be. The disclosure is real; the decision is still the agent's, and it is not the agent's to make. Accepting weaker evidence changes what the done claim is worth, and what it is worth is the human's call. aiw-ground-truth already forbids silently substituting a lower trust level for an *input*; the same rule applies to *evidence*.
+
+Stop and put it to the human in the Asking for Guidance format, with these options:
+
+- **Accept the weaker evidence**, with the reduced worth of the claim stated plainly rather than buried.
+- **Wait** until the committed method is available.
+- **Narrow the claim** to what the available evidence does support, and leave the rest unverified and named.
+
+Recommend one, then wait.
+
+"Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance. Nothing about the sentence is false, and the human still never got to make the choice.
 
 ## Reading Runtime Output
 

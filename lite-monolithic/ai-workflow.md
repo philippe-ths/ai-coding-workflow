@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.21.0
+Version: 3.22.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -244,7 +244,9 @@ Check what those two questions return and stop there: the surfaces that consume 
 
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
-Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is impractical, say so and treat the unverified path as a known risk.
+Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is disproportionate to the change, say so and treat the unverified path as a known risk; a method that simply cannot run is the next case, not this one.
+
+When the verification method the plan committed to cannot run at all — sub-agents unavailable in this session, quota spent, an unfunded API key, staging down, the device not to hand — do not substitute a weaker one and note it. The disclosure is real and the decision is still yours, and it is not yours to make: accepting weaker evidence changes what the done claim is worth. Stop and put it to the human in the Asking for Guidance format — accept the weaker evidence with its reduced worth stated plainly, wait for the committed method, or narrow the claim to what the available evidence supports — and recommend one. "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance.
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
 
@@ -376,6 +378,7 @@ Stop and ask the human before doing any of the following:
 - ASK before deleting any file, function, class, or module.
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
+- ASK before accepting verification evidence weaker than the plan committed to.
 - ASK before proceeding when the task, expected behaviour, or project constraints are unclear.
 
 ### Never Do

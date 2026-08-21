@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.21.0
+Version: 3.22.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -73,6 +73,7 @@ Stop and ask the human before doing any of the following:
 - ASK before refactoring code that is not required by the task.
 - ASK before deleting any file, function, class, or module.
 - ASK before weakening, skipping, or removing tests.
+- ASK before accepting verification evidence weaker than the plan committed to. If the committed method cannot run, that is a decision about what the done claim is worth, and it is the human's to make.
 
 ### Never Do
 
