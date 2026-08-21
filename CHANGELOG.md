@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.23.0 - 2026-08-21
+
+### Changed
+
+- `aiw-verification`'s scoping step now drives every named unverified surface to one of three resolutions the human can see — checked, tracked as its own issue, or waived by the human — instead of leaving it as prose. Prompted by 463 closed pull requests in a repository running this workflow: 105 of 461 merged pull requests explicitly declared an unverified surface, and for 81 of them (77%) that declaration is the last trace of the item anywhere, with no later comment, issue, or reference. The declaration rate is rising rather than falling — 0% in February, 21% in June, 55% of August's 62 merged pull requests — so honesty was increasing the volume of untracked risk rather than reducing it. No new machinery is introduced, because the receiving mechanism already exists and works: where a gap was filed as an issue instead (31 cases), 26 are closed and the median time to close was the same day. It was simply never connected to the step that produces the gaps, so `aiw-issue-creation` now names the scoping step as a normal source and `ai-workflow.md` gains an Always Do entry. A state is reached when its artifact exists rather than when its word is written — what you ran, the issue number, or the human's words — because a label is not checkable and a column of correct-looking labels would hide an undisclosed gap better than plain prose did. Tracking is explicitly not licence to file: proposing the issue is the agent's and creating it is the human's, which is what `ai-workflow.md`'s "surface follow-up work without acting on it" and `aiw-issue-creation`'s duplicate-confirmation gate already required. A waiver must carry what the human was told, since an agent that may waive on their behalf has three states on paper and one in practice. The box-ticking case — one pull request in the dataset reads "Not verified: nothing" — is handled by rewriting the existing line that caused the defensive answer rather than by adding a section to argue with it: an empty part 3 is now an argument in terms of what the change is, never a bare assertion. The Always Do entry folds into the existing justification bullet, which fires at the same moment, and the scoping step's preamble arguing for naming is dropped, since the new subsection requires more than naming. Mirrored into `.claude/skills/` and `.agents/skills/`, and re-condensed into `lite-monolithic/ai-workflow.md` ([#208]).
+
 ## 3.22.0 - 2026-08-20
 
 ### Changed
@@ -565,3 +571,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#211]: https://github.com/philippe-ths/ai-coding-workflow/issues/211
 [#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213
 [#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214
+[#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208

@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.22.0
+Version: 3.23.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -236,11 +236,13 @@ Passing tests are not proof the change works — only that the checks the agent 
 
 1. **What could plausibly have broken** as a result of this change — what reads the value, shape, ordering, grouping, or type you altered, and what is derived from it that nobody wrote down: an axis scale, a total, a cache key. Downstream is not only the code that calls yours.
 2. **What evidence shows those things did not break** — the specific checks run and what they actually observed.
-3. **What was not checked, and why** — name the unverified surface as a risk, not as silence.
+3. **What was not checked, and why** — name the unverified surface as a risk, not as silence. A change genuinely can have nothing unverified, but an empty part 3 is an argument in terms of what the change is, never the bare assertion "nothing".
 
 If part 1 surfaces something part 2 does not cover, the change is not verified: either run more checks or move the gap explicitly into part 3 and tell the human.
 
 Check what those two questions return and stop there: the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping — nothing called that code.
+
+Naming a surface in part 3 is half the step. Before presenting the work, each named surface ends in one of three states, and a state is reached when its artifact exists rather than when its word is written: **checked** (the artifact is what you ran and what it showed; the item then belongs in part 2), **tracked** (the artifact is the issue number — proposing the issue is yours, creating it is the human's), or **waived** (the artifact is the human's words and what they were told; silence is not a waiver). A label with no artifact behind it is the same undisclosed gap in a tidier format.
 
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
