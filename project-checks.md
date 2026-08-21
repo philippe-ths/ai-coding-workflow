@@ -97,7 +97,7 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 
 ## Not Covered Here
 
-- **Application logs and error tracking.** No runtime application exists to produce them. The `telemetry/` residue that used to sit here — four zero-byte `.log` files and five empty directories left by the removed eval stack — was deleted in #204.
+- **Application logs and error tracking.** No runtime application exists to produce them. The `telemetry/` residue that used to sit here, left by the removed eval stack, was deleted in #204 and then recreated: the same issue left two launchd agents registered, and a failing agent recreates the log paths its plist declares. Both agents were unregistered and the residue removed on 2026-08-21, so nothing recreates it now. A deletion is not finished while something outside the repository still points at what was deleted.
 - **Dependent services.** Nothing is called at runtime. `bash`, `git`, `jq`, and `python3` are developer tools, checked by their absence breaking validation rather than by a health probe.
 - **Deployment and CI.** `.github/` holds no workflows, so there is no remote build whose status could be red. The nearest equivalent is the local validation state above.
 - **Certificate and secret expiry.** No secrets are held; the only credential is the `gh` token, checked under Expiry and Limits.
