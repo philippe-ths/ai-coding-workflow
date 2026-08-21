@@ -124,6 +124,18 @@ assert_blocked "--fill, body derived from commit messages" \
 assert_blocked "--body-file naming a path that does not exist" \
   "$(bash_payload "gh pr create --title x --body-file $TMP/absent.md")"
 
+# This hook runs before the command does, so a path it cannot resolve is not a
+# path it may assume is fine. Both shapes below look like working commands, and
+# both were found by running the hook against this repository's own workflow
+# rather than by imagining what might go wrong.
+
+assert_blocked "--body-file built from a shell variable the hook cannot expand" \
+  "$(bash_payload 'gh pr create --title x --body-file $SCRATCH/body.md')"
+
+assert_blocked "--body-file naming a file the same command is about to write" \
+  "$(bash_payload "printf 'Ran the suite, green.' > $TMP/later.md
+gh pr create --title x --body-file $TMP/later.md")"
+
 # ── Scope ──
 
 echo "Actions that carry no pull request body are untouched:"

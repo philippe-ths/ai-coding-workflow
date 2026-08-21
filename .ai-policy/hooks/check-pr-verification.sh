@@ -22,6 +22,13 @@ set -eu
 # the normal path gets routed around.
 #
 # The two checks below are the ones a script can make without that judgement.
+#
+# Like block-pr-merge.sh, this matches the command string rather than parsing
+# the shell, so a command that merely quotes the pull-request-creating form —
+# writing this file, say — is blocked too. That is the deliberate trade the
+# other hooks in this directory make: knowing what is inside a heredoc means
+# parsing shell, and a guard that parses shell is a guard with holes in it.
+# Author such content with a file-writing tool rather than a shell heredoc.
 
 INPUT="$(cat)"
 
@@ -111,12 +118,23 @@ if printf '%s' "$COMMAND" | grep -Eq '(^|[[:space:]])(--body-file|-F)([[:space:]
   BODY_PATH="$(printf '%s' "$COMMAND" \
     | sed -nE 's/.*(^|[[:space:]])(--body-file|-F)[[:space:]=]+("([^"]*)"|'"'"'([^'"'"']*)'"'"'|([^[:space:]]+)).*/\4\5\6/p' \
     | head -1)"
-  if [ -n "$BODY_PATH" ] && [ -r "$BODY_PATH" ]; then
-    BODY="$(cat "$BODY_PATH")"
-    READ_IT="yes"
-  else
-    deny "'$COMMAND'" "The body file named on the command line could not be read, so the justification could not be checked."
+  # This hook runs before the command does, so it sees the path as written.
+  # Two shapes it cannot resolve, both of which look like a working command:
+  # a path built from a shell variable, which is not in this hook's
+  # environment, and a path to a file the same command is about to create with
+  # a heredoc. Both are named explicitly, because "could not read the file" is
+  # a useless thing to tell someone whose command was about to work.
+  case "$BODY_PATH" in
+    "~"/*) BODY_PATH="$HOME/${BODY_PATH#\~/}" ;;
+  esac
+  if printf '%s' "$BODY_PATH" | grep -q '[$`]'; then
+    deny "'$COMMAND'" "The body file path is built from a shell variable, which this hook cannot expand. Pass a literal path."
   fi
+  if [ -z "$BODY_PATH" ] || [ ! -r "$BODY_PATH" ]; then
+    deny "'$COMMAND'" "The body file does not exist yet. Write it in one step and open the pull request in the next, so the justification can be read before it is published."
+  fi
+  BODY="$(cat "$BODY_PATH")"
+  READ_IT="yes"
 # --body / -b: read the quoted string.
 elif printf '%s' "$COMMAND" | grep -Eq '(^|[[:space:]])(--body|-b)([[:space:]=]|$)'; then
   BODY="$(printf '%s' "$COMMAND" \
