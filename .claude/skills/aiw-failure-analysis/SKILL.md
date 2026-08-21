@@ -1,6 +1,6 @@
 ---
 name: aiw-failure-analysis
-description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted — by the user, by runtime behaviour, by manual verification, or by the agent itself. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Use it equally when the agent is about to supersede, replace, redo, or properly fix its own recent attempt at the same defect, or is about to touch code its own recent change was the last to touch for the same defect, whoever noticed. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the three core skills (aiw-ground-truth, aiw-testing, aiw-verification) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the three core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
+description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted — by the user, by runtime behaviour, by manual verification, or by the agent itself. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Use it equally when the agent is about to supersede, replace, or redo its own recent attempt at the same defect, or to touch code its own recent change last touched for that defect, whoever noticed. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the three core skills (aiw-ground-truth, aiw-testing, aiw-verification) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the three core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
 ---
 
 # Failure Analysis
@@ -27,13 +27,10 @@ So the trigger also fires on the agent's own signals. Any of these is a contradi
 
 - You are about to change code your own recent change was the last to touch, for the same defect.
 - You are about to write a fix you would describe as superseding, replacing, redoing, or properly fixing an earlier attempt.
-- You reach for words like "supersedes", "this time", "actually fixes", or "the previous fix did not".
 - A second pull request, branch, or commit is opening against an issue you already closed or claimed done.
 - You found the defect yourself, before anyone reported it, while the first fix was still in flight.
 
-A second attempt framed as a fresh fix is the most common way the audit gets skipped. The framing is what does it: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed here. Notice the framing and treat it as the trigger.
-
-Catching it yourself is the cheaper moment, not the lesser one. The audit costs the same either way, and running it before the human has to notice the repetition is the whole point of watching for these signals.
+A second attempt framed as a fresh fix is the most common way the audit gets skipped. The framing is what does it: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed here. Notice the framing and treat it as the trigger. Catching it yourself is the cheaper moment, not a confession.
 
 ## The Hard Stop
 
