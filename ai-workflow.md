@@ -54,11 +54,10 @@ Protect your context window and the human's quota — but never by doing less th
 
 The AI must raise these without being asked, so the human has the information needed to make decisions. Surface only what was encountered while doing the task, with concrete evidence. Default to the handoff summary; raise mid-task only when the observation changes what the AI should do next.
 
-- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision.
+- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, or waived by the human.
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
-- ALWAYS drive every unverified surface named at verification to a resolution the human can see — checked, tracked as its own issue, or waived by the human — before presenting work for the done decision. A named gap with no resolution is the last trace of it.
 - ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.
 - ALWAYS surface security concerns observed in the code paths the task touched, with the concrete signal that prompted them.
 - ALWAYS surface refactoring opportunities directly relevant to the task code, without acting on them.

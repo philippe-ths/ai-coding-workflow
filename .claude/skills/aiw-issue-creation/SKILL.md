@@ -15,7 +15,7 @@ Read this file when creating a follow-up or spin-off GitHub issue.
 
 ## Where These Issues Come From
 
-Follow-up work discovered mid-task is one source. The other is aiw-verification's scoping step: a surface the work named as unchecked, which is not being checked now, is tracked here rather than left as prose. Such an issue names the surface and what would close it. It does not prescribe the check — by the time someone picks it up, the right way to cover that surface may not be the way you would have done it today.
+Follow-up work discovered mid-task is one source. The other is aiw-verification's scoping step: a surface the work named as unchecked, which is not being checked now, is tracked here rather than left as prose. Such an issue names the surface and what would close it, and goes through the same human confirmation as any other — a gap the agent filed unasked is not a resolution. It does not prescribe the check — by the time someone picks it up, the right way to cover that surface may not be the way you would have done it today.
 
 ## What the Issue Must Contain
 
