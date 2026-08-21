@@ -19,13 +19,15 @@ Classify the task using the modality decision procedure defined in aiw-ground-tr
 
 Before declaring any task complete, produce a short, explicit argument with three parts:
 
-1. **What could plausibly have broken as a result of this change.** Name the surfaces the change touches and the surfaces downstream of those.
+1. **What could plausibly have broken as a result of this change.** Name what reads the value, shape, ordering, grouping, or type you altered, and what is derived from it that nobody wrote down — an axis scale, a total, a cache key. Downstream is not only the code that calls yours.
 2. **What evidence shows those things did not break.** Cite the specific checks run and what they actually observed.
 3. **What was not checked, and why.** Either because it was out of scope, because it was impractical, or because the agent did not think of it until now.
 
 This step is non-skippable. The output is short — a few lines is usually enough — but the act of producing it forces real thought about coverage. An agent that cannot answer part 1 has not understood the change. An agent that cannot answer part 2 has not verified it. An agent that pretends part 3 is empty is hiding risk.
 
 If part 1 surfaces something part 2 does not cover, the change is not verified. Either run additional checks or move the gap explicitly into part 3 and acknowledge the risk to the user.
+
+Part 1 is bounded by those two questions: check what they return and stop there, the surfaces that consume what the change moved rather than the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping. Nothing called that code. The grouping was its input.
 
 ## Evidence Hierarchy
 
@@ -79,7 +81,7 @@ The modality for this task has already been classified — typically during plan
 
 - **New.** Confirmed examples produce the expected outputs. Explicitly name in the justification that real-usage exposure has not happened — first contact with reality is still ahead.
 - **Feature.** Two checks: the new behaviour works on confirmed examples, and the existing behaviour the feature touches has not changed. A green run on the new path alone is insufficient.
-- **Fix.** A check that failed before the fix and passes after is non-negotiable. Without it, there is no evidence the fix addresses the reported bug. Adjacent inputs that were working continue to work. The justification must also name the coverage gap that allowed the bug to ship — what kind of check would have caught it earlier.
+- **Fix.** A check that failed before the fix and passes after is non-negotiable. Without it, there is no evidence the fix addresses the reported bug. Adjacent inputs that were working continue to work, and so does whatever is derived from what the fix changed — a fix verified against its own symptom alone is where the second defect comes from. The justification must also name the coverage gap that allowed the bug to ship — what kind of check would have caught it earlier.
 - **Refactor.** Strict behavioural equivalence on real inputs. A before/after comparison is required: either captured outputs match, or the same end-to-end run produces the same observable behaviour. Equivalence claimed without comparison is not verified.
 - **Improve.** For any behavioural aspect, apply the refactor rule. For non-behavioural aspects (naming, readability, simplification), state explicitly that the verification rests on human judgement rather than mechanical checks. Do not claim verification for non-behavioural changes.
 - **Investigate.** A specific claim about cause backed by specific evidence, not a list of hypotheses. A reliable reproducer is the strongest verification; if one cannot be produced, state what is missing to produce one.
