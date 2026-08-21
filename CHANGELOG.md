@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.24.0 - 2026-08-21
+
+### Changed
+
+- A verification gap that keeps recurring is now caught by `aiw-init`'s session preflight rather than at the done claim, and `aiw-verification` keeps only the rule that makes the repeat recognisable. Prompted by 463 closed pull requests in a repository running this workflow, where the same structural limitation was re-declared for six months — a suite standing in an in-memory database for the real one was declared in ten of them, across February to August — because the workflow had no notion of a gap it had seen before. Splitting the rule by the moment it applies puts each half where it costs least. Naming a gap by its cause rather than by the task ("no real external-model call, the API key is unfunded" rather than "could not fully test the coach for #712") is a writing rule, so it stays beside the writing, needs no tool call, and is what makes a later search possible at all. Finding the repeat is a reading rule about the repository rather than about the change under test, so it belongs to preflight, where it runs once, blocks nothing, and reaches the human before a task is chosen instead of arriving at the moment the agent already carries the most obligations. `aiw-init` gains it as a declared surface with a normal it can evaluate, alongside the drift checks it already owns. Escalation stays the human's: the preflight reports the recurrence and `aiw-issue-creation` describes the shape of the resulting issue, one that removes the limitation rather than tracking another instance of it, which keeps the agent on the correct side of the approval gate that [#208] restored. No new file or state is introduced, since the merged pull requests and issues are already the durable record ([#209]).
+
 ## 3.23.0 - 2026-08-21
 
 ### Changed
@@ -572,3 +578,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#213]: https://github.com/philippe-ths/ai-coding-workflow/issues/213
 [#214]: https://github.com/philippe-ths/ai-coding-workflow/issues/214
 [#208]: https://github.com/philippe-ths/ai-coding-workflow/issues/208
+[#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209

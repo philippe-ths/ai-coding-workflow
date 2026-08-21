@@ -17,6 +17,8 @@ Read this file when creating a follow-up or spin-off GitHub issue.
 
 Follow-up work discovered mid-task is one source. The other is aiw-verification's scoping step: a surface the work named as unchecked, which is not being checked now, is tracked here rather than left as prose. Such an issue names the surface and what would close it, and goes through the same human confirmation as any other — a gap the agent filed unasked is not a resolution. It does not prescribe the check — by the time someone picks it up, the right way to cover that surface may not be the way you would have done it today.
 
+A limitation that keeps producing the same declared gap, which aiw-init's preflight reports when it recurs, arrives here as a third shape. That issue is not about the surface the current task left unchecked; it is about removing the limitation that keeps producing the gap. Name the limitation, list the earlier occurrences as evidence of its cost, and state what would end it. One such issue replaces the whole run of caveats — do not file one per occurrence.
+
 ## What the Issue Must Contain
 
 - State what needs to change from the user's perspective.

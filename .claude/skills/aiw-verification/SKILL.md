@@ -121,4 +121,6 @@ Naming the surface is half the step. The other half is what became of it, settle
 - **Tracked.** An issue carries it, and the artifact is the issue number. Proposing that issue is yours; creating it is the human's, under aiw-issue-creation.
 - **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
 
+Name the gap by its cause rather than by the task. "No real external-model call — the API key is unfunded" can be recognised the next time it appears; "could not fully test the coach for #712" cannot, and a gap nobody can find is a gap that gets declared fresh forever.
+
 A label with no artifact behind it is not a resolution. (Why: it is the same undisclosed gap in a tidier format, and a column of correct-looking labels hides that better than plain prose did.)

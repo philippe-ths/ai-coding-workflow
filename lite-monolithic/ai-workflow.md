@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.23.0
+Version: 3.24.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -243,6 +243,8 @@ If part 1 surfaces something part 2 does not cover, the change is not verified: 
 Check what those two questions return and stop there: the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping — nothing called that code.
 
 Naming a surface in part 3 is half the step. Before presenting the work, each named surface ends in one of three states, and a state is reached when its artifact exists rather than when its word is written: **checked** (the artifact is what you ran and what it showed; the item then belongs in part 2), **tracked** (the artifact is the issue number — proposing the issue is yours, creating it is the human's), or **waived** (the artifact is the human's words and what they were told; silence is not a waiver). A label with no artifact behind it is the same undisclosed gap in a tidier format.
+
+Name each gap by its cause rather than by the task — "no real external-model call, the API key is unfunded" can be recognised the next time it appears, "could not fully test the coach for #712" cannot — because a gap nobody can find gets declared fresh forever, and the same limitation then buys a caveat every time instead of a fix.
 
 Evidence runs from weak to strong: static checks < unit tests < integration tests < end-to-end on synthetic input < end-to-end on real artifacts < a before/after diff against captured behaviour. Name the level you reached, not just "tests pass."
 
