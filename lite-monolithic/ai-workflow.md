@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.18.0
+Version: 3.19.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -136,6 +136,8 @@ Trust hierarchy for any input or expected value the work relies on, highest firs
 4. Hand-constructed minimal examples the user has explicitly confirmed represent real behaviour.
 5. Synthetic fixtures the agent invented — useful for exercising logic, not authoritative about what the system should do.
 
+Real is not the same as relevant. The hierarchy ranks how real an input is, not whether it describes the thing you are changing: evidence read from the wrong process, substrate, or environment is authentic and irrelevant at once. For any evidence drawn from a running system, name where you read it and confirm the code under test runs in that same place. One cross-user data leak ran for a week because "set in prod today" was true of the web process, while the worker that actually sends had no such setting.
+
 Rules:
 
 - Name the oracle before implementing. It depends on the modality: a Fix is judged against the reported bug, a Refactor against the captured prior behaviour, a Migrate against prior behaviour on real inputs with an explicit exception list, a Configure against the real external system (not a mock), a Delete against the absence of remaining dependencies.
@@ -244,7 +246,7 @@ Run the full system end-to-end on real inputs for: changes to data flowing betwe
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
 
-Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass.
+Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass. A reading taken from a running system — a config value, a live setting, a stored row — is a reading from one process in one environment: name which, and confirm the code under test runs there.
 
 When the runtime path has no output to read, add observability as part of the change — temporary or permanent — especially for changes touching writes, sync, state transitions, integration points, or reactive UI paths. Remove any temporary diagnostics before declaring done.
 
