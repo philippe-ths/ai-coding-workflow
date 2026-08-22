@@ -128,7 +128,10 @@ if [ "$PROFILE" = "full" ]; then
   while IFS= read -r p; do
     [ -z "$p" ] && continue
     git -C "$SOURCE" ls-files -- "${p%/}" >> "$current_product"
-  done < <(jq -r --arg t "$TOOL" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$MANIFEST")
+    # Spans EVERY tool, not just the one being updated. A removal bullet names a
+    # path, not a tool, so scoping this to $TOOL deletes from disk a file another
+    # installed tool still ships (#229).
+  done < <(jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST")
 
   in_range() { # version, installed, source : installed < version <= source
     ver_lt "$2" "$1" && ver_le "$1" "$3"
@@ -174,20 +177,22 @@ $removed_paths
 EOF
 
   # Prune the removed paths from the managed .gitignore block, but never a path
-  # the current product still ships.
-  keep_keys="|"
-  while IFS= read -r p; do
-    [ -z "$p" ] && continue
-    keep_keys="$keep_keys${p%/}|"
-  done < <(jq -r --arg t "$TOOL" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$MANIFEST")
+  # the current product still ships. The keep set spans EVERY tool, not just the
+  # one being updated: a removal bullet names a path, not a tool, and several
+  # tools can be installed in one repo, so pruning a path another installed tool
+  # still ships would un-ignore that tool's vendored files (#229).
+  keep_file="$(mktemp)"
+  jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST" \
+    | sed 's#/*$##' > "$keep_file"
   drop_keys=""
   while IFS= read -r k; do
     [ -z "$k" ] && continue
-    case "$keep_keys" in *"|$k|"*) continue ;; esac
+    LC_ALL=C grep -Fxq -- "$k" "$keep_file" && continue
     drop_keys="$drop_keys$k|"
   done <<EOF
 $(printf '%s' "$prune_keys" | tr '|' '\n')
 EOF
+  rm -f "$keep_file"
   prune_gitignore_block "$drop_keys"
 fi
 

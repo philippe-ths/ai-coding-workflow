@@ -111,6 +111,46 @@ for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/"; do
   if grep -qxF "$p" "$T/.gitignore"; then ok "still ignored: $p"; else bad "wrongly pruned: $p"; fi
 done
 
+# A removal bullet names a path by name, not by tool. When several tools are
+# installed side by side, a path one tool dropped may still be shipped by
+# another, and pruning it un-ignores that tool's vendored files (#229).
+echo "a removal does not un-ignore a path another installed tool still ships:"
+FAKE_SRC2="$SANDBOX/fake-src-2"
+mkdir -p "$FAKE_SRC2"
+git -C "$ROOT_DIR" archive HEAD | tar -x -C "$FAKE_SRC2"
+mkdir -p "$FAKE_SRC2/legacy-thing"
+echo legacy > "$FAKE_SRC2/legacy-thing/note.md"
+tmp_manifest="$(mktemp)"
+jq '.profiles.full.tools.claude += ["legacy-thing/"]' "$FAKE_SRC2/install-manifest.json" > "$tmp_manifest" \
+  && mv "$tmp_manifest" "$FAKE_SRC2/install-manifest.json"
+set_version "$FAKE_SRC2/ai-workflow.md" 90.0.0
+( cd "$FAKE_SRC2" && git init -q && git config user.email t@t && git config user.name t \
+    && git add -A && git commit -qm init ) >/dev/null 2>&1
+
+T="$(new_target multi-tool-prune)"
+"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
+"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+if grep -qxF "legacy-thing/" "$T/.gitignore"; then ok "legacy-thing/ recorded before update"; else bad "legacy-thing/ not recorded before update"; fi
+
+# The source names the path as removed; the claude tool set still ships it.
+set_version "$FAKE_SRC2/ai-workflow.md" 90.1.0
+tmp_changelog="$(mktemp)"
+{
+  printf '## 90.1.0\n\n### Removed\n\n- `legacy-thing/` no longer shipped for gemini.\n\n'
+  cat "$FAKE_SRC2/CHANGELOG.md"
+} > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC2/CHANGELOG.md"
+( cd "$FAKE_SRC2" && git add -A && git commit -qm drop ) >/dev/null 2>&1
+
+"$UPDATE" --source "$FAKE_SRC2" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "multi-tool prune update exited non-zero"
+if grep -qxF "legacy-thing/" "$T/.gitignore"; then
+  ok "legacy-thing/ still ignored (the claude set still ships it)"
+else
+  bad "legacy-thing/ pruned from .gitignore though the claude set still ships it"
+fi
+for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/" "GEMINI.md" ".gemini/"; do
+  if grep -qxF "$p" "$T/.gitignore"; then ok "still ignored: $p"; else bad "wrongly pruned: $p"; fi
+done
+
 echo "already up-to-date (no-op):"
 T="$(new_target current)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1

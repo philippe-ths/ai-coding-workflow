@@ -89,71 +89,76 @@ copy_tracked() {
 # The block is a UNION across installs: entries already in it are kept in order
 # and this run's paths are appended if absent, so installing a second tool does
 # not un-ignore the first tool's paths (#216).
+#
+# A target's .gitignore is arbitrary bytes written by humans and other tools, so
+# this function assumes nothing about its content (#229):
+#   * the whole new file is built in one awk pass into $gi.tmp and moved into
+#     place only on success, so a failure cannot leave the file truncated;
+#   * text processing runs under LC_ALL=C, because a line that is not valid
+#     UTF-8 makes BSD awk/grep/sed fail with "illegal byte sequence" under a
+#     UTF-8 locale;
+#   * this run's paths reach awk through a file, never a delimited string, so a
+#     literal delimiter in a path or an existing line cannot mis-split;
+#   * entries are compared AND re-emitted normalised, so an indented "  .claude/"
+#     cannot shadow the real ".claude/" while git ignores nothing.
 write_gitignore_block() {
   local gi="$TARGET/.gitignore"
   local begin="# >>> ai-workflow (vendored, managed by installer) >>>"
   local end="# <<< ai-workflow <<<"
   touch "$gi"
-  # Entries currently inside the managed block, in order.
-  local existing
-  existing="$(awk -v b="$begin" -v e="$end" '
-    $0==b {inblock=1; next}
-    $0==e {inblock=0; next}
-    inblock==1 {print}
-  ' "$gi")"
-  local had_block=0
-  grep -qxF "$begin" "$gi" 2>/dev/null && had_block=1
-  # Drop our previous managed block. On a FIRST install only (no managed block
-  # yet), also drop pre-existing unmarked lines that exactly match a vendored
-  # path, folding an earlier manual copy into the managed block instead of
-  # leaving the same path listed twice (#166). Once a managed block exists, a
-  # matching line outside it is hand-maintained and is left untouched (#216).
-  local joined; joined="$(printf '%s|' "$@")"
-  [ "$had_block" -eq 1 ] && joined=""
-  awk -v b="$begin" -v e="$end" -v paths="$joined" '
-    BEGIN {
-      n = split(paths, parr, "|")
-      for (i = 1; i <= n; i++) { k = parr[i]; sub(/\/+$/, "", k); if (k != "") drop[k] = 1 }
-    }
-    $0==b {skip=1}
-    skip==0 {
-      key = $0
-      sub(/^[ \t]+/, "", key); sub(/[ \t]+$/, "", key); sub(/\/+$/, "", key)
-      if (!(key in drop)) print
-    }
-    $0==e {skip=0}
-  ' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
-  # New block contents: kept entries first, then this run's unseen paths.
-  local keys="|" out="" line k
-  while IFS= read -r line; do
-    k="$(printf '%s' "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's#/*$##')"
-    [ -z "$k" ] && continue
-    case "$keys" in *"|$k|"*) continue ;; esac
-    keys="$keys$k|"
-    out="$out$line
-"
-  done <<EXISTING
-$existing
-EXISTING
-  local p
-  for p in "$@"; do
-    k="$(printf '%s' "$p" | sed -e 's#/*$##')"
-    [ -z "$k" ] && continue
-    case "$keys" in *"|$k|"*) continue ;; esac
-    keys="$keys$k|"
-    out="$out$p
-"
-  done
-  if [ -s "$gi" ] && [ -n "$(tail -c1 "$gi" 2>/dev/null)" ]; then
-    printf '\n' >> "$gi"
-  fi
-  {
-    printf '%s\n' "$begin"
-    printf '%s' "$out"
-    printf '%s\n' "$end"
-  } >> "$gi"
-}
 
+  local paths_file p
+  paths_file="$(mktemp)" || { echo "error: could not create a temp file" >&2; return 1; }
+  for p in "$@"; do
+    [ -n "$p" ] && printf '%s\n' "$p"
+  done > "$paths_file"
+
+  # Existing block entries are kept in order and deduplicated by normalised key;
+  # this run's unseen paths are appended verbatim, exactly as the manifest gives
+  # them. Pre-existing unmarked lines matching a vendored path are folded into
+  # the block on a FIRST install only (#166); once a managed block exists such a
+  # line is hand-maintained and is left alone (#216). Exactly one marker pair is
+  # emitted however many the input held.
+  if LC_ALL=C LANG=C awk -v b="$begin" -v e="$end" -v pf="$paths_file" '
+    function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+    function norm(s) { s = trim(s); sub(/\/+$/, "", s); return s }
+    FILENAME == pf { raw[++np] = $0; runkey[norm($0)] = 1; next }
+    { lines[++nl] = $0; if ($0 == b) hadblock = 1 }
+    END {
+      fold = (hadblock ? 0 : 1)
+      skip = 0
+      for (i = 1; i <= nl; i++) {
+        line = lines[i]
+        if (line == b) skip = 1
+        if (skip == 0) {
+          k = norm(line)
+          if (!(fold && k != "" && (k in runkey))) out[++no] = line
+        } else if (line != b && line != e) {
+          k = norm(line)
+          if (k != "" && !(k in seen)) { seen[k] = 1; keep[++nk] = trim(line) }
+        }
+        if (line == e) skip = 0
+      }
+      for (i = 1; i <= no; i++) print out[i]
+      print b
+      for (i = 1; i <= nk; i++) print keep[i]
+      for (i = 1; i <= np; i++) {
+        k = norm(raw[i])
+        if (k == "" || (k in seen)) continue
+        seen[k] = 1
+        print raw[i]
+      }
+      print e
+    }
+  ' "$paths_file" "$gi" > "$gi.tmp"; then
+    rm -f "$paths_file"
+    mv "$gi.tmp" "$gi"
+  else
+    rm -f "$paths_file" "$gi.tmp"
+    echo "error: could not rewrite $gi; it was left unchanged" >&2
+    return 1
+  fi
+}
 ignore_paths=()
 
 if [ "$PROFILE" = "full" ]; then
