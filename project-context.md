@@ -119,7 +119,7 @@ Version: 1.23.0
 - `scripts/classify.sh`: prints the product/factory classification read from `install-manifest.json`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
-- `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, reference resolution, version headers, size budget, entry-point parity), and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
+- `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, JSONL fixture validity, the manifest integrity check, and the install, update, and changelog-removals sandbox tests.
 
