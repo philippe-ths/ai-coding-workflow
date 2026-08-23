@@ -33,6 +33,12 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: empty.
 - Matters: post-merge cleanup was skipped, and the leftover branch will be mistaken for live work.
 
+### Remote branch without an open pull request
+- Check: `git ls-remote --heads origin`, then for each branch other than `main`, `gh pr list --head <branch> --state all --json number,state`
+- Normal: every remote branch other than `main` has an open pull request.
+- Matters: two different things fail this, and they need different answers, so report which one each branch is rather than only that it has no open pull request. A branch with no pull request at all is finished work that nothing will ever merge, and the open-pull-request check above cannot see it, because an absent pull request reads there as nothing waiting on you. A branch whose pull request already merged is post-merge cleanup that happened locally and never reached the remote, and a remote branch outlives the machine it was pushed from.
+- Read the result, not the exit status: `gh pr list` prints nothing for a branch with no pull request, so a command that fails prints nothing too. If the lookup is wrapped in anything that substitutes a default on error, every branch reads as having no pull request. Resolving whether an unmerged branch's commits already sit in `main` needs its objects, which a read-only run does not have; say the merge status is unresolved rather than fetching.
+
 ## Repository Integrity
 
 ### Local main matches remote
@@ -80,9 +86,15 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: 30 or fewer days since the last `make observe`.
 - Matters: the dashboard is the only view of how workflow changes are landing across sessions, and a stale one invites conclusions drawn from old data.
 
+### Recurring unverified surface
+- Check: `gh pr list --state merged --limit 20 --json number,body`, then read each body's unverified-surface section, group by the surface named, and count repeats; for any surface named in three or more, search the issues for that surface.
+- Normal: no surface named in three or more of the last twenty merged pull requests without an issue tracking it.
+- Matters: a gap declared once is a task's limitation, and a gap declared across many tasks is the repository's. Left untracked it is re-declared indefinitely, which reads as honesty while nothing moves.
+- This one is read, not grepped. The section has no fixed heading: recent bodies write it as "What was not checked", as "**Not verified:**", and as "**Also not verified:**" partway through a paragraph, and `aiw-verification` names it only as part 3. Locating it is a judgement, and so is deciding that two differently-worded gaps are the same surface. Treat the count as a prompt to look rather than as a measurement. Put the real surface into the issue search; the literal placeholder matches everything and returns the whole issue list, which reads as though all of it is already tracked.
+
 ## Not Covered Here
 
-- **Application logs and error tracking.** No runtime application exists to produce them. The `telemetry/` residue that used to sit here — four zero-byte `.log` files and five empty directories left by the removed eval stack — was deleted in #204.
+- **Application logs and error tracking.** No runtime application exists to produce them. The `telemetry/` residue that used to sit here, left by the removed eval stack, was deleted in #204 and then recreated: the same issue left two launchd agents registered, and a failing agent recreates the log paths its plist declares. Both agents were unregistered and the residue removed on 2026-08-21. That last part is a reading from one machine and nothing in the repository can confirm it for another, so if the residue reappears, check `launchctl list` before assuming this line still holds. A deletion is not finished while something outside the repository still points at what was deleted.
 - **Dependent services.** Nothing is called at runtime. `bash`, `git`, `jq`, and `python3` are developer tools, checked by their absence breaking validation rather than by a health probe.
 - **Deployment and CI.** `.github/` holds no workflows, so there is no remote build whose status could be red. The nearest equivalent is the local validation state above.
 - **Certificate and secret expiry.** No secrets are held; the only credential is the `gh` token, checked under Expiry and Limits.

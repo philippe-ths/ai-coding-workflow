@@ -11,6 +11,11 @@ Every `### Removed` bullet must lead with the removed path as a backticked token
 ### Changed
 
 - A named unverified surface can now end in a fourth state, **deferred**, and the workflow says where work is presented for the human's done decision. Across 489 merged pull requests in a repository running this workflow, 12 carry a comment reporting substantive verification posted after the pull request was opened, every one of them within two hours and half within fifteen minutes: a clean-context pass run once quota reset, a check performed inside the real production image rather than by inspection, manual items closed out. The rule required the justification before the work was presented for the done decision, practice treated opening the pull request as that presentation, and the two disagreed. Neither was wrong. Opening a pull request is not the moment the human decides, since they decide afterwards, so the pull request is part of the verification surface rather than the end of it. `aiw-verification` gains `deferred` beside checked, tracked and waived: the artifact is the method named, why it has not run, and that it runs before the human decides, and posting the result where the work is presented is what moves the item to checked in front of the person deciding. It is the existing Wait option kept visible rather than finished work held back, and it is explicitly not available for a method that cannot run at all, which stays the human's decision under "When the Committed Method Cannot Run". `aiw-github` gains the matching floor at the moment the pull request opens: scope what the body claims to the evidence that exists then, and never write up evidence you intend to gather as though it has already run. The alternative was to tighten the gate so all evidence had to exist before opening, which would have made the honest act of posting further evidence into a violation, and a rule that penalises disclosure produces less of it ([#210]).
+## 3.25.1 - 2026-08-21
+
+### Fixed
+
+- Installing a second agent tool into the same target no longer strips the first tool's vendored paths from the target's `.gitignore`. The installer-managed block was rebuilt from only the current run's paths, so the documented multi-tool procedure — one installer run per tool, which `scripts/update.sh` requires by refusing to auto-detect an ambiguous target — left each run undoing the one before it. In a repository running this workflow with four tools installed, the result was `.claude/`, `.codex/`, `.gemini/`, `CLAUDE.md` and `AGENTS.md` all untracked, one `git add -A` away from being committed into a history that is supposed to vendor them. The block is now a union: entries already in it are kept in order and the current run's paths appended if absent. This is the opposite symptom of [#166], and [#166]'s fix is its cause — to stop duplicate entries the installer began deleting matching lines from anywhere in the file, and combined with each run knowing only one tool's paths, removal outran replacement. That file-wide deletion is now confined to the first install, the only run with no managed block to date the file against; once a block exists, a matching line outside it is hand-maintained and is left alone, so a section a human labelled as needing to survive updates does. `scripts/update.sh` prunes paths named in `### Removed` changelog bullets from the block, since a union would otherwise keep a path that had left the product forever, and never prunes one the current product still ships. The gap that let this run for two months was that both sandbox tests only ever installed a single tool; they now install three in sequence and assert on `git status --porcelain`, which is the hazard the issue actually describes rather than a proxy for it ([#216]).
 
 ## 3.25.0 - 2026-08-21
 
@@ -567,6 +572,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#155]: https://github.com/philippe-ths/ai-coding-workflow/issues/155
 [#99]: https://github.com/philippe-ths/ai-coding-workflow/issues/99
 [#165]: https://github.com/philippe-ths/ai-coding-workflow/issues/165
+[#166]: https://github.com/philippe-ths/ai-coding-workflow/issues/166
 [#114]: https://github.com/philippe-ths/ai-coding-workflow/issues/114
 [#170]: https://github.com/philippe-ths/ai-coding-workflow/issues/170
 [#173]: https://github.com/philippe-ths/ai-coding-workflow/issues/173
@@ -597,3 +603,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
 [#224]: https://github.com/philippe-ths/ai-coding-workflow/issues/224
 [#210]: https://github.com/philippe-ths/ai-coding-workflow/issues/210
+[#216]: https://github.com/philippe-ths/ai-coding-workflow/issues/216

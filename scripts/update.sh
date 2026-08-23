@@ -94,15 +94,44 @@ fi
 "$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL" --profile "$PROFILE" >/dev/null \
   || { echo "error: re-copy step failed" >&2; exit 1; }
 
+# Drop paths from the installer-managed .gitignore block (the block is a union,
+# so a path that left the product would otherwise linger forever). Nothing
+# outside the managed block is touched.
+prune_gitignore_block() {
+  local gi="$TARGET/.gitignore" joined="$1"
+  [ -f "$gi" ] || return 0
+  [ -n "$joined" ] || return 0
+  local begin="# >>> ai-workflow (vendored, managed by installer) >>>"
+  local end="# <<< ai-workflow <<<"
+  awk -v b="$begin" -v e="$end" -v paths="$joined" '
+    BEGIN {
+      n = split(paths, parr, "|")
+      for (i = 1; i <= n; i++) { k = parr[i]; sub(/\/+$/, "", k); if (k != "") drop[k] = 1 }
+    }
+    $0==b { inblock=1; print; next }
+    $0==e { inblock=0; print; next }
+    inblock==1 {
+      key = $0
+      sub(/^[ \t]+/, "", key); sub(/[ \t]+$/, "", key); sub(/\/+$/, "", key)
+      if (key in drop) next
+    }
+    { print }
+  ' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
+}
+
 # --- removal reconciliation (full profile; lite is a single file with nothing to reconcile) ---
 removed_count=0
+prune_keys=""
 if [ "$PROFILE" = "full" ]; then
   current_product="$(mktemp)"
   trap 'rm -f "$current_product"' EXIT
   while IFS= read -r p; do
     [ -z "$p" ] && continue
     git -C "$SOURCE" ls-files -- "${p%/}" >> "$current_product"
-  done < <(jq -r --arg t "$TOOL" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$MANIFEST")
+    # Spans EVERY tool, not just the one being updated. A removal bullet names a
+    # path, not a tool, so scoping this to $TOOL deletes from disk a file another
+    # installed tool still ships (#229).
+  done < <(jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST")
 
   in_range() { # version, installed, source : installed < version <= source
     ver_lt "$2" "$1" && ver_le "$1" "$3"
@@ -124,6 +153,7 @@ if [ "$PROFILE" = "full" ]; then
     [ -z "${ver:-}" ] && continue
     in_range "$ver" "$installed_version" "$source_version" || continue
     rp_stripped="${rp%/}"
+    prune_keys="$prune_keys$rp_stripped|"
     case "$rp" in
       */)  # directory removal: delete target files under it that are not current product
         if [ -d "$TARGET/$rp_stripped" ]; then
@@ -145,6 +175,25 @@ if [ "$PROFILE" = "full" ]; then
   done <<EOF
 $removed_paths
 EOF
+
+  # Prune the removed paths from the managed .gitignore block, but never a path
+  # the current product still ships. The keep set spans EVERY tool, not just the
+  # one being updated: a removal bullet names a path, not a tool, and several
+  # tools can be installed in one repo, so pruning a path another installed tool
+  # still ships would un-ignore that tool's vendored files (#229).
+  keep_file="$(mktemp)"
+  jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST" \
+    | sed 's#/*$##' > "$keep_file"
+  drop_keys=""
+  while IFS= read -r k; do
+    [ -z "$k" ] && continue
+    LC_ALL=C grep -Fxq -- "$k" "$keep_file" && continue
+    drop_keys="$drop_keys$k|"
+  done <<EOF
+$(printf '%s' "$prune_keys" | tr '|' '\n')
+EOF
+  rm -f "$keep_file"
+  prune_gitignore_block "$drop_keys"
 fi
 
 echo "Update complete: target now at $source_version (profile: $PROFILE, tool: $TOOL); $removed_count file(s) removed."

@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.22.0
+Version: 1.23.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -34,6 +34,7 @@ Version: 1.22.0
 - Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, and project-context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
 - Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`).
+- Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
 - Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool and profile into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
 - Declares the product/factory boundary in `install-manifest.json`, validated by `scripts/check-manifest.sh` and printed by `make classify`.
 - Records observed AI agent failure patterns (`observations/observed-ai-failings.md`) to inform workflow rule changes.
@@ -118,6 +119,7 @@ Version: 1.22.0
 - `scripts/classify.sh`: prints the product/factory classification read from `install-manifest.json`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
+- `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, JSONL fixture validity, the manifest integrity check, and the install, update, and changelog-removals sandbox tests.
 
@@ -125,6 +127,7 @@ Version: 1.22.0
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed.
 - Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-gemini-enforcement.sh` requires `.gemini/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; `test-changelog-hook.sh`, `test-pre-push-hook.sh`, `test-project-validation.sh`, `test-context-drift-hook.sh`, `test-pr-merge-hook.sh`, `test-push-refs.sh`, `test-pr-approve-hook.sh`, `test-pr-verification-hook.sh`, and `test-validation-state.sh` always run.
 - When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
+- Prose integrity (`scripts/check-prose-integrity.sh`) runs inside repo-specific validation, so a change to the agent-facing rules is checked by something other than its author's reading. It is structural only: it cannot tell whether two passages contradict each other.
 - Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, a JSONL validity check on the fixture, the manifest integrity check, and the installer, updater, changelog-removals, and observation install/uninstall sandbox tests.
 - No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
 - Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
