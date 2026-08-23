@@ -97,6 +97,35 @@ assert_blocked "no verification content at all" \
 assert_blocked "an empty body" \
   "$(bash_payload 'gh pr create --title x --body ""')"
 
+echo "A bare assertion under a heading is blocked (#235):"
+# Every one of the twenty-five most recent merged bodies here that declares an
+# unverified surface puts it under a heading or a bold lead-in, so matching only
+# the single-line form caught the shape nobody writes.
+assert_blocked "a heading with the bare word beneath it" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h1.md 'Tests pass.' '' '## What was not checked' '' 'Nothing.')")"
+assert_blocked "a bold lead-in with the bare word beneath it" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h2.md 'Tests pass.' '' '**Not verified:**' '' 'None')")"
+assert_blocked "a numbered heading ending in punctuation" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h3.md 'Tests pass.' '' '**3. What was not checked.**' '' 'Nothing.')")"
+assert_blocked "a heading separated by several blank lines" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h4.md 'Tests pass.' '' '## Still not checked' '' '' '' 'n/a')")"
+
+# Folding a line onto the next cannot invent a match: the pattern anchors the
+# bare word to the end of the line, so a real declaration that merely opens
+# with one of those words still has content after it.
+assert_allowed "a section opening with None but continuing" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h5.md 'Tests pass.' '' '## What was not checked' '' 'None of the sync paths were exercised, so a regression there would not be caught.')")"
+assert_allowed "a section opening with Nothing but continuing" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h6.md 'Tests pass.' '' '## What was not checked' '' 'Nothing changed at runtime, so there is no path to exercise.')")"
+assert_allowed "a real declaration under a heading" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h7.md 'Tests pass.' '' '## What was not checked' '' 'The four tools were not driven; only configuration was asserted.')")"
+
+# A body that demonstrates the bad form inside a fenced code block is
+# discussing the rule, not declaring a gap. This pull request is written
+# that way, and blocked itself before the fences were excluded.
+assert_allowed "a bare assertion shown inside a fenced code block" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h8.md 'Tests pass.' '' 'The guard misses this form:' '' '```' '## What was not checked' '' 'Nothing.' '```' '' '## What was not checked' '' 'The four tools were not driven.')")"
+
 echo "A bare assertion in place of part 3 is blocked:"
 
 for bare in "Not verified: nothing" "**Not verified:** none" "- not checked: n/a" "Unverified: nil" "Not verified: -"; do

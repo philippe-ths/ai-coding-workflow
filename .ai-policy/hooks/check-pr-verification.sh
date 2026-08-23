@@ -77,9 +77,36 @@ check_body() {
   #    swallow a real declaration when apostrophes pair up across it, and that
   #    is the direction to err in: a missed box-tick costs a caveat, a false
   #    block costs the guard its credibility.
-  local unquoted
-  unquoted="$(printf '%s' "$norm" | sed -e 's/"[^"]*"/QUOTED/g' -e "s/'[^']*'/QUOTED/g")"
-  if printf '%s' "$unquoted" | grep -qiE '(^|[^[:alnum:]])(not[[:space:]]+(verified|checked)|unverified|nothing[[:space:]]+unverified)[[:space:]]*:?[[:space:]]*(nothing|none|n/?a|nil|-)[[:punct:][:space:]]*$'; then
+  #    A fenced code block is a demonstration, not a declaration. Backticks are
+  #    stripped by normalise, so the fences have to go before it runs, and only
+  #    this check uses the stripped text: a body that shows the bad form in order
+  #    to discuss it is the same case as one that quotes it inline, and the
+  #    pull request fixing this guard is necessarily written that way.
+  local nofence unquoted folded
+  nofence="$(printf '%s' "$body" | LC_ALL=C awk '
+    /^[[:space:]]*```/ { infence = !infence; next }
+    !infence { print }
+  ' | normalise)"
+  unquoted="$(printf '%s' "$nofence" | sed -e 's/"[^"]*"/QUOTED/g' -e "s/'[^']*'/QUOTED/g")"
+  #    The declaration is as often a heading with the bare word beneath it as it
+  #    is one line, and of the twenty-five most recent merged bodies here, every
+  #    one that declares a surface uses the heading form. Matching only the one
+  #    line would catch the shape nobody writes. Rather than a second pattern to
+  #    keep in step with the first, each line is also read joined to the next
+  #    non-empty one, and the same matcher runs over that. Joining cannot invent
+  #    a match: the pattern anchors the bare word to the end, so a following
+  #    line that says anything further ("None of the sync paths were exercised")
+  #    still has content after it and does not match.
+  folded="$(printf '%s\n' "$unquoted" | LC_ALL=C awk '
+    { line[NR] = $0 }
+    END {
+      for (i = 1; i <= NR; i++) {
+        j = i + 1
+        while (j <= NR && line[j] ~ /^[[:space:]]*$/) j++
+        if (j <= NR) print line[i] " " line[j]; else print line[i]
+      }
+    }')"
+  if printf '%s\n%s' "$unquoted" "$folded" | grep -qiE '(^|[^[:alnum:]])(not[[:space:]]+(verified|checked)|unverified|nothing[[:space:]]+unverified)[[:punct:][:space:]]*(nothing|none|n/?a|nil|-)[[:punct:][:space:]]*$'; then
     deny "$source" "The unverified-surface section is a bare assertion. Say why there is nothing to check, in terms of what the change is."
   fi
 }
