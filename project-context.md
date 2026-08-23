@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.23.0
+Version: 1.24.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -80,6 +80,7 @@ Version: 1.23.0
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files and `design/research/` holds primary-source notes with stable anchor IDs.
 - `observations/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
 - `observations/workflow-reviews/`: archived periodic review outputs, each named by date.
+- `observations/investigations/`: findings from issues labelled investigation, each named by date; the 2026-08-21 record concludes that neither the session-observation tool nor the pull request corpus can measure whether independent verification reduces rework, and why. The two Python files beside it rebuild that record's corpus and recompute its figures; they are archival, pinned to that investigation, and not covered by validation.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
