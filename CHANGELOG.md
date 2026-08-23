@@ -6,6 +6,12 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.26.1 - 2026-08-23
+
+### Fixed
+
+- The guard that rejects a box-ticked unverified surface now catches the form this repository actually writes. It matched only when the trigger phrase and the bare word sat on one line, so `Not verified: none` was blocked while the same declaration under a heading was not. Of the twenty-five most recent merged pull request bodies, twelve declare an unverified surface and **every one of them** uses a heading or a bold lead-in, so the guard was catching the shape nobody writes and missing the shape everybody does. Rather than add a second pattern to keep in step with the first, each line is now also read joined to the next non-empty line and the existing matcher runs over that view as well. Joining cannot invent a match, because the pattern anchors the bare word to the end of the line: a section opening "None of the sync paths were exercised" still has content after the word and does not match. The matcher also tolerates punctuation between the trigger and the bare word, since one real heading in the corpus reads `3. What was not checked.`. All thirty of the most recent merged bodies were run through the changed guard and none is blocked, which is the same corpus check that established the guard's normal path when it was built ([#235]).
+
 ## 3.26.0 - 2026-08-21
 
 ### Changed
@@ -603,4 +609,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#209]: https://github.com/philippe-ths/ai-coding-workflow/issues/209
 [#224]: https://github.com/philippe-ths/ai-coding-workflow/issues/224
 [#210]: https://github.com/philippe-ths/ai-coding-workflow/issues/210
+[#235]: https://github.com/philippe-ths/ai-coding-workflow/issues/235
 [#216]: https://github.com/philippe-ths/ai-coding-workflow/issues/216
