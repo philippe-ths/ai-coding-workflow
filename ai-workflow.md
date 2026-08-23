@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.25.1
+Version: 3.26.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -54,7 +54,7 @@ Protect your context window and the human's quota — but never by doing less th
 
 The AI must raise these without being asked, so the human has the information needed to make decisions. Surface only what was encountered while doing the task, with concrete evidence. Default to the handoff summary; raise mid-task only when the observation changes what the AI should do next.
 
-- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, or waived by the human.
+- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, deferred with its method named, or waived by the human. Opening a pull request is not that decision, since the human makes it afterwards, so the pull request is where the justification is presented and where deferred evidence lands before they decide.
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.

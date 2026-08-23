@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.25.1
+Version: 3.26.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -242,7 +242,7 @@ If part 1 surfaces something part 2 does not cover, the change is not verified: 
 
 Check what those two questions return and stop there: the surfaces that consume what the change moved, not the whole system. One fix regrouped a chart's data, corrected the reported grouping, and pushed the highest values off the top of the plot, because the charting library recomputed the vertical scale from the new grouping — nothing called that code.
 
-Naming a surface in part 3 is half the step. Before presenting the work, each named surface ends in one of three states, and a state is reached when its artifact exists rather than when its word is written: **checked** (the artifact is what you ran and what it showed; the item then belongs in part 2), **tracked** (the artifact is the issue number — proposing the issue is yours, creating it is the human's), or **waived** (the artifact is the human's words and what they were told; silence is not a waiver). A label with no artifact behind it is the same undisclosed gap in a tidier format.
+Naming a surface in part 3 is half the step. Before presenting the work, each named surface ends in one of four states, and a state is reached when its artifact exists rather than when its word is written: **checked** (the artifact is what you ran and what it showed; the item then belongs in part 2), **tracked** (the artifact is the issue number — proposing the issue is yours, creating it is the human's), **deferred** (the method has not run yet and you can say when it will, before the human decides; the artifact is the method named, that timing and the reason for the wait, and posting the result where the work is presented is what moves it to checked, since deferred is the one state whose artifact is a commitment rather than a result), or **waived** (the artifact is the human's words and what they were told; silence is not a waiver). If you cannot say when it runs, or it turns out it will not, it is not deferred, and that case is the human's decision. The evidence your modality requires cannot be deferred: a fix with no check that failed before and passes after, or a refactor with no before-and-after comparison, is not ready to present whatever else has run. Scope what a pull request body claims to the evidence that exists as you open it, and never write up evidence you intend to gather as though it has already run. A label with no artifact behind it is the same undisclosed gap in a tidier format.
 
 Name each gap by its cause rather than by the task — "no real external-model call, the API key is unfunded" can be recognised the next time it appears, "could not fully test the coach for #712" cannot — because a gap nobody can find gets declared fresh forever, and the same limitation then buys a caveat every time instead of a fix.
 
@@ -250,7 +250,7 @@ Evidence runs from weak to strong: static checks < unit tests < integration test
 
 Run the full system end-to-end on real inputs for: changes to data flowing between processes or pipeline stages; changes to an external tool or library interface; any Refactor or Migrate claiming behaviour preservation; any Delete. If end-to-end is disproportionate to the change, say so and treat the unverified path as a known risk; a method that simply cannot run is the next case, not this one.
 
-When the verification method the plan committed to cannot run at all — sub-agents unavailable in this session, quota spent, an unfunded API key, staging down, the device not to hand — do not substitute a weaker one and note it. The disclosure is real and the decision is still yours, and it is not yours to make: accepting weaker evidence changes what the done claim is worth. Stop and put it to the human in the Asking for Guidance format — accept the weaker evidence with its reduced worth stated plainly, wait for the committed method, or narrow the claim to what the available evidence supports — and recommend one. "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance.
+When the verification method the plan committed to cannot run at all — sub-agents unavailable in this session, an unfunded API key, staging down, the device not to hand, anything you cannot name a time for — do not substitute a weaker one and note it. The disclosure is real and the decision is still yours, and it is not yours to make: accepting weaker evidence changes what the done claim is worth. Stop and put it to the human in the Asking for Guidance format — accept the weaker evidence with its reduced worth stated plainly, wait for the committed method, or narrow the claim to what the available evidence supports — and recommend one. "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance.
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
 
@@ -364,7 +364,7 @@ These are the human's to do; the AI cannot:
 
 The following apply to every task without exception:
 
-- ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision.
+- ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
