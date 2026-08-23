@@ -47,6 +47,17 @@ if [ -x ./scripts/check-manifest.sh ]; then
   ./scripts/check-manifest.sh
 fi
 
+# --- prose integrity: the agent-facing rules must stay structurally coherent ---
+# Changes to this repository's prose have no check behind them but their author's
+# own reading (#227). This checks only the invariants a script can judge without
+# an editorial call; it prints what it cannot cover, and cannot read for meaning.
+if [ -x ./scripts/check-prose-integrity.sh ]; then
+  ./scripts/check-prose-integrity.sh
+fi
+if [ -x ./scripts/test-prose-integrity.sh ]; then
+  ./scripts/test-prose-integrity.sh
+fi
+
 # --- install: sandbox test of the installer against throwaway target repos ---
 if [ -x ./scripts/test-install.sh ]; then
   ./scripts/test-install.sh
