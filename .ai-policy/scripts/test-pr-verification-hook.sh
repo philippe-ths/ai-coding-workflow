@@ -120,6 +120,12 @@ assert_allowed "a section opening with Nothing but continuing" \
 assert_allowed "a real declaration under a heading" \
   "$(bash_payload "gh pr create --title x --body-file $(body_file h7.md 'Tests pass.' '' '## What was not checked' '' 'The four tools were not driven; only configuration was asserted.')")"
 
+# A body that demonstrates the bad form inside a fenced code block is
+# discussing the rule, not declaring a gap. This pull request is written
+# that way, and blocked itself before the fences were excluded.
+assert_allowed "a bare assertion shown inside a fenced code block" \
+  "$(bash_payload "gh pr create --title x --body-file $(body_file h8.md 'Tests pass.' '' 'The guard misses this form:' '' '```' '## What was not checked' '' 'Nothing.' '```' '' '## What was not checked' '' 'The four tools were not driven.')")"
+
 echo "A bare assertion in place of part 3 is blocked:"
 
 for bare in "Not verified: nothing" "**Not verified:** none" "- not checked: n/a" "Unverified: nil" "Not verified: -"; do

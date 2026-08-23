@@ -77,8 +77,17 @@ check_body() {
   #    swallow a real declaration when apostrophes pair up across it, and that
   #    is the direction to err in: a missed box-tick costs a caveat, a false
   #    block costs the guard its credibility.
-  local unquoted folded
-  unquoted="$(printf '%s' "$norm" | sed -e 's/"[^"]*"/QUOTED/g' -e "s/'[^']*'/QUOTED/g")"
+  #    A fenced code block is a demonstration, not a declaration. Backticks are
+  #    stripped by normalise, so the fences have to go before it runs, and only
+  #    this check uses the stripped text: a body that shows the bad form in order
+  #    to discuss it is the same case as one that quotes it inline, and the
+  #    pull request fixing this guard is necessarily written that way.
+  local nofence unquoted folded
+  nofence="$(printf '%s' "$body" | LC_ALL=C awk '
+    /^[[:space:]]*```/ { infence = !infence; next }
+    !infence { print }
+  ' | normalise)"
+  unquoted="$(printf '%s' "$nofence" | sed -e 's/"[^"]*"/QUOTED/g' -e "s/'[^']*'/QUOTED/g")"
   #    The declaration is as often a heading with the bare word beneath it as it
   #    is one line, and of the twenty-five most recent merged bodies here, every
   #    one that declares a surface uses the heading form. Matching only the one
