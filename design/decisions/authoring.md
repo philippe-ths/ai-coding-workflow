@@ -150,7 +150,9 @@ Update the context file when build, runtime, or dependency boundaries change.
 During reviews, remove stale lines instead of accumulating historical notes.
 Update outdated terms when the codebase is renamed or refactored.
 Keep the file under 300 lines.
-If the file approaches 300 lines, merge overlapping facts and remove low-value detail.
+Give a new fact its own line rather than extending a line that already exists.
+Treat the file as full: once it is at the limit, adding a fact means choosing which line leaves.
+Merge overlapping facts and remove low-value detail to make that room.
 
 ### Skill files (SKILL.md)
 
