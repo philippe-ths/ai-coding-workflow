@@ -55,6 +55,7 @@ Before proposing the first remote GitHub action, check:
 - Confirm aiw-verification's justification step has been completed for the work in this PR, and that the pull request body carries it. Pass the body from a file rather than leaving it to an editor or to commit messages, because the policy layer reads it there and blocks a body it cannot read. (Why: a pull request without a completed verification justification is a pull request opened on unverified work. Completed means every surface part 3 names has a resolution, not that every check has already run. See aiw-verification for the justification step itself.)
 - Scope what the body claims to the evidence that exists as you open it. Evidence you intend to gather is deferred in the justification, named with its method, never written up as though it has already run; post it on the pull request when it arrives, before the human's done decision. (Why: opening a pull request is not the done decision, so the pull request is part of the verification surface rather than the end of it.)
 - Whether documentation or README files need updating based on the change.
+- Whether the branch changed what `project-context.md` records, and if so refresh it with the aiw-project-context-management skill.
 - Whether version numbers need updating.
 - Whether a tagged release is needed.
 - Parent and sub-issue closure status.

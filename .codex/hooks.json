@@ -39,6 +39,11 @@
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-pr-verification.sh\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/remind-context-management.sh\"",
+            "timeout": 10
           }
         ]
       }
