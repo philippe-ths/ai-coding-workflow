@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.28.0
+Version: 3.29.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -155,11 +155,12 @@ When producing a plan:
 - State the goal and the user-visible behaviour that must change.
 - State the modality classification and the oracle (what counts as correct, at what trust level, from what source).
 - State the files and code areas the change will touch.
-- State the proposed implementation approach at the level of what will be done, not how every line is written.
+- State what will be done, not how every line is written: the first meaningful implementation slice, the feedback signal that will test its direction, and later work as revisable direction rather than fixed prescription.
 - State assumptions and classify each as issue-sourced (unverified) or codebase-confirmed (verified by reading the code), and how each issue-sourced assumption will be verified.
 - If a codebase-confirmed assumption turns out to be wrong during implementation, stop and revise the plan.
 - State remaining uncertainties, risks, and edge cases.
 - Mark the change as higher-risk if it crosses real seams between components, touches external systems, modifies data flow between processes or pipeline stages, or affects state other parts of the system depend on. Include at least one runtime validation step for higher-risk changes.
+- If the task affects a documented architectural boundary, name the deterministic check that enforces it in the verification approach. If no such check exists, record that boundary as an unverified surface. Do not add enforcement tooling unless the approved scope requires it.
 - State the verification approach: what evidence will be required to declare done.
 - Treat the issue goal as authoritative but implementation suggestions as provisional until the codebase confirms them. If the issue and the codebase disagree, prioritise the codebase and flag the mismatch.
 
@@ -365,6 +366,7 @@ These are the human's to do; the AI cannot:
 The following apply to every task without exception:
 
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
+- ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
 - ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.

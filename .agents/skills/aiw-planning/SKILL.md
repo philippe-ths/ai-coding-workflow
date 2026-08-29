@@ -79,10 +79,11 @@ The plan the agent produces for the user should have these elements:
 - **Modality classification.** The modality (or modalities) recorded above.
 - **Oracle.** What counts as correct for this task and where it comes from. (See "The Oracle Section" below.)
 - **Files and code areas.** What the change will touch.
-- **Implementation approach.** The proposed approach, at the level of what will be done, not how every line is written.
+- **Implementation approach.** What will be done, not how every line is written: the first meaningful implementation slice, the feedback signal that will test its direction, and later work as revisable direction rather than fixed prescription.
 - **Assumptions.** Separated into issue-sourced and codebase-confirmed. (See "Assumption Classification" below.)
 - **Assumption verification.** How each issue-sourced assumption will be verified before or during implementation.
 - **Risks and edge cases.** Including any higher-risk flag. (See "Higher-Risk Flags" below.)
+- **Architectural boundaries.** For each documented boundary the task affects, the deterministic check that enforces it, or its absence as an unverified surface. Do not add enforcement tooling unless the approved scope requires it.
 - **Verification approach.** What evidence will be required to declare done. (See "Verification Approach in the Plan" below.)
 - **Testing notes.** What test infrastructure exists, what gaps exist, what will be needed. (See "Testing Notes in the Plan" below.)
 - **Remaining uncertainties.** What is still ambiguous before implementation begins.
