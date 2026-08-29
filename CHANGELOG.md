@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.29.0 - 2026-08-29
+
+### Added
+
+- `ai-workflow.md` gains an Always Do rule treating non-convergence as evidence rather than a cue to try another variation: when successive attempts repair one surface while reopening another, or repeat an approach without new evidence, implementation stops and the task framing, oracle, plan and code structure are reassessed before anything else changes. The convergence machinery already existed but only inside failure-analysis mode, which is reached through a contradicted "done" claim. Thrashing that never produces a "done" claim to contradict was therefore unreachable by it, and the agent could cycle indefinitely without any rule firing. The new rule is a standing one so it applies during implementation, and it names the same four reassessment targets `aiw-failure-analysis` escalates to, so the two paths converge on one procedure rather than becoming two ([#241]).
+- The `aiw-planning` plan gains an **Architectural boundaries** element: for each documented boundary the task affects, the deterministic check that enforces it, or its absence recorded as an unverified surface. The absence is the point. A boundary documented in project context with nothing enforcing it is invisible at planning time and stays invisible through verification, because `aiw-verification` names unverified surfaces from what the change touched and a boundary is not a code path it can see. The element carries an explicit "do not add enforcement tooling unless the approved scope requires it" clause, because the natural agent response to a missing check is to build one, and that is scope expansion the human did not approve ([#241]).
+
+### Changed
+
+- The plan's **Implementation approach** element now asks for the first meaningful implementation slice and the feedback signal that will test its direction, with later work stated as revisable direction rather than fixed prescription. The existing bound on the plan's *detail* ("what will be done, not how every line is written") is kept, because the new wording bounds a different thing — the plan's *confidence*. A plan could previously be appropriately coarse and still commit the whole sequence before any of it had met the codebase. Naming the feedback signal is what makes the revisability operative: without it "revisable" is a disposition, and with it the plan says where the evidence to revise on arrives ([#241]).
+- `lite-monolithic/ai-workflow.md` receives all three rules inline, since it has no skill layer to carry the planning ones. Its existing convergence line stays where it is, inside the failure-analysis section, because it is the reactive form and the new Always Do rule is the standing one ([#241]).
+
 ## 3.28.0 - 2026-08-26
 
 ### Added
@@ -631,3 +643,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#237]: https://github.com/philippe-ths/ai-coding-workflow/issues/237
 [#216]: https://github.com/philippe-ths/ai-coding-workflow/issues/216
 [#239]: https://github.com/philippe-ths/ai-coding-workflow/issues/239
+[#241]: https://github.com/philippe-ths/ai-coding-workflow/issues/241
