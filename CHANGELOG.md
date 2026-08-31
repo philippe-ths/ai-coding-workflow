@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.31.0 - 2026-08-31
+
+### Added
+
+- `aiw-verification` gains a Refuting Pass: a sub-agent that did not write the change, asked to find where the work fails rather than whether it works. The skill already sent a clean-context agent to drive the end-to-end run, but that agent is only ever asked to observe and report. Nobody was ever asked to attack the claim, and a reviewer asked whether work is good says yes. Three classes of defect therefore passed verification untouched: work that satisfies the words of the requirement and not its intent, change beyond what the plan named, and tests that would still pass if the code under them were wrong ([#250]).
+- The pass is defined by what it is denied as much as by what it is asked. It receives the requirement, the plan's scope and file list, the diff, and the evidence part 2 cites; it never receives the implementer's transcript or reasoning, because the narrative is what makes a wrong reading sound right and a reviewer that has read why the code was written this way will accept that it is written this way ([#250]).
+- Findings are evidence weighed in the main loop rather than orders, and each resolves into one of the four states the scoping step already defines. A reviewer that must be obeyed becomes a second thing to rubber-stamp; one that can be dismissed in silence is not a check at all ([#250]).
+- Failed clearance routes into the existing non-convergence rule rather than a new one. Work goes back once, and a second pass that does not clear the same finding is an approach repeated without new evidence, which is the condition `ai-workflow.md` already names. It is grounded in that rule's own words rather than gestured at, because `aiw-failure-analysis`'s trigger list is anchored to a contradicted "done" claim and the refuting pass runs before one is made ([#250]).
+- `lite-monolithic/ai-workflow.md` receives a condensed refuting pass, since it has no skill layer to carry it ([#250]).
+
+### Changed
+
+- `CLAUDE.md` gains a routing entry mapping the refuting pass to a second general-purpose agent, alongside the existing clean-context verification entry. The two are distinct shapes of work and the routing table maps shapes to tools, so collapsing them would send one agent to do both jobs and lose the withheld-transcript property that makes the second one work ([#250]).
+
 ## 3.30.0 - 2026-08-31
 
 ### Added
@@ -660,3 +674,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#239]: https://github.com/philippe-ths/ai-coding-workflow/issues/239
 [#244]: https://github.com/philippe-ths/ai-coding-workflow/issues/244
 [#241]: https://github.com/philippe-ths/ai-coding-workflow/issues/241
+[#250]: https://github.com/philippe-ths/ai-coding-workflow/issues/250
