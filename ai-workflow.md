@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.29.0
+Version: 3.30.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -9,9 +9,10 @@ It is written for the AI coding agent.
 
 - The codebase is the truth about what the system does.
 - The spec is the truth about what the system should do.
+- The north-star is the truth about what the system should be like when the spec permits more than one answer.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, project context, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
-- When code, spec, and runtime conflict, reconcile — none wins by default.
+- When code, spec, north-star, and runtime conflict, reconcile — none wins by default.
 
 ## Task Flow
 
@@ -25,6 +26,8 @@ The skill set enforces disciplines invoked at specific points in a task.
 6. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
 Conditional skills (aiw-performance-profiling, aiw-security-testing) load alongside the above when their triggers apply — see Non-Functional Dimensions.
+
+`north-star.md`, if it exists, is the intent oracle: consult it before interrupting the human with a question of preference, and ask where it is silent. aiw-north-star owns it.
 
 `project-context.md`, if it exists, is read at task start. If stale, flag it. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
 
@@ -56,7 +59,7 @@ The AI must raise these without being asked, so the human has the information ne
 
 - ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, deferred with its method named, or waived by the human. Opening a pull request is not that decision, since the human makes it afterwards, so the pull request is where the justification is presented and where deferred evidence lands before they decide.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis, which reassesses the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
+- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A preference the north-star settles is not unclear; risk and scope always are.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
 - ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.

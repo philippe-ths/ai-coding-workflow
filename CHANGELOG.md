@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.30.0 - 2026-08-31
+
+### Added
+
+- `aiw-north-star`, a skill owning `north-star.md`, a per-repository record of what the project would refuse. The workflow had an oracle for correctness and none for intent, so every question with two acceptable answers was resolved by interrupting the human, which is the mechanical reason human attention is spent at implementation altitude. The skill's load-bearing rule is that a refusal decides and an intention does not: "fast and simple" settles nothing because both options usually qualify, while "better to do nothing than the wrong thing" settles whether to degrade or fail loudly, whether to auto-apply or ask first, and whether to guess a malformed input's format or reject it. It carries a trust hierarchy for intent whose top rung is a refusal the human actually made and whose bottom rung, anything inferred from the code, is circular because the north-star exists to judge the codebase ([#244]).
+- `ai-workflow.md` gains a first principle: the north-star is the truth about what the system should be like when the spec permits more than one answer. The intent line was already there in incomplete form, since the spec says whether the system should do X and says nothing about which of two acceptable ways to do X is wanted. Adding the principle rather than a new rule keeps the change at the altitude of its neighbours and makes the other two edits smaller ([#244]).
+- The `aiw-planning` Oracle section now asks the plan to name the intent oracle where more than one answer would be correct, recording which option the north-star settled and on which entry. This extends the existing section rather than adding a plan element, because the north-star is an oracle rather than a new kind of planning artifact ([#244]).
+
+### Changed
+
+- The Always Do rule on stopping to ask now states that a preference the north-star settles is not unclear, while risk and scope always are. Without the second clause the first would race the Ask First list, which is about irreversibility rather than taste and stays with the human unchanged ([#244]).
+- The First Principles reconciliation rule now lists the north-star alongside code, spec, and runtime, so a spec that asks for something the project would refuse is reconciled rather than silently resolved in the spec's favour ([#244]).
+- `lite-monolithic/ai-workflow.md` receives the principle, the two rule changes, and a condensed North Star section, since it has no skill layer to carry the authoring rules ([#244]).
+
 ## 3.29.0 - 2026-08-29
 
 ### Added
@@ -643,4 +657,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#237]: https://github.com/philippe-ths/ai-coding-workflow/issues/237
 [#216]: https://github.com/philippe-ths/ai-coding-workflow/issues/216
 [#239]: https://github.com/philippe-ths/ai-coding-workflow/issues/239
+[#244]: https://github.com/philippe-ths/ai-coding-workflow/issues/244
 [#241]: https://github.com/philippe-ths/ai-coding-workflow/issues/241

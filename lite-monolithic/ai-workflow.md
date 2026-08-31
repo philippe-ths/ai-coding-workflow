@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.29.0
+Version: 3.30.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -11,9 +11,10 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 - The codebase is the truth about what the system does.
 - The spec or issue is the truth about what the system should do.
+- The north-star is the truth about what the system should be like when the spec permits more than one answer.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
-- When code, spec, and runtime conflict, reconcile them — none wins by default.
+- When code, spec, north-star, and runtime conflict, reconcile them — none wins by default.
 
 ## Workflow
 
@@ -146,6 +147,17 @@ Rules:
 - Mark synthetic fixtures visibly so no later read mistakes them for higher-trust data.
 - When you capture or reuse real ground-truth artifacts, record their provenance alongside them: trust level, origin, capture date, any modifications, and what would make them stale. Do not assume provenance can be reconstructed from a filename later.
 - A failing test against real ground truth is a signal about the code. Do not modify the oracle to make it pass.
+
+## The North Star
+
+The oracle above settles what is correct. It cannot settle which of two correct answers is wanted, and that question is what most interruptions are made of. `north-star.md`, where the project has one, is the record of what this project would refuse.
+
+- A refusal decides; an intention does not. "Fast and simple" settles nothing, because both options usually qualify. "Better to do nothing than the wrong thing" settles whether to degrade or fail loudly, whether to auto-apply or ask first, and whether to guess a malformed input's format or reject it.
+- Rank every entry by where it came from: a refusal the human actually made, then one they stated in the abstract, then a stated preference, then an intention, then anything the agent inferred from the code. Only the first has real authority, and the last is circular, because the north-star exists to judge the codebase.
+- Keep entries at the altitude where they decide a question you did not have in mind when writing them. An entry naming code is a coding convention and belongs elsewhere; an entry that rules nothing out is decoration.
+- Build entries from corrections the human actually made, not from imagination. A refusal appearing in three unrelated situations was never about those situations, and that is an entry.
+- Test a draft against held-out corrections it was not written from, and name every miss. A north-star fitted to the cases used to write it predicts those cases and proves nothing.
+- Consult it before interrupting the human with a question of preference. Where it is silent the question is open, so ask; silence is not permission.
 
 ## Planning Requirements
 
@@ -367,7 +379,7 @@ The following apply to every task without exception:
 
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
+- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A preference the north-star settles is not unclear; risk and scope always are.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
 - ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.

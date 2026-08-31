@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.25.0
+Version: 1.26.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -12,6 +12,8 @@ Version: 1.25.0
 - **AI workflow**: the step-by-step process defined in `ai-workflow.md` that the agent follows for every task.
 - **Project context**: a factual reference document (`project-context.md`) describing the target repository's current implementation state, authored using the `aiw-project-context-management` skill.
 - **Project checks**: a per-repository document (`project-checks.md`) recording what is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
+- **North star**: a per-repository record (`north-star.md`) of what the project would refuse, maintained by the `aiw-north-star` skill.
+- **Intent oracle**: the north-star's role in the workflow, settling which of two acceptable options is wanted where the correctness oracle cannot.
 - **Session preflight**: a read-only run of the declared checks that reports project state the human may not be aware of and starts no work.
 - **Validation state**: a local runtime artifact (`.ai-policy/state/validation.status`) recording whether validation passed and, for a pass, a fingerprint of the working tree it was computed against.
 - **Tree fingerprint**: a hash of tracked and untracked-not-ignored content, produced by `.ai-policy/scripts/tree-fingerprint.sh`, which ties a validation result to the content that produced it so a pass from an earlier tree cannot satisfy the gate.
@@ -31,7 +33,7 @@ Version: 1.25.0
 - Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, and project-context management, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
+- Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, project-context management, and north-star authoring, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot, Gemini CLI, Codex) and `.claude/skills/` (Claude Code).
 - Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`).
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
@@ -71,6 +73,7 @@ Version: 1.25.0
 - A web browser: opens the generated static HTML dashboard; no server is involved.
 
 ## Project Structure
+- `north-star.md`: the intent oracle, authored per repository; `ai-workflow.md` instructs consulting it before interrupting the human with a question of preference, and asking where it is silent.
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent; its `Version:` header is the canonical project version.
 - `install-manifest.json`: source of truth for the product/factory boundary; lists product files per profile and tool, authored-in-target files, and factory-only files.
 - `INSTALL.md`: agent-actionable entry doc for installing or updating the workflow in a target repository.
@@ -81,7 +84,7 @@ Version: 1.25.0
 - `observations/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
 - `observations/workflow-reviews/`: archived periodic review outputs, each named by date.
 - `observations/investigations/`: findings from issues labelled investigation, each named by date; the 2026-08-21 record concludes that neither the session-observation tool nor the pull request corpus can measure whether independent verification reduces rework, and why. The two Python files beside it rebuild that record's corpus and recompute its figures; they are archival, pinned to that investigation, and not covered by validation.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`), each self-contained in a `SKILL.md` file.
+- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
