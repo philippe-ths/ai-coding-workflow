@@ -4,8 +4,8 @@ Explores moving the human up a level in the workflow, letting Build and Test run
 
 ## Status
 
-This is an exploration, not a decision.
-Nothing here has been implemented and no option has been chosen.
+This is an exploration, not a decision, with one exception.
+Nothing here has been implemented, and no option has been chosen except the measure named in Measuring Project Health, which was tested on 2026-08-31 and decided on the result.
 It records a design discussion held on 2026-08-31 so the reasoning is not lost.
 Where a claim is measured, the measurement is stated.
 Where a claim is argument, it is marked as argument.
@@ -359,20 +359,75 @@ Cyclomatic complexity, file length, and coupling scores are gameable.
 Splitting a 400-line file into four 100-line files improves every metric while comprehension gets worse.
 Complexity is conserved, so the metric moved and the complexity did not.
 
-Measure the cost of change instead, as ratios and concentrations rather than counts.
+An earlier draft of this section proposed four alternatives: churn concentration, cross-boundary co-change as a share of all changes, fix-after-fix rate, and attempts per accepted change.
+They shared one justification, that they are outcome measures rather than structure measures, so project size and feature count cancel out.
+That justification was tested on 2026-08-31 and does not hold.
 
-Churn concentration, meaning what share of changes land in what share of files.
-Cross-boundary co-change as a share of all changes, meaning how often a change has to touch more than one module.
-Fix-after-fix rate, meaning what fraction of changes are followed by a corrective change.
-Attempts per accepted change.
+### Measured: three of the four proposals fail
 
-These are outcome measures rather than structure measures, which is why they are hard to game.
-The only way to improve them is to make the area genuinely easier to change.
-Splitting a file into four that always co-change makes the coupling signal stronger, not weaker.
+Cross-boundary co-change is dominated by change size rather than by project size.
+Measured on `AI-running-coach` over 473 code-touching commits, the share of commits crossing a top-level directory rises with the number of files changed: 0% at one file, 9.7% at two to three, 33.7% at four to six, 48.7% at seven to eleven, 62.1% at twelve to twenty, then 57.1% at twenty-one or more on a thin count of 21 commits.
+The rise is monotonic up to twenty files and the top bucket is too small to read.
+A one-file commit cannot cross a boundary, so the measure largely reports how big the commits are.
 
-Adding a feature cleanly touches one module, needs no correction, and takes one attempt, so none of the four ratios move.
-Adding a feature messily touches four modules, needs two corrections, and takes three attempts, so all four move.
-Project size and feature count cancel out.
+Fix-after-fix fails the same way, and this repository had already recorded it.
+`observations/investigations/2026-08-21-verification-and-rework.md` found rework rate rising from 14.3% at one file to 88.5% at twenty-one or more, and concluded that "a later pull request touched the same files within 72 hours" is a proxy for file count rather than for defects.
+
+Churn concentration fails on project age instead.
+Gini over per-file touch counts on the same repository, by quarter, was 0.372, then 0.506, then 0.464.
+The first rise is project birth, where nearly every file is touched once and concentration is mechanically low.
+The measure tracks maturity, which is what it was supposed to be immune to.
+
+Attempts per accepted change survives the critique and is mostly not recoverable from git.
+Squash merges destroy the attempt history: this repository holds no merge commits at all, and `AI-running-coach` holds 24 across 557.
+What remains lives in the session store or the GitHub API rather than in local history.
+
+### Measured: what survives
+
+The established measure is propagation cost, from MacCormack, Rusnak and Baldwin (2006).
+It is the density of the visibility matrix, which is the transitive closure of the dependency graph, and it reads as the fraction of the system that could be affected by a change to a randomly chosen part of it.
+Sturtevant's 2013 dissertation linked architectural complexity differences of this kind to roughly three-fold increases in defect density and 50% productivity drops, which is the route by which a complexity measure predicts reliability without measuring reliability directly.
+
+The variant that matters here is the co-change form (Gaur and colleagues, MSR 2018), which builds the matrix from files that change together in git history rather than from declared dependencies.
+This removes the need for a language parser.
+A skill file and a TypeScript module are both nodes that either co-change or do not, so code, agent prose, configuration and documentation pass through one instrument and produce one number.
+
+Measured on 2026-08-31 over co-change graphs, with edges kept at three or more co-occurrences and 0.3 confidence, commits capped at twenty files, and files needing three or more changes to be counted: this repository scored 22.9% propagation cost with a cyclic core of 22.2%, and `AI-running-coach` scored 14.4% with a core of 13.8%.
+
+Three properties were tested rather than assumed.
+
+Age invariance holds.
+Over equal-sized sliding windows of 150 commits on `AI-running-coach`, propagation cost ran 17.8, 19.0, 26.6, 13.6, 9.2, 13.9, 11.9, and 31.5 percent.
+There is no birth artifact and no drift with maturity, which is the failure that disqualified churn concentration.
+
+The absolute number is not meaningful.
+Across defensible threshold settings the figure ranges from 2.3% to 93.6%.
+What is stable is the ordering, where this repository reads as more entangled than `AI-running-coach` under eleven of the twelve threshold settings swept.
+It is a comparative and trend instrument rather than a score, which is consistent with the descriptive-only stance recorded in `docs/adr/0001`.
+
+It identifies real structure without being told what to look for.
+The cyclic core of `AI-running-coach` is the coach service and its tests: prompts, context, retrieval, validator, framing, and prompt features.
+The cyclic core of this repository, once the mirrored skill directories are collapsed to single nodes, is `CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md` and seven `aiw-` skills, ten of forty-seven files.
+That is a finding about this project rather than about the method: the core skills cannot be changed independently of one another.
+
+### Measured: the blind spot
+
+Collapsing the mirrored skill directories removes seven files of pure duplication that cost a double edit on every skill change.
+Propagation cost moved from 22.9% to 24.8% and the cyclic core from 22.2% to 21.3%.
+It went up.
+
+Propagation cost measures entanglement.
+Duplication is a different axis and is invisible to it, as are dead code, sprawl, and poor naming.
+This is the concrete form of the criticism in the literature that the metric does not capture the semantics of an architectural transformation.
+
+A single number for project health is therefore not available.
+Any composite would need weights, and the weights would be the judgement the number was supposed to replace.
+
+### The decision
+
+Propagation cost and cyclic core size are adopted as the entanglement measure, with their scope stated: they say how tangled a project is and nothing about duplication or sprawl.
+No single project health score is adopted.
+Nothing is wired into validation or the observation tool by this record.
 
 ### One honesty constraint
 
@@ -380,6 +435,8 @@ A metric that only improves is not measuring.
 Sometimes a project should get more complex because it does more.
 The honest claim is not that complexity falls but that complexity is paid for.
 The measurable form is whether the cost of change in an area is rising while what the area does stays flat.
+That form still has no denominator, because every candidate for what an area does is a shape metric and is gameable in the flattering direction by inflating it.
+This is unresolved.
 
 ## The Non-Determinism Gap
 
@@ -432,7 +489,9 @@ Whether Build and Test should proceed without human approval, in exchange for be
 Whether the refuting reviewer is built before, alongside, or after that change.
 What the observability surface looks like in practice, given that an interruptible stream needs one.
 Whether escaping a mess is a new modality or Migrate pointed at intent.
-Whether the project health measures are computed from git history, from the session store, or both.
+Whether propagation cost is worth computing on a schedule, and against what baseline, given that only its trend and ordering carry meaning.
+What measures the axes propagation cost is blind to, chiefly duplication and sprawl, without reintroducing gameable shape metrics.
+What denominator, if any, makes the honesty constraint measurable.
 How the workflow's verification rules should change for non-deterministic systems.
 Where the north-star lives, how it is authored, and how corrections feed it.
 
@@ -440,6 +499,17 @@ Where the north-star lives, how it is authored, and how corrections feed it.
 
 The cost and cache figures are measured from the maintainer's own session store on 2026-08-31.
 They are local to this developer's usage and are not generalisable.
+
+The project health figures are measured from the git histories of this repository and `AI-running-coach` on 2026-08-31.
+They are two repositories by one developer, so they establish that the method runs and what it finds here, not that it generalises.
+The scripts that produced them were not kept.
+
+The propagation cost method is external published work rather than argument.
+Propagation cost and the visibility matrix come from MacCormack, Rusnak and Baldwin, "Exploring the Structure of Complex Software Designs", Management Science 2006.
+The link from architectural coupling to defect density and productivity comes from Sturtevant, "System Design and the Cost of Architectural Complexity", MIT 2013.
+The co-change variant that needs no language parser comes from a Design Structure Matrix approach for measuring co-change, MSR 2018.
+The limitation that the metric misses the semantics of an architectural transformation is reported by the Software Engineering Institute, "Variations on Using Propagation Costs to Measure Architecture Modifiability Properties".
+Dedicated complexity metrics for LLM-integrated applications exist (arXiv 2607.01903) and were read but not used, being too recent to rely on.
 
 The following claims come from an external personal knowledge base rather than from `design/research/`.
 They are not yet recorded in this repository with anchor IDs, which is a gap.
