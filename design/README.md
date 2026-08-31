@@ -18,6 +18,17 @@ Find the file for your concern:
 | `runtime-configuration.md` | Thinking effort defaults, output brevity, prompt caching, and subagent use |
 | `ai-workflow-line-by-line.md` | Rationale and source for every line in `ai-workflow.md` |
 
+## Explorations
+
+Files in `explorations/` record design discussions before a decision is made.
+They are dated and may span several concerns, unlike `decisions/` which covers one concern each.
+An exploration is superseded when its questions are answered in `decisions/`.
+
+| File | Subject |
+|---|---|
+| `2026-08-31-dark-factory.md` | Human role and review gates, delegation cost, project health measures, north-star, non-determinism |
+| `2026-08-31-intent-oracle.md` | A second oracle for intent: north-star trust hierarchy, authored artifact, two consumption points |
+
 ## Research
 
 Files in `research/` hold primary-source notes that back the reasoning in `decisions/`.
