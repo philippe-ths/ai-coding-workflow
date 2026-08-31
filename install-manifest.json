@@ -20,7 +20,7 @@
       }
     }
   },
-  "authored_in_target": ["project-context.md", "project-checks.md"],
+  "authored_in_target": ["project-context.md", "project-checks.md", "north-star.md"],
   "factory_only": [
     "install-manifest.json",
     "INSTALL.md",

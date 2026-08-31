@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.29.0
+Version: 3.30.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -11,14 +11,17 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 - The codebase is the truth about what the system does.
 - The spec or issue is the truth about what the system should do.
+- The north-star is the truth about what the project is trying to achieve.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
-- When code, spec, and runtime conflict, reconcile them — none wins by default.
+- When code, spec, north-star, and runtime conflict, reconcile them — none wins by default.
 
 ## Workflow
 
 1. **Step 1: Confirm the task and inputs.**
 
+   - Check the request against `north-star.md`. If it pulls the project away from its goal, stop before planning and put it to the human.
+   - See [The North Star](#the-north-star).
    - Confirm the GitHub issue number and read the issue.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
    - Check branch state and confirm the branch is up to date with the target branch.
@@ -146,6 +149,16 @@ Rules:
 - Mark synthetic fixtures visibly so no later read mistakes them for higher-trust data.
 - When you capture or reuse real ground-truth artifacts, record their provenance alongside them: trust level, origin, capture date, any modifications, and what would make them stale. Do not assume provenance can be reconstructed from a filename later.
 - A failing test against real ground truth is a signal about the code. Do not modify the oracle to make it pass.
+
+## The North Star
+
+The oracle above settles what is correct. It cannot say what the project is trying to achieve, and that decides most of the judgement calls that would otherwise reach the human. `north-star.md`, where the project has one, is the shortest statement of that goal and holds nothing else.
+
+- Short is the point. The file is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal grown into a list of everything the project does has stopped being a goal.
+- Keep it between two failures. Too low and it describes what the project currently does, which means it was read out of the codebase and can never judge it. Too high and no request could ever contradict it. The test: could a plausible feature request pull against this?
+- Never write it from inference alone. The goal is why the codebase looks as it does, so reading it back out of the artifact is circular. Read what exists, bring a candidate to the human, ask for the outcome rather than a summary, confirm in plain terms, then write.
+- Check an arriving request against it before planning. A request that pulls the project away from its goal is a signal, not an obstacle: either the request is wrong or the goal has moved, and the human decides which. Planning around a conflict resolves it silently in favour of the request.
+- Never widen the goal to accommodate the request in front of you. A goal stretched to admit whatever conflicted with it will not conflict with anything again.
 
 ## Planning Requirements
 
@@ -367,7 +380,7 @@ The following apply to every task without exception:
 
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope.
+- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A question the north-star settles is not unclear; risk and scope always are.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
 - ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
