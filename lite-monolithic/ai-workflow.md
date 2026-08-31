@@ -11,7 +11,7 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 - The codebase is the truth about what the system does.
 - The spec or issue is the truth about what the system should do.
-- The north-star is the truth about what the project is for and what it must never become.
+- The north-star is the truth about what the project is trying to achieve.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
 - When code, spec, north-star, and runtime conflict, reconcile them — none wins by default.
@@ -20,7 +20,7 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 1. **Step 1: Confirm the task and inputs.**
 
-   - Check the request against `north-star.md`. If it would break the goal or a restriction, stop before planning and put it to the human.
+   - Check the request against `north-star.md`. If it pulls the project away from its goal, stop before planning and put it to the human.
    - See [The North Star](#the-north-star).
    - Confirm the GitHub issue number and read the issue.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
@@ -152,14 +152,13 @@ Rules:
 
 ## The North Star
 
-The oracle above settles what is correct. It cannot say what the project is for, or what it must never become, and those decide most of the judgement calls that would otherwise reach the human. `north-star.md`, where the project has one, holds exactly two things: the goal, and the restrictions it must stay inside.
+The oracle above settles what is correct. It cannot say what the project is trying to achieve, and that decides most of the judgement calls that would otherwise reach the human. `north-star.md`, where the project has one, is the shortest statement of that goal and holds nothing else.
 
-- The goal names the outcome the project is trying to achieve, never the mechanism. The restrictions say what it must never become, must never require, or must never give up. A goal alone settles nothing, because it can usually be honoured in two opposite ways; the restrictions are what collapse the choice.
-- Keep both above the altitude of a project's recorded constraints. A restriction naming a file, a number, a command or a tool has fallen to constraint altitude: it should explain why that constraint exists, and still guide when the number changes. A restriction that rules out nothing anyone would have proposed is decoration.
-- Never write this file from inference alone. The codebase cannot tell you the goal, because the goal is why the codebase looks as it does. Read what exists, bring a candidate goal and candidate restrictions to the human, ask one question at a time, confirm each in plain terms, then write.
-- Check an arriving request against the file before planning it. A request that would break the goal or a restriction is a signal, not an obstacle: either the request is wrong or the goal has moved, and the human decides which. Planning around a conflict resolves it silently in favour of the request.
-- Never soften a restriction to fit the request in front of you. A restriction rewritten to permit the thing that conflicted with it has stopped being a restriction, and nothing will conflict with it again.
-- Consult it when deciding how and why. A question it settles is not an open question; where it says nothing, ask.
+- Short is the point. The file is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal grown into a list of everything the project does has stopped being a goal.
+- Keep it between two failures. Too low and it describes what the project currently does, which means it was read out of the codebase and can never judge it. Too high and no request could ever contradict it. The test: could a plausible feature request pull against this?
+- Never write it from inference alone. The goal is why the codebase looks as it does, so reading it back out of the artifact is circular. Read what exists, bring a candidate to the human, ask for the outcome rather than a summary, confirm in plain terms, then write.
+- Check an arriving request against it before planning. A request that pulls the project away from its goal is a signal, not an obstacle: either the request is wrong or the goal has moved, and the human decides which. Planning around a conflict resolves it silently in favour of the request.
+- Never widen the goal to accommodate the request in front of you. A goal stretched to admit whatever conflicted with it will not conflict with anything again.
 
 ## Planning Requirements
 

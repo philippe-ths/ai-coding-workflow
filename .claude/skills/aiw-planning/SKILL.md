@@ -99,7 +99,7 @@ The oracle depends on the modality (aiw-ground-truth defines this per modality).
 - For a migrate, the oracle is the previous behaviour on real inputs, with an explicit exception list.
 - For configure, the oracle is the real external system, not a mock.
 
-The oracle above settles what is correct. Where the approach turns on what the project is for or what it must not become, `north-star.md` settles that; record what it settled. See aiw-north-star.
+The oracle above settles what is correct. Where the approach turns on what the project is trying to achieve, `north-star.md` settles that; record what it settled. See aiw-north-star.
 
 If the modality requires a trust level higher than what is currently available, flag it at planning time. Apply aiw-ground-truth's sourcing protocol — stop and ask the user, do not invent a substitute. Discovering at implementation time that the required oracle was never available is more expensive than naming the gap now.
 

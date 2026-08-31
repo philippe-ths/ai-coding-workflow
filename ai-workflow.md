@@ -9,7 +9,7 @@ It is written for the AI coding agent.
 
 - The codebase is the truth about what the system does.
 - The spec is the truth about what the system should do.
-- The north-star is the truth about what the project is for and what it must never become.
+- The north-star is the truth about what the project is trying to achieve.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, project context, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
 - When code, spec, north-star, and runtime conflict, reconcile — none wins by default.
@@ -18,7 +18,7 @@ It is written for the AI coding agent.
 
 The skill set enforces disciplines invoked at specific points in a task.
 
-1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it conflicts.
+1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
 3. **Planning:** aiw-planning (baseline, modality, oracle, plan).
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds.
@@ -28,7 +28,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 
 Conditional skills (aiw-performance-profiling, aiw-security-testing) load alongside the above when their triggers apply — see Non-Functional Dimensions.
 
-`north-star.md`, if it exists, states what the project is for and the restrictions it must stay inside. Consult it when deciding how and why. A request that would break the goal or a restriction stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
+`north-star.md`, if it exists, is the shortest statement of what the project is trying to achieve. Consult it when deciding how and why. A request that pulls the project away from that goal stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
 
 `project-context.md`, if it exists, is read at task start. If stale, flag it. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
 
