@@ -213,6 +213,32 @@ Whether `aiw-init` should report a north-star that has gone unused or unmissed, 
 Whether the predictive test is a one-time authoring gate or a recurring check.
 How an entry is retired when the human's taste changes, given that provenance ties entries to past decisions.
 
+## Superseded During Implementation
+
+Recorded 2026-08-31, after the choices above met a first implementation.
+
+Two things in this file, both inherited from the dark-factory exploration, turned out to be wrong.
+
+**The north-star is not a list of refusals mined from corrections.**
+It holds the goal the project is trying to achieve and the restrictions it must stay inside, both at high altitude.
+Building it from logged corrections produces entries about how the agent should work rather than about what the project is, because a workflow repository's corrections are corrections of method.
+A first draft written that way was rejected for exactly this: it read as a methodology, and half of it would never have decided a question about the product.
+
+**It is authored by interview, not by inference.**
+The agent writes the file and the human is its source of truth, the same division `project-context.md` uses with the codebase.
+The procedure is: read what exists, bring a candidate goal and candidate restrictions, ask, confirm, write.
+The codebase cannot supply the goal, because the goal is why the codebase looks as it does.
+
+Two consequences follow.
+
+The predictive test described above tested a draft against held-out corrections.
+Corrections are the wrong corpus for entries about the project, and the held-out sample drawn for it is moot.
+Whether an interview-authored north-star needs a test of its own, and what it would be tested against, is open.
+
+The consumption points changed shape.
+The file is not only consulted to settle a question; an arriving request is checked against it before planning, and a conflict stops the work and reopens the interview.
+That check is a workflow step rather than a hook, because a hook would tie it to one tool.
+
 ## Sources
 
 The framing, the four trees, and every claim attributed to the dark-factory discussion come from `design/explorations/2026-08-31-dark-factory.md`.

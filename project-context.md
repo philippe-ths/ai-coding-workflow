@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.26.0
+Version: 1.28.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -12,8 +12,8 @@ Version: 1.26.0
 - **AI workflow**: the step-by-step process defined in `ai-workflow.md` that the agent follows for every task.
 - **Project context**: a factual reference document (`project-context.md`) describing the target repository's current implementation state, authored using the `aiw-project-context-management` skill.
 - **Project checks**: a per-repository document (`project-checks.md`) recording what is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
-- **North star**: a per-repository record (`north-star.md`) of what the project would refuse, maintained by the `aiw-north-star` skill.
-- **Intent oracle**: the north-star's role in the workflow, settling which of two acceptable options is wanted where the correctness oracle cannot.
+- **North star**: a per-repository statement (`north-star.md`) of the goal a project is trying to achieve and the restrictions it must stay inside, authored by the `aiw-north-star` skill through an interview with the human.
+- **Restriction**: a north-star entry naming what the project must never become, require, or give up; `project-context.md`'s Important Constraints are its consequences, one altitude below.
 - **Session preflight**: a read-only run of the declared checks that reports project state the human may not be aware of and starts no work.
 - **Validation state**: a local runtime artifact (`.ai-policy/state/validation.status`) recording whether validation passed and, for a pass, a fingerprint of the working tree it was computed against.
 - **Tree fingerprint**: a hash of tracked and untracked-not-ignored content, produced by `.ai-policy/scripts/tree-fingerprint.sh`, which ties a validation result to the content that produced it so a pass from an earlier tree cannot satisfy the gate.
@@ -73,7 +73,7 @@ Version: 1.26.0
 - A web browser: opens the generated static HTML dashboard; no server is involved.
 
 ## Project Structure
-- `north-star.md`: the intent oracle, authored per repository; `ai-workflow.md` instructs consulting it before interrupting the human with a question of preference, and asking where it is silent.
+- `north-star.md`: the goal and restrictions, authored per repository and not present in this repository yet; `ai-workflow.md` step 1 checks an arriving request against it and stops before planning when the request conflicts.
 - `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent; its `Version:` header is the canonical project version.
 - `install-manifest.json`: source of truth for the product/factory boundary; lists product files per profile and tool, authored-in-target files, and factory-only files.
 - `INSTALL.md`: agent-actionable entry doc for installing or updating the workflow in a target repository.

@@ -1,87 +1,74 @@
 ---
 name: aiw-north-star
-description: "Structured process for authoring and updating `north-star.md`, a repository's record of what it would refuse, which the workflow consults as the oracle for questions of desirability that correctness cannot settle. Use this skill before any edit to that file, when the human asks to create, scaffold, revise, or test the north-star, and when the agent notices it has been overruled twice on the same kind of choice, which is the raw material an entry is made from. Phrasings include 'what is our north-star', 'the north-star does not cover this', 'you keep getting this wrong', and 'record that preference'. The skill exists to stop the artifact drifting into a mission statement: a north-star built from intentions rather than refusals decides nothing, and one fitted to the cases used to write it cannot be tested."
+description: "Structured process for authoring and updating `north-star.md`, a repository's high-altitude statement of the goal it is trying to achieve and the restrictions it must stay inside. Use this skill when the human asks to create, scaffold, revise, or check the north-star, with phrasings like 'what is this project for', 'set up a north-star', or 'is that still our goal'. Use it also, and without being asked, when a request that has just arrived would break the stated goal or a restriction, before any planning happens: that conflict means either the request is wrong or the goal has moved, and neither is the agent's call. The skill exists because a project's direction is the one thing no oracle can derive: the codebase shows what is, the spec shows what is asked, and neither says what the project is for or what it must never become."
 ---
 
 # North Star
 
-Read this file before creating or editing `north-star.md`.
+Read this file before creating or editing `north-star.md`, and when a request conflicts with what it says.
 
 ## Why This Skill Exists
 
-The workflow can tell whether a change is correct. It cannot tell whether a change is wanted.
+The workflow knows what the system does, because the codebase says so. It knows what the system should do, because the spec says so. It knows what the system currently is, because `project-context.md` says so.
 
-aiw-ground-truth gives correctness a trust hierarchy, a sourcing protocol, provenance rules, and modality-specific rules. Intent has none of them, so every question with two acceptable answers is resolved by interrupting the human. That is why the human's attention is spent at implementation altitude instead of on direction.
+Nothing says what the project is *for*, or what it must never become. So every judgement that turns on the project's direction is resolved by interrupting the human, and the human ends up spending their attention on implementation instead of on direction.
 
-`north-star.md` is the intent oracle. Its job is to answer "which of these two acceptable options" without asking.
+`north-star.md` holds exactly two things: the goal, and the restrictions.
 
-## A Refusal Decides; An Intention Does Not
+## What Goes In
 
-This is the whole craft. Most interruptions are a choice between two options that are both fine, and only a refusal collapses that choice.
+**The goal.** What the project is trying to achieve, in one statement. It names the outcome, never the mechanism. A reader who knows nothing about the implementation should be able to tell from it whether a proposed piece of work belongs here.
 
-"Fast and simple" is an intention. Both options are usually fast and simple enough, so nothing is decided and the human is interrupted anyway.
+**The restrictions.** What the project must never become, must never require, or must never give up. These are what make the goal decisive, because a goal on its own can usually be honoured in two opposite ways and settles nothing between them.
 
-"Better to do nothing than the wrong thing" is a refusal. It settles whether to degrade or fail loudly, whether to auto-apply or ask first, and whether to guess a malformed input's format or reject it. One line, three decisions, no interruption.
+Both are the human's. The agent writes the file and the human is its source of truth, the same division `project-context.md` already uses with the codebase.
 
-Write every entry so that it rules something out. An entry that rules nothing out is decoration, and decoration in an oracle is worse than an empty file, because the agent will consult it and proceed on nothing.
+## Altitude
 
-## Trust Hierarchy for Intent
+`project-context.md` has an Important Constraints section. Everything in it is a *consequence* of a restriction, and the difference between the two files is exactly that gap.
 
-Rank every candidate entry by where it came from. Highest first:
+"`project-context.md` must stay under 300 lines" is a constraint. The restriction that produced it is that an agent has to carry the whole governance layer in context alongside the work it is doing. The constraint names a number; the restriction explains why a number exists and would still guide you if the number changed.
 
-1. A refusal the human actually made, in a situation on the record.
-2. A refusal the human stated in the abstract.
-3. A preference the human stated.
-4. An intention or an aspiration.
-5. Anything the agent inferred from the code.
+The test, in both directions:
 
-Rank 1 is the only rung with real authority. Ranks 4 and 5 are how a north-star becomes a mission statement, and rank 5 is circular: the codebase is what the north-star is supposed to judge.
+- If a restriction names a file, a number, a command, or a tool, it has fallen to constraint altitude. Climb until it explains the constraint instead of repeating it.
+- If a restriction rules out nothing a reasonable person would otherwise have proposed, it is decoration. Descend until it excludes something real.
 
-Record each entry's rank and the decisions it came from. Provenance is not bookkeeping here. It is what tells a later reader whether the entry earned its place, and it is what the predictive test is run against.
+Keep the set small. Restrictions that never bind are noise, and a long list is a sign they have drifted down to constraint altitude.
 
-## The Altitude Test
+## Authoring: Interview, Confirm, Write
 
-An entry should speak about the project's character and still settle code-level questions.
+Never write this file from inference alone. The codebase cannot tell you the goal, because the goal is why the codebase looks the way it does, and reading intent out of an artifact is circular.
 
-Too low and it is a coding convention. "Never add a dependency to save fifty lines" belongs in project context or a lint rule; it names code, applies to one situation, and teaches nothing about the next.
+1. **Prepare.** Read `project-context.md` and enough of the repository to form a candidate goal and candidate restrictions. Bring these to the interview. Starting the human from a blank page wastes the one thing the agent can genuinely do here.
+2. **Interview.** Put questions to the human one at a time, most consequential first. Ask what the project is for, what it must never become, and what they would turn down even when it would work.
+3. **Confirm.** State the goal and each restriction back in plain terms and get explicit agreement on each. A restriction the human has not affirmed is the agent's guess wearing the human's authority.
+4. **Write.** Record each restriction with what it rules out, so a later reader can tell whether it still binds.
 
-Too high and it settles nothing. "Build quality software" is not wrong, it is inert.
+Questions that work ask for a boundary: what would you turn down, what would make you abandon this, what would you refuse even if it were free. Questions that fail ask for a summary, because a summary of a project is its description and this file is not a description.
 
-The test: does this entry decide a question you did not have in mind when you wrote it? If it only decides the case it came from, climb.
+## When a Request Conflicts
 
-## Authoring: Build It From Corrections
+A request that would break the goal or a restriction is a signal, not an obstacle. It means one of two things is wrong, and the agent can determine neither.
 
-An aspirational north-star is worse than none, because the agent follows it and produces something that does not fit the human. Corrections are evidence; imagination is not.
+Act on it when the request arrives, before planning. Planning around a conflict resolves it silently in favour of the request, and by the time a plan exists the conflict has already been designed away.
 
-- Gather the record of the human overruling the agent: logged failure entries, review threads, and the corrections the human has stated directly.
-- Look for the same refusal appearing in different clothes. A refusal that shows up in three unrelated situations was never about those situations, and that is an entry.
-- Write it as the refusal, not as the situations it came from.
-- Keep the set small enough to hold in mind. A north-star with thirty entries is a style guide, and nothing consults a style guide at decision time.
+- **Stop.** Name the goal or restriction, and say specifically how the request meets it.
+- **Ask.** Put it to the human: the request may be wrong, or the north-star may have moved.
+- **Update, or proceed.** If the north-star moved, interview and confirm the change and rewrite the file before the work starts. If the request was wrong, the human says so and the file stands.
 
-## The Predictive Test
-
-A north-star that cannot predict past calls will not predict future ones. This test is what stops it becoming a mission statement, and it only works if it is set up before the drafting starts.
-
-**Split the corrections before authoring anything.** One part is the material entries are written from. The other is held back, unread, and is the test. A draft fitted to the cases used to write it will predict those cases, and the resulting figure is not evidence of anything.
-
-Then: take the held-out decisions, ask what the draft north-star would have decided, and compare against what was actually decided.
-
-Report hits and misses separately, and name each miss. Misses are the useful half. A north-star that decides confidently and wrongly is worse than no north-star, because under any reduced-interruption workflow it decides unattended.
-
-Where the test was run inside a repository whose product is its own process, say so with the result. What passes there validates something narrower than a north-star for a repository that ships a product to users.
+Do not soften a restriction to fit a request. A restriction quietly rewritten to permit the thing in front of you has stopped being a restriction, and nothing will ever conflict with it again.
 
 ## Updating
 
-Every time the human overrules the agent, that is a rank 1 correction and the raw material for an entry. Two overrules on the same kind of choice is the signal to open this skill; one is an instance.
+The goal changes rarely. When it does, it is because the project became something else, and that is worth recording rather than smoothing over.
 
-When a plan's stated intent carries the same refusal for the third time, it was never specific to those pieces of work. Promote it.
-
-An entry can also stop being true, because taste changes. Retire it rather than editing it into something vaguer, and keep the provenance of what replaced it. A vague entry is an entry that has stopped deciding.
+Restrictions change more often, and each change is the human's to make and to confirm. Retire one outright rather than editing it into something vaguer, because a vague restriction binds nothing and still looks like governance.
 
 ## Anti-Patterns
 
-- **The mission statement.** Every entry is rank 4, nothing is ruled out, and the agent consults it and asks the human anyway.
-- **The style guide.** Thirty entries at coding-convention altitude. The set is too large to consult and too low to generalise.
-- **Fitted to its own test.** Authored from the same cases it is scored against, then reported as a hit rate.
-- **Inferred from the codebase.** Rank 5 dressed as rank 1. The north-star exists to judge the codebase, so it cannot be read out of it.
-- **Silence treated as permission.** Where the north-star has no entry, the question is still open and still goes to the human. An oracle that answers everything is not an oracle.
+- **The description.** The goal restates what the project currently does. It was read out of the codebase, so it can never judge the codebase.
+- **The mission statement.** A goal nobody could disagree with, and no restrictions. It excludes nothing.
+- **The second constraints section.** Restrictions at the altitude of `project-context.md`'s constraints, duplicating them and drifting from them separately.
+- **The silent resolution.** A conflicting request gets planned, and the conflict surfaces at review, or never.
+- **Inferred and unconfirmed.** The agent wrote a plausible goal, the human never affirmed it, and it now decides things on their behalf.

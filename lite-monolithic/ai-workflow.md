@@ -11,7 +11,7 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 - The codebase is the truth about what the system does.
 - The spec or issue is the truth about what the system should do.
-- The north-star is the truth about what the system should be like when the spec permits more than one answer.
+- The north-star is the truth about what the project is for and what it must never become.
 - Runtime behaviour is the final truth about what actually happens.
 - Documentation, plans, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
 - When code, spec, north-star, and runtime conflict, reconcile them — none wins by default.
@@ -20,6 +20,8 @@ This is a single, self-contained file: it inlines rules that the full version sp
 
 1. **Step 1: Confirm the task and inputs.**
 
+   - Check the request against `north-star.md`. If it would break the goal or a restriction, stop before planning and put it to the human.
+   - See [The North Star](#the-north-star).
    - Confirm the GitHub issue number and read the issue.
    - See [Handling Parent and Sub-Issues](#handling-parent-and-sub-issues).
    - Check branch state and confirm the branch is up to date with the target branch.
@@ -150,14 +152,14 @@ Rules:
 
 ## The North Star
 
-The oracle above settles what is correct. It cannot settle which of two correct answers is wanted, and that question is what most interruptions are made of. `north-star.md`, where the project has one, is the record of what this project would refuse.
+The oracle above settles what is correct. It cannot say what the project is for, or what it must never become, and those decide most of the judgement calls that would otherwise reach the human. `north-star.md`, where the project has one, holds exactly two things: the goal, and the restrictions it must stay inside.
 
-- A refusal decides; an intention does not. "Fast and simple" settles nothing, because both options usually qualify. "Better to do nothing than the wrong thing" settles whether to degrade or fail loudly, whether to auto-apply or ask first, and whether to guess a malformed input's format or reject it.
-- Rank every entry by where it came from: a refusal the human actually made, then one they stated in the abstract, then a stated preference, then an intention, then anything the agent inferred from the code. Only the first has real authority, and the last is circular, because the north-star exists to judge the codebase.
-- Keep entries at the altitude where they decide a question you did not have in mind when writing them. An entry naming code is a coding convention and belongs elsewhere; an entry that rules nothing out is decoration.
-- Build entries from corrections the human actually made, not from imagination. A refusal appearing in three unrelated situations was never about those situations, and that is an entry.
-- Test a draft against held-out corrections it was not written from, and name every miss. A north-star fitted to the cases used to write it predicts those cases and proves nothing.
-- Consult it before interrupting the human with a question of preference. Where it is silent the question is open, so ask; silence is not permission.
+- The goal names the outcome the project is trying to achieve, never the mechanism. The restrictions say what it must never become, must never require, or must never give up. A goal alone settles nothing, because it can usually be honoured in two opposite ways; the restrictions are what collapse the choice.
+- Keep both above the altitude of a project's recorded constraints. A restriction naming a file, a number, a command or a tool has fallen to constraint altitude: it should explain why that constraint exists, and still guide when the number changes. A restriction that rules out nothing anyone would have proposed is decoration.
+- Never write this file from inference alone. The codebase cannot tell you the goal, because the goal is why the codebase looks as it does. Read what exists, bring a candidate goal and candidate restrictions to the human, ask one question at a time, confirm each in plain terms, then write.
+- Check an arriving request against the file before planning it. A request that would break the goal or a restriction is a signal, not an obstacle: either the request is wrong or the goal has moved, and the human decides which. Planning around a conflict resolves it silently in favour of the request.
+- Never soften a restriction to fit the request in front of you. A restriction rewritten to permit the thing that conflicted with it has stopped being a restriction, and nothing will conflict with it again.
+- Consult it when deciding how and why. A question it settles is not an open question; where it says nothing, ask.
 
 ## Planning Requirements
 
@@ -379,7 +381,7 @@ The following apply to every task without exception:
 
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A preference the north-star settles is not unclear; risk and scope always are.
+- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A question the north-star settles is not unclear; risk and scope always are.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
 - ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
