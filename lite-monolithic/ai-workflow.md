@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.31.0
+Version: 3.32.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -54,6 +54,7 @@ This is a single, self-contained file: it inlines rules that the full version sp
 6. **Step 6: Implement the approved scope.**
 
    - Implement the work defined in the approved plan.
+   - From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step.
    - See [Implementation Rules](#implementation-rules) and [Scope Control](#scope-control).
 
 7. **Step 7: Run validation.**
@@ -382,11 +383,10 @@ The following apply to every task without exception:
 
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A question the north-star settles is not unclear; risk and scope always are.
+- ALWAYS surface uncertainty, guesses, and incomplete validation. Where a reading is uncertain, take the one a careful colleague would, name it, and carry on; stop and wait only when no reading is safe to act on, when a wrong one would mean redoing the work rather than adjusting it, or when the question is one the Ask First list reserves for the human. A question the north-star settles is not uncertain.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
 - ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
-- ALWAYS state what a command does and why before requesting approval to run it.
 
 ### Ask First
 
@@ -400,7 +400,6 @@ Stop and ask the human before doing any of the following:
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
 - ASK before weakening, skipping, or removing tests.
 - ASK before accepting verification evidence weaker than the plan committed to.
-- ASK before proceeding when the task, expected behaviour, or project constraints are unclear.
 
 ### Never Do
 

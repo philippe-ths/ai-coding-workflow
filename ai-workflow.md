@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.31.0
+Version: 3.32.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -20,8 +20,8 @@ The skill set enforces disciplines invoked at specific points in a task.
 
 1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (baseline, modality, oracle, plan).
-4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds.
+3. **Planning:** aiw-planning (baseline, modality, oracle, plan), agreed with the human before implementation begins.
+4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step.
 5. **Verification gate:** aiw-verification justification step before presenting work for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
@@ -60,7 +60,7 @@ The AI must raise these without being asked, so the human has the information ne
 
 - ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, deferred with its method named, or waived by the human. Opening a pull request is not that decision, since the human makes it afterwards, so the pull request is where the justification is presented and where deferred evidence lands before they decide.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis, which reassesses the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation, and stop to ask when anything is unclear, risky, or out of scope. A question the north-star settles is not unclear; risk and scope always are.
+- ALWAYS surface uncertainty, guesses, and incomplete validation. Where a reading is uncertain, take the one a careful colleague would, name it, and carry on; stop and wait only when no reading is safe to act on, when a wrong one would mean redoing the work rather than adjusting it, or when the question is one the Ask First list reserves for the human. A question the north-star settles is not uncertain.
 - ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
 - ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
 - ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.

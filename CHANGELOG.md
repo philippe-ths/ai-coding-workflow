@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.32.0 - 2026-09-01
+
+### Changed
+
+- The Always Do rule on uncertainty no longer licenses a stop by itself. It read "stop to ask when anything is unclear, risky, or out of scope", and ordinary implementation is continuously unclear in small ways, so the rule authorised a pause at almost any moment. It now asks for the reading a careful colleague would take, named and carried forward, and reserves stopping for one bounded test: no reading is safe to act on, a wrong one would mean redoing the work rather than adjusting it, or the question is one the Ask First list reserves for the human. Risk and scope keep their stops through that list, where they are enumerated, rather than as bare words in this rule; "risky" was as undefined and as continuously true of ordinary work as "unclear" was. This is the rule that was producing the pauses, not the Task Flow, which never had an implementation gate in it. The rule is stage-unscoped, as it was before, so it governs planning and handoff as well as implementation; the cause was a blanket rule and scoping the replacement to one stage would patch the instance rather than the class ([#253]).
+- The Task Flow now states the trade it was already making. Step 3 says the plan is agreed with the human before implementation begins, and step 4 says the work then runs without step-by-step authorisation, with the human interrupting rather than approving each step. It makes no claim about where the remaining stops are enumerated, because they are spread across the Ask First list, the skills the work invokes, and the uncertainty rule itself, and any short pointer to one of those reads as a complete account of all three. Both were true before and neither was written down, so a fresh reader had no way to tell that proceeding was the expected behaviour rather than an omission ([#253]).
+- `lite-monolithic/ai-workflow.md` drops the Always Do rule requiring the agent to state what a command does and why before requesting approval to run it. The full profile has no counterpart, so the two profiles disagreed about whether an ordinary command needs approval at all. Its useful half, explaining before asking, is already carried at a better altitude by the Asking for Guidance rule directly above it ([#253]).
+- `lite-monolithic/ai-workflow.md` drops the Ask First bullet requiring the agent to ask before proceeding when the task, expected behaviour, or project constraints are unclear. It restated the old Always Do rule in the one list the new default points at as authoritative, so without removing it the lite profile would not have changed at all while the full profile did. The full profile has no counterpart bullet ([#253]).
+- `lite-monolithic/ai-workflow.md` receives the uncertainty rewrite and a step 6 statement of the same default, since its numbered checkpoints show where the human stops but never say what happens between them ([#253]).
+
 ## 3.31.0 - 2026-08-31
 
 ### Added
@@ -675,3 +685,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#244]: https://github.com/philippe-ths/ai-coding-workflow/issues/244
 [#241]: https://github.com/philippe-ths/ai-coding-workflow/issues/241
 [#250]: https://github.com/philippe-ths/ai-coding-workflow/issues/250
+[#253]: https://github.com/philippe-ths/ai-coding-workflow/issues/253
