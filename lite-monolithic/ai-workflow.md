@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.30.0
+Version: 3.31.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -267,6 +267,8 @@ Run the full system end-to-end on real inputs for: changes to data flowing betwe
 When the verification method the plan committed to cannot run at all — sub-agents unavailable in this session, an unfunded API key, staging down, the device not to hand, anything you cannot name a time for — do not substitute a weaker one and note it. The disclosure is real and the decision is still yours, and it is not yours to make: accepting weaker evidence changes what the done claim is worth. Stop and put it to the human in the Asking for Guidance format — accept the weaker evidence with its reduced worth stated plainly, wait for the committed method, or narrow the claim to what the available evidence supports — and recommend one. "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance.
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the code and carries none of its context, and have it report what it observed; you are the worst verifier of your own change. Weigh its report in the main loop as evidence, not a verdict.
+
+Then run a refuting pass. The end-to-end run above observes what the system does; nobody has yet been asked to find where the work fails, and a reviewer asked whether work is good says yes. Drive it with a second sub-agent that did not write the change. Give it the requirement, the plan's scope and file list, the diff, and the evidence part 2 cites, and withhold your transcript and reasoning, because the narrative is what makes a wrong reading sound right. Ask it to find three things: work that satisfies the words of the requirement and not its intent; change beyond what the plan named, whether files the plan did not list or unasked-for work inside ones it did; and tests that would still pass if the code under them were wrong. Its findings are evidence weighed in the main loop, never a verdict to act on unread, and each ends in one of the four states part 3 requires. Work goes back once; a second pass that does not clear the same finding is an approach repeated without new evidence, so stop implementation, enter failure analysis, and tell the human that a refuting finding is what stopped the work. This cannot be skipped for any change that alters what the system does, and instruction files that direct an agent are what such a system does. A change that alters no behaviour at all is exempt only by an argument in terms of what the change is, never by bare assertion; and if the sub-agent it needs is unavailable, that is the paragraph above on a committed method that cannot run.
 
 Exit code 0 is not success. Inspect the actual output: confirm the change's effect appears, scan logs for unexpected warnings and errors, and notice silence — a run that produces fewer outputs or skips a path that should have executed is a verification failure, not a pass. A reading taken from a running system — a config value, a live setting, a stored row — is a reading from one process in one environment: name which, and confirm the code under test runs there.
 

@@ -62,6 +62,59 @@ Drive that end-to-end run with a fresh sub-agent, one that did not write the cha
 
 If end-to-end execution is disproportionate to the change, name why in the justification step's part 3 and treat the unverified path as a known risk. A method that is not disproportionate but simply cannot run is the next section, not this one.
 
+## The Refuting Pass
+
+The end-to-end run above sends a clean-context agent to observe what the system does.
+Nobody has yet been asked to find where the work fails.
+A reviewer asked whether work is good says yes.
+A reviewer asked to find where work fails finds things.
+Ask the second question before presenting work for the human's done decision.
+
+Drive it with a sub-agent that did not write the change.
+It is not the end-to-end runner: that one observes behaviour, this one reads what the change claims against what was asked for and tries to break the claim.
+
+### What it is given, and what is withheld
+
+Give it the requirement, meaning the issue plus the plan's scope and file list, the diff, and the evidence part 2 cites.
+
+Withhold the implementer's transcript, reasoning, and narrative.
+The narrative is what makes a wrong reading sound right.
+A reviewer that has read why the code was written this way will accept that it is written this way.
+
+### What it is asked to find
+
+Ask it to find failures, not to assess quality.
+Name the three it is hunting:
+
+- Work that satisfies the words of the requirement and not its intent.
+- Change beyond what the plan named: files the plan did not list, and work inside listed files that the plan did not call for.
+- Tests that would still pass if the code under them were wrong.
+
+The second is half mechanical, because the plan names files and the diff names files.
+The third has a deterministic form wherever the tooling exists: change the code and see whether a test fails.
+Prefer it, and where it does not exist ask the reviewer to name, for each test, the breakage that test would catch.
+
+### What its findings are worth
+
+Findings are evidence weighed in the main loop, never a verdict to act on unread.
+A reviewer that must be obeyed becomes a second thing to rubber-stamp.
+A reviewer that can be dismissed in silence is not a check at all.
+Every finding ends in one of the four states the scoping step below requires: checked, tracked, waived, or deferred.
+
+### When it does not clear
+
+Work goes back once.
+A second pass that does not clear the same finding is an approach repeated without new evidence, which is the non-convergence rule in ai-workflow.md.
+Stop implementation, invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
+Do not try a third variation.
+
+### When it cannot be skipped
+
+It cannot be skipped for any change that alters what the system does.
+Instruction files that direct an agent are what such a system does, so prose is not exempt by being prose.
+A change that alters no behaviour of any kind skips this the way part 3 can be empty: by an argument in terms of what the change is, never by bare assertion.
+If the sub-agent it needs is unavailable, that is the next section, not this one.
+
 ## When the Committed Method Cannot Run
 
 The plan named the evidence this task would produce. Sometimes that method is not available when the time comes: sub-agents are unavailable in this session, the API key is unfunded.
