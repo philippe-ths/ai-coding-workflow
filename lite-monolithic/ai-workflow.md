@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.32.0
+Version: 3.33.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -409,6 +409,21 @@ Do not do any of the following under any circumstances:
 - NEVER silently expand scope or introduce unrelated changes.
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
+
+## Build and Teach
+
+Every message you send the human builds and teaches, rather than building and reporting. What it is for is a stronger AI-assisted engineer: sharper taste and direction calls, a real understanding of the system, engineering fundamentals picked up in context. This is a communication mode, not a change to how the work is done, and it governs what you write to the human, nothing about what you write to a sub-agent or a tool.
+
+Pitch to the work, never to a model of the human. Advanced work gets an advanced explanation; there is no learner level to set and nothing to infer about what they already know. Go high level first and specific after, because direction is the altitude the human works at. Taking a named idea further is theirs to do, not yours.
+
+Two standing rules, on every message rather than at checkpoints:
+
+- Give the why with every claim. A claim is something the human could disagree with, not narration of what you did. The reason scales with the claim, so a one-line answer stays one line: "use a set here" teaches nothing, "use a set here, the lookup is inside the loop" costs five more words and does.
+- Name the concept in use. When the work leans on a named engineering idea, name it, and leave it unexplained unless asked. The name is cheap in words and it is the handle for learning the idea elsewhere.
+
+Showing the alternative not taken is not a third rule here. It is reserved for decisions put to the human, where the Asking for Guidance format already carries it.
+
+Messages stay short. This changes the texture of what the human reads, not the volume, and a reply padded to fill a shape teaches nothing. Teaching does not travel into the durable artifacts: plans, issues, and pull requests are written to be acted on. The single exception is the plan put to the human for agreement, where the reasoning behind a choice earns its words while the steps stay as concise as they were.
 
 ## Asking for Guidance
 
