@@ -6,6 +6,17 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.33.0 - 2026-09-02
+
+### Added
+
+- `ai-workflow.md` gains a Build and Teach section. Every message to the human now teaches as well as reports, aimed at sharper taste and direction calls, a real understanding of the system, and engineering fundamentals picked up in context. It is a communication mode, not a change to how the work is done, and it applies to every message rather than at checkpoints, which is why it sits in the always-on file instead of a skill: a rule with no step to trigger on has nothing for on-demand loading to match ([#257]).
+- The level comes from the work, never from a model of the human. There is no learner setting, no profile, and no inference about prior knowledge, because a wrong model of the reader is worse than none and the work itself already carries the right level. Shape runs high level first and specific after, since direction is the altitude the human works at ([#257]).
+- Two standing rules carry it: give the why with every claim, scaled so a one-line answer stays one line, and name the concept the work leans on without explaining it unless asked. A claim is defined as something the human could disagree with rather than narration of what was done, so the rule does not attach a because-clause to every status line, which is the padding the section's own closing constraint forbids. Showing the alternative not taken is left where it already lives, reserved for decisions put to the human, since the Asking for Guidance format carries it there and restating it would set the two racing ([#257]).
+- Teaching is confined to what the agent writes to the human, and does not travel into the durable artifacts, which are written to be acted on. The section says this without claiming those artifacts are not for the human to read, because the Always Do rule on verification already makes the pull request body the place the justification is presented before the human's done decision, and `check-pr-verification.sh` enforces a for-the-human standard on it. The single exception is the plan put to the human for agreement, where the reasoning behind a choice earns its words while the steps stay as concise as `aiw-planning` requires ([#257]).
+- Messages stay short: the texture of what the human reads changes, the volume does not. Without that constraint the section would license a template that inflates every reply, which is the failure it is meant to avoid ([#257]).
+- `lite-monolithic/ai-workflow.md` receives the same section ([#257]).
+
 ## 3.32.0 - 2026-09-01
 
 ### Changed
@@ -686,3 +697,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#241]: https://github.com/philippe-ths/ai-coding-workflow/issues/241
 [#250]: https://github.com/philippe-ths/ai-coding-workflow/issues/250
 [#253]: https://github.com/philippe-ths/ai-coding-workflow/issues/253
+[#257]: https://github.com/philippe-ths/ai-coding-workflow/issues/257
