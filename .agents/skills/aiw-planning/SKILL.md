@@ -24,7 +24,7 @@ This skill owns step 2. The overview exists so the full sequence is visible at a
 
 Before drafting the plan, establish what the codebase currently does, what the test infrastructure tells you, and what is actually being asked. The plan depends on these facts.
 
-When establishing what the codebase does spans several files or areas, route the reconnaissance to parallel read-only search sub-agents rather than reading serially, and synthesise their findings yourself. The map you plan against must be one you built in the main loop, not one you accepted unread.
+When establishing what the codebase does spans several files or areas, route the reconnaissance to parallel read-only search sub-agents rather than reading serially, and synthesise their findings yourself. The map you plan against must be one you built in the main loop, not one you accepted unread. Reconnaissance is the one fan-out that pays on almost any task, because its output is bulk you would distil anyway; it is not a licence to fan out the implementation, which aiw-orchestration gates separately.
 
 ### Read project context
 
@@ -80,6 +80,7 @@ The plan the agent produces for the user should have these elements:
 - **Oracle.** What counts as correct for this task and where it comes from. (See "The Oracle Section" below.)
 - **Files and code areas.** What the change will touch.
 - **Implementation approach.** What will be done, not how every line is written: the first meaningful implementation slice, the feedback signal that will test its direction, and later work as revisable direction rather than fixed prescription.
+- **Execution shape.** How the work will be run: solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay passing a chain too large for one context window from agent to agent, and why. Solo is the default and needs no argument; anything else does, because concurrency spends the human's quota and returns a review queue to one person. Load aiw-orchestration to make this call whenever the work looks like it might split, rather than once you have decided it does; it owns the gate and the per-role capability and effort routing.
 - **Assumptions.** Separated into issue-sourced and codebase-confirmed. (See "Assumption Classification" below.)
 - **Assumption verification.** How each issue-sourced assumption will be verified before or during implementation.
 - **Risks and edge cases.** Including any higher-risk flag. (See "Higher-Risk Flags" below.)

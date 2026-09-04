@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.33.0
+Version: 3.34.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -20,13 +20,13 @@ The skill set enforces disciplines invoked at specific points in a task.
 
 1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (baseline, modality, oracle, plan), agreed with the human before implementation begins.
+3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape), agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step.
 5. **Verification gate:** aiw-verification justification step before presenting work for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
-Conditional skills (aiw-performance-profiling, aiw-security-testing) load alongside the above when their triggers apply — see Non-Functional Dimensions.
+Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling and aiw-security-testing (see Non-Functional Dimensions), and aiw-orchestration on the trigger stated in Resource Discipline.
 
 `north-star.md`, if it exists, is the shortest statement of what the project is trying to achieve. Consult it when deciding how and why. A request that pulls the project away from that goal stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
 
@@ -36,7 +36,7 @@ Before a task is chosen, the human may invoke aiw-init. It runs the repository's
 
 ## Non-Functional Dimensions
 
-Two skills load conditionally when their triggers apply, alongside the Task Flow core skills:
+Two of the conditional skills cover the non-functional dimensions, and load when their triggers apply alongside the Task Flow core skills:
 
 - aiw-performance-profiling for changes affecting speed or responsiveness.
 - aiw-security-testing for changes crossing trust boundaries or handling untrusted input.
@@ -49,7 +49,8 @@ Protect your context window and the human's quota — but never by doing less th
 
 - Efficiency governs *how* you discharge a required step, never *whether*. Never skip, weaken, or defer a required step to save context or quota.
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
-- Route work to a sub-agent by its shape: broad multi-file search, mechanical or parallelisable work, output you would only distil, or parallel edits that need isolation. Reaching for one on that work is the disciplined move, not an indulgence to justify.
+- Route reconnaissance out freely: broad multi-file search, and any output you would only distil. It writes nothing, so it needs no permission.
+- Everything that writes is aiw-orchestration's call. Load it when the work looks like it might split — many files or areas, more input than you can hold at once, or any impulse to hand implementation to another agent — and before handing writing work to any agent other than yourself. Load it to decide whether to split, not once you have decided. The conditions live there, and this file does not restate them, because one rule kept in several places is several copies of the same defect.
 - Keep judgment, design, and the review of every returned result in the main loop. A sub-agent's result is evidence to weigh, never a verdict to accept unread. A thin brief returns confident, wrong work, and an orchestrator that defers inherits the error.
 
 ## Boundary Rules
