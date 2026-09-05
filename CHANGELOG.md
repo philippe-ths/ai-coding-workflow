@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.35.0 - 2026-09-05
+
+### Added
+
+- `aiw-issue-creation` searches the codebase, alongside the existing open-issue search, for other sites where the same request would apply. A request arrives phrased for the place the human noticed it, which is not always the place it belongs ([#265]).
+- The applicability question is settled by that one search rather than by counting how often the request has come up before. Sites that share the shape today are visible in the current session; a count of past occurrences needs memory across sessions and arrives after the divergence it would have prevented ([#265]).
+- Where such sites exist the scope does not move. The issue stays at the site the human named, the other sites are named by path, and the finding lands in the acceptance criteria rather than in a note, because a note is free to ignore and acceptance criteria are what the work is checked against. The criterion binds the requested site alone and is stated as a property of the result rather than a design to follow, that adopting it at the other sites would not mean rewriting it, keeping it clear of the same skill's standing prohibition on prescribing an implementation ([#265]).
+- Neither check stops to ask the human which unit to build. A question there spends the altitude the workflow exists to protect, and the workflow already takes an uncertain reading that is safe to act on, names it, and carries it ([#265]).
+- `aiw-planning`'s bounded-change confirmation runs in two directions. Too large keeps its existing decomposition prompts; aimed above the layer where the cause lives is the new one, and left alone it becomes the run of shallow fixes `aiw-failure-analysis` exists to catch afterwards ([#265]).
+- Where the approach is aimed too high, the plan settles it rather than asking: it plans at the requested level when that work survives the deeper fix, and targets the deeper layer when the deeper fix would discard it. The human approves the plan before implementation, so aiming deeper there is a proposal they can refuse rather than silent scope expansion. The asymmetry with issue creation, which may not move scope, is that plan review is a checkpoint and issue filing is not; the planning skill states this in its own prose, since an issue that names other sites has done the finding rather than made the call ([#265]).
+- `lite-monolithic/ai-workflow.md` carries both rules condensed into its Scope Control section, because the lite profile ships no skills ([#265]).
+
 ## 3.34.0 - 2026-09-04
 
 ### Added
@@ -721,3 +733,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#253]: https://github.com/philippe-ths/ai-coding-workflow/issues/253
 [#257]: https://github.com/philippe-ths/ai-coding-workflow/issues/257
 [#260]: https://github.com/philippe-ths/ai-coding-workflow/issues/260
+[#265]: https://github.com/philippe-ths/ai-coding-workflow/issues/265

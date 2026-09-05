@@ -50,8 +50,11 @@ When establishing what the codebase does spans several files or areas, route the
 
 ### Confirm the task is a bounded change
 
+Bounded runs in two directions. Too large is the familiar one. Aimed above the layer where the cause lives is the other, and left alone it becomes the repeated shallow fixes the non-convergence rule stops mid-implementation, once the cost has already been paid.
+
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
+- Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan and settle it there rather than stopping to ask which layer to use; the human approves the plan before implementation, so aiming deeper is a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Plan at the requested level when the work survives the deeper fix. Target the deeper layer when it would not, and not both: work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
 
 If the baseline, test readiness, or task scope is unclear after these checks, stop and resolve before drafting the plan.
 
