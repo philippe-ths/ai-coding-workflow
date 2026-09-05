@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.34.0
+Version: 3.35.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -222,7 +222,7 @@ The plan states the chosen shape and why, so the human can challenge it before a
 
 Keep the change focused on the approved task:
 
-- If the issue contains multiple unrelated objectives or would require changes across many unrelated areas, flag this and suggest decomposition.
+- If the issue contains multiple unrelated objectives or would require changes across many unrelated areas, flag this and suggest decomposition. Bounded runs the other way too: ask whether the approach is aimed above the layer where the cause lives, meaning the real fix one layer down would discard this work, as repairing a shared helper discards a patch at every caller and a check discards a reminder to do the same thing by hand. Name the answer in the plan and settle it there rather than stopping to ask which layer to use, planning at the requested level when the work survives the deeper fix and targeting the deeper layer when it would not, and not both, since work the deeper fix would discard does not become worth doing by being small. The human approves the plan before implementation, so aiming deeper there is a proposal they can refuse rather than silent scope expansion or an unrequested refactor.
 - Extract the intended outcome from the issue before using implementation suggestions.
   (Why: Issue text is often stale or speculative; treating implementation suggestions as authoritative leads to implementing the wrong thing.)
 - Do only the work required to complete the task. Do not treat "while I am here" changes as free.
@@ -230,6 +230,8 @@ Keep the change focused on the approved task:
 - Separate fixes, refactors, and feature work unless the task clearly requires them together.
 - If a larger problem is discovered, surface it as follow-up work instead of silently broadening the implementation. A follow-up issue may reference a relevant file by path to locate the concern, but must not paste, paraphrase, or prescribe the file's contents or an implementation approach. Before creating it, search existing open issues for overlap; if any overlaps, surface it and get the human's confirmation it is not a duplicate before creating.
   (Why: Unreviewed scope expansion breaks the human approval model; implementation detail in an issue biases whoever picks it up.)
+- Whenever you create an issue, whoever asked for it, also search the codebase for other sites where the same request would apply, settling it by that one search rather than by counting how often this request has come up before. Where such sites exist the scope does not move: the issue stays at the site the human named, those sites are named by path, and the finding lands in the acceptance criteria rather than in a note, bound to the requested site alone and stated as a property of the result rather than a design to follow, that adopting it at the other sites would not mean rewriting it. Do not ask the human which unit to build.
+  (Why: a request is phrased for the place it was noticed, which is not always the place it belongs; a note is free to ignore, and acceptance criteria are what the work is checked against.)
 - If the task changes significantly during implementation, update the issue or flag the mismatch to the human.
 
 ## Validation Requirements

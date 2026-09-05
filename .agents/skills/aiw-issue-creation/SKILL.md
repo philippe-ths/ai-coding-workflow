@@ -11,7 +11,18 @@ Read this file when creating a follow-up or spin-off GitHub issue.
 
 - Search open issues in the repository for overlap with the proposed issue's intent.
 - If a potential overlap is found, surface the overlapping issue to the human before proceeding.
+- Search the codebase for other sites where the same request would apply. A request arrives phrased for the place the human noticed it, which is not always the place it belongs.
 - Only proceed with creation after the human confirms there is no duplicate.
+
+## When the Request Fits More Than One Site
+
+Settle the question by one search now, not by counting how often this request has come up before. Sites that share the shape today are visible in the current session; a count of past occurrences needs memory across sessions and arrives after the divergence it would have prevented.
+
+Scope does not move. The issue stays at the site the human named, and the finding lands in the acceptance criteria rather than in a note, because a note is free to ignore and acceptance criteria are what the work is checked against. Bind the criterion to the requested site alone, and state it as a property of the result rather than a design to follow: adopting it at the other sites would not mean rewriting it. Name those sites by path.
+
+Sorting is asked for on one list screen, and four list screens share the shape. The issue stays on that screen, and its acceptance says the other four could adopt the result unchanged. That is checkable on one screen's diff and commits nobody to touching the others.
+
+Do not ask the human which unit to build. Record what you found and carry on; a question here spends the altitude the workflow exists to protect.
 
 ## Where These Issues Come From
 
