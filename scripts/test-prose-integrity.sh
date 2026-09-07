@@ -23,16 +23,15 @@ drop() { local f="$1" p="$2"; grep -v "$p" "$f" > "$f.edit"; mv "$f.edit" "$f"; 
 # copies from this rather than re-walking the repository, so the suite spends its
 # time running the checker instead of running cp.
 PRISTINE="$TMP/_pristine"
-mkdir -p "$PRISTINE/.github" "$PRISTINE/lite-monolithic" \
+mkdir -p "$PRISTINE/.github" \
          "$PRISTINE/.claude" "$PRISTINE/.agents"
 cp -R "$ROOT/.claude/skills" "$PRISTINE/.claude/skills"
 cp -R "$ROOT/.agents/skills" "$PRISTINE/.agents/skills"
 cp "$ROOT/ai-workflow.md" "$ROOT/project-context.md" "$ROOT/CLAUDE.md" \
    "$ROOT/AGENTS.md" "$ROOT/GEMINI.md" "$PRISTINE/"
-cp "$ROOT/lite-monolithic/ai-workflow.md" "$PRISTINE/lite-monolithic/"
 cp "$ROOT/.github/copilot-instructions.md" "$PRISTINE/.github/"
 for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md GEMINI.md \
-                lite-monolithic/ai-workflow.md .github/copilot-instructions.md \
+                .github/copilot-instructions.md \
                 .claude/skills/aiw-init/SKILL.md .agents/skills/aiw-init/SKILL.md; do
   [ -e "$PRISTINE/$required" ] || { echo "pristine fixture is missing $required (ROOT=$ROOT)" >&2; exit 2; }
 done

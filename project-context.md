@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.31.0
+Version: 1.32.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -18,10 +18,9 @@ Version: 1.31.0
 - **Tree fingerprint**: a hash of tracked and untracked-not-ignored content, produced by `.ai-policy/scripts/tree-fingerprint.sh`, which ties a validation result to the content that produced it so a pass from an earlier tree cannot satisfy the gate.
 - **Policy layer**: the set of shell scripts in `.ai-policy/` that enforce protected-branch and validation-state rules.
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
-- **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file in the full profile holding the conditions; the lite profile carries its own copy because it ships no skills.
+- **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
 - **Checkpoint**: a required human-review pause defined in the workflow before a consequential action.
-- **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per profile and tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
-- **Profile**: an install variant, `full` (policy layer, skills, entry point) or `lite` (single self-contained file).
+- **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
 - **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive per-session metrics with no statistical verdict.
 - **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt from transcripts on demand.
@@ -37,10 +36,9 @@ Version: 1.31.0
 - Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`).
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
-- Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool and profile into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
+- Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
 - Declares the product/factory boundary in `install-manifest.json`, validated by `scripts/check-manifest.sh` and printed by `make classify`.
 - Records observed AI agent failure patterns (`observations/observed-ai-failings.md`) to inform workflow rule changes.
-- Provides a lite-monolithic version (`lite-monolithic/ai-workflow.md`) that condenses the workflow into a single self-contained file with no policy layer, skills, or multi-agent entry points.
 - Provides a local session-observation tool (`observation/`) that parses Claude Code transcripts into a JSONL Session Store and a self-contained static HTML dashboard.
 - The observation tool is descriptive only: it surfaces how metrics move across workflow versions and over time, and never computes a statistical comparison or pass/fail verdict.
 - Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
@@ -104,8 +102,6 @@ Version: 1.31.0
 - `.vscode/settings.json`: VS Code Copilot tool permission defaults.
 - `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration, permission defaults, and hook definitions.
 - `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
-- `lite-monolithic/ai-workflow.md`: single-file AI workflow with planning and failure analysis inlined, no policy layer or skill indirection.
-- `lite-monolithic/README.md`: usage instructions for the lite-monolithic version.
 - `observation/collect.py`: reads all session transcripts, joins Manifest and Ratings, writes the Session Store, and regenerates the dashboard.
 - `observation/parse.py`: the only module that knows the transcript JSONL format; extracts per-session metrics.
 - `observation/pricing.py`: model price table and estimated-cost calculation, since transcripts store no cost.
@@ -120,7 +116,7 @@ Version: 1.31.0
 - `scripts/test-observation-install.sh`: sandbox test of the install/uninstall pair against a throwaway `CLAUDE_HOME`.
 - `observation/README.md`: setup and usage for the observation tool.
 - `Makefile`: `observe` rebuilds the store and opens the dashboard; `observe-test` runs the parser test; `classify` prints the product/factory boundary.
-- `scripts/install.sh`: copies the product set for a tool and profile into a target repo, vendors it in the target's `.gitignore`, and installs hooks (full profile); lite copies the single file plus a generated entry.
+- `scripts/install.sh`: copies the product set for a tool into a target repo, vendors it in the target's `.gitignore`, and installs hooks.
 - `scripts/update.sh`: updates an installed copy by re-copying the current product, auto-detecting tool and profile, and reconciling removals from the source `CHANGELOG.md`.
 - `scripts/classify.sh`: prints the product/factory classification read from `install-manifest.json`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.

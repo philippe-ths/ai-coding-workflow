@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Update an already-installed AI workflow copy in a target repository.
 #
-#   scripts/update.sh --target <dir> --tool <name> [--profile full|lite] [--source <dir>]
+#   scripts/update.sh --target <dir> --tool <name> [--source <dir>]
 #
 # Reconciles an installed (vendored) copy to the source's current version:
 #   1. Reads the installed version (target ai-workflow.md `Version:`) and the
@@ -21,15 +21,13 @@ set -eu
 SOURCE=""
 TARGET=""
 TOOL=""
-PROFILE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --source) SOURCE="${2:-}"; shift 2 ;;
     --target) TARGET="${2:-}"; shift 2 ;;
     --tool) TOOL="${2:-}"; shift 2 ;;
-    --profile) PROFILE="${2:-}"; shift 2 ;;
-    -h|--help) echo "Usage: update.sh --target <dir> --tool <name> [--profile full|lite] [--source <dir>]"; exit 0 ;;
+    -h|--help) echo "Usage: update.sh --target <dir> --tool <name> [--source <dir>]"; exit 0 ;;
     *) echo "error: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -52,10 +50,7 @@ read_version() { awk '/^Version:[[:space:]]*/ { print $2; exit }' "$1" 2>/dev/nu
 
 [ -f "$TARGET/ai-workflow.md" ] || { echo "error: no installed workflow found in target (ai-workflow.md missing); use install.sh" >&2; exit 1; }
 
-# Auto-detect tool and profile from the installed target when not given.
-if [ -z "$PROFILE" ]; then
-  if [ -d "$TARGET/.ai-policy" ]; then PROFILE="full"; else PROFILE="lite"; fi
-fi
+# Auto-detect the tool from the installed target when not given.
 if [ -z "$TOOL" ]; then
   detected=""
   [ -f "$TARGET/CLAUDE.md" ] && detected="$detected claude"
@@ -70,7 +65,6 @@ if [ -z "$TOOL" ]; then
   esac
 fi
 case "$TOOL" in claude|codex|gemini|copilot) ;; *) echo "error: --tool must be claude|codex|gemini|copilot" >&2; exit 2 ;; esac
-case "$PROFILE" in full|lite) ;; *) echo "error: --profile must be full or lite" >&2; exit 2 ;; esac
 
 installed_version="$(read_version "$TARGET/ai-workflow.md")"
 source_version="$(read_version "$SOURCE/ai-workflow.md")"
@@ -91,7 +85,7 @@ else
 fi
 
 # --- additive: re-copy the current product set (overwrites changed, adds new) ---
-"$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL" --profile "$PROFILE" >/dev/null \
+"$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL" >/dev/null \
   || { echo "error: re-copy step failed" >&2; exit 1; }
 
 # Drop paths from the installer-managed .gitignore block (the block is a union,
@@ -119,82 +113,80 @@ prune_gitignore_block() {
   ' "$gi" > "$gi.tmp" && mv "$gi.tmp" "$gi"
 }
 
-# --- removal reconciliation (full profile; lite is a single file with nothing to reconcile) ---
+# --- removal reconciliation ---
 removed_count=0
 prune_keys=""
-if [ "$PROFILE" = "full" ]; then
-  current_product="$(mktemp)"
-  trap 'rm -f "$current_product"' EXIT
-  while IFS= read -r p; do
-    [ -z "$p" ] && continue
-    git -C "$SOURCE" ls-files -- "${p%/}" >> "$current_product"
-    # Spans EVERY tool, not just the one being updated. A removal bullet names a
-    # path, not a tool, so scoping this to $TOOL deletes from disk a file another
-    # installed tool still ships (#229).
-  done < <(jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST")
+current_product="$(mktemp)"
+trap 'rm -f "$current_product"' EXIT
+while IFS= read -r p; do
+  [ -z "$p" ] && continue
+  git -C "$SOURCE" ls-files -- "${p%/}" >> "$current_product"
+  # Spans EVERY tool, not just the one being updated. A removal bullet names a
+  # path, not a tool, so scoping this to $TOOL deletes from disk a file another
+  # installed tool still ships (#229).
+done < <(jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST")
 
-  in_range() { # version, installed, source : installed < version <= source
-    ver_lt "$2" "$1" && ver_le "$1" "$3"
-  }
+in_range() { # version, installed, source : installed < version <= source
+  ver_lt "$2" "$1" && ver_le "$1" "$3"
+}
 
-  # Collect removed paths named in CHANGELOG for versions in (installed, source].
-  removed_paths="$(
-    awk '
-      /^## /      { match($0, /[0-9][0-9.]*/); ver=substr($0,RSTART,RLENGTH); inrem=0; next }
-      /^### Removed/ { inrem=1; next }
-      /^### /     { inrem=0; next }
-      inrem==1 && /^- `/ {
-        s=$0; sub(/^- `/,"",s); sub(/`.*/,"",s); print ver "\t" s
-      }
-    ' "$SOURCE/CHANGELOG.md"
-  )"
+# Collect removed paths named in CHANGELOG for versions in (installed, source].
+removed_paths="$(
+  awk '
+    /^## /      { match($0, /[0-9][0-9.]*/); ver=substr($0,RSTART,RLENGTH); inrem=0; next }
+    /^### Removed/ { inrem=1; next }
+    /^### /     { inrem=0; next }
+    inrem==1 && /^- `/ {
+      s=$0; sub(/^- `/,"",s); sub(/`.*/,"",s); print ver "\t" s
+    }
+  ' "$SOURCE/CHANGELOG.md"
+)"
 
-  while IFS=$'\t' read -r ver rp; do
-    [ -z "${ver:-}" ] && continue
-    in_range "$ver" "$installed_version" "$source_version" || continue
-    rp_stripped="${rp%/}"
-    prune_keys="$prune_keys$rp_stripped|"
-    case "$rp" in
-      */)  # directory removal: delete target files under it that are not current product
-        if [ -d "$TARGET/$rp_stripped" ]; then
-          while IFS= read -r f; do
-            rel="${f#"$TARGET"/}"
-            if ! grep -Fxq "$rel" "$current_product"; then
-              rm -f "$f"; removed_count=$((removed_count + 1)); echo "  removed: $rel"
-            fi
-          done < <(find "$TARGET/$rp_stripped" -type f 2>/dev/null)
-          find "$TARGET/$rp_stripped" -type d -empty -delete 2>/dev/null || true
-        fi
-        ;;
-      *)   # file removal
-        if [ -e "$TARGET/$rp_stripped" ] && ! grep -Fxq "$rp_stripped" "$current_product"; then
-          rm -f "$TARGET/$rp_stripped"; removed_count=$((removed_count + 1)); echo "  removed: $rp_stripped"
-        fi
-        ;;
-    esac
-  done <<EOF
+while IFS=$'\t' read -r ver rp; do
+  [ -z "${ver:-}" ] && continue
+  in_range "$ver" "$installed_version" "$source_version" || continue
+  rp_stripped="${rp%/}"
+  prune_keys="$prune_keys$rp_stripped|"
+  case "$rp" in
+    */)  # directory removal: delete target files under it that are not current product
+      if [ -d "$TARGET/$rp_stripped" ]; then
+        while IFS= read -r f; do
+          rel="${f#"$TARGET"/}"
+          if ! grep -Fxq "$rel" "$current_product"; then
+            rm -f "$f"; removed_count=$((removed_count + 1)); echo "  removed: $rel"
+          fi
+        done < <(find "$TARGET/$rp_stripped" -type f 2>/dev/null)
+        find "$TARGET/$rp_stripped" -type d -empty -delete 2>/dev/null || true
+      fi
+      ;;
+    *)   # file removal
+      if [ -e "$TARGET/$rp_stripped" ] && ! grep -Fxq "$rp_stripped" "$current_product"; then
+        rm -f "$TARGET/$rp_stripped"; removed_count=$((removed_count + 1)); echo "  removed: $rp_stripped"
+      fi
+      ;;
+  esac
+done <<EOF
 $removed_paths
 EOF
 
-  # Prune the removed paths from the managed .gitignore block, but never a path
-  # the current product still ships. The keep set spans EVERY tool, not just the
-  # one being updated: a removal bullet names a path, not a tool, and several
-  # tools can be installed in one repo, so pruning a path another installed tool
-  # still ships would un-ignore that tool's vendored files (#229).
-  keep_file="$(mktemp)"
-  jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST" \
-    | sed 's#/*$##' > "$keep_file"
-  drop_keys=""
-  while IFS= read -r k; do
-    [ -z "$k" ] && continue
-    LC_ALL=C grep -Fxq -- "$k" "$keep_file" && continue
-    drop_keys="$drop_keys$k|"
-  done <<EOF
+# Prune the removed paths from the managed .gitignore block, but never a path
+# the current product still ships. The keep set spans EVERY tool, not just the
+# one being updated: a removal bullet names a path, not a tool, and several
+# tools can be installed in one repo, so pruning a path another installed tool
+# still ships would un-ignore that tool's vendored files (#229).
+keep_file="$(mktemp)"
+jq -r '[.profiles.full.shared[], (.profiles.full.tools[] | .[])] | unique | .[]' "$MANIFEST" \
+  | sed 's#/*$##' > "$keep_file"
+drop_keys=""
+while IFS= read -r k; do
+  [ -z "$k" ] && continue
+  LC_ALL=C grep -Fxq -- "$k" "$keep_file" && continue
+  drop_keys="$drop_keys$k|"
+done <<EOF
 $(printf '%s' "$prune_keys" | tr '|' '\n')
 EOF
-  rm -f "$keep_file"
-  prune_gitignore_block "$drop_keys"
-fi
+rm -f "$keep_file"
+prune_gitignore_block "$drop_keys"
 
-echo "Update complete: target now at $source_version (profile: $PROFILE, tool: $TOOL); $removed_count file(s) removed."
+echo "Update complete: target now at $source_version (tool: $TOOL); $removed_count file(s) removed."
 echo "Local additions under vendored paths were left in place."

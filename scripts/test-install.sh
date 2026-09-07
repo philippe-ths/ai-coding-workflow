@@ -31,7 +31,7 @@ new_target() {
 
 echo "full / claude:"
 T="$(new_target full-claude)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "install exited non-zero"
 present "$T" CLAUDE.md
 present "$T" .claude/settings.json
 present "$T" .claude/skills
@@ -58,7 +58,7 @@ hp="$(cd "$T" && git config core.hooksPath || true)"
 if [ "$hp" = ".githooks" ]; then ok "core.hooksPath set"; else bad "core.hooksPath not set (got '$hp')"; fi
 
 echo "idempotency (re-run):"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 n="$(grep -cF "# >>> ai-workflow (vendored, managed by installer) >>>" "$T/.gitignore")"
 if [ "$n" -eq 1 ]; then ok "single managed block after re-run"; else bad "managed block count = $n"; fi
 
@@ -73,7 +73,7 @@ ai-workflow.md
 .githooks/
 CLAUDE.md
 GI
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 exactly_once "$T" "ai-workflow.md"
 exactly_once "$T" ".claude/"
 exactly_once "$T" ".ai-policy/"
@@ -83,7 +83,7 @@ has_line   "$T" "node_modules/"
 
 echo "full / codex (tool specificity):"
 T="$(new_target full-codex)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1
 present "$T" AGENTS.md
 present "$T" .codex/config.toml
 present "$T" .agents/skills
@@ -92,7 +92,7 @@ absent  "$T" .claude
 
 echo "full / gemini (tool specificity):"
 T="$(new_target full-gemini)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1
 present "$T" GEMINI.md
 present "$T" .gemini/settings.json
 present "$T" .agents/skills
@@ -101,7 +101,7 @@ absent  "$T" .codex
 
 echo "full / copilot (tool specificity):"
 T="$(new_target full-copilot)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool copilot --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool copilot >/dev/null 2>&1
 present "$T" .github/copilot-instructions.md
 present "$T" .github/hooks/block-protected-branch.json
 present "$T" .vscode/settings.json
@@ -153,8 +153,8 @@ PATHS
 
 echo "multi-tool install (gemini then claude, same target):"
 T="$(new_target multi-gemini-claude)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
 $(tool_paths gemini claude)
 EOF
@@ -165,7 +165,7 @@ one_block "$T"
 no_untracked_vendored "$T" gemini claude
 
 echo "multi-tool install (third tool: codex on top):"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex --profile full >/dev/null 2>&1 || bad "codex install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
 $(tool_paths gemini claude codex)
 EOF
@@ -175,14 +175,14 @@ no_untracked_vendored "$T" gemini claude codex
 
 echo "hand-maintained entries outside the managed block survive a later install:"
 T="$(new_target hand-maintained)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
 cat >> "$T/.gitignore" <<'GI'
 
 # keep these - hand maintained
 .agents/skills/
 build-output/
 GI
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex --profile full >/dev/null 2>&1 || bad "codex install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 has_outside "$T" "# keep these - hand maintained"
 has_outside "$T" ".agents/skills/"
 has_outside "$T" "build-output/"
@@ -200,7 +200,7 @@ cat > "$T/.gitignore" <<'GI'
 .agents/skills/
 build-output/
 GI
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
 exactly_once "$T" ".agents/skills/"
 has_outside  "$T" "build-output/"
 has_outside  "$T" "# keep these - hand maintained"
@@ -225,7 +225,7 @@ echo "a non-UTF-8 byte inside the managed block does not truncate .gitignore:"
 T="$(new_target invalid-utf8-in-block)"
 printf 'node_modules/\n# >>> ai-workflow (vendored, managed by installer) >>>\nL\xf6sungen/\n.claude/\n# <<< ai-workflow <<<\n' > "$T/.gitignore"
 before_bytes="$(wc -c < "$T/.gitignore" | tr -d ' ')"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "install exited non-zero on an invalid-UTF-8 .gitignore"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "install exited non-zero on an invalid-UTF-8 .gitignore"
 after_bytes="$(wc -c < "$T/.gitignore" | tr -d ' ')"
 if [ "${after_bytes:-0}" -ge "${before_bytes:-0}" ]; then
   ok ".gitignore not truncated ($before_bytes -> $after_bytes bytes)"
@@ -241,8 +241,8 @@ no_untracked_vendored "$T" claude
 echo "a non-UTF-8 byte outside the block does not append a second block per install:"
 T="$(new_target invalid-utf8-outside-block)"
 printf 'node_modules/\nL\xf6sungen/\n' > "$T/.gitignore"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "first install exited non-zero"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "second install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "first install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "second install exited non-zero"
 one_block "$T"
 exactly_once "$T" ".claude/"
 has_line "$T" "node_modules/"
@@ -251,9 +251,9 @@ no_untracked_vendored "$T" claude
 
 echo "a block entry containing a literal '|' does not un-ignore a vendored path:"
 T="$(new_target pipe-in-block)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
 insert_in_block "$T" 'a|.claude|b'
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 exactly_once "$T" ".claude/"
 has_line "$T" 'a|.claude|b'
 if git -C "$T" check-ignore -q .claude/settings.json; then ok "git still ignores .claude/settings.json"; else bad "git no longer ignores .claude/settings.json"; fi
@@ -261,27 +261,13 @@ one_block "$T"
 
 echo "a leading-whitespace block entry does not shadow the real vendored path:"
 T="$(new_target leading-space-in-block)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
 insert_in_block "$T" '  .claude/'
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 exactly_once "$T" ".claude/"
 if git -C "$T" check-ignore -q .claude/settings.json; then ok "git ignores .claude/settings.json"; else bad "git does not ignore .claude/settings.json"; fi
 one_block "$T"
 no_untracked_vendored "$T" gemini claude
-
-echo "lite / claude:"
-T="$(new_target lite-claude)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile lite >/dev/null 2>&1
-present "$T" ai-workflow.md
-present "$T" CLAUDE.md
-absent  "$T" .ai-policy
-absent  "$T" .githooks
-absent  "$T" .claude
-if grep -qF "self-contained" "$T/ai-workflow.md"; then ok "lite workflow content copied"; else bad "lite workflow content wrong"; fi
-has_line "$T" "ai-workflow.md"
-has_line "$T" "CLAUDE.md"
-hp="$(cd "$T" && git config core.hooksPath || true)"
-if [ -z "$hp" ]; then ok "no hooks for lite"; else bad "lite should not set hooks (got '$hp')"; fi
 
 echo
 echo "Results: $pass passed, $fail failed."

@@ -22,10 +22,6 @@ for t in $(jq -r '.profiles.full.tools | keys[]' "$MANIFEST"); do
   printf '  full profile, %s:\n' "$t"
   jq -r --arg t "$t" '.profiles.full.tools[$t][] | "    " + .' "$MANIFEST"
 done
-echo "  lite profile:"
-jq -r '.profiles.lite.shared[] | "    " + .' "$MANIFEST"
-echo
-
 echo "AUTHORED IN TARGET — created fresh per target, never copied"
 jq -r '.authored_in_target[] | "  " + .' "$MANIFEST"
 echo

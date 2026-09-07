@@ -101,9 +101,7 @@ done
 [ "$doc_fails" -eq 0 ] && ok "project-context.md names every skill in the tree"
 
 head_ "Version headers:"
-# Equality between the lite condensation and the canonical version is enforced
-# in scripts/repo-validation.sh, which runs before this and exits on drift.
-for f in ai-workflow.md project-context.md lite-monolithic/ai-workflow.md; do
+for f in ai-workflow.md project-context.md; do
   if grep -qE '^Version:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+' "$f"; then
     ok "$f carries a Version header"
   else

@@ -7,7 +7,7 @@ Covers how much to include in `ai-workflow.md`, versioning, file splitting, sess
 **Version number.**
 The `Version:` header in `ai-workflow.md` is the canonical version for the project.
 It tracks changes that affect how AI coding agents behave when the shipped files are installed in a target repository.
-No other file holds a release-level version number; subordinate files (for example `lite-monolithic/ai-workflow.md`) carry this same version so they can be identified against the canonical anchor, but they are not independent sources of truth.
+No other file holds a release-level version number.
 
 A change requires a version bump if it affects agent behaviour in a target repo.
 Files whose changes require a bump:
@@ -16,7 +16,6 @@ Files whose changes require a bump:
 - Skill files in `.agents/skills/` and `.claude/skills/`.
 - Policy scripts and hooks in `.ai-policy/`, `.githooks/`, and agent hook configurations.
 - Agent entry points (`.github/copilot-instructions.md`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`).
-- `lite-monolithic/ai-workflow.md`.
 
 Files whose changes do not require a bump:
 
@@ -37,9 +36,6 @@ Every change to the canonical `Version:` header in `ai-workflow.md` requires a m
 Bump it whenever the document is updated to reflect a change in the codebase it describes; it is not shipped to target repos, so its version neither affects nor is affected by the canonical version.
 Apply the same X.Y.Z scheme: patch (Z) for a small factual correction or wording fix, minor (Y) for adding or restructuring a section or documenting newly added project structure, major (X) for a wholesale rewrite.
 Changes to `project-context.md` do not require a `CHANGELOG.md` entry or a tagged release.
-
-**Derived files.**
-`lite-monolithic/ai-workflow.md` is a standalone condensation of `ai-workflow.md` plus the `aiw-*` skills into a single file. It is not authored independently for content: whenever a change to the full workflow or the skills alters the rules an agent follows, re-condense the lite file in the same change and set its `Version:` header equal to the new canonical version. Because the lite version is held equal to canonical by this rule, a lite `Version:` that lags the canonical version is a drift signal — it means the lite file has not been re-synced and may no longer reflect the current rules. Treat that gap as a defect to resolve by re-condensing, not by editing the version header alone. `scripts/repo-validation.sh` enforces this mechanically: validation fails when the lite `Version:` header does not equal the canonical version, so a canonical bump that forgets to re-sync the lite file cannot pass silently. The check cannot prove the lite *content* is in parity, only that its version was consciously set; the re-condense discipline above remains the substantive guarantee.
 
 **Tagged releases.**
 Create a tagged release for any minor or major version bump.

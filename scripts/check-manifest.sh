@@ -15,8 +15,7 @@
 # .ai-policy/state/) are out of scope by design, since the boundary governs what ships.
 #
 # Categories: product (union of every profile's shared + per-tool paths),
-# authored_in_target, and factory_only. lite entry_filenames are target
-# filenames the installer generates, not source paths, so they are not checked.
+# authored_in_target, and factory_only.
 set -eu
 
 ROOT_DIR="$(git rev-parse --show-toplevel)"

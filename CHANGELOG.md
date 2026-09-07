@@ -6,6 +6,22 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 4.0.0 - 2026-09-07
+
+The lite profile is removed. It was unused, and every change to the workflow's rules had to be hand-condensed into it a second time, which is one rule kept in several files: several copies of the same defect.
+
+### Removed
+
+- `lite-monolithic/ai-workflow.md` — the single-file condensation of the workflow and skills. Targets installed on the lite profile can no longer be updated by `scripts/update.sh` and should be reinstalled on the full profile ([#272]).
+- `lite-monolithic/README.md` — usage instructions for the removed profile ([#272]).
+
+### Changed
+
+- `scripts/install.sh` and `scripts/update.sh` drop `--profile` entirely rather than accepting a single remaining value. The updater no longer infers a profile from the presence of `.ai-policy/` ([#272]).
+- `scripts/repo-validation.sh` drops the lite version-parity gate, `scripts/check-prose-integrity.sh` drops the lite version-header check, and `scripts/classify.sh` and `scripts/check-manifest.sh` drop the lite profile from the product/factory boundary ([#272]).
+- `install-manifest.json` drops the `lite` profile and its entry filenames ([#272]).
+- `design/decisions/maintenance.md` drops the derived-files rule that governed re-condensing, which now governs nothing ([#272]).
+
 ## 3.37.0 - 2026-09-07
 
 Every rule in Boundary Rules was tested against `north-star.md` and removed where it did not serve it. Twenty-one rules became fourteen.

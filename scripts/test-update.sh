@@ -33,7 +33,7 @@ set_version() {
 
 echo "real-history update (installed 2.14.0 -> $SRC_VERSION):"
 T="$(new_target hist)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 set_version "$T/ai-workflow.md" 2.14.0
 # stale product files that 3.3.0 removed (real removed paths):
 mkdir -p "$T/.claude/skills/aiw-evaluation";     echo stale > "$T/.claude/skills/aiw-evaluation/SKILL.md"
@@ -42,7 +42,7 @@ echo stale > "$T/.ai-policy/scripts/update-session-tags.sh"
 # a genuine local addition under a vendored path:
 mkdir -p "$T/.claude/skills/my-local-skill";      echo mine > "$T/.claude/skills/my-local-skill/SKILL.md"
 
-"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "update exited non-zero"
+"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "update exited non-zero"
 
 absent  "$T" .claude/skills/aiw-evaluation
 absent  "$T" .claude/skills/aiw-telemetry-setup
@@ -54,7 +54,7 @@ if [ "$v" = "$SRC_VERSION" ]; then ok "version bumped to $SRC_VERSION"; else bad
 
 echo "pre-prefix update (installed 1.0.0 -> $SRC_VERSION, drops un-prefixed skills):"
 T="$(new_target preprefix)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 set_version "$T/ai-workflow.md" 1.0.0
 # simulate the superseded un-prefixed skill dirs an old install left behind:
 for s in planning testing failure-analysis issue-creation project-spec-management logging-and-observability; do
@@ -64,7 +64,7 @@ for s in planning testing failure-analysis issue-creation project-spec-managemen
 done
 # a genuine local addition under the same vendored path must survive:
 mkdir -p "$T/.claude/skills/my-local-skill"; echo mine > "$T/.claude/skills/my-local-skill/SKILL.md"
-"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "pre-prefix update exited non-zero"
+"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "pre-prefix update exited non-zero"
 for s in planning testing failure-analysis issue-creation project-spec-management logging-and-observability; do
   absent "$T" ".claude/skills/$s"
   absent "$T" ".agents/skills/$s"
@@ -88,7 +88,7 @@ set_version "$FAKE_SRC/ai-workflow.md" 90.0.0
     && git add -A && git commit -qm init ) >/dev/null 2>&1
 
 T="$(new_target pruned)"
-"$INSTALL" --source "$FAKE_SRC" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "fake-source install exited non-zero"
+"$INSTALL" --source "$FAKE_SRC" --target "$T" --tool claude >/dev/null 2>&1 || bad "fake-source install exited non-zero"
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then ok "legacy-thing/ recorded in .gitignore before update"; else bad "legacy-thing/ not recorded before update"; fi
 
 # The source drops the path and declares the removal.
@@ -104,7 +104,7 @@ tmp_changelog="$(mktemp)"
 } > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC/CHANGELOG.md"
 ( cd "$FAKE_SRC" && git add -A && git commit -qm drop ) >/dev/null 2>&1
 
-"$UPDATE" --source "$FAKE_SRC" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "prune update exited non-zero"
+"$UPDATE" --source "$FAKE_SRC" --target "$T" --tool claude >/dev/null 2>&1 || bad "prune update exited non-zero"
 absent "$T" legacy-thing
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then bad "legacy-thing/ still in .gitignore after update"; else ok "legacy-thing/ pruned from .gitignore"; fi
 for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/"; do
@@ -128,8 +128,8 @@ set_version "$FAKE_SRC2/ai-workflow.md" 90.0.0
     && git add -A && git commit -qm init ) >/dev/null 2>&1
 
 T="$(new_target multi-tool-prune)"
-"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool claude --profile full >/dev/null 2>&1 || bad "claude install exited non-zero"
-"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
+"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then ok "legacy-thing/ recorded before update"; else bad "legacy-thing/ not recorded before update"; fi
 
 # The source names the path as removed; the claude tool set still ships it.
@@ -141,7 +141,7 @@ tmp_changelog="$(mktemp)"
 } > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC2/CHANGELOG.md"
 ( cd "$FAKE_SRC2" && git add -A && git commit -qm drop ) >/dev/null 2>&1
 
-"$UPDATE" --source "$FAKE_SRC2" --target "$T" --tool gemini --profile full >/dev/null 2>&1 || bad "multi-tool prune update exited non-zero"
+"$UPDATE" --source "$FAKE_SRC2" --target "$T" --tool gemini >/dev/null 2>&1 || bad "multi-tool prune update exited non-zero"
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then
   ok "legacy-thing/ still ignored (the claude set still ships it)"
 else
@@ -153,9 +153,9 @@ done
 
 echo "already up-to-date (no-op):"
 T="$(new_target current)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 mkdir -p "$T/.claude/skills/my-local-skill"; echo mine > "$T/.claude/skills/my-local-skill/SKILL.md"
-"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 ec=$?
 if [ "$ec" -eq 0 ]; then ok "up-to-date update exits 0"; else bad "up-to-date update exit=$ec"; fi
 present "$T" .claude/skills/my-local-skill/SKILL.md
@@ -163,15 +163,15 @@ present "$T" CLAUDE.md
 
 echo "refuse downgrade (target ahead):"
 T="$(new_target ahead)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 set_version "$T/ai-workflow.md" 99.0.0
-"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$UPDATE" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 if [ "$?" -ne 0 ]; then ok "refuses to downgrade"; else bad "should refuse downgrade"; fi
 present "$T" ai-workflow.md
 
 echo "auto-detect tool and profile (full/claude):"
 T="$(new_target detect)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 set_version "$T/ai-workflow.md" 2.14.0
 "$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1 || bad "auto-detect update exited non-zero"
 v="$(awk '/^Version:[[:space:]]*/ {print $2; exit}' "$T/ai-workflow.md")"
@@ -179,18 +179,10 @@ if [ "$v" = "$SRC_VERSION" ]; then ok "auto-detected full/claude and updated"; e
 
 echo "ambiguous tool requires --tool:"
 T="$(new_target ambig)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile full >/dev/null 2>&1
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
 touch "$T/AGENTS.md"
 "$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1
 if [ "$?" -ne 0 ]; then ok "ambiguous tool errors without --tool"; else bad "should error on ambiguous tool"; fi
-
-echo "lite update (auto-detected):"
-T="$(new_target lite)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude --profile lite >/dev/null 2>&1
-set_version "$T/ai-workflow.md" 2.14.0
-"$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1 || bad "lite update exited non-zero"
-present "$T" ai-workflow.md
-present "$T" CLAUDE.md
 
 echo
 echo "Results: $pass passed, $fail failed."
