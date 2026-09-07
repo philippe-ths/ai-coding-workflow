@@ -110,12 +110,22 @@ for f in ai-workflow.md project-context.md; do
 done
 
 head_ "Declared size budget:"
-pc_lines="$(wc -l < project-context.md | tr -d ' ')"
-if [ "$pc_lines" -le 300 ]; then
-  ok "project-context.md is $pc_lines lines (budget 300)"
-else
-  bad "project-context.md is $pc_lines lines, over its declared 300-line budget"
-fi
+# Counted in tokens, not lines. A fact fused onto an existing line leaves the
+# line count untouched while the file gets heavier, so a line budget cannot
+# hold the thing it exists to hold. Tokens are estimated as bytes/4 rather than
+# measured: a real tokenizer is a dependency this repository does not carry, and
+# the estimate only has to be stable and roughly right to make growth visible.
+check_budget() { # file, token budget
+  [ -f "$1" ] || return 0   # both files are optional in a target repo
+  _t=$(( $(wc -c < "$1") / 4 ))
+  if [ "$_t" -le "$2" ]; then
+    ok "$1 is ~$_t tokens (budget $2)"
+  else
+    bad "$1 is ~$_t tokens, over its declared $2-token budget; drop a line rather than raising the budget"
+  fi
+}
+check_budget project-context.md 6000
+check_budget north-star.md 400
 
 head_ "Entry-point parity:"
 for e in "${ENTRY_POINTS[@]}"; do

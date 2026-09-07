@@ -26,8 +26,8 @@ Use these sections, in order; omit one only when the repository has no reliable 
 
 - Write exactly one sentence per line, and give a new fact its own line rather than extending a line that already exists.
   (Why: a fact fused onto an existing line is invisible in review, and it escapes any limit counted in lines, so the file can triple in weight while its line count barely moves.)
-- Treat the file as full: hold it near 300 lines, and once it is at the limit, adding a fact means choosing which line leaves.
-  (Why: `project-context.md` loads into agent context on every task; every line competes with task-specific content.)
+- Treat the file as full: hold it under 6000 tokens, and once it is at the limit, adding a fact means choosing which line leaves.
+  (Why: `project-context.md` loads into agent context on every task; every line competes with task-specific content. The budget is counted in tokens because that is what the file actually costs, and because a fact fused onto an existing line walks past a limit counted in lines.)
 - When choosing which line leaves, drop the line a reader is least likely to act on, not the line least related to the change you are making.
   (Why: relatedness is not value, and trading a load-bearing fact for a detail is worse than the crowding it relieved.)
 - Where the repository can enforce that budget the way it enforces anything else, enforce it there.

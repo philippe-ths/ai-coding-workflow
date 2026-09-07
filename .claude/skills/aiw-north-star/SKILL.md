@@ -15,7 +15,7 @@ The workflow knows what the system does, because the codebase says so. It knows 
 
 The goal, and nothing else.
 
-Short is the point rather than a courtesy. This is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal that has grown into a list of everything the project does has stopped being a goal.
+Short is the point rather than a courtesy. The ceiling is 400 tokens, and a north-star approaching it has stopped being one. This is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal that has grown into a list of everything the project does has stopped being a goal.
 
 The human is its source of truth. The agent writes the file, the same division `project-context.md` uses with the codebase, except the codebase cannot supply this one.
 

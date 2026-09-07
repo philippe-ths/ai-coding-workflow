@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.1.0 - 2026-09-07
+
+`project-context.md` and `north-star.md` have size ceilings that validation enforces, counted in tokens.
+
+### Added
+
+- A token budget on both agent-facing files, checked by `scripts/check-prose-integrity.sh` and therefore failing validation: 6000 tokens for `project-context.md`, 400 for `north-star.md`. Tokens are estimated as bytes/4 rather than measured, because a real tokenizer is a dependency this repository does not carry and the estimate only has to be stable and roughly right to make growth visible. A file that is absent is not a failure, since both are optional in a target repo ([#272]).
+- Cases in `scripts/test-prose-integrity.sh` asserting the budget fires: one for each file over its ceiling, and one for a single fused line over the ceiling, which is the case the previous check could not see. A fourth asserts an absent `north-star.md` still passes ([#272]).
+
+### Changed
+
+- The budget replaces the 300-line limit on `project-context.md`. A fact fused onto an existing line adds weight without adding a line, so a line count could not hold the thing it existed to hold; the file's own authoring skill already warned about exactly that, and nothing measured it ([#272]).
+- `aiw-project-context-management` and `aiw-north-star` state the ceilings in the terms the check enforces, in both skill trees ([#272]).
+
 ## 5.0.0 - 2026-09-07
 
 Gemini CLI is no longer a supported tool, and `CLAUDE.md` no longer carries rules of its own.

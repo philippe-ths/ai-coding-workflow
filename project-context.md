@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.33.0
+Version: 1.34.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -46,7 +46,9 @@ Version: 1.33.0
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
-- `project-context.md` must stay under 300 lines.
+- `project-context.md` must stay under 6000 tokens.
+- `north-star.md` must stay under 400 tokens.
+- `scripts/check-prose-integrity.sh` fails validation when either budget is exceeded, counting tokens as bytes/4 rather than measuring them.
 - No work may be done directly on `main` or `master`; the policy layer and git hooks enforce this at commit and push time.
 - Validation must pass before commit or push when hooks are installed.
 - All facts in `project-context.md` must reflect implementation truth, not planned architecture.
@@ -135,7 +137,7 @@ Version: 1.33.0
 ## Maintenance Checklist
 - Update this file when the project structure, key files, or policy rules change.
 - Keep this file aligned with the current codebase, not planned architecture.
-- Keep this file concise and under 300 lines.
+- Keep this file concise and under its 6000-token budget.
 - When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.
 - When this file changes, bump its own `Version:` header per the `project-context.md` version rule in `design/decisions/maintenance.md`.
 - When adding a top-level tracked file, classify it in `install-manifest.json`; validation fails until every tracked file is classified.
