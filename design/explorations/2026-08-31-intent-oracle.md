@@ -162,9 +162,9 @@ Take ten decisions the human actually made and check whether the draft predicts 
 ### The corpus exists
 
 Checked on 2026-08-31.
-`observations/observed-ai-failings.md` holds 29 entries.
+`field-notes/observed-ai-failings.md` holds 29 entries.
 The Claude Code memory directory for this repository holds 7 feedback entries.
-`observations/workflow-reviews/` holds 2 archived reviews.
+`field-notes/workflow-reviews/` holds 2 archived reviews.
 `design/decisions/` holds 8 concern-scoped rationale files.
 The repository has upwards of 240 merged pull requests.
 

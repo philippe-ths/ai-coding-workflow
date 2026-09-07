@@ -1,10 +1,10 @@
 # Observation Capture
 
-Covers how to record entries in `observations/observed-ai-failings.md`, including writing guidelines and the entry template.
+Covers how to record entries in `field-notes/observed-ai-failings.md`, including writing guidelines and the entry template.
 
 ## Recording Guidelines
 
-Use `observations/observed-ai-failings.md` to record concrete AI-agent failure patterns seen in real sessions.
+Use `field-notes/observed-ai-failings.md` to record concrete AI-agent failure patterns seen in real sessions.
 Keep entries short.
 Write one sentence per line.
 Record what happened, not theories unless they are useful.
