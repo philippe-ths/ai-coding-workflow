@@ -13,7 +13,6 @@ Find the file for your concern:
 | `context-economics.md` | Context budget, progressive disclosure, and skill loading |
 | `enforcement-layers.md` | The `.ai-policy/` deterministic enforcement system and `.githooks/` git hooks |
 | `maintenance.md` | Versioning, CHANGELOG entries, file splitting, and the reusable maintenance prompt |
-| `observation-capture.md` | How to record entries in `field-notes/observed-ai-failings.md` |
 | `rule-placement.md` | Where rules belong within `ai-workflow.md`: canonical location and section boundaries |
 | `runtime-configuration.md` | Thinking effort defaults, output brevity, prompt caching, and subagent use |
 

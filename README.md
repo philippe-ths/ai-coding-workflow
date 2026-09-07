@@ -61,7 +61,6 @@ Tipping points are a judgement call. They come from real-world usage in other re
 ### Maintenance documents
 
 - `design/` — concern-scoped design decisions and primary-source research. See `design/README.md` for a file index.
-- `field-notes/observed-ai-failings.md` — log of concrete failure patterns observed in real AI-agent sessions.
 - `field-notes/workflow-reviews/` — archived outputs from earlier periodic workflow reviews.
 
 ## Product vs Factory

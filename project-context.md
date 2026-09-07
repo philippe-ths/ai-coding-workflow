@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.35.0
+Version: 1.36.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -38,7 +38,6 @@ Version: 1.35.0
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
 - Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
 - Declares the product/factory boundary in `install-manifest.json`, validated by `scripts/check-manifest.sh` and printed by `make classify`.
-- Records observed AI agent failure patterns (`field-notes/observed-ai-failings.md`) to inform workflow rule changes.
 - Provides a local session-observation tool (`observation/`) that parses Claude Code transcripts into a JSONL Session Store and a self-contained static HTML dashboard.
 - The observation tool is descriptive only: it surfaces how metrics move across workflow versions and over time, and never computes a statistical comparison or pass/fail verdict.
 - Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
@@ -81,7 +80,6 @@ Version: 1.35.0
 - `CONTEXT.md`: glossary of the session-observation domain language.
 - `docs/adr/`: architecture decision records; `0001` and `0002` record the move to descriptive observation and global capture.
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
-- `field-notes/observed-ai-failings.md`: log of concrete AI agent failure patterns observed in real sessions.
 - `field-notes/workflow-reviews/`: archived periodic review outputs, each named by date.
 - `field-notes/investigations/`: findings from issues labelled investigation, each named by date; the 2026-08-21 record concludes that neither the session-observation tool nor the pull request corpus can measure whether independent verification reduces rework, and why. The two Python files beside it rebuild that record's corpus and recompute its figures; they are archival, pinned to that investigation, and not covered by validation.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
