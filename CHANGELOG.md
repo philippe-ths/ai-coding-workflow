@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.36.0 - 2026-09-07
+
+### Changed
+
+- Task Flow step 4 states that the human can only interrupt what they can see. Running implementation without step-by-step authorisation is right and is unchanged; the sentence conflated that with saying nothing, and a human who cannot see the work cannot perform the interrupting the step assigns them ([#271]).
+- The Always Do preamble raises an observation while the human can still act on it, and leaves for the handoff summary only what they could read about afterwards. It previously defaulted to the handoff summary and admitted mid-task reporting only when the observation changed what the AI should do next, which read as an instruction to stay quiet and beat four Always Do rules that each require speaking mid-task ([#271]).
+- Build and Teach pitches to the altitude the human works at rather than to the depth of the work, and names `north-star.md` as what fixes that altitude. The previous wording tied explanation depth to code difficulty, which contradicted both the north-star and the section's own following sentence ([#271]).
+- Asking for Guidance decides implementation-only questions itself and reports the decision, reserving the human for decisions that turn on taste or direction. The section previously constrained the shape of a question without asking whether it was the human's to answer, so a correctly formatted message could still put an implementation choice in front of someone with no basis to make it. Its closing sentence about walls of text goes, being a negative restatement of the lead-with-a-recommendation rule above it ([#271]).
+- `lite-monolithic/ai-workflow.md` carries the same repairs, since it ships its own copies of three of those sentences ([#271]).
+
 ## 3.35.0 - 2026-09-05
 
 ### Added
@@ -734,3 +744,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#257]: https://github.com/philippe-ths/ai-coding-workflow/issues/257
 [#260]: https://github.com/philippe-ths/ai-coding-workflow/issues/260
 [#265]: https://github.com/philippe-ths/ai-coding-workflow/issues/265
+[#271]: https://github.com/philippe-ths/ai-coding-workflow/issues/271
