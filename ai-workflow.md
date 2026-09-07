@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.36.0
+Version: 3.37.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -47,7 +47,7 @@ When these dimensions apply, attempt automated coverage before falling back to m
 
 Protect your context window and the human's quota — but never by doing less than the task requires.
 
-- Efficiency governs *how* you discharge a required step, never *whether*. Never skip, weaken, or defer a required step to save context or quota.
+- A required step is discharged at the depth the change warrants. A one-line change and a schema migration do not earn the same evidence, and spending an hour proving a five-minute change is ceremony rather than rigour.
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
 - Route reconnaissance out freely: broad multi-file search, and any output you would only distil. It writes nothing, so it needs no permission.
 - Everything that writes is aiw-orchestration's call. Load it when the work looks like it might split — many files or areas, more input than you can hold at once, or any impulse to hand implementation to another agent — and before handing writing work to any agent other than yourself. Load it to decide whether to split, not once you have decided. The conditions live there, and this file does not restate them, because one rule kept in several places is several copies of the same defect.
@@ -57,17 +57,10 @@ Protect your context window and the human's quota — but never by doing less th
 
 ### Always Do
 
-The AI must raise these without being asked, so the human has the information needed to make decisions. Surface only what was encountered while doing the task, with concrete evidence. Raise it while the human can still act on it; what they could only read about afterwards goes in the handoff summary.
-
-- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, deferred with its method named, or waived by the human. Opening a pull request is not that decision, since the human makes it afterwards, so the pull request is where the justification is presented and where deferred evidence lands before they decide.
-- ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis, which reassesses the task framing, oracle, plan, and code structure before anything else changes.
-- ALWAYS surface uncertainty, guesses, and incomplete validation. Where a reading is uncertain, take the one a careful colleague would, name it, and carry on; stop and wait only when no reading is safe to act on, when a wrong one would mean redoing the work rather than adjusting it, or when the question is one the Ask First list reserves for the human. A question the north-star settles does not warrant stopping.
-- ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
-- ALWAYS surface follow-up work discovered during the task that falls outside scope, without acting on it.
-- ALWAYS surface performance concerns observed in the code paths the task touched, with the concrete signal that prompted them.
-- ALWAYS surface security concerns observed in the code paths the task touched, with the concrete signal that prompted them.
-- ALWAYS surface refactoring opportunities directly relevant to the task code, without acting on them.
-- ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
+- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution: checked, tracked by an issue, deferred with its method named, or waived by the human. A pull request is where that justification is presented, since the human decides afterwards.
+- ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
+- ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping. Stop and wait only when no reading is safe to act on, or when a wrong one would mean redoing the work rather than adjusting it.
+- ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not. Tell the human only what changes a decision of theirs. A finding handed over without a disposition is work moved from you to them.
 
 ### Ask First
 
@@ -76,10 +69,7 @@ Stop and ask the human before doing any of the following:
 - ASK before adding a new dependency.
 - ASK before changing architecture, patterns, or conventions documented in project context.
 - ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
-- ASK before refactoring code that is not required by the task.
-- ASK before deleting any file, function, class, or module.
-- ASK before weakening, skipping, or removing tests.
-- ASK before accepting verification evidence weaker than the plan committed to. If the committed method cannot run, that is a decision about what the done claim is worth, and it is the human's to make.
+- ASK before accepting verification evidence weaker than the plan committed to. If the committed method cannot run, that is a decision about what the done claim is worth, and it is the human's.
 
 ### Never Do
 
@@ -90,6 +80,7 @@ Do not do any of the following under any circumstances:
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
 - NEVER bypass deterministic policy checks or treat them as optional.
+- NEVER add a test case for a failure mode an existing case already covers. A suite that has grown past the point where it is run without thinking has cost more assurance than it added.
 
 ## Build and Teach
 

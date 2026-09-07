@@ -6,6 +6,25 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 3.37.0 - 2026-09-07
+
+Every rule in Boundary Rules was tested against `north-star.md` and removed where it did not serve it. Twenty-one rules became fourteen.
+
+### Added
+
+- `NEVER add a test case for a failure mode an existing case already covers.` The suite gate previously sat only on removal, so adding was free and removing required stopping to ask. That asymmetry is a ratchet: measured in one repository running this workflow, a suite went from 726 lines to 4,589 in a fortnight, forty commits growing it against three shrinking it, until a run took three minutes and stopped being reflexive. The gate now sits on the side that was free ([#272], [#270]).
+
+### Changed
+
+- Five Always Do rules that surfaced findings without disposing of them, covering follow-up work, performance, security, refactoring and logs, become one rule that resolves or tracks what it finds and tells the human only what changes a decision of theirs. `north-star.md` has the AI managing the work beneath the human; a finding handed over with no disposition moves work the other way ([#272]).
+- `ALWAYS present any question in the Asking for Guidance format` goes, being a pointer to a section that already states this ([#272]).
+- `ASK before refactoring code that is not required by the task` goes, being covered by `NEVER silently expand scope` ([#272]).
+- `ASK before deleting any file, function, class, or module` goes, being covered by the human's existing authority over destructive and hard-to-reverse actions. At its previous breadth it stopped work over an empty directory ([#272]).
+- `ASK before weakening, skipping, or removing tests` goes, replaced by the addition gate above ([#272]).
+- Resource Discipline discharges a required step at the depth the change warrants, rather than governing only how a step is discharged and never whether. The previous wording licensed the maximal reading of every step regardless of what was being built, and is the recorded cause of a five-minute change absorbing forty-five minutes ([#272], [#269]).
+- The Always Do preamble goes; the disposition rule carries what it said ([#272]).
+- `lite-monolithic/ai-workflow.md` is re-condensed against the same rule set ([#272]).
+
 ## 3.36.0 - 2026-09-07
 
 ### Changed
@@ -745,3 +764,6 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#260]: https://github.com/philippe-ths/ai-coding-workflow/issues/260
 [#265]: https://github.com/philippe-ths/ai-coding-workflow/issues/265
 [#271]: https://github.com/philippe-ths/ai-coding-workflow/issues/271
+[#272]: https://github.com/philippe-ths/ai-coding-workflow/issues/272
+[#270]: https://github.com/philippe-ths/ai-coding-workflow/issues/270
+[#269]: https://github.com/philippe-ths/ai-coding-workflow/issues/269
