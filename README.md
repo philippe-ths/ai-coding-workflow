@@ -41,12 +41,11 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 - `CLAUDE.md` — Claude Code agent instructions.
 - `AGENTS.md` — Codex agent instructions.
-- `GEMINI.md` — Gemini CLI agent instructions.
 - `.github/copilot-instructions.md` — VS Code Copilot agent instructions.
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`). Used by VS Code Copilot, Gemini CLI, and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`). Used by VS Code Copilot and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement
@@ -57,7 +56,6 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `.githooks/pre-commit`, `.githooks/pre-push` — git hooks that call `.ai-policy/` scripts.
 - `.claude/settings.json` — Claude Code hook configuration and tool permission defaults.
 - `.codex/config.toml`, `.codex/hooks.json` — Codex agent configuration, permission defaults, and hook definitions.
-- `.gemini/settings.json` — Gemini CLI hook configuration and tool permission defaults.
 - `.vscode/settings.json` — VS Code Copilot tool permission defaults.
 
 ### Maintenance documents
@@ -80,7 +78,7 @@ make classify
 
 ## Installation
 
-Point an AI coding agent at this repository — a local path or its URL — and say "install the AI workflow" (or "upgrade the AI workflow"). The agent follows [`INSTALL.md`](INSTALL.md), which drives the installer: it asks which tool (`claude`, `codex`, `gemini`, `copilot`) and profile (`full` or `lite`), copies the right files, records them in the target's `.gitignore`, and installs the git hooks. No hand-copying.
+Point an AI coding agent at this repository — a local path or its URL — and say "install the AI workflow" (or "upgrade the AI workflow"). The agent follows [`INSTALL.md`](INSTALL.md), which drives the installer: it asks which tool (`claude`, `codex`, `copilot`), copies the right files, records them in the target's `.gitignore`, and installs the git hooks. No hand-copying.
 
 To run it directly instead:
 

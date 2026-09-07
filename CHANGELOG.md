@@ -6,6 +6,24 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.0.0 - 2026-09-07
+
+Gemini CLI is no longer a supported tool, and `CLAUDE.md` no longer carries rules of its own.
+
+### Removed
+
+- `GEMINI.md` — the Gemini CLI entry point ([#272]).
+- `.gemini/` — Gemini CLI settings, hook wiring and tool permission defaults ([#272]).
+- `.ai-policy/scripts/test-gemini-enforcement.sh` — the Gemini enforcement test ([#272]).
+- `CLAUDE.md` sub-agent routing and capability-tier rules. They mapped `aiw-orchestration`'s tiers onto Claude Code tool names, which is the same rule kept in two files, and they loaded into every Claude Code session. `CLAUDE.md` is now four lines that point at the governance files, matching `AGENTS.md` and `.github/copilot-instructions.md` ([#272]).
+
+### Changed
+
+- `scripts/install.sh` and `scripts/update.sh` accept `claude`, `codex` and `copilot`. The updater no longer detects a target by the presence of `GEMINI.md` ([#272]).
+- `install-manifest.json` drops the Gemini tool set, and `scripts/check-prose-integrity.sh` drops `GEMINI.md` from entry-point parity ([#272]).
+- The pull-request merge and approve hooks keep blocking single-underscore MCP tool names. That naming is not specific to one client, so the assertions stay and only the vendor name in their labels goes ([#272]).
+- `scripts/test-install.sh` and `scripts/test-update.sh` substitute `copilot` or `codex` wherever Gemini stood in for a second or third tool, so multi-tool coverage survives the removal rather than being deleted with it ([#272]).
+
 ## 4.0.0 - 2026-09-07
 
 The lite profile is removed. It was unused, and every change to the workflow's rules had to be hand-condensed into it a second time, which is one rule kept in several files: several copies of the same defect.

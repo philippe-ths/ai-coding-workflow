@@ -198,7 +198,7 @@ Do not duplicate the advisory form of a rule in a script; the advisory form live
 No dedicated rule files exist in the repository yet.
 When they are introduced, add authoring conventions here rather than scattering them across other files.
 
-### Agent entry points (CLAUDE.md, AGENTS.md, GEMINI.md, Copilot configs)
+### Agent entry points (CLAUDE.md, AGENTS.md, Copilot configs)
 
 Agent entry points route the agent to `ai-workflow.md` and `project-context.md`.
 They do not contain workflow rules; rules belong in `ai-workflow.md`.

@@ -17,11 +17,6 @@
           ".codex/",
           ".agents/skills/"
         ],
-        "gemini": [
-          "GEMINI.md",
-          ".gemini/",
-          ".agents/skills/"
-        ],
         "copilot": [
           ".github/copilot-instructions.md",
           ".github/hooks/",

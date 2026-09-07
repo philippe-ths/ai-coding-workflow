@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install the AI coding workflow into a target repository.
 #
-#   scripts/install.sh --target <dir> --tool <claude|codex|gemini|copilot> [--source <dir>]
+#   scripts/install.sh --target <dir> --tool <claude|codex|copilot> [--source <dir>]
 #
 # Copies the product file set for the chosen tool into the target
 # repo, records the vendored files in the target's .gitignore (the governance
@@ -24,7 +24,7 @@ usage() {
 Usage: install.sh --target <dir> --tool <name> [--source <dir>]
 
   --target <dir>    Repository to install into (must be a git work tree). Required.
-  --tool <name>     One of: claude, codex, gemini, copilot. Required.
+  --tool <name>     One of: claude, codex, copilot. Required.
   --source <dir>    Workflow source repo. Defaults to the repo containing this script.
 USAGE
 }
@@ -50,8 +50,8 @@ fi
 
 [ -n "$TARGET" ] || { echo "error: --target is required" >&2; usage >&2; exit 2; }
 case "$TOOL" in
-  claude|codex|gemini|copilot) ;;
-  *) echo "error: --tool must be one of claude, codex, gemini, copilot" >&2; exit 2 ;;
+  claude|codex|copilot) ;;
+  *) echo "error: --tool must be one of claude, codex, copilot" >&2; exit 2 ;;
 esac
 command -v jq >/dev/null 2>&1 || { echo "error: jq is required" >&2; exit 1; }
 

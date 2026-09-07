@@ -263,11 +263,7 @@ echo
 echo "The hook is wired into each installed agent entry point:"
 #
 # Behaviour tests pass just as happily when nothing invokes the hook, so assert
-# it is reachable. Gemini CLI is deliberately absent: its BeforeTool consumer
-# does not read additionalContext, and it treats stray stdout as a parse
-# failure, so wiring it there would trade a reminder that cannot land for a
-# per-call error. check-context-drift.sh already carries a two-of-four
-# compromise for the same kind of reason.
+# it is reachable.
 
 for cfg in ".claude/settings.json" ".codex/hooks.json" ".github/hooks/block-protected-branch.json"; do
   [ -f "$ROOT_DIR/$cfg" ] || continue
@@ -277,14 +273,6 @@ for cfg in ".claude/settings.json" ".codex/hooks.json" ".github/hooks/block-prot
     FAIL=$((FAIL + 1)); echo "  FAIL: $cfg does not invoke the hook"
   fi
 done
-
-if [ -f "$ROOT_DIR/.gemini/settings.json" ]; then
-  if grep -q "remind-context-management.sh" "$ROOT_DIR/.gemini/settings.json"; then
-    FAIL=$((FAIL + 1)); echo "  FAIL: .gemini/settings.json invokes a hook Gemini cannot consume"
-  else
-    PASS=$((PASS + 1)); echo "  PASS: .gemini/settings.json deliberately does not invoke it"
-  fi
-fi
 
 echo
 echo "Results: $PASS passed, $FAIL failed."

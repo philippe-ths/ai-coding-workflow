@@ -173,10 +173,6 @@ This is the most granular model — every permitted command is explicitly listed
 There is no per-command allowlist; safety comes from sandbox confinement plus hooks.
 Dangerous GitHub MCP tools (`push_files`, `create_or_update_file`, `delete_file`) are explicitly disabled.
 
-**Gemini CLI** (`.gemini/settings.json`) uses a sandbox and trusted-folders model.
-`tools.shell.allowedCommands = "all"` permits shell execution; safety comes from the sandbox layer and the `BeforeTool` hooks that block protected-branch operations.
-There is no per-command allowlist.
-
 **VS Code Copilot** (`.vscode/settings.json`) uses `chat.tools.terminal.autoApprove` with prefix-matched command names.
 This is similar to Claude's model — each safe command is explicitly listed.
 

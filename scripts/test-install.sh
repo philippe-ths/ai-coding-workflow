@@ -40,7 +40,6 @@ present "$T" .ai-policy/scripts/install-hooks.sh
 present "$T" .githooks
 absent  "$T" AGENTS.md
 absent  "$T" .codex
-absent  "$T" .gemini
 absent  "$T" .vscode
 absent  "$T" .agents
 absent  "$T" observation
@@ -90,15 +89,6 @@ present "$T" .agents/skills
 absent  "$T" CLAUDE.md
 absent  "$T" .claude
 
-echo "full / gemini (tool specificity):"
-T="$(new_target full-gemini)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1
-present "$T" GEMINI.md
-present "$T" .gemini/settings.json
-present "$T" .agents/skills
-absent  "$T" CLAUDE.md
-absent  "$T" .codex
-
 echo "full / copilot (tool specificity):"
 T="$(new_target full-copilot)"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool copilot >/dev/null 2>&1
@@ -107,7 +97,6 @@ present "$T" .github/hooks/block-protected-branch.json
 present "$T" .vscode/settings.json
 present "$T" .agents/skills
 absent  "$T" CLAUDE.md
-absent  "$T" GEMINI.md
 
 # --- multi-tool helpers ---------------------------------------------------
 manifest_paths() { # tool -> full-profile vendored paths, one per line
@@ -151,31 +140,31 @@ PATHS
   fi
 }
 
-echo "multi-tool install (gemini then claude, same target):"
-T="$(new_target multi-gemini-claude)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+echo "multi-tool install (copilot then claude, same target):"
+T="$(new_target multi-copilot-claude)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool copilot >/dev/null 2>&1 || bad "copilot install exited non-zero"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
-$(tool_paths gemini claude)
+$(tool_paths copilot claude)
 EOF
 exactly_once "$T" ".agents/skills/"
 exactly_once "$T" ".ai-policy/"
 exactly_once "$T" "ai-workflow.md"
 one_block "$T"
-no_untracked_vendored "$T" gemini claude
+no_untracked_vendored "$T" copilot claude
 
 echo "multi-tool install (third tool: codex on top):"
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 while IFS= read -r p; do has_line "$T" "$p"; done <<EOF
-$(tool_paths gemini claude codex)
+$(tool_paths copilot claude codex)
 EOF
 exactly_once "$T" ".agents/skills/"
 one_block "$T"
-no_untracked_vendored "$T" gemini claude codex
+no_untracked_vendored "$T" copilot claude codex
 
 echo "hand-maintained entries outside the managed block survive a later install:"
 T="$(new_target hand-maintained)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool copilot >/dev/null 2>&1 || bad "copilot install exited non-zero"
 cat >> "$T/.gitignore" <<'GI'
 
 # keep these - hand maintained
@@ -200,11 +189,11 @@ cat > "$T/.gitignore" <<'GI'
 .agents/skills/
 build-output/
 GI
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 exactly_once "$T" ".agents/skills/"
 has_outside  "$T" "build-output/"
 has_outside  "$T" "# keep these - hand maintained"
-if git -C "$T" status --porcelain 2>/dev/null | grep -qE '\.agents/|\.gemini/|GEMINI\.md'; then
+if git -C "$T" status --porcelain 2>/dev/null | grep -qE '\.agents/|\.codex/|AGENTS\.md'; then
   bad "a vendored path is untracked after the fold"
 else
   ok "no vendored path is untracked after the fold"
@@ -251,7 +240,7 @@ no_untracked_vendored "$T" claude
 
 echo "a block entry containing a literal '|' does not un-ignore a vendored path:"
 T="$(new_target pipe-in-block)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 insert_in_block "$T" 'a|.claude|b'
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 exactly_once "$T" ".claude/"
@@ -261,13 +250,13 @@ one_block "$T"
 
 echo "a leading-whitespace block entry does not shadow the real vendored path:"
 T="$(new_target leading-space-in-block)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
 insert_in_block "$T" '  .claude/'
 "$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
 exactly_once "$T" ".claude/"
 if git -C "$T" check-ignore -q .claude/settings.json; then ok "git ignores .claude/settings.json"; else bad "git does not ignore .claude/settings.json"; fi
 one_block "$T"
-no_untracked_vendored "$T" gemini claude
+no_untracked_vendored "$T" codex claude
 
 echo
 echo "Results: $pass passed, $fail failed."

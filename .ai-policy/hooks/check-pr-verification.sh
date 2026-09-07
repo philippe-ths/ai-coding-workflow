@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-# PreToolUse hook for Claude Code, Codex, Gemini CLI, and VS Code Copilot.
+# PreToolUse hook for Claude Code, Codex, and VS Code Copilot.
 # Blocks opening or editing a pull request whose body carries no verification
 # justification, or whose unverified-surface section is a bare assertion.
 # Reads tool_input from JSON on stdin.

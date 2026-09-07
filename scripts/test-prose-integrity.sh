@@ -28,9 +28,9 @@ mkdir -p "$PRISTINE/.github" \
 cp -R "$ROOT/.claude/skills" "$PRISTINE/.claude/skills"
 cp -R "$ROOT/.agents/skills" "$PRISTINE/.agents/skills"
 cp "$ROOT/ai-workflow.md" "$ROOT/project-context.md" "$ROOT/CLAUDE.md" \
-   "$ROOT/AGENTS.md" "$ROOT/GEMINI.md" "$PRISTINE/"
+   "$ROOT/AGENTS.md" "$PRISTINE/"
 cp "$ROOT/.github/copilot-instructions.md" "$PRISTINE/.github/"
-for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md GEMINI.md \
+for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md \
                 .github/copilot-instructions.md \
                 .claude/skills/aiw-init/SKILL.md .agents/skills/aiw-init/SKILL.md; do
   [ -e "$PRISTINE/$required" ] || { echo "pristine fixture is missing $required (ROOT=$ROOT)" >&2; exit 2; }

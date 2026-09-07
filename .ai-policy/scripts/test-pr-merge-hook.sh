@@ -52,8 +52,8 @@ echo "MCP route — merge tools blocked:"
 assert_blocked "mcp__github__merge_pull_request" \
   "$(mcp_payload "mcp__github__merge_pull_request")"
 
-# Gemini CLI normalises MCP tool names with single underscores.
-assert_blocked "mcp_github_merge_pull_request (Gemini naming)" \
+# Some MCP clients normalise tool names with single underscores.
+assert_blocked "mcp_github_merge_pull_request (single-underscore naming)" \
   "$(mcp_payload "mcp_github_merge_pull_request")"
 
 assert_blocked "merge_pull_request under a third-party server prefix" \
