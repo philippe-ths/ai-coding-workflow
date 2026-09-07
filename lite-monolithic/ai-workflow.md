@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.36.0
+Version: 3.37.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -191,7 +191,7 @@ During implementation:
 
 Protect your context window and the human's quota — but never by doing less than the task requires:
 
-- Efficiency governs how you discharge a required step, never whether. Never skip, weaken, or defer a required step to save context or quota.
+- A required step is discharged at the depth the change warrants. A one-line change and a schema migration do not earn the same evidence, and spending an hour proving a five-minute change is ceremony rather than rigour.
   (Why: An efficiency directive is easy to misread as licence to thin verification, ground truth, or failure analysis; the cost saving is illusory when it lets a defect through.)
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
 - Route reconnaissance out freely: broad multi-file search, and any output you would only distil. It writes nothing, so it needs no permission.
@@ -407,9 +407,7 @@ The following apply to every task without exception:
 - ALWAYS follow the workflow steps in order, and produce the verification justification before presenting work for the human's done decision. Opening a pull request is not that decision, so the pull request is where the justification is presented and where deferred evidence lands before the human decides.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and enter failure analysis mode, reassessing the task framing, oracle, plan, and code structure before anything else changes.
 - ALWAYS surface uncertainty, guesses, and incomplete validation. Where a reading is uncertain, take the one a careful colleague would, name it, and carry on; stop and wait only when no reading is safe to act on, when a wrong one would mean redoing the work rather than adjusting it, or when the question is one the Ask First list reserves for the human. A question the north-star settles does not warrant stopping.
-- ALWAYS present any question or decision you put to the human in the Asking for Guidance format — lead with a clear recommendation and its rationale, never a bare list of options for the human to sort out.
-- ALWAYS surface follow-up work, performance concerns, security concerns, and relevant refactoring opportunities discovered during the task — with concrete evidence — without acting on them.
-- ALWAYS surface notable entries from logs consulted during the task: errors, warnings, and unexpected patterns.
+- ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not. Tell the human only what changes a decision of theirs. A finding handed over without a disposition is work moved from you to them.
 
 ### Ask First
 
@@ -418,10 +416,7 @@ Stop and ask the human before doing any of the following:
 - ASK before adding a new dependency.
 - ASK before changing architecture, established patterns, or documented conventions.
 - ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
-- ASK before refactoring code that is not required by the task.
-- ASK before deleting any file, function, class, or module.
 - ASK before running `git reset --hard` or any command that discards uncommitted working-tree state.
-- ASK before weakening, skipping, or removing tests.
 - ASK before accepting verification evidence weaker than the plan committed to.
 
 ### Never Do
@@ -432,6 +427,7 @@ Do not do any of the following under any circumstances:
 - NEVER silently expand scope or introduce unrelated changes.
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
+- NEVER add a test case for a failure mode an existing case already covers. A suite that has grown past the point where it is run without thinking has cost more assurance than it added.
 
 ## Build and Teach
 
