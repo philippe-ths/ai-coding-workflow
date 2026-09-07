@@ -131,7 +131,21 @@ expect "a missing Version header is caught" fail "$D" "no Version header"
 echo "size budget:"
 D="$(fixture oversize)"
 for i in $(seq 1 400); do echo "- filler line $i"; done >> "$D/project-context.md"
-expect "project-context.md over its 300-line budget is caught" fail "$D" "budget"
+expect "project-context.md over its token budget is caught" fail "$D" "budget"
+
+# The reason the budget is counted in tokens rather than lines: one fused line
+# adds weight without adding a line, and walked straight past the old check.
+D="$(fixture oversize-one-line)"
+{ printf -- '- '; for i in $(seq 1 4000); do printf 'filler fact %s. ' "$i"; done; printf '\n'; } >> "$D/project-context.md"
+expect "a single fused line over the token budget is caught" fail "$D" "budget"
+
+D="$(fixture north-star-oversize)"
+{ echo "# North Star"; for i in $(seq 1 200); do echo "Goal sentence $i."; done; } > "$D/north-star.md"
+expect "north-star.md over its token budget is caught" fail "$D" "budget"
+
+D="$(fixture no-north-star)"
+rm -f "$D/north-star.md"
+expect "an absent north-star.md is not a budget failure" pass "$D" ""
 
 echo "entry-point parity:"
 D="$(fixture entry-drift)"
