@@ -1,6 +1,6 @@
 ---
 name: aiw-failure-analysis
-description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted — by the user, by runtime behaviour, by manual verification, or by the agent itself. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Use it equally when the agent is about to supersede, replace, or redo its own recent attempt at the same defect, or to touch code its own recent change last touched for that defect, whoever noticed. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the three core skills (aiw-ground-truth, aiw-testing, aiw-verification) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the three core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
+description: "Reactive skill for when the agent has claimed a task complete and that claim is contradicted — by the user, by runtime behaviour, by manual verification, or by the agent itself. Use it whenever the user reports the behaviour is still broken, the fix didn't help, the system is doing the wrong thing, or runtime disagrees with the agent's tests or validation, with phrases like 'still broken' or 'didn't help'. Use it equally when the agent is about to supersede, replace, or redo its own recent attempt at the same defect, or to touch code its own recent change last touched for that defect, whoever noticed. Load this skill BEFORE proposing any fix. The trigger is a trust collapse: the core skills (aiw-ground-truth, aiw-testing, aiw-verification, aiw-validation) that should have caught the problem did not, so the agent cannot trust its oracle, tests, or verification until each is audited. It stops the agent jumping to the nearest plausible patch. It owns the structured pause after a contradicted 'done' claim, the audit of the core skills, the hypothesis-and-evidence loop that replaces speculative fixing, the convergence check when repeated fixes fail, and the plan-level flaw detection path."
 ---
 
 # Failure Analysis
@@ -13,11 +13,11 @@ When the agent declared the task complete, three things had to have signed off: 
 
 This is a trust collapse. The agent's natural response is to jump to the nearest plausible fix. Resist it. If understanding was wrong enough for verification to miss the problem, the nearest plausible fix is likely also wrong, and a sequence of such fixes will produce confident-looking patches that move the broken behaviour around without resolving it.
 
-This skill is reactive. The three core skills (aiw-ground-truth, aiw-testing, aiw-verification) are proactive — they keep the loop honest. This skill runs when the loop failed anyway, and audits the three core skills to find where the gap opened.
+This skill is reactive. The core skills (aiw-ground-truth, aiw-testing, aiw-verification, aiw-validation) are proactive — they keep the loop honest. This skill runs when the loop failed anyway, and audits the core skills to find where the gap opened.
 
 ## Relationship to the Investigate Modality
 
-The Investigate modality (defined in aiw-ground-truth) covers tasks where producing understanding is the deliverable from the start — diagnosing a bug, narrowing down a cause, deciding what to build. Failure analysis covers tasks where the agent thought it had finished and was wrong. The investigative posture is the same; the trigger is different. Failure analysis runs the audit specific to a contradicted "done" claim, then typically hands off to a fresh task — often in Fix or Investigate modality — that goes through the three core skills normally.
+The Investigate modality (defined in aiw-ground-truth) covers tasks where producing understanding is the deliverable from the start — diagnosing a bug, narrowing down a cause, deciding what to build. Failure analysis covers tasks where the agent thought it had finished and was wrong. The investigative posture is the same; the trigger is different. Failure analysis runs the audit specific to a contradicted "done" claim, then typically hands off to a fresh task — often in Fix or Investigate modality — that goes through the core skills normally.
 
 ## What Counts as a Contradiction
 
@@ -54,9 +54,9 @@ Before any reasoning, produce a short structured block. Four parts:
 
 State the gap before theorising about it. This discipline keeps the rest of the analysis grounded in the contradiction itself rather than in the agent's preferred explanation.
 
-## Audit the Three Core Skills
+## Audit the Core Skills
 
-The heart of this skill. The agent answers three audits in order, with specific answers. Vague answers ("the oracle was probably fine", "tests covered most of it") are not acceptable — they are the failure mode that produced the contradicted "done" claim. If an answer cannot be made specific, that itself is a finding.
+The heart of this skill. The agent answers the audits in order, with specific answers. Vague answers ("the oracle was probably fine", "tests covered most of it") are not acceptable — they are the failure mode that produced the contradicted "done" claim. If an answer cannot be made specific, that itself is a finding.
 
 ### Ground truth audit
 
@@ -86,6 +86,12 @@ The verification audit examines aiw-verification's three-part justification as a
 
 - Was the unverified surface named, or hidden?
 - Did the named unverified surface include the area that turned out to be wrong?
+
+### Validation audit
+
+- Was the deliverable named in the plan, as the thing the human would open rather than the work?
+- Was it met in the form the human meets it, or was the code that produces it read instead?
+- If the contradiction is that the deliverable was missing, empty, or not what was asked for, the gap is here rather than in the three audits above, and no amount of oracle, test, or evidence repair closes it.
 
 ### Testing audit
 
@@ -163,7 +169,7 @@ If the audit or the convergence check reveals that the original plan was based o
 - **What the codebase or system actually does.** The observed reality that contradicts the assumption.
 - **What a revised approach would need to account for.** Not a full new plan — a statement of the constraints a new plan would have to respect.
 
-Hand the work back. A new plan, validated through aiw-planning and the three core skills from the start, is the correct response. Patching forward from a flawed plan compounds the error.
+Hand the work back. A new plan, validated through aiw-planning and the core skills from the start, is the correct response. Patching forward from a flawed plan compounds the error.
 
 Do not signal a flawed approach based on difficulty alone. (Why: difficulty is normal implementation friction; only evidence of wrong assumptions signals a flawed approach.) Signal the flaw when the evidence shows the assumptions were wrong.
 
@@ -177,6 +183,6 @@ This skill's job is done when:
 - A single leading hypothesis is named with supporting evidence.
 - A concrete next step is identified.
 
-The next step is typically a fresh task — Fix or Investigate modality — that runs through the three core skills normally. This skill is the place where the right next step is identified, not where the fix is written. Hand off to the new task at this point.
+The next step is typically a fresh task — Fix or Investigate modality — that runs through the core skills normally. This skill is the place where the right next step is identified, not where the fix is written. Hand off to the new task at this point.
 
 If the audit produces work that should be tracked separately — a coverage gap, a deeper bug surfaced by the investigation, a plan-level rework — use aiw-issue-creation to create the new issue. Do not bundle unrelated work into the current task.

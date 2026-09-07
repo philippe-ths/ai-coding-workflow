@@ -6,6 +6,26 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.2.0 - 2026-09-07
+
+The done gate now asks two questions: whether the change is correct, and whether the result is what was asked for.
+
+### Added
+
+- `aiw-validation`, a skill in both trees, run at the done gate alongside `aiw-verification`. It names the deliverable as what the human will open, read, run, or look at; asks whether it exists, whether it does what was asked, and whether it is still the thing the project is for; and requires the agent to meet the artifact in the form the human will rather than read the code that produces it ([#279]).
+- An Always Do rule in `ai-workflow.md` making a missing, empty, or wrong deliverable unfinished work rather than a caveat to hand over ([#279]).
+- A validation audit in `aiw-failure-analysis`. A contradicted "done" claim caused by a missing deliverable has no route through the oracle, testing, or verification audits, so the reactive path could not reach the gate that failed ([#279]).
+- A pre-pull-request check in `aiw-github` for `aiw-validation`'s line in the body: the deliverable, and how it was met. A gate that leaves nothing behind cannot be told apart from one that was skipped ([#279]).
+
+### Changed
+
+- Task Flow step 5 is the done gate rather than the verification gate, and names both skills ([#279]).
+- "The Human is Responsible For" separates judging whether a result is good, which needs lived human experience, from confirming the deliverable exists and does what was asked, which does not and no longer waits for the human. Read as written, the previous wording excused the agent from looking at what it built, so the human was the first look every time ([#279]).
+- The plan's "user-visible behaviour" item is now "deliverable", naming the result rather than the work, because `aiw-validation` checks the finished work against that line ([#279]).
+- `aiw-verification` states that it is one of two questions at the done gate, since work can satisfy it completely while delivering nothing the human wanted ([#279]).
+- `aiw-failure-analysis` audits four core skills rather than three ([#279]).
+- `README.md`'s skill list names all fifteen skills; it was four behind the tree ([#264]).
+
 ## 5.1.0 - 2026-09-07
 
 `project-context.md` and `north-star.md` have size ceilings that validation enforces, counted in tokens.
@@ -812,6 +832,8 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#260]: https://github.com/philippe-ths/ai-coding-workflow/issues/260
 [#265]: https://github.com/philippe-ths/ai-coding-workflow/issues/265
 [#271]: https://github.com/philippe-ths/ai-coding-workflow/issues/271
+[#264]: https://github.com/philippe-ths/ai-coding-workflow/issues/264
+[#279]: https://github.com/philippe-ths/ai-coding-workflow/issues/279
 [#272]: https://github.com/philippe-ths/ai-coding-workflow/issues/272
 [#270]: https://github.com/philippe-ths/ai-coding-workflow/issues/270
 [#269]: https://github.com/philippe-ths/ai-coding-workflow/issues/269

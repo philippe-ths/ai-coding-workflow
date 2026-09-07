@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.36.0
+Version: 1.37.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -19,6 +19,9 @@ Version: 1.36.0
 - **Policy layer**: the set of shell scripts in `.ai-policy/` that enforce protected-branch and validation-state rules.
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
 - **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
+- **Deliverable**: what the human will open, read, run, or look at when a task is done, named as a noun in the plan and checked by the `aiw-validation` skill at the done gate.
+- **Done gate**: the pair of checks run before work is presented for the human's done decision, `aiw-verification` for whether the change is correct and `aiw-validation` for whether the result is what was asked for.
+- The `aiw-validation` skill is unrelated to the validation state and validation scripts of the policy layer, which record whether a repository's checks passed.
 - **Checkpoint**: a required human-review pause defined in the workflow before a consequential action.
 - **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
@@ -32,7 +35,7 @@ Version: 1.36.0
 - Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, performance profiling, security testing, project-context management, north-star authoring, and execution-shape orchestration, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot and Codex) and `.claude/skills/` (Claude Code).
+- Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, deliverable validation, performance profiling, security testing, project-context management, north-star authoring, and execution-shape orchestration, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot and Codex) and `.claude/skills/` (Claude Code).
 - Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`); each points at the governance files and carries no rules of its own.
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
@@ -82,7 +85,7 @@ Version: 1.36.0
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
 - `field-notes/workflow-reviews/`: archived periodic review outputs, each named by date.
 - `field-notes/investigations/`: findings from issues labelled investigation, each named by date; the 2026-08-21 record concludes that neither the session-observation tool nor the pull request corpus can measure whether independent verification reduces rework, and why. The two Python files beside it rebuild that record's corpus and recompute its figures; they are archival, pinned to that investigation, and not covered by validation.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
+- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
