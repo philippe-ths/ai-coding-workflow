@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.1.0
+Version: 5.2.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -22,7 +22,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 2. **Task start:** aiw-github (issue, branch).
 3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape), agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
-5. **Verification gate:** aiw-verification justification step before presenting work for human review.
+5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for. Both run before work is presented for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
@@ -60,6 +60,7 @@ Protect your context window and the human's quota — but never by doing less th
 - ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution: checked, tracked by an issue, deferred with its method named, or waived by the human. A pull request is where that justification is presented, since the human decides afterwards.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
 - ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping. Stop and wait only when no reading is safe to act on, or when a wrong one would mean redoing the work rather than adjusting it.
+- ALWAYS meet the deliverable the way the human will before presenting work for their done decision, and treat one that is missing, empty, or not what was asked for as work that is not finished rather than a caveat to hand over. aiw-validation owns this.
 - ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not. Tell the human only what changes a decision of theirs. A finding handed over without a disposition is work moved from you to them.
 
 ### Ask First
@@ -114,7 +115,7 @@ This rule overrides the rest of the workflow when triggered.
 The AI cannot perform these tasks.
 The human must complete them.
 
-- Make judgements that depend on lived human experience: visual quality, UX flow, real-device behaviour, subjective response.
+- Judge whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. These need lived human experience and nothing substitutes for them. Whether the deliverable exists and does what was asked is not that judgement, needs no human, and does not wait for one; aiw-validation covers it.
 - Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
 - Authorise actions that affect systems or people beyond the local working tree: pushing to remote, deploying, opening or commenting on PRs, posting to external services, modifying CI.
 - Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.

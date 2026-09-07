@@ -14,7 +14,7 @@ Planning is step 2 of the task sequence. The plan does not reproduce the rules o
 1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
 2. **aiw-planning** (this skill): establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
 3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
-4. **aiw-verification's justification step** before any "done" claim.
+4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, and aiw-validation for whether the deliverable this plan named actually exists and does what was asked.
 5. **aiw-github** again for commit, push, and pull request, each as a separate human-approved action.
 6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
 
@@ -78,7 +78,7 @@ The plan the agent produces for the user should have these elements:
 
 - **Branch.** The branch the work will be implemented on.
 - **Goal.** The goal of the change in one or two sentences.
-- **User-visible behaviour.** What must change from the user's perspective.
+- **Deliverable.** What the human will open, read, run, or look at when this is done, named as a noun in their terms, and what must change about it from their perspective. Name the result, not the work; aiw-validation checks the finished work against this line.
 - **Modality classification.** The modality (or modalities) recorded above.
 - **Oracle.** What counts as correct for this task and where it comes from. (See "The Oracle Section" below.)
 - **Files and code areas.** What the change will touch.
