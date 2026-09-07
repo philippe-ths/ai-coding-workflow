@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Install the AI coding workflow into a target repository.
 #
-#   scripts/install.sh --target <dir> --tool <claude|codex|gemini|copilot> [--profile full|lite] [--source <dir>]
+#   scripts/install.sh --target <dir> --tool <claude|codex|gemini|copilot> [--source <dir>]
 #
-# Copies the product file set for the chosen tool and profile into the target
+# Copies the product file set for the chosen tool into the target
 # repo, records the vendored files in the target's .gitignore (the governance
 # files are a local vendored copy, not committed into the target's history),
 # and installs the git hooks. The product/factory boundary comes from
@@ -21,11 +21,10 @@ set -eu
 
 usage() {
   cat <<'USAGE'
-Usage: install.sh --target <dir> --tool <name> [--profile full|lite] [--source <dir>]
+Usage: install.sh --target <dir> --tool <name> [--source <dir>]
 
   --target <dir>    Repository to install into (must be a git work tree). Required.
   --tool <name>     One of: claude, codex, gemini, copilot. Required.
-  --profile <name>  full (default) or lite.
   --source <dir>    Workflow source repo. Defaults to the repo containing this script.
 USAGE
 }
@@ -33,14 +32,12 @@ USAGE
 SOURCE=""
 TARGET=""
 TOOL=""
-PROFILE="full"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --source) SOURCE="${2:-}"; shift 2 ;;
     --target) TARGET="${2:-}"; shift 2 ;;
     --tool) TOOL="${2:-}"; shift 2 ;;
-    --profile) PROFILE="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "error: unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -56,11 +53,6 @@ case "$TOOL" in
   claude|codex|gemini|copilot) ;;
   *) echo "error: --tool must be one of claude, codex, gemini, copilot" >&2; exit 2 ;;
 esac
-case "$PROFILE" in
-  full|lite) ;;
-  *) echo "error: --profile must be full or lite" >&2; exit 2 ;;
-esac
-
 command -v jq >/dev/null 2>&1 || { echo "error: jq is required" >&2; exit 1; }
 
 MANIFEST="$SOURCE/install-manifest.json"
@@ -159,44 +151,25 @@ write_gitignore_block() {
     return 1
   fi
 }
-ignore_paths=()
+product_paths=()
+while IFS= read -r p; do [ -n "$p" ] && product_paths+=("$p"); done < <(
+  jq -r --arg t "$TOOL" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$MANIFEST"
+)
+for p in "${product_paths[@]}"; do
+  copy_tracked "$p"
+done
+ignore_paths=("${product_paths[@]}")
 
-if [ "$PROFILE" = "full" ]; then
-  product_paths=()
-  while IFS= read -r p; do [ -n "$p" ] && product_paths+=("$p"); done < <(
-    jq -r --arg t "$TOOL" '[.profiles.full.shared[], .profiles.full.tools[$t][]] | .[]' "$MANIFEST"
-  )
-  for p in "${product_paths[@]}"; do
-    copy_tracked "$p"
-  done
-  ignore_paths=("${product_paths[@]}")
-
-  # Install git hooks in the target (policy layer ships only with the full profile).
-  ( cd "$TARGET" \
-      && git config core.hooksPath .githooks \
-      && chmod +x .githooks/* 2>/dev/null \
-      && chmod +x .ai-policy/scripts/*.sh 2>/dev/null ) || true
-else
-  # lite: a single self-contained file plus a generated entry pointer.
-  mkdir -p "$TARGET"
-  cp "$SOURCE/lite-monolithic/ai-workflow.md" "$TARGET/ai-workflow.md"
-  entry="$(jq -r --arg t "$TOOL" '.profiles.lite.entry_filenames[$t]' "$MANIFEST")"
-  mkdir -p "$TARGET/$(dirname "$entry")"
-  cat > "$TARGET/$entry" <<'ENTRY'
-# AI Coding Workflow (lite)
-
-Read `ai-workflow.md` at the repository root and follow the workflow it defines
-for every task. The human reviews and approves at the checkpoints it describes.
-ENTRY
-  ignore_paths=("ai-workflow.md" "$entry")
-fi
+# Install git hooks in the target.
+( cd "$TARGET" \
+    && git config core.hooksPath .githooks \
+    && chmod +x .githooks/* 2>/dev/null \
+    && chmod +x .ai-policy/scripts/*.sh 2>/dev/null ) || true
 
 write_gitignore_block "${ignore_paths[@]}"
 
-echo "Installed AI workflow (profile: $PROFILE, tool: $TOOL) into $TARGET"
+echo "Installed AI workflow (tool: $TOOL) into $TARGET"
 echo "Vendored files recorded in $TARGET/.gitignore"
-if [ "$PROFILE" = "full" ]; then
-  echo "Git hooks installed (core.hooksPath = .githooks)"
-fi
+echo "Git hooks installed (core.hooksPath = .githooks)"
 echo "Next: author project-context.md in the target via the aiw-project-context-management skill."
 echo "Then: invoke the aiw-init skill in the target to scaffold its project-checks.md."

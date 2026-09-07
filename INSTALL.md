@@ -31,12 +31,11 @@ as a local path instead.
 1. Confirm the target path and that it is a git repository. If not, run
    `git init` there first (the installer requires it for hooks and vendoring).
 2. Ask the human which agent tool to install for (`claude`, `codex`, `gemini`, or
-   `copilot`) and which profile: `full` (policy layer, skills, entry point) or
-   `lite` (one self-contained file).
+   `copilot`).
 3. Run the installer from the source:
 
    ```bash
-   <source>/scripts/install.sh --target <target> --tool <tool> --profile <profile>
+   <source>/scripts/install.sh --target <target> --tool <tool>
    ```
 
 4. Author the target's `project-context.md` using the
@@ -56,7 +55,7 @@ as a local path instead.
    ```
 
    It auto-detects the installed tool and profile from the target. Pass
-   `--tool` / `--profile` to override or to disambiguate if several tools are
+   `--tool` to override or to disambiguate if several tools are
    installed.
 3. Report the version change and any files that were removed.
 

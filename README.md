@@ -36,7 +36,6 @@ Tipping points are a judgement call. They come from real-world usage in other re
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
 - `project-context.md` — factual reference for this repository's implementation state, authored using the `aiw-project-context-management` skill.
 - `project-checks.md` — what this repository is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
-- `lite-monolithic/` — single-file version of the workflow with planning and failure analysis inlined, no policy layer, no skills, no multi-agent entry points. See `lite-monolithic/README.md`.
 
 ### Agent instruction entry points
 
@@ -87,7 +86,7 @@ To run it directly instead:
 
 ```bash
 # fresh install
-scripts/install.sh --target <target-repo> --tool claude --profile full
+scripts/install.sh --target <target-repo> --tool claude
 
 # update an installed copy (auto-detects the installed tool and profile)
 scripts/update.sh --target <target-repo>
