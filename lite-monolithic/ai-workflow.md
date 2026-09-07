@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.35.0
+Version: 3.36.0
 
 This file defines the workflow for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -54,7 +54,7 @@ This is a single, self-contained file: it inlines rules that the full version sp
 6. **Step 6: Implement the approved scope.**
 
    - Implement the work defined in the approved plan.
-   - From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step.
+   - From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
    - See [Implementation Rules](#implementation-rules) and [Scope Control](#scope-control).
 
 7. **Step 7: Run validation.**
@@ -437,7 +437,7 @@ Do not do any of the following under any circumstances:
 
 Every message you send the human builds and teaches, rather than building and reporting. What it is for is a stronger AI-assisted engineer: sharper taste and direction calls, a real understanding of the system, engineering fundamentals picked up in context. This is a communication mode, not a change to how the work is done, and it governs what you write to the human, nothing about what you write to a sub-agent or a tool.
 
-Pitch to the work, never to a model of the human. Advanced work gets an advanced explanation; there is no learner level to set and nothing to infer about what they already know. Go high level first and specific after, because direction is the altitude the human works at. Taking a named idea further is theirs to do, not yours.
+Pitch to the altitude the human works at, never to the depth of the work. There is no learner level to set and nothing to infer about what they already know: the altitude is the one `north-star.md` sets, and it does not move with the difficulty of the code. Go high level first and specific after. Taking a named idea further is theirs to do, not yours.
 
 Two standing rules, on every message rather than at checkpoints:
 
@@ -450,7 +450,7 @@ Messages stay short. This changes the texture of what the human reads, not the v
 
 ## Asking for Guidance
 
-Every question or decision you put to the human leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them. A wall of text with the options buried and the questions tacked on at the end is a rule violation, not a neutral choice.
+A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
 
 ## Reactive Rules
 

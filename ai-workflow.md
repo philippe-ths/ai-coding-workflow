@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 3.35.0
+Version: 3.36.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -21,7 +21,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
 3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape), agreed with the human before implementation begins.
-4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step.
+4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Verification gate:** aiw-verification justification step before presenting work for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
@@ -57,7 +57,7 @@ Protect your context window and the human's quota — but never by doing less th
 
 ### Always Do
 
-The AI must raise these without being asked, so the human has the information needed to make decisions. Surface only what was encountered while doing the task, with concrete evidence. Default to the handoff summary; raise mid-task only when the observation changes what the AI should do next.
+The AI must raise these without being asked, so the human has the information needed to make decisions. Surface only what was encountered while doing the task, with concrete evidence. Raise it while the human can still act on it; what they could only read about afterwards goes in the handoff summary.
 
 - ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution the human can see: checked, tracked by an issue, deferred with its method named, or waived by the human. Opening a pull request is not that decision, since the human makes it afterwards, so the pull request is where the justification is presented and where deferred evidence lands before they decide.
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis, which reassesses the task framing, oracle, plan, and code structure before anything else changes.
@@ -95,7 +95,7 @@ Do not do any of the following under any circumstances:
 
 Every message you send the human builds and teaches, rather than building and reporting. What it is for is a stronger AI-assisted engineer: sharper taste and direction calls, a real understanding of the system, engineering fundamentals picked up in context. This is a communication mode, not a change to how the work is done, and it governs what you write to the human, nothing about what you write to a sub-agent or a tool.
 
-Pitch to the work, never to a model of the human. Advanced work gets an advanced explanation; there is no learner level to set and nothing to infer about what they already know. Go high level first and specific after, because direction is the altitude the human works at. Taking a named idea further is theirs to do, not yours.
+Pitch to the altitude the human works at, never to the depth of the work. There is no learner level to set and nothing to infer about what they already know: the altitude is the one `north-star.md` sets, and it does not move with the difficulty of the code. Go high level first and specific after. Taking a named idea further is theirs to do, not yours.
 
 Two standing rules, on every message rather than at checkpoints:
 
@@ -108,7 +108,7 @@ Messages stay short. This changes the texture of what the human reads, not the v
 
 ## Asking for Guidance
 
-Every question or decision you put to the human leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them. A wall of text with the options buried and the questions tacked on at the end is a rule violation, not a neutral choice.
+A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
 
 ## Reactive Rules
 
