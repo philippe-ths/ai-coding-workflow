@@ -21,7 +21,7 @@ Files whose changes do not require a bump:
 
 - Design decisions in `design/` — maintenance docs for this repo, not shipped to target repos.
 - `project-context.md` in this repo — this repo's own context document, not shipped. It carries its own independent version (see "`project-context.md` version" below); changes to it never require a canonical bump.
-- `README.md`, `observations/`, test scripts — not shipped as workflow instructions.
+- `README.md`, `field-notes/`, test scripts — not shipped as workflow instructions.
 
 Bump the patch version (Z) for any change that corrects wording, fixes a gap, or removes duplication without altering intent.
 Bump the minor version (Y) for any change that adds a new rule, section, skill, policy enforcement, or meaningful constraint.

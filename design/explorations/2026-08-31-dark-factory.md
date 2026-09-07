@@ -371,7 +371,7 @@ The rise is monotonic up to twenty files and the top bucket is too small to read
 A one-file commit cannot cross a boundary, so the measure largely reports how big the commits are.
 
 Fix-after-fix fails the same way, and this repository had already recorded it.
-`observations/investigations/2026-08-21-verification-and-rework.md` found rework rate rising from 14.3% at one file to 88.5% at twenty-one or more, and concluded that "a later pull request touched the same files within 72 hours" is a proxy for file count rather than for defects.
+`field-notes/investigations/2026-08-21-verification-and-rework.md` found rework rate rising from 14.3% at one file to 88.5% at twenty-one or more, and concluded that "a later pull request touched the same files within 72 hours" is a proxy for file count rather than for defects.
 
 Churn concentration fails on project age instead.
 Gini over per-file touch counts on the same repository, by quarter, was 0.372, then 0.506, then 0.464.
