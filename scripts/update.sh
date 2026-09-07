@@ -55,7 +55,6 @@ if [ -z "$TOOL" ]; then
   detected=""
   [ -f "$TARGET/CLAUDE.md" ] && detected="$detected claude"
   [ -f "$TARGET/AGENTS.md" ] && detected="$detected codex"
-  [ -f "$TARGET/GEMINI.md" ] && detected="$detected gemini"
   [ -f "$TARGET/.github/copilot-instructions.md" ] && detected="$detected copilot"
   detected="$(echo $detected | xargs)"
   case "$detected" in
@@ -64,7 +63,7 @@ if [ -z "$TOOL" ]; then
     *)      TOOL="$detected" ;;
   esac
 fi
-case "$TOOL" in claude|codex|gemini|copilot) ;; *) echo "error: --tool must be claude|codex|gemini|copilot" >&2; exit 2 ;; esac
+case "$TOOL" in claude|codex|copilot) ;; *) echo "error: --tool must be claude|codex|copilot" >&2; exit 2 ;; esac
 
 installed_version="$(read_version "$TARGET/ai-workflow.md")"
 source_version="$(read_version "$SOURCE/ai-workflow.md")"

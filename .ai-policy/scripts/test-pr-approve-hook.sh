@@ -100,7 +100,7 @@ assert_blocked "unrecognised event (fails closed)" \
 assert_blocked "submit_pending_pull_request_review APPROVE" \
   '{"tool_name":"mcp__github__submit_pending_pull_request_review","tool_input":{"owner":"x","repo":"y","pullNumber":1,"event":"APPROVE"}}'
 
-assert_blocked "Gemini single-underscore naming" \
+assert_blocked "single-underscore MCP naming" \
   '{"tool_name":"mcp_github_create_pull_request_review","tool_input":{"owner":"x","repo":"y","pullNumber":1,"event":"APPROVE"}}'
 
 assert_blocked "third-party server prefix" \

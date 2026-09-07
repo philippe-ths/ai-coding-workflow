@@ -209,7 +209,7 @@ assert_blocked "update_pull_request replacing the body with an unjustified one" 
 
 echo "The hook is wired into each installed agent entry point:"
 
-for cfg in ".claude/settings.json" ".codex/hooks.json" ".gemini/settings.json" ".github/hooks/block-protected-branch.json"; do
+for cfg in ".claude/settings.json" ".codex/hooks.json" ".github/hooks/block-protected-branch.json"; do
   [ -f "$ROOT_DIR/$cfg" ] || continue
   if grep -q "check-pr-verification.sh" "$ROOT_DIR/$cfg"; then
     PASS=$((PASS + 1)); echo "  PASS: $cfg"

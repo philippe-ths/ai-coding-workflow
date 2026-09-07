@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-# PreToolUse hook for Claude Code, Codex, Gemini CLI, and VS Code Copilot.
+# PreToolUse hook for Claude Code, Codex, and VS Code Copilot.
 # Blocks the agent from merging a pull request by any route.
 # Reads tool_input from JSON on stdin.
 # Exit 2 = block, exit 0 = allow.
@@ -35,7 +35,7 @@ deny() {
 
 # ── MCP route ──
 # Matches mcp__github__merge_pull_request (Claude Code, Copilot) and
-# mcp_github_merge_pull_request (Gemini CLI), plus any other server prefix.
+# mcp_github_merge_pull_request (single-underscore naming), plus any other server prefix.
 case "$TOOL_NAME" in
   *merge_pull_request) deny "MCP tool '$TOOL_NAME'" ;;
 esac

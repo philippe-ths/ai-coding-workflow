@@ -30,7 +30,7 @@ as a local path instead.
 
 1. Confirm the target path and that it is a git repository. If not, run
    `git init` there first (the installer requires it for hooks and vendoring).
-2. Ask the human which agent tool to install for (`claude`, `codex`, `gemini`, or
+2. Ask the human which agent tool to install for (`claude`, `codex`, or
    `copilot`).
 3. Run the installer from the source:
 

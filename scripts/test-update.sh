@@ -129,25 +129,25 @@ set_version "$FAKE_SRC2/ai-workflow.md" 90.0.0
 
 T="$(new_target multi-tool-prune)"
 "$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
-"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool gemini >/dev/null 2>&1 || bad "gemini install exited non-zero"
+"$INSTALL" --source "$FAKE_SRC2" --target "$T" --tool copilot >/dev/null 2>&1 || bad "copilot install exited non-zero"
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then ok "legacy-thing/ recorded before update"; else bad "legacy-thing/ not recorded before update"; fi
 
 # The source names the path as removed; the claude tool set still ships it.
 set_version "$FAKE_SRC2/ai-workflow.md" 90.1.0
 tmp_changelog="$(mktemp)"
 {
-  printf '## 90.1.0\n\n### Removed\n\n- `legacy-thing/` no longer shipped for gemini.\n\n'
+  printf '## 90.1.0\n\n### Removed\n\n- `legacy-thing/` no longer shipped for copilot.\n\n'
   cat "$FAKE_SRC2/CHANGELOG.md"
 } > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC2/CHANGELOG.md"
 ( cd "$FAKE_SRC2" && git add -A && git commit -qm drop ) >/dev/null 2>&1
 
-"$UPDATE" --source "$FAKE_SRC2" --target "$T" --tool gemini >/dev/null 2>&1 || bad "multi-tool prune update exited non-zero"
+"$UPDATE" --source "$FAKE_SRC2" --target "$T" --tool copilot >/dev/null 2>&1 || bad "multi-tool prune update exited non-zero"
 if grep -qxF "legacy-thing/" "$T/.gitignore"; then
   ok "legacy-thing/ still ignored (the claude set still ships it)"
 else
   bad "legacy-thing/ pruned from .gitignore though the claude set still ships it"
 fi
-for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/" "GEMINI.md" ".gemini/"; do
+for p in "ai-workflow.md" ".ai-policy/" ".githooks/" "CLAUDE.md" ".claude/" ".github/copilot-instructions.md" ".vscode/"; do
   if grep -qxF "$p" "$T/.gitignore"; then ok "still ignored: $p"; else bad "wrongly pruned: $p"; fi
 done
 

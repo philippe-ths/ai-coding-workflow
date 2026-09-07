@@ -20,9 +20,6 @@ for t in ./.ai-policy/scripts/test-*.sh; do
     test-codex-enforcement)
       [ -d ./.codex ] || { echo "Skipping $base (no ./.codex/ — Codex not installed)"; continue; }
       ;;
-    test-gemini-enforcement)
-      [ -d ./.gemini ] || { echo "Skipping $base (no ./.gemini/ — Gemini CLI not installed)"; continue; }
-      ;;
     test-vscode-copilot-enforcement)
       [ -d ./.github/hooks ] || { echo "Skipping $base (no ./.github/hooks/ — VS Code Copilot not installed)"; continue; }
       ;;

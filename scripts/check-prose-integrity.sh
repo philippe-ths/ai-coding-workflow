@@ -28,7 +28,7 @@ head_() { [ "$VERBOSE" = 1 ] && echo "$1"; return 0; }
 
 AGENT_DIR=".agents/skills"
 CLAUDE_DIR=".claude/skills"
-ENTRY_POINTS=("CLAUDE.md" "AGENTS.md" "GEMINI.md" ".github/copilot-instructions.md")
+ENTRY_POINTS=("CLAUDE.md" "AGENTS.md" ".github/copilot-instructions.md")
 
 head_ "Skill mirror parity:"
 a_list="$(ls "$AGENT_DIR" 2>/dev/null | sort)"

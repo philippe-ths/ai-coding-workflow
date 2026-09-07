@@ -188,7 +188,7 @@ hits="$hits$(printf '%s\n' "$STRUCTURAL" | grep -E '^(\.ai-policy|\.githooks|scr
 "
 
 # What the policy layer enforces, however it changed.
-hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(\.ai-policy/hooks/|\.githooks/|\.github/hooks/|\.ai-policy/policy\.env$|\.claude/settings\.json$|\.codex/hooks\.json$|\.gemini/settings\.json$)')
+hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(\.ai-policy/hooks/|\.githooks/|\.github/hooks/|\.ai-policy/policy\.env$|\.claude/settings\.json$|\.codex/hooks\.json$)')
 "
 
 # What validation covers: a check added or removed, or the check set itself.
