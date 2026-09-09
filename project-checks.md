@@ -23,6 +23,11 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: empty.
 - Matters: work left in the tree from a previous session is easy to overwrite on the next branch switch.
 
+### Archive contents
+- Check: `find .archive -mindepth 2 -type f 2>/dev/null`
+- Normal: empty or absent.
+- Matters: `aiw-housekeeping` parks untracked files it removes there instead of deleting them, and it is a holding area rather than storage. Anything still in it is waiting on a decision to restore it or let it go, and because the directory is ignored, nothing else in a session will ever mention it. `git clean -fdx` removes it without warning.
+
 ### Unpushed commits
 - Check: `git log --branches --not --remotes --oneline`
 - Normal: empty.

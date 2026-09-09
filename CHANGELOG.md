@@ -6,6 +6,43 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.4.0 - 2026-09-09
+
+Keeping the project clean and organised becomes a step in the workflow rather than something that happens when someone notices.
+
+### Added
+
+- `aiw-housekeeping` skill in both skill trees. It runs third at the done gate and asks whether anything the task caused should now be removed or moved: a code path the change orphaned, a file the work left behind, a thing sitting in the wrong place ([#285]).
+- A footprint boundary in that skill: the files the branch changed, the untracked files the task produced, and what those changes left unreferenced, which is where orphaned code lives because it sits in files the change never opened. Mess outside it is a finding disposed of under the existing resolve-or-track rule, not work ([#285]).
+- An `ALWAYS` rule in `ai-workflow.md` Boundary Rules, and a line in `aiw-github`'s pre-pull-request readiness. Housekeeping is the done-gate step whose ordinary outcome is that nothing happened, which makes it the one where running it and skipping it look identical, so it states in one line that it ran ([#285]).
+- An archive check in `project-checks.md`, since an ignored directory is invisible to every other check in a session ([#285]).
+- Three removal tiers in that skill, set by reach: nothing outside the working tree can refer to it, references are inside the repository and findable by searching, or something outside the repository could refer to it. Only the third is a delete in aiw-ground-truth's sense and carries aiw-verification's full Delete requirements ([#285]).
+- A requirement that the repository's own checks are green before and after a tier-two removal, not the name search alone. A search over names cannot see a behavioural reference, so a helper a test exercises through its caller reads as orphaned and is not ([#285]).
+- A git-ignored `.archive/` directory for untracked files a task removes. It is created on first use with a `.gitignore` containing `*`, so it is invisible to git and needs no entry in a target's `.gitignore` and no installer change ([#285]).
+- An archive line in `aiw-init`'s discovery list, so what is parked there is reported at session start rather than accumulating ([#285]).
+
+### Changed
+
+- `ai-workflow.md` Task Flow step 5 names three done-gate skills rather than two ([#285]).
+- `aiw-verification` and `aiw-planning` say the done gate has three checks rather than two, as `aiw-verification` was updated when validation joined it in 5.3.0 ([#285]).
+- `README.md`'s skill list names `aiw-housekeeping` ([#285]).
+
+### Notes
+
+The removal machinery already existed and was not the gap. `aiw-ground-truth` gives a delete its oracle, `aiw-verification`'s Delete modality gives that oracle its search, and `ai-workflow.md` already governed findings outside the task. All of it fired only once the agent had decided to remove something, so nothing asked. The new skill is the asking and delegates the how, which is why it adds no rules about removing safely.
+
+The archive covers untracked files only. Git already holds every version of a tracked file, so a second copy on disk buys nothing there and costs something: it is invisible in review and indistinguishable from live code to a later search. Untracked files are the case history does not cover, and deleting one is irreversible.
+
+What the archive buys is a session, not permanence. Being ignored is what keeps it out of a target's `.gitignore` and out of the installer, and it is also what puts it one `git clean -fdx` from gone with nothing in `git status` to warn first. The skill says so rather than selling a durability it does not have, and `project-checks.md` reports what is sitting in it at session start so it empties by decision rather than by accident.
+
+Removals and moves made at this step re-enter `aiw-verification`'s justification step in full, and `aiw-validation`'s first question where they moved the deliverable or something it depends on. Without that, the last thing to change the tree is the one thing nothing checked, and a move can relocate the very artifact validation had just confirmed exists.
+
+A uniform evidence bar on a removal does not survive contact with a small mess. Requiring a delete's full evidence for anything removed makes the honest answer on a dead three-line helper "this costs more than the mess is worth", so the step reliably produces its own no-op. Tiering by reach removes the trade: the tier is a property of the thing being removed, it names the evidence, and there is no weighing left to do. Two adversarial reviews found the escape hatch at whichever sentence expressed the cost, and moving it was not fixing it.
+
+The tiers were then probed against a task carrying one of each. A clean-context agent archived the tier-one leftover, stopped for an Ask First on the tier-three config key rather than removing it, and left a pre-existing dead module outside the footprint alone. It also declined a tier-two removal the rules as written called for, because the suite still asserted the helper's behaviour through its caller while no reference named it: that is where the before-and-after requirement above came from.
+
+Repository-wide rot stays out of scope. It is not produced at task granularity, and a per-task rule is the wrong shape for it.
+
 ## 5.3.0 - 2026-09-09
 
 Validation reports what the checks cost. It does not gate on it.
@@ -861,3 +898,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#272]: https://github.com/philippe-ths/ai-coding-workflow/issues/272
 [#270]: https://github.com/philippe-ths/ai-coding-workflow/issues/270
 [#269]: https://github.com/philippe-ths/ai-coding-workflow/issues/269
+[#285]: https://github.com/philippe-ths/ai-coding-workflow/issues/285

@@ -45,7 +45,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`). Used by VS Code Copilot and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`). Used by VS Code Copilot and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement
