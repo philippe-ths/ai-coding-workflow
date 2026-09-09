@@ -14,7 +14,7 @@ Planning is step 2 of the task sequence. The plan does not reproduce the rules o
 1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
 2. **aiw-planning** (this skill): establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
 3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
-4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, and aiw-validation for whether the deliverable this plan named actually exists and does what was asked.
+4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, aiw-validation for whether the deliverable this plan named actually exists and does what was asked, and aiw-housekeeping for whether anything the task caused should now be removed or moved.
 5. **aiw-github** again for commit, push, and pull request, each as a separate human-approved action.
 6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
 

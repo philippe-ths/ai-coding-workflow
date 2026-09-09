@@ -1,11 +1,11 @@
 ---
 name: aiw-validation
-description: "Governs whether the finished work is the thing the human asked for, as distinct from whether the change is correct. Use this skill at the done gate alongside aiw-verification, before presenting any work for the human's done decision, and whenever about to say 'done', hand over a deliverable, or open a pull request. It owns the deliverable the plan must name, the questions asked of finished work (does it exist, does it do what was asked, is it the thing the project is for), the requirement to meet the artifact in the form the human will meet it rather than read the code that produces it, the one line it leaves in the pull request body, and the split between what the human judges and what the agent confirms."
+description: "Governs whether the finished work is the thing the human asked for, as distinct from whether the change is correct. Use this skill at the done gate alongside aiw-verification and aiw-housekeeping, before presenting any work for the human's done decision, and whenever about to say 'done', hand over a deliverable, or open a pull request. It owns the deliverable the plan must name, the questions asked of finished work (does it exist, does it do what was asked, is it the thing the project is for), the requirement to meet the artifact in the form the human will meet it rather than read the code that produces it, the one line it leaves in the pull request body, and the split between what the human judges and what the agent confirms."
 ---
 
 # Validation
 
-Read this file before presenting work for the human's done decision, alongside aiw-verification.
+Read this file before presenting work for the human's done decision, alongside aiw-verification and aiw-housekeeping.
 
 ## Why This Skill Exists
 

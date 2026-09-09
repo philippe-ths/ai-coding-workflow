@@ -13,7 +13,7 @@ A passing test suite is not evidence the system works. It is evidence that the t
 
 The failure mode this skill exists to prevent: every check passes, the agent declares done, and the change breaks the system on first real use. The cause is almost always coverage — the checks did not actually exercise the path the change affected — rather than test correctness. The remedy is not more tests by default. It is forcing the agent to argue, explicitly and every time, that the checks it ran are sufficient evidence the change works.
 
-Verification is one of the two questions at the done gate. It asks whether the change is correct. aiw-validation asks whether the result is what was asked for, and work can satisfy this skill completely while delivering nothing the human wanted. Run both.
+Verification is one of the three checks at the done gate. It asks whether the change is correct. aiw-validation asks whether the result is what was asked for, and work can satisfy this skill completely while delivering nothing the human wanted. aiw-housekeeping asks whether anything the task caused should now be removed or moved. Run all three.
 
 Classify the task using the modality decision procedure defined in aiw-ground-truth. Verification requirements depend on the modality.
 

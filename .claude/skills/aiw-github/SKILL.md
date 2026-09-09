@@ -34,6 +34,7 @@ Before any operation that moves the working tree to a different branch state (re
 
 - Compare tracked files between the current branch and the target.
 - Check whether gitignored or untracked local files exist at paths the target state tracks.
+- Check whether `.archive/` holds anything. It is ignored, so it survives a checkout but not a `git clean -fdx`, and nothing in `git status` will mention it first.
 - If either check reveals unexpected files or path overlap, stop and report before proceeding.
 - If the human approves, back up the working tree (excluding `.git/`) before the operation.
 - Delete the backup after confirming no files were lost.
@@ -53,7 +54,7 @@ Treat commit creation, push to remote, and pull request creation as separate Git
 Before proposing the first remote GitHub action, check:
 
 - Confirm aiw-verification's justification step has been completed for the work in this PR, and that the pull request body carries it. Pass the body from a file rather than leaving it to an editor or to commit messages, because the policy layer reads it there and blocks a body it cannot read. (Why: a pull request without a completed verification justification is a pull request opened on unverified work. Completed means every surface part 3 names has a resolution, not that every check has already run. See aiw-verification for the justification step itself.)
-- Confirm the body carries aiw-validation's line: the deliverable, and how it was met. (Why: a check that leaves nothing behind cannot be told apart from a check that was skipped, and the human decides after the pull request is open, not before.)
+- Confirm the body carries aiw-validation's line: the deliverable, and how it was met. Confirm it carries aiw-housekeeping's line too: what was removed or moved, or that nothing was. (Why: a check that leaves nothing behind cannot be told apart from a check that was skipped, and the human decides after the pull request is open, not before.)
 - Scope what the body claims to the evidence that exists as you open it. Evidence you intend to gather is deferred in the justification, named with its method, never written up as though it has already run; post it on the pull request when it arrives, before the human's done decision. (Why: opening a pull request is not the done decision, so the pull request is part of the verification surface rather than the end of it.)
 - Whether documentation or README files need updating based on the change.
 - Whether the branch changed what `project-context.md` records, and if so refresh it with the aiw-project-context-management skill.
