@@ -50,9 +50,20 @@ Cover these surfaces, and add any the repository shows you that are not listed h
 - Errors: what recent logs and any error tracker show since the last session.
 - Expiry and limits: security advisories, certificates, tokens, quotas.
 - Drift: staleness in the project's own documents, quarantined or skipped tests.
+- Cost of the required checks: how long validation takes and how large the checks are, both reported by the run itself. There is no normal to declare; report the figures and let the human judge them.
 - Recurring gaps: the same unverified surface named across several merged pull requests with no issue tracking it. Normal is none; on a third appearance it is a limitation of the repository rather than of any one task.
 
 Run the checks as you write them, so a first run reports like any other rather than only producing a file. Then tell the human where the file is and what each section covers, without pasting it back. They will spot which checks are noise faster than you can infer it.
+
+## What the checks cost
+
+Validation reports two numbers: how long the run took, and how large the checks are.
+
+Report them as facts and nothing more. Neither is gated on, and neither should be compared against a previous session and called a change. Runtime on a working machine varies by half again with nothing edited, and the size of the checks moves for reasons that have nothing to do with anyone adding one.
+
+They are worth reporting because a suite that has grown past the point where it is run without thinking has stopped earning its cost, and nobody notices that happening from inside one session. What to do about a large one is a judgement about the project, so it is the human's. Do not propose a threshold unless asked.
+
+The reported size only counts what the patterns match, either conventional test locations or `SUITE_PATHS` in `.ai-policy/policy.env`. Where a repository's checks live somewhere else, the number is quietly short, and saying so is more useful than the number.
 
 ## Reporting
 

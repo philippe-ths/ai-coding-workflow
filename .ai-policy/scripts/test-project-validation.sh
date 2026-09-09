@@ -43,6 +43,14 @@ trap 'rm -rf "$SANDBOX"' EXIT
 mkdir -p "$SANDBOX/.ai-policy/scripts" "$SANDBOX/.ai-policy/hooks" "$SANDBOX/.githooks" "$SANDBOX/scripts"
 cp "$SRC" "$SANDBOX/.ai-policy/scripts/project-validation.sh"
 chmod +x "$SANDBOX/.ai-policy/scripts/project-validation.sh"
+# The scripts project-validation.sh invokes directly have to exist here too, or
+# the sandbox measures a missing file rather than the branch under test.
+cp "$ROOT_DIR/.ai-policy/scripts/report-suite-size.sh" "$SANDBOX/.ai-policy/scripts/"
+chmod +x "$SANDBOX/.ai-policy/scripts/report-suite-size.sh"
+printf 'PROTECTED_BRANCHES="main"\n' > "$SANDBOX/.ai-policy/policy.env"
+git -C "$SANDBOX" init -q -b main .
+git -C "$SANDBOX" config user.email "test@example.com"
+git -C "$SANDBOX" config user.name "Test"
 
 # Minimal valid files so the upfront `bash -n .../*.sh .../* ` globs resolve.
 printf '#!/usr/bin/env bash\n:\n' > "$SANDBOX/.ai-policy/hooks/noop.sh"

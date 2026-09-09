@@ -18,7 +18,13 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
+# Wall time, because it is what the human waits. Reported and never gated on:
+# measured on one machine this run varied between 70s and 121s with nothing
+# changed, so the difference between two runs is not evidence of anything.
+STARTED_AT="$(date +%s)"
+
 if sh -c "$VALIDATION_COMMAND"; then
+  echo "Validation took $(( $(date +%s) - STARTED_AT ))s."
   # Record which tree this result covers. Taken after the command returns, so it
   # describes the content the gate will compare against. If the fingerprint
   # cannot be computed, set -e aborts here with the state still "running" and the
@@ -31,6 +37,7 @@ if sh -c "$VALIDATION_COMMAND"; then
 else
   printf "failed" > "$STATE_FILE"
   trap - EXIT INT TERM
+  echo "Validation took $(( $(date +%s) - STARTED_AT ))s."
   echo "Validation failed."
   exit 1
 fi

@@ -27,6 +27,9 @@ for t in ./.ai-policy/scripts/test-*.sh; do
   "$t"
 done
 
+# Reports the size of the checks themselves. Reports only; never gates.
+./.ai-policy/scripts/report-suite-size.sh
+
 if [ -x ./scripts/repo-validation.sh ]; then
   echo "Running repo-specific checks from ./scripts/repo-validation.sh ..."
   ./scripts/repo-validation.sh

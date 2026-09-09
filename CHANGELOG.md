@@ -6,6 +6,28 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.3.0 - 2026-09-09
+
+Validation reports what the checks cost. It does not gate on it.
+
+### Added
+
+- `.ai-policy/scripts/report-suite-size.sh`, wired into policy-layer validation. It reports how many files and bytes a repository's checks come to, and which pattern set it counted, so a number that is quietly short can be recognised as short. It exits 0 whatever it finds, including outside a git work tree ([#282]).
+- `SUITE_PATHS` in `.ai-policy/policy.env`, undeclared by default. Absent it, conventional test locations are counted and the report says so ([#282]).
+- Elapsed time on every validation run, on both the passing and failing paths ([#282]).
+- `.ai-policy/scripts/test-suite-size.sh`, 13 cases covering the ways a count goes silently short: untracked checks, ignored files, filenames git quotes, filenames with spaces, symlinks, declared paths, patterns matching nothing, and no git work tree ([#282]).
+- Cases in `test-validation-state.sh` asserting the run reports its duration on both paths and that the state file's first line is still `passed <fingerprint>`, which the stale-tree gate parses ([#282]).
+
+### Notes
+
+Two designs that gated on this number were built and rejected, both because they blocked an unchanged working tree.
+
+Gating on runtime fires on noise: this repository's unchanged suite measured 70s, 86s, 95s, 108s, 120s, 121s and 136s depending on machine load, and a gate on it blocked an unchanged tree twice in three runs. CPU time is steadier but wrong in principle, since a suite that waits on the network costs no CPU while parallelising a slow suite costs more, which punishes the fix and ignores the disease.
+
+Gating on bytes fires on symlinks, on clean and smudge filters such as `core.autocrlf`, and on git-lfs, because the working tree and the stored blob are then different units. For those repositories the error scales with the suite, so removing checks cannot clear it. That design also could not see the work actually driving this repository's run time, and renaming a file moved it out of the count.
+
+A number the human reads has neither failure mode. What to do about a large suite is a judgement about the project and stays with the human ([#283] tracks the related defect that updating a target overwrites its `policy.env`).
+
 ## 5.2.0 - 2026-09-07
 
 The done gate now asks two questions: whether the change is correct, and whether the result is what was asked for.
@@ -833,6 +855,8 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#265]: https://github.com/philippe-ths/ai-coding-workflow/issues/265
 [#271]: https://github.com/philippe-ths/ai-coding-workflow/issues/271
 [#264]: https://github.com/philippe-ths/ai-coding-workflow/issues/264
+[#282]: https://github.com/philippe-ths/ai-coding-workflow/issues/282
+[#283]: https://github.com/philippe-ths/ai-coding-workflow/issues/283
 [#279]: https://github.com/philippe-ths/ai-coding-workflow/issues/279
 [#272]: https://github.com/philippe-ths/ai-coding-workflow/issues/272
 [#270]: https://github.com/philippe-ths/ai-coding-workflow/issues/270
