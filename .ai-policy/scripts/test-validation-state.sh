@@ -323,6 +323,36 @@ git commit -qm "allowed after revalidating" 2>&1 || rc=$?
 assert_exit "git commit succeeds once validation matches the tree" 0 "$rc"
 assert_ne "the commit landed" "$before" "$(git rev-parse HEAD)"
 
+# ── The run reports what it took ──
+#
+# Reported, never gated on. The first line of the state file must stay
+# "passed <fingerprint>": check-validation.sh reads everything after that first
+# space as the fingerprint, so anything appended there breaks the stale-tree
+# gate silently rather than loudly.
+
+rc=0
+out="$("$RUN" 2>&1)" || rc=$?
+assert_exit "a reporting run still passes" 0 "$rc"
+assert_contains "the run reports how long it took" "Validation took" "$out"
+assert_eq "the state file's first line is still passed plus one fingerprint" \
+  "passed $("$FINGERPRINT")" "$(head -n 1 "$STATE")"
+
+rc=0
+"$CHECK" >/dev/null 2>&1 || rc=$?
+assert_exit "the tree fingerprint gate still reads that line" 0 "$rc"
+
+cat > .ai-policy/policy.env <<'ENV'
+PROTECTED_BRANCHES="main master"
+REQUIRE_VALIDATION_BEFORE_COMMIT="true"
+REQUIRE_VALIDATION_BEFORE_PUSH="true"
+VALIDATION_STATE_FILE=".ai-policy/state/validation.status"
+VALIDATION_COMMAND="false"
+ENV
+rc=0
+out="$("$RUN" 2>&1)" || rc=$?
+assert_exit "a failing run still fails" 1 "$rc"
+assert_contains "a failing run also reports how long it took" "Validation took" "$out"
+
 # ── Summary ──
 
 echo ""
