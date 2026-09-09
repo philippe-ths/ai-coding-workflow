@@ -1,6 +1,6 @@
 ---
 name: aiw-housekeeping
-description: "Makes keeping the project clean and well organised a step in the workflow rather than something that happens when someone notices. Use this skill at the done gate, third after aiw-verification and aiw-validation, before presenting any work for the human's done decision, and on every task including one that set out to remove or move nothing. It asks whether anything the task caused should now be removed or moved: a code path the change orphaned, a file the work left behind, a thing sitting in the wrong place. It owns the footprint that bounds what may be acted on, the tiering that sets what evidence a removal needs from how far the thing reaches rather than how large it is, the archive that makes removal recoverable, and the disposition of mess found outside the boundary. It does not define the searches themselves; aiw-ground-truth owns the oracle for a delete and aiw-verification owns the dependency search that establishes it."
+description: "Makes keeping the project clean and well organised a step in the workflow rather than something that happens when someone notices. Use this skill at the done gate, third after aiw-verification and aiw-validation, before presenting any work for the human's done decision, and on every task including one that set out to remove or move nothing. It asks whether anything the task caused should now be removed or moved: a code path the change orphaned, a file the work left behind, a thing sitting in the wrong place. Use it also on its own, over the whole repository, when the human asks what has built up, asks for a cleanup or a tidy-up or an audit of the repository, wonders what all these leftover files are, or when a session-start note reports the repository hiding paths through a local exclude rule. In that mode it examines the whole repository and hands back a ranked list for the human to approve, rather than acting on what it finds. It owns the footprint that bounds what may be acted on, the tiering that sets what evidence a removal needs from how far the thing reaches rather than how large it is, the archive that makes removal recoverable, and the disposition of mess found outside the boundary. It does not define the searches themselves; aiw-ground-truth owns the oracle for a delete and aiw-verification owns the dependency search that establishes it."
 ---
 
 # Housekeeping
@@ -17,7 +17,17 @@ That moment is the cheap one, and it is the only point where someone still holds
 
 This skill is the asking. It adds no rules about how to remove; it delegates that.
 
+## Two Ways In
+
+**At the done gate**, on every task, over the footprint below. This is the ordinary case, and the rest of this file assumes it unless a section says otherwise.
+
+**Invoked on its own**, over the whole repository. The human asking is what puts you here and is sufficient by itself, and a session-start note is the other way in. A task may well be in flight; the audit is simply not about it. The footprint does not apply. Everything else here does.
+
+What separates them is not scope, it is what you may do with what you find. The tiers below say whether a removal is *safe*. They never say whether it *should happen*. At the done gate those two collapse into one question, because you still hold the reason the thing exists: you made it, or your change killed it. In an audit nobody in the session knows why anything is there, so a clean tier puts a candidate on a list rather than in the bin, and the human decides.
+
 ## The Footprint
+
+This section is the done-gate mode. In an audit it does not apply; see The Audit below.
 
 Act on what this task caused, and nothing else. That is:
 
@@ -67,6 +77,41 @@ Mess outside the footprint is a finding, not housekeeping. Give it the dispositi
 
 Where there is no tracker to file to, saying so is the disposition. What is not a disposition is the bare list with nothing decided, because that is work moved to the human rather than a finding reported to them.
 
+## The Audit
+
+Run it when the human asks, or when a session-start note reports the repository hiding paths through `.git/info/exclude`.
+
+The output is one list, not a conversation. The human should be able to approve it in a single pass, so every row carries what it costs and what the evidence says, and the list is short enough to read in one sitting.
+
+**Where to look.** Start from what is cheap and determinate:
+
+- Paths hidden by `.git/info/exclude`. A `.gitignore` rule is committed, reviewed and shared, so what it hides is a documented decision. A local exclude rule is none of those, so what it hides is invisible to review, to anyone else who clones the repository, and to every other check there is. Resolve each entry against what is still on disk, because a rule outlives the file it hid; where an entry resolves to nothing, the rule is itself the leftover and the line is what goes. Where you propose removing a file the rule hides, the line goes with it, or the next thing to land on that name is hidden too.
+- Untracked files no rule hides, and how long they have been sitting there.
+- What the repository's own `project-checks.md` declares and nobody has cleared. Read that file rather than assuming what is in it: it is per-repository, its checks are its own, and each states the normal it is measured against.
+- Files nothing else names. Match basenames against tracked content in one pass rather than once per file. It is crude and it is not proof, so let it rank a candidate rather than condemn one, and stop at the ranking: going back to adjudicate each hit is the codebase audit ruled out below, and it cannot condemn anything even when it finishes. Where the hits share a directory or a prefix, report them as one row naming the pattern, which is a shape you can see without adjudicating any of them.
+
+Ignored files are not candidates. A committed rule hiding something is a documented decision, which is the whole distinction this mode rests on. Report what they come to in bytes and stop there: a directory nobody chose that has quietly become the largest thing on the disk is worth the human seeing, even when it is nobody's to remove.
+
+Do not go hunting dead code by reading the codebase. That is an audit of the software rather than of its clutter, and it does not terminate.
+
+**Branches are candidates too, and the same reach test tiers them.** A local branch whose commits are all in the target branch reaches nothing outside this working tree. A remote branch does, because someone else's clone or an open worktree can be sitting on it, so it is tier three whatever the evidence says. A local branch with a registered worktree needs the worktree removed before the ref will go. A local branch carrying commits no other ref has is not a candidate at all: that is unfinished work, and it belongs in the statement below rather than on the list.
+
+**What to measure.** You cannot judge whether a thing earns its place. You can measure what it costs: size, count, how long it has been there, and its tier. Report those and let them do the ranking.
+
+Take age from git where git knows it, the last commit touching a tracked path. For an untracked file only the filesystem knows, and a clone or a copy resets that, so mark the date unreliable rather than reporting it as fact. Where nothing can date a thing, say it is undated. An invented age ranks the list wrongly and nobody reading the list can see that it did.
+
+**State work in flight separately, and do not rank it.** A dirty tree, an unmerged branch with a live pull request. The human should see it and it is not clutter.
+
+**How to rank.** Cheapest to lose first, which means high cost, clean evidence, short reach. A pile of tier-one files nothing references and nobody has touched in months goes at the top. A tier-three item goes at the bottom whatever it costs, because what it needs is a conversation rather than a removal.
+
+**What you may do unasked: nothing that removes or moves.** Not tier one, not the file you are certain about. Your certainty is about safety and the open question is worth, and this is the exact point where those two come apart. The reporting is the work.
+
+**What to hand over.** The list, a recommendation per row, and one sentence on what the whole thing comes to. Then stop.
+
+**After approval** the tiers and the archive govern exactly as they do at the done gate, and what was approved is what you do, no more. An audit has no issue and no branch of its own, so its removals archive under `.archive/audit-<date>/`. Filing them under whichever branch happens to be checked out attaches them to unrelated work.
+
+Where the human declines an item, that is a fact about the repository and it belongs in `project-checks.md` as part of what normal looks like there. An audit that re-proposes the same declined item every time is one nobody reads by the third run.
+
 ## The Archive
 
 Removal feels permanent, and an agent that believes that behaves timidly. For a file that is in a commit the belief is simply false, and the answer is the fact rather than a mechanism: git holds that version, and `git checkout <commit> -- <path>` brings it back. Say so, and delete the file. A second copy on disk is worse than history, because it is invisible in review and a later search cannot tell it from live code.
@@ -85,14 +130,18 @@ That is also why it does not accumulate quietly. aiw-init reports what is sittin
 
 ## What It Leaves Behind
 
-One line in the pull request body, beside the verification justification and validation's line: what was removed or moved and under which tier, or, where nothing was, the names the diff stopped referring to and what the search returned for each. (Why: this is the one of the three whose ordinary outcome is that nothing happened, which makes it the one where running it and skipping it look identical. A line that only asserts you looked is one a skipping agent writes just as easily and just as fast; a line naming what the search returned is one only a real pass can produce.)
+At the done gate, one line in the pull request body, beside the verification justification and validation's line: what was removed or moved and under which tier, or, where nothing was, the names the diff stopped referring to and what the search returned for each. (Why: this is the one of the three whose ordinary outcome is that nothing happened, which makes it the one where running it and skipping it look identical. A line that only asserts you looked is one a skipping agent writes just as easily and just as fast; a line naming what the search returned is one only a real pass can produce.)
 
 Name anything archived on that line as well. Archived files are invisible to git before and after, so nothing else records them.
 
 Where the task's work is already committed, put these changes in a commit of their own, so the removal reads on its own. Where it is not, which is the common case at this step because commit is the next one, they land inside the task's commit and the line above is the only thing telling a reviewer the task from the tidying.
+
+An audit leaves the list, and after the human has been through it, whatever they declined recorded in `project-checks.md`. Removals they approved leave a commit of their own, because an audit has no task work to sit inside.
 
 ## What It Costs
 
 Opening the footprint is two git commands. They list files on any task that changed one, so a non-empty result is the normal case and carries no signal. The third bullet is the part that takes reading rather than running, and what it returns is not predictable from the size of the diff: a one-line change that deletes the last call site orphans as much as a large one.
 
 The floor is one pass of the three questions over the footprint, on every task. Resource Discipline sets how hard you look past that, never whether you look. Above the floor the cost is the tier's evidence, and the tiers are arranged so the common case, a file this task made, costs almost nothing.
+
+An audit is a different budget and the human has already agreed to it by asking. It still ends: the sources above are finite, and the instruction not to go reading the codebase for dead code is what keeps it that way.
