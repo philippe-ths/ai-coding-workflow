@@ -6,6 +6,38 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.5.0 - 2026-09-09
+
+Housekeeping gains a second way in: an audit the human invokes over the whole repository, and a session-start signal telling them when to run it.
+
+### Added
+
+- An audit mode in `aiw-housekeeping`, invoked by the human and not tied to a task. It ignores the footprint, examines the repository, and hands back one ranked list carrying each candidate's cost and evidence. It removes nothing on its own judgement ([#286]).
+- `.ai-policy/hooks/check-hidden-clutter.sh`, a SessionStart advisory that reports when `.git/info/exclude` carries `HIDDEN_CLUTTER_THRESHOLD` or more entries. Advisory only: every path exits 0, and it is silent outside a git work tree, with no exclude file, with an unreadable one, or with a non-numeric threshold ([#286]).
+- `HIDDEN_CLUTTER_THRESHOLD` in `.ai-policy/policy.env`, default 5 ([#286]).
+- `.ai-policy/scripts/test-hidden-clutter-hook.sh`, 12 cases weighted to the degenerate paths rather than the happy one, including the boundary, a linked worktree reading the common exclude file, and that the reporting path still exits 0 ([#286]).
+- Reach-tiering for git refs in the audit: a local branch whose commits are all in the target branch reaches nothing outside the working tree, a remote branch reaches outside whatever the evidence says, and a local branch with a registered worktree needs the worktree removed before the ref will go ([#286]).
+- A rule for where an audit's removals are archived, `.archive/audit-<date>/`, since an audit has no issue and no branch of its own and would otherwise file them under whichever branch happened to be checked out ([#286]).
+- A source for the age an audit reports: git where git knows it, the filesystem marked unreliable where it does not, and undated where nothing knows. An invented age ranks the list wrongly and the list does not show that it did ([#286]).
+- A stated position on ignored files in an audit: not candidates, because a committed rule hiding something is a documented decision, but reported as a byte total so a directory nobody chose that has become the largest thing on disk is still visible ([#286]).
+
+### Changed
+
+- `ai-workflow.md` records that `aiw-housekeeping` also runs invoked ([#286]).
+- `project-context.md` states the enforcement-test gating rule instead of listing every always-run script, because validation discovers them by glob and the list drifted ([#286]).
+
+### Notes
+
+The tiers say whether a removal is safe. They never say whether it should happen. At the done gate those collapse into one question, because the agent still holds the reason the thing exists: it made the file, or its change killed the code. In an audit nobody in the session knows why anything is there, so a clean tier puts a candidate on a list rather than in the bin. That is the whole difference between the modes, and it is why the audit reports rather than acts.
+
+The counter watches `.git/info/exclude` rather than clutter in general. A `.gitignore` rule is committed, reviewed and shared, so what it hides is a documented decision. A local exclude rule is none of those, so what it hides is invisible to review, to anyone else who clones the repository, and to every other check the workflow has. Hiding a file there is how mess escapes, and nothing else in a session will ever mention it. It counts rules rather than files, because one pattern covering hundreds of build artifacts is one decision while sixteen files added one at a time is sixteen, and that difference is the signal.
+
+A broader signal was considered and rejected. An advisory that chatters is one nobody reads by the third session, which fails the same way as having none.
+
+Probed against a real repository carrying 227 KB of session handoff notes that a local exclude rule had kept out of every check it has. A clean-context agent found them, tiered them, ranked them against merged branch refs and a remote branch with no pull request, kept the `.DS_Store` rule as the legitimate use of the mechanism, did not flag the vendored workflow install that a committed `.gitignore` hides, and changed nothing. Six gaps it reported are fixed above.
+
+Re-probed after those fixes, on the same repository. Five of the six were confirmed closed by quotation, and the age rule earned itself: the agent reported that without it every one of those documents would have read as zero days old, because a copy resets the filesystem date, and would have ranked last. The second run found five further gaps, since fixed, one of which was a factual error: the skill had named two checks as things `project-checks.md` declares, and that file declares neither. A project-agnostic skill cannot quote a per-repository file's contents, so it now says to read it.
+
 ## 5.4.0 - 2026-09-09
 
 Keeping the project clean and organised becomes a step in the workflow rather than something that happens when someone notices.
@@ -899,3 +931,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#270]: https://github.com/philippe-ths/ai-coding-workflow/issues/270
 [#269]: https://github.com/philippe-ths/ai-coding-workflow/issues/269
 [#285]: https://github.com/philippe-ths/ai-coding-workflow/issues/285
+[#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286

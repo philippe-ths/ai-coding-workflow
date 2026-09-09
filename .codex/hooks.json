@@ -14,6 +14,14 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-hidden-clutter.sh\""
+          }
+        ]
       }
     ],
     "PreToolUse": [
