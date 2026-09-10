@@ -6,6 +6,21 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.6.0 - 2026-09-10
+
+The push gate stops asserting something about an artifact it never looked at.
+
+### Added
+
+- `.ai-policy/scripts/check-push-content.sh`, invoked by `.githooks/pre-push` alongside `check-validation.sh`, which refuses a push whose content is not the content validation read. `check-validation.sh` fingerprints the working tree, and for a commit that is the whole answer, because a commit writes the working tree. A push writes a commit, and a commit can differ from the working tree by any amount, so the gate was refusing on a property it was not measuring while saying "it does not cover what is being committed or pushed". Two shapes are blocked: tracked content on disk differing from HEAD, and a ref being pushed whose tip is not HEAD. Tag-only and delete-only pushes publish no content and are unaffected, as they are for the protected-branch check ([#290]).
+- `.ai-policy/scripts/test-push-content.sh`, 17 cases, auto-discovered by `project-validation.sh` and run in every repo since the layer is not tool-specific. Weighted to the paths that matter: the two refusals, the normal commit-then-push sequence that must not fire, and the tracked validation state file that would otherwise refuse every push in a repository that has not ignored it ([#290]).
+
+### Notes
+
+- `tree-fingerprint.sh` excludes HEAD deliberately, so that committing does not invalidate the pass the following push relies on. That exclusion is right for what it solves and is exactly what left this open: with HEAD out of the fingerprint, nothing at push time asked whether the pushed commit carried the validated content. The fix adds the missing question rather than changing the fingerprint, because putting HEAD back would block every push that follows a commit ([#290]).
+- The incident that produced this: a rebase created a commit, a fix was made and staged after it, validation passed against the working tree holding the fix, and the push published the commit that did not. The gate was satisfied at every step and the default branch went red ([#290]).
+- Untracked files are not asked about. They are not published by a push, and `tree-fingerprint.sh` already covers them for the question `check-validation.sh` asks ([#290]).
+
 ## 5.5.0 - 2026-09-09
 
 Housekeeping gains a second way in: an audit the human invokes over the whole repository, and a session-start signal telling them when to run it.
@@ -932,3 +947,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#269]: https://github.com/philippe-ths/ai-coding-workflow/issues/269
 [#285]: https://github.com/philippe-ths/ai-coding-workflow/issues/285
 [#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286
+[#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
