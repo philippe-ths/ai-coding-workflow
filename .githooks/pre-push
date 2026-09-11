@@ -53,7 +53,13 @@ fi
 . "$ROOT_DIR/.ai-policy/policy.env"
 
 if [ "$REQUIRE_VALIDATION_BEFORE_PUSH" = "true" ]; then
+  # Was a passing result recorded, against the working tree as it now stands?
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
+  # Is that working tree what this push publishes? check-validation.sh cannot
+  # answer that: it reads the working tree and a push writes a commit, and
+  # tree-fingerprint.sh excludes HEAD on purpose so that committing does not
+  # invalidate the pass. This is the only layer that receives the resolved refs.
+  printf '%s\n' "$PUSH_REFS" | "$ROOT_DIR/.ai-policy/scripts/check-push-content.sh"
 fi
 
 printf '%s\n' "$PUSH_REFS" | "$ROOT_DIR/.ai-policy/hooks/check-changelog.sh"
