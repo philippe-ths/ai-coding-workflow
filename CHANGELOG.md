@@ -6,6 +6,19 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.7.0 - 2026-09-11
+
+The organisation of the project is the agent's to keep.
+
+### Changed
+
+- The `ALWAYS` rule covering housekeeping now states that the organisation of the project is the agent's to keep, rather than only when to look. Waiting to be asked is named as a failure, and the human's part is a decision rather than an inspection ([#289]).
+
+### Notes
+
+The workflow told the agent what the human is responsible for and gave it procedures to follow, but never said whose job the organisation of the project was. It takes that word from `north-star.md`, which asks for a project that gets cleaner, more reliable, better organised and working rather than merely larger, so the rule and the goal are one idea rather than two adjacent ones. The done-gate rule said when to look; nothing said the looking was owed. The gap showed up twice in one session: on finding accumulated clutter in another repository the agent reported it and stopped, and while building the invoked audit it left that half assigned to nobody until the human pointed at `north-star.md`.
+
+This replaces the existing rule rather than joining it. A second bullet delegating to the same skill would be two rules where one belongs, and one of them would eventually be read as the exception to the other.
 ## 5.6.0 - 2026-09-10
 
 The push gate stops asserting something about an artifact it never looked at.
@@ -948,3 +961,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#285]: https://github.com/philippe-ths/ai-coding-workflow/issues/285
 [#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286
 [#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
+[#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289

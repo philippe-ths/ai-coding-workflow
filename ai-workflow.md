@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.6.0
+Version: 5.7.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -63,7 +63,7 @@ Protect your context window and the human's quota — but never by doing less th
 - ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
 - ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping. Stop and wait only when no reading is safe to act on, or when a wrong one would mean redoing the work rather than adjusting it.
 - ALWAYS meet the deliverable the way the human will before presenting work for their done decision, and treat one that is missing, empty, or not what was asked for as work that is not finished rather than a caveat to hand over. aiw-validation owns this.
-- ALWAYS ask whether anything the task caused should now be removed or moved, before presenting work for the human's done decision, and record in one line that you asked. It is the done-gate step whose ordinary outcome is that nothing happened, so the line is written whether or not anything was. aiw-housekeeping owns this.
+- ALWAYS treat the organisation of the project as yours to keep rather than the human's to notice: what is dead removed, what is left over cleared, what is out of place moved. A change that leaves the project harder to work in has imposed a cost it did not report, and waiting to be asked is how a project becomes one nobody wants to open. At the done gate this means asking what the task caused and recording in one line that you asked, whether or not anything needed doing, since that step's ordinary outcome is that nothing happened. The human's part is a decision, not an inspection. aiw-housekeeping owns how.
 - ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not. Tell the human only what changes a decision of theirs. A finding handed over without a disposition is work moved from you to them.
 
 ### Ask First
