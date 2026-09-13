@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.8.0 - 2026-09-13
+
+The agent commits, pushes, and opens the pull request on its own; the merge stays the human's.
+
+### Changed
+
+- `ai-workflow.md` no longer lists pushing to remote or opening the task's pull request among the actions the human authorises. Deploying, commenting on other pull requests, external services, CI, and the merge remain theirs ([#293]).
+- `aiw-github` replaces the explicit-confirmation rule for push and pull-request open with one step: commit, push, and open once the done gate has run, then stop and report. Posting deferred evidence on the task's own pull request needs no approval either ([#293]).
+- `design/decisions/enforcement-layers.md` now grounds the pre-approval of `git push` in the hooks rather than in a prose checkpoint ([#293]).
+
+### Notes
+
+Confirming a push or a pull-request open was a decision with no content: the branch is issue-scoped, the pull request is where the done decision is made, and `block-pr-merge.sh` keeps the protected branch out of the agent's reach deterministically. Each confirmation was an interruption below the altitude `north-star.md` sets. What the human decides has not changed, only when they are asked.
+
 ## 5.7.0 - 2026-09-11
 
 The organisation of the project is the agent's to keep.
@@ -961,4 +975,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#285]: https://github.com/philippe-ths/ai-coding-workflow/issues/285
 [#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286
 [#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
+[#293]: https://github.com/philippe-ths/ai-coding-workflow/issues/293
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289

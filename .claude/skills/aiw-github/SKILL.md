@@ -1,13 +1,13 @@
 ---
 name: aiw-github
-description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions explicitly approved, traceable to an issue, and safe against silent working-tree loss during branch operations."
+description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken at the right point in the task, safe against silent working-tree loss during branch operations, and short of the one action that stays the human's: the merge."
 ---
 
 # GitHub Workflow
 
 ## Why this skill exists
 
-GitHub actions touch shared state. Each one becomes visible to others the moment it lands, and approval for one is not approval for another. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action gated by explicit human approval, anchored to an issue, and safe against working-tree surprises.
+GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, taken only after the done gate, and safe against working-tree surprises. The human's part is the merge, and the policy layer blocks the agent from it deterministically; nothing else in this skill waits for their word.
 
 ## Starting work on an issue
 
@@ -40,18 +40,19 @@ Before any operation that moves the working tree to a different branch state (re
 - Delete the backup after confirming no files were lost.
 - If a rebase produces modify/delete conflicts, stop and discuss with the human before resolving.
 
-## Commits, pushes, and pull requests are separate actions
+## Commits, pushes, and pull requests
 
-Treat commit creation, push to remote, and pull request creation as separate GitHub actions.
+Commit, push, and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
 
-- Do not infer approval for one GitHub action from approval for another.
-- Do not push to remote or open a pull request without explicit human confirmation in the current session.
-- If new commits are added after approval, stop and ask again before the next remote GitHub action.
-- After running an approved GitHub action, stop and report the result.
+- Commit as the work reaches a coherent state; do not hold a task's changes for one commit at the end.
+- Push and open the pull request when the pre-pull-request checks below pass. Do not push work the done gate has not covered.
+- Post evidence that was deferred in the justification on the task's own pull request when it arrives. Commenting on any other pull request stays the human's.
+- After opening the pull request, stop and report: the link, the justification's unverified surfaces, and what the human is now deciding.
+- Never merge a pull request, and never work around the hook that blocks it.
 
 ## Pre-pull-request readiness
 
-Before proposing the first remote GitHub action, check:
+Before the first push, check:
 
 - Confirm aiw-verification's justification step has been completed for the work in this PR, and that the pull request body carries it. Pass the body from a file rather than leaving it to an editor or to commit messages, because the policy layer reads it there and blocks a body it cannot read. (Why: a pull request without a completed verification justification is a pull request opened on unverified work. Completed means every surface part 3 names has a resolution, not that every check has already run. See aiw-verification for the justification step itself.)
 - Confirm the body carries aiw-validation's line: the deliverable, and how it was met. Confirm it carries aiw-housekeeping's line too: what was removed or moved, or that nothing was. (Why: a check that leaves nothing behind cannot be told apart from a check that was skipped, and the human decides after the pull request is open, not before.)
@@ -61,7 +62,6 @@ Before proposing the first remote GitHub action, check:
 - Whether version numbers need updating.
 - Whether a tagged release is needed.
 - Parent and sub-issue closure status.
-- State which GitHub action would be next if the human wants to publish the work.
 
 ## Deterministic policy hooks
 
