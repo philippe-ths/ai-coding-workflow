@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.7.0
+Version: 5.8.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -23,7 +23,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape), agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for human review.
-6. **GitHub actions:** aiw-github for commit, push, PR.
+6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
 Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling and aiw-security-testing (see Non-Functional Dimensions), and aiw-orchestration on the trigger stated in Resource Discipline.
@@ -120,7 +120,7 @@ The human must complete them.
 
 - Judge whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. These need lived human experience and nothing substitutes for them. Whether the deliverable exists and does what was asked is not that judgement, needs no human, and does not wait for one; aiw-validation covers it.
 - Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
-- Authorise actions that affect systems or people beyond the local working tree: pushing to remote, deploying, opening or commenting on PRs, posting to external services, modifying CI.
+- Authorise actions that reach beyond the task's own branch and pull request: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI.
 - Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
 - Merge pull requests.
 - Interrupt the AI when it is chasing the wrong root cause, looping on failed approaches, or about to take an action that conflicts with intent.

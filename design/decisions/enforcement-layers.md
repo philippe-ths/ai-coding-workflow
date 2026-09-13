@@ -150,7 +150,7 @@ The human reviews them once (in the PR that adds them), and every subsequent clo
 
 Tool permission configs and git hooks serve complementary roles:
 
-1. **Tool-side permissions** reduce friction by pre-approving commands that are safe or that the workflow already gates through human checkpoints (e.g. `git push` requires explicit human approval at Step 11 before the agent runs it).
+1. **Tool-side permissions** reduce friction by pre-approving commands that are safe or that a hook already gates (e.g. `git push` is pre-approved because the pre-push hook blocks a protected branch and the merge hook blocks the one action that would reach it).
 2. **Git hooks** enforce bright-line rules mechanically regardless of what the tool permits. Even if a tool auto-approves `git push`, the pre-push hook blocks it on a protected branch.
 
 Neither layer is sufficient alone.
@@ -182,7 +182,7 @@ Commands are organised into categories:
 
 - **Git read** (`status`, `log`, `diff`, `show`, `branch`, `fetch`, etc.): zero side effects, always safe.
 - **Git local write** (`checkout`, `add`, `commit`, `rebase`, `restore`, `stash`): reversible, no shared state affected.
-- **Git remote** (`push`, `pull`): the workflow requires human confirmation at checkpoint steps before the agent runs these. Pre-approving the tool execution avoids a redundant prompt since the workflow and hooks already gate the action.
+- **Git remote** (`push`, `pull`): the agent pushes the issue branch on its own once the done gate has run (5.8.0; before that the workflow required human confirmation). The pre-push hook blocks protected branches and the merge hook blocks the merge, so the push reaches nothing the human has not chosen to merge.
 - **GitHub CLI** (`gh issue`, `gh pr`, `gh repo`): needed for the workflow's issue and PR operations.
 - **Shell read utilities** (`ls`, `cat`, `grep`, `find`, `wc`, etc.): read-only, no risk.
 - **File operations** (`mkdir`, `cp`, `mv`, `touch`): local and reversible.
