@@ -120,7 +120,7 @@ The human must complete them.
 
 - Judge whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. These need lived human experience and nothing substitutes for them. Whether the deliverable exists and does what was asked is not that judgement, needs no human, and does not wait for one; aiw-validation covers it.
 - Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
-- Authorise actions that reach beyond the task's own branch and pull request: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI. Committing, pushing the issue branch, and opening the task's pull request are the AI's to do when the done gate has run, because the pull request is where the human's done decision starts, and the merge hook keeps the protected branch out of reach.
+- Authorise actions that reach beyond the task's own branch and pull request: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI.
 - Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
 - Merge pull requests.
 - Interrupt the AI when it is chasing the wrong root cause, looping on failed approaches, or about to take an action that conflicts with intent.

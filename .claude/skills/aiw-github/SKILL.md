@@ -1,13 +1,13 @@
 ---
 name: aiw-github
-description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken at the right point in the task, safe against silent working-tree loss during branch operations, and short of the one action that stays the human's: the merge."
+description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken after the done gate, safe against silent working-tree loss during branch operations, and short of the one action that stays the human's: the merge."
 ---
 
 # GitHub Workflow
 
 ## Why this skill exists
 
-GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, taken only after the done gate, and safe against working-tree surprises. The human's part is the merge, and the policy layer blocks the agent from it deterministically; nothing else in this skill waits for their word.
+GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, taken only after the done gate, and safe against working-tree surprises. The merge is the human's, and the policy layer blocks the agent from it deterministically.
 
 ## Starting work on an issue
 
@@ -44,8 +44,7 @@ Before any operation that moves the working tree to a different branch state (re
 
 Commit, push, and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
 
-- Commit as the work reaches a coherent state; do not hold a task's changes for one commit at the end.
-- Push and open the pull request when the pre-pull-request checks below pass. Do not push work the done gate has not covered.
+- Push and open the pull request when the pre-pull-request checks below pass.
 - Post evidence that was deferred in the justification on the task's own pull request when it arrives. Commenting on any other pull request stays the human's.
 - After opening the pull request, stop and report: the link, the justification's unverified surfaces, and what the human is now deciding.
 - Never merge a pull request, and never work around the hook that blocks it.
