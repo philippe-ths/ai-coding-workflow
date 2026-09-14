@@ -79,6 +79,7 @@ The plan the agent produces for the user should have these elements:
 - **Branch.** The branch the work will be implemented on.
 - **Goal.** The goal of the change in one or two sentences.
 - **Deliverable.** What the human will open, read, run, or look at when this is done, named as a noun in their terms, and what must change about it from their perspective. Name the result, not the work; aiw-validation checks the finished work against this line.
+- **End impact.** What the user can do, see, or rely on differently once this lands, and which user: the end user of the product, or the human directing the work. Write it so the work is clear from the effect alone; the deliverable and the elements below are evidence for it, not a substitute. "The threads page shows applications per week as a chart" is the deliverable; "the team can tell whether applications are climbing without exporting the data" is the end impact. A task with nothing to open still has one: "the next change to sync touches one file instead of four".
 - **Modality classification.** The modality (or modalities) recorded above.
 - **Oracle.** What counts as correct for this task and where it comes from. (See "The Oracle Section" below.)
 - **Files and code areas.** What the change will touch.

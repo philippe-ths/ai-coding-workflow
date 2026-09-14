@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.8.0
+Version: 5.9.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -99,7 +99,7 @@ Two standing rules, on every message rather than at checkpoints:
 
 Showing the alternative not taken is not a third rule here. It is reserved for decisions put to the human, where the Asking for Guidance format already carries it.
 
-Messages stay short. This changes the texture of what the human reads, not the volume, and a reply padded to fill a shape teaches nothing. Teaching does not travel into the durable artifacts: plans, issues, and pull requests are written to be acted on. The single exception is the plan put to the human for agreement, where the reasoning behind a choice earns its words while the steps stay as concise as they were.
+Messages stay short. This changes the texture of what the human reads, not the volume, and a reply padded to fill a shape teaches nothing. Teaching does not travel into the durable artifacts: plans, issues, and pull requests are written to be acted on. The plan and the pull request each explain the work through its end impact: what the user can do, see, or rely on differently once it lands, stated so the work is clear from the effect alone. The user is whoever meets the result, the product's end user or the human directing the work, and the line says which. The single exception to the teaching rule is the plan put to the human for agreement, where the reasoning behind a choice earns its words while the steps stay as concise as they were.
 
 ## Asking for Guidance
 

@@ -19,7 +19,7 @@ The deliverable is what the human will open, read, run, or look at when this is 
 
 Name it in the plan, as a noun, in the human's terms. "The threads page shows applications per week as a chart" is a deliverable. "Add charting to the threads view" is the work, and naming the work instead is how the thing goes missing: the work can be complete while the artifact is absent.
 
-If the task produces nothing a human meets, say so in the plan. That sentence discharges this skill, and it is an argument about what the change is, never a bare assertion.
+If the task produces nothing a human meets, say so in the plan. That sentence discharges the questions below, and it is an argument about what the change is, never a bare assertion. The end impact is still stated, in the plan and in the line this skill leaves behind, because a task with nothing to open still changes what someone relies on.
 
 ## The Questions
 
@@ -49,7 +49,7 @@ A device you do not have, a build you cannot run, an account you cannot reach. T
 
 ## What It Leaves Behind
 
-One line in the pull request body, beside the verification justification: the deliverable, and how it was met. "The weekly report, rendered for the week of 3 March and read against the SQL count." That sentence is the whole record.
+One line in the pull request body, beside the verification justification: the deliverable, how it was met, and the end impact as delivered and for which user, so the work is clear from the effect alone. "The weekly report, rendered for the week of 3 March and read against the SQL count; the team reads one page on Monday instead of running the query." That sentence is the whole record.
 
 It goes there for the reason the verification justification goes there: the human decides afterwards, and a check that leaves nothing behind cannot be told apart from a check that was skipped.
 
