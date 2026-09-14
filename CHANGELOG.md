@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.9.0 - 2026-09-14
+
+The plan and the pull request explain the work through its end impact for the user.
+
+### Changed
+
+- `ai-workflow.md` Build and Teach: the plan and the pull request carry the end impact, what the user can do, see, or rely on differently once the work lands, so the work is clear from the effect alone ([#296]).
+- `aiw-planning` adds an **End impact** element beside the deliverable, naming which user it is for and showing the shape on a repository with no screen ([#296]).
+- `aiw-validation` extends its pull request line to the end impact as delivered; `aiw-github` checks for it before the pull request opens ([#296]).
+
 ## 5.8.0 - 2026-09-13
 
 The agent commits, pushes, and opens the pull request on its own; the merge stays the human's.
@@ -976,4 +986,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286
 [#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
 [#293]: https://github.com/philippe-ths/ai-coding-workflow/issues/293
+[#296]: https://github.com/philippe-ths/ai-coding-workflow/issues/296
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289
