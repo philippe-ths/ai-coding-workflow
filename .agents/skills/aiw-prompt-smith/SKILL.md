@@ -1,11 +1,11 @@
 ---
 name: aiw-prompt-smith
-description: Author or repair prompting artifacts, including system prompts, CLAUDE.md, AGENTS.md/AGENT.md files, and other skills. Use when writing any of these from scratch, and especially when one has produced a noticed failure and needs fixing at the cause rather than a narrow patch. Trigger whenever the user is drafting, reviewing, tightening, or debugging a system prompt, a project-instructions file, an agent-instructions file, or a skill, even if they don't say the word "prompt", e.g. "my CLAUDE.md keeps making it do X", "this skill over-triggers", "help me write instructions for the agent", "why does my agent ignore this rule". Prefer this skill over ad-hoc editing whenever the likely fix would otherwise be to just append another rule.
+description: Author or repair prompting artifacts, including system prompts, CLAUDE.md, AGENTS.md/AGENT.md files, other skills, agent prompt files, and any file an agent loads at session start or opens at a step to learn what to do, whatever it is named, such as a README a mode file includes, a method page, or a reference an operator agent reads for a field. Use when writing any of these from scratch, when moving instructions from one file to another, and especially when one has produced a noticed failure and needs fixing at the cause rather than a narrow patch. Trigger whenever the user is drafting, reviewing, tightening, or debugging a system prompt, a project-instructions file, an agent-instructions file, or a skill, even if they don't say the word "prompt", e.g. "my CLAUDE.md keeps making it do X", "this skill over-triggers", "help me write instructions for the agent", "why does my agent ignore this rule". Prefer this skill over ad-hoc editing whenever the likely fix would otherwise be to just append another rule.
 ---
 
 # Prompt Smith
 
-Two jobs, one spine. Use this when **writing** a prompting artifact (system prompt, CLAUDE.md, AGENTS.md/AGENT.md, or another skill) or **repairing** one after it produced a failure you noticed.
+Two jobs, one spine. Use this when **writing** a prompting artifact (system prompt, CLAUDE.md, AGENTS.md/AGENT.md, another skill, an agent prompt file, or any file an agent loads to learn what to do, whatever it is named) or **repairing** one after it produced a failure you noticed. Moving instructions from one file to another is repair: something about where they lived has failed.
 
 The governing idea is **altitude**. Every instruction sits at some level of generality, and most prompt problems are altitude errors. Too low and you write a brittle rule for the one case in front of you, and this is what breeds bloat. Too high and you write something so vague it steers nothing. Aim for the altitude where a competent role or a named concept does the work.
 
@@ -13,12 +13,13 @@ This skill is deliberately small. If your edit makes an artifact longer without 
 
 ## Start here (both modes)
 
-Before writing or editing anything, get three answers. If you are repairing, get a fourth.
+Before writing or editing anything, get four answers. If you are repairing, get a fifth.
 
 1. **Behaviour**: what should the artifact make the model do?
 2. **Failure it prevents**: what goes wrong without this? If nothing, you do not need the instruction.
 3. **One example**: a concrete good-vs-bad pair, ideally an awkward case rather than an easy one.
-4. **(Repair only) Instance or class**: is this a one-off, or a pattern the artifact should handle as a category?
+4. **Layer**: who reads this line, in which file, with what else in their context at the time? Altitude is about the line; layer is about where it lives, and it is a decision, not a default: always-on for what nearly every session needs, a skill for a method pulled on match, a reference for what is looked up, and a step's own sealed prompt for the role and judgement of one step a model runs (aiw-orchestration's step owner). A correct line at the wrong layer is not read, or is read alongside so much else that it does not bind, and prose written for a human and handed to a model unchanged is how most lines get there.
+5. **(Repair only) Instance or class**: is this a one-off, or a pattern the artifact should handle as a category?
 
 If you cannot answer these, you are not ready to write. Ask, do not guess. A confident wrong instruction costs more than a question.
 
@@ -37,7 +38,7 @@ Then apply the shared principles below to whatever you write.
 
 ## Write mode (a new artifact)
 
-- **Pull, not push.** A skill is for behaviour that should not live in the always-on system prompt. Keep the always-on footprint tiny and let the skill be pulled in when its description matches. If it belongs in the base prompt, it is not a skill.
+- **Pull, not push.** Keep the always-on footprint tiny and let a skill be pulled in when its description matches; the Layer question above decides which is which.
 - **One job.** Keep each artifact to a single job and compose several, rather than growing one into a monolith. For a skill, the description header is what triggers it, so write that with the most care.
 - **Trust the model for judgment, constrain it for interfaces.** For anything the model already knows well (a good running coach, clean code, clear writing), name the role or the standard and let its latent knowledge fill in. Do not enumerate every rule the role would follow, because you cannot finish the list, and trying breeds bloat. Specify explicitly only where the model *cannot* know: private facts, exact formats and APIs, current information, safety-critical limits. Delegate the disposition, pin down the interface. This is not licence to under-specify: a vague prompt just inherits the model's bland average.
 

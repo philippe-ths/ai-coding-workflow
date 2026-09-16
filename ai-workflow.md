@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.9.0
+Version: 5.10.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -20,7 +20,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 
 1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape), agreed with the human before implementation begins.
+3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
@@ -52,7 +52,7 @@ Protect your context window and the human's quota — but never by doing less th
 - A required step is discharged at the depth the change warrants. A one-line change and a schema migration do not earn the same evidence, and spending an hour proving a five-minute change is ceremony rather than rigour.
 - Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
 - Route reconnaissance out freely: broad multi-file search, and any output you would only distil. It writes nothing, so it needs no permission.
-- Everything that writes is aiw-orchestration's call. Load it when the work looks like it might split — many files or areas, more input than you can hold at once, or any impulse to hand implementation to another agent — and before handing writing work to any agent other than yourself. Load it to decide whether to split, not once you have decided. The conditions live there, and this file does not restate them, because one rule kept in several places is several copies of the same defect.
+- Everything that writes is aiw-orchestration's call. Load it when the work looks like it might split — many files or areas, more input than you can hold at once, or any impulse to hand implementation to another agent — before handing writing work to any agent other than yourself, and when the deliverable includes a step a model will run on every use of the built system. Load it to decide whether to split, not once you have decided. The conditions live there, and this file does not restate them, because one rule kept in several places is several copies of the same defect.
 - Keep judgment, design, and the review of every returned result in the main loop. A sub-agent's result is evidence to weigh, never a verdict to accept unread. A thin brief returns confident, wrong work, and an orchestrator that defers inherits the error.
 
 ## Boundary Rules
