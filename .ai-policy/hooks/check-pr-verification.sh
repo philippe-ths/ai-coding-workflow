@@ -3,7 +3,8 @@ set -eu
 
 # PreToolUse hook for Claude Code, Codex, and VS Code Copilot.
 # Blocks opening or editing a pull request whose body carries no verification
-# justification, or whose unverified-surface section is a bare assertion.
+# justification, or whose unverified-surface section is a bare assertion, or
+# which changed agent-facing prose without recording an aiw-prompt-smith pass.
 # Reads tool_input from JSON on stdin.
 # Exit 2 = block, exit 0 = allow.
 #
@@ -21,7 +22,17 @@ set -eu
 # demanded an issue would fire on the normal path, and a guard that fires on
 # the normal path gets routed around.
 #
-# The two checks below are the ones a script can make without that judgement.
+# The three checks below are the ones a script can make without that judgement.
+#
+# The third exists because a rule that lived only in prose and memory was
+# skipped on three runs of pull requests (#218 to #223, #294, #302), and each
+# time the pass, once asked for, cut real defects. Agent-facing prose is found by
+# path: the skill and agent directories, the three entry points, and whatever
+# those entry points pull in through an @ line, followed transitively, because
+# the file that bit hardest was a README an entry point included and nobody
+# thought of as a prompt. A file an agent reads because prose tells it to is
+# outside what a path rule can see; aiw-prompt-smith's Layer question covers
+# that at plan time.
 #
 # Like block-pr-merge.sh, this matches the command string rather than parsing
 # the shell, so a command that merely quotes the pull-request-creating form —
@@ -38,9 +49,124 @@ COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')"
 deny() {
   echo "Blocked: $1" >&2
   echo "$2" >&2
-  echo "See aiw-verification's justification step. Part 3 names what was not checked;" >&2
-  echo "an empty part 3 is an argument in terms of what the change is, never a bare assertion." >&2
+  if [ "${3:-}" = "prose" ]; then
+    echo "Invoke aiw-prompt-smith over those files, then record in the body what the pass found," >&2
+    echo "even when it found nothing to change. The hook checks that it ran, not that it was good." >&2
+  else
+    echo "See aiw-verification's justification step. Part 3 names what was not checked;" >&2
+    echo "an empty part 3 is an argument in terms of what the change is, never a bare assertion." >&2
+  fi
   exit 2
+}
+
+# Print the agent-facing prose files this branch changed, one per line, or
+# nothing. The branch is read against the protected branches from policy.env
+# (else main master), local and remote, taking the newest merge-base so a
+# stale origin does not drag the base back and fire on a code-only branch.
+# Uncommitted changes count, since the body may be written before the last
+# commit. When no base resolves or git is unavailable, print nothing: a check
+# that cannot be evaluated is skipped, not failed, because blocking every pull
+# request in a repository whose base is not fetched is the false block that
+# gets a guard routed around.
+#
+# Agent-facing prose is found by path: the skill and agent directories, the
+# entry points and ai-workflow.md, and whatever an entry point pulls in with an
+# @ token, followed through further @ tokens, in the working tree and in the
+# base so a deleted include still counts. An @ token is text from a file in the
+# working tree, which a cloned repository can make hostile, so it is never
+# handed to a shell: paths are restricted to a plain character set, may not
+# leave the repository, may not themselves be symlinks, and are read with a
+# size cap.
+prose_files_changed() {
+  local root branches b cand mb newest files entries f
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || return 0
+  branches="main master"
+  if [ -r "$root/.ai-policy/policy.env" ]; then
+    branches="$( ( set +eu; . "$root/.ai-policy/policy.env" >/dev/null 2>&1; printf '%s' "${PROTECTED_BRANCHES:-main master}" ) 2>/dev/null || printf 'main master' )"
+  fi
+  newest=""
+  for b in $branches; do
+    for cand in "origin/$b" "$b"; do
+      git -C "$root" rev-parse --verify -q "$cand" >/dev/null 2>&1 || continue
+      mb="$(git -C "$root" merge-base HEAD "$cand" 2>/dev/null)" || continue
+      if [ -z "$newest" ] || git -C "$root" merge-base --is-ancestor "$newest" "$mb" 2>/dev/null; then
+        newest="$mb"
+      fi
+    done
+  done
+  [ -n "$newest" ] || return 0
+  mb="$newest"
+  files="$( { git -C "$root" -c core.quotePath=false diff --name-only --no-renames "$mb" 2>/dev/null
+              git -C "$root" -c core.quotePath=false status --porcelain --no-renames -uall 2>/dev/null | cut -c4-
+            } | sort -u )"
+  [ -n "$files" ] || return 0
+
+  entries="$(prose_includes "$root" "$mb")"
+
+  printf '%s\n' "$files" | while IFS= read -r f; do
+    case "$f" in
+      .claude/skills/*|.agents/skills/*|.claude/agents/*|.github/agents/*|ai-workflow.md) echo "$f"; continue ;;
+    esac
+    if printf '%s\n' "$entries" | grep -qxF -- "$f"; then echo "$f"; fi
+  done
+}
+
+# Normalise a repository-relative path, resolving . and .., and print it; fail
+# when the path climbs above the repository root. No filesystem access, so a
+# symlink cannot redirect it, and no shell sees the text.
+inside_repo() {
+  local IFS='/' seg out=""
+  case "$1" in /*) return 1 ;; esac
+  for seg in $1; do
+    case "$seg" in
+      ''|'.') ;;
+      '..') [ -n "$out" ] || return 1; case "$out" in */*) out="${out%/*}" ;; *) out="" ;; esac ;;
+      *) out="${out:+$out/}$seg" ;;
+    esac
+  done
+  [ -n "$out" ] || return 1
+  printf '%s' "$out"
+}
+
+# The entry points and everything they include, transitively, read from the
+# working tree and from the base commit. Prints one path per line.
+prose_includes() {
+  local root="$1" mb="$2" queue seen p tok dir cand src content
+  queue="CLAUDE.md AGENTS.md .github/copilot-instructions.md"
+  seen=""
+  while [ -n "$queue" ]; do
+    p="${queue%% *}"
+    queue="${queue#"$p"}"; queue="${queue# }"
+    case " $seen " in *" $p "*) continue ;; esac
+    seen="$seen $p"
+    dir="${p%/*}"; [ "$dir" = "$p" ] && dir=""
+    for src in tree base; do
+      if [ "$src" = tree ]; then
+        [ -f "$root/$p" ] && [ ! -L "$root/$p" ] || continue
+        content="$(head -c 1000000 -- "$root/$p" 2>/dev/null)" || continue
+      else
+        content="$(git -C "$root" show "$mb:$p" 2>/dev/null | head -c 1000000)" || continue
+        [ -n "$content" ] || continue
+      fi
+      # Drop fenced code blocks (a demonstration is not an include), then take
+      # every whitespace-delimited token that starts with @, less trailing
+      # punctuation. Only plain paths are followed; anything else is ignored.
+      for tok in $(printf '%s\n' "$content" | LC_ALL=C awk '/^[[:space:]]*```/ { f = !f; next } !f { print }' \
+                    | grep -oE '(^|[[:space:](])@[^[:space:]]+' | sed -e 's/^[[:space:](]*@//' -e 's/[.,;:)]*$//' \
+                    | grep -E '^[A-Za-z0-9._/-]+$' | sort -u); do
+        [ "$(wc -w <<<"$seen $queue")" -lt 200 ] || break
+        for cand in "${dir:+$dir/}$tok" "$tok"; do
+          cand="$(inside_repo "$cand")" || continue
+          if { [ -f "$root/$cand" ] && [ ! -L "$root/$cand" ]; } || git -C "$root" cat-file -e "$mb:$cand" 2>/dev/null; then
+            case " $seen $queue " in *" $cand "*) ;; *) queue="$queue $cand" ;; esac
+            break
+          fi
+        done
+      done
+    done
+    queue="${queue# }"
+  done
+  printf '%s\n' $seen | grep -v '^$' || true
 }
 
 # Present the body to the checks with markdown emphasis and list markers gone,
@@ -108,6 +234,22 @@ check_body() {
     }')"
   if printf '%s\n%s' "$unquoted" "$folded" | grep -qiE '(^|[^[:alnum:]])(not[[:space:]]+(verified|checked)|unverified|nothing[[:space:]]+unverified)[[:punct:][:space:]]*(nothing|none|n/?a|nil|-)[[:punct:][:space:]]*$'; then
     deny "$source" "The unverified-surface section is a bare assertion. Say why there is nothing to check, in terms of what the change is."
+  fi
+
+  # 3. A branch that changed agent-facing prose records an aiw-prompt-smith
+  #    pass. Presence only, as in check 1: the body has to say the pass ran and
+  #    what it found, and whether that was a good pass is the human's to judge.
+  #    A body that names the pass only to say it was skipped passes this
+  #    check, deliberately: every matcher tried for that shape blocked honest
+  #    bodies ("n/a for the test file", "not run over the fixtures") while
+  #    catching four spellings of the lie, which is the trade check 2 refuses
+  #    in the other direction. A skipped pass reported in the body is in front
+  #    of the human, which is where that decision belongs.
+  local prose named
+  prose="$(prose_files_changed)"
+  if [ -n "$prose" ] && ! printf '%s' "$norm" | grep -qiE 'prompt[- ]?smith'; then
+    named="$(printf '%s' "$prose" | tr '\n' ' ' | tr -cd '[:print:]' | sed 's/ $//')"
+    deny "$source" "The branch changed agent-facing prose ($named) and the body records no aiw-prompt-smith pass." "prose"
   fi
 }
 

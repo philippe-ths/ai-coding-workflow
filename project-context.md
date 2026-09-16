@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.41.0
+Version: 1.42.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -96,6 +96,7 @@ Version: 1.41.0
 - `.ai-policy/policy.env`: declares protected branches, validation state file path, validation command, and optionally `SUITE_PATHS`, the files counted as this repository's checks.
 - `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement; `report-suite-size.sh` reports how many files and bytes this repository's checks come to and never gates; `run-validation.sh` reports how long each run took, also never gated on; `check-validation.sh` is the commit and push gate and blocks unless the recorded pass matches the fingerprint `tree-fingerprint.sh` computes for the current tree; `project-validation.sh` is the portable policy-layer check (shell-script syntax plus enforcement tests gated on the agent entry points installed) and invokes `scripts/repo-validation.sh` afterwards when present, warning loudly when it is absent.
 - `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry), `check-context-drift.sh` (SessionStart, advisory reminder when `project-context.md` is `CONTEXT_DRIFT_THRESHOLD`+ commits behind HEAD; wired for Claude Code and Codex only), `block-pr-merge.sh` (PreToolUse, blocks agent pull-request merges on the shell and MCP routes unconditionally; wired for all three tools), and `block-pr-approve.sh` (PreToolUse, blocks agent pull-request approvals on both routes, failing closed on an unreadable MCP review event; review comments and change requests pass), and `check-pr-verification.sh` (PreToolUse, blocks opening or editing a pull request whose body carries no verification justification or whose unverified-surface section is a bare assertion, and blocks a body it cannot read rather than passing it over; wired for all three tools).
+- `check-pr-verification.sh` also blocks a body that records no `aiw-prompt-smith` pass when the branch changed agent-facing prose, found by path: skills, agent files, `ai-workflow.md`, the entry points, and files an entry point pulls in with an `@` line.
 - `.ai-policy/hooks/check-hidden-clutter.sh`: SessionStart advisory reporting when `.git/info/exclude` carries `HIDDEN_CLUTTER_THRESHOLD` or more entries, the signal to run the audit; wired for Claude Code and Codex, and never blocks.
 - `.ai-policy/hooks/remind-context-management.sh`: PreToolUse advisory reminder pointing at `aiw-project-context-management` before a pull request opens on a branch that changed what `project-context.md` records without touching it, and before the context file is written.
 - It emits `additionalContext` with no `permissionDecision` key, so it neither blocks nor auto-approves, and is wired for Claude Code, Codex, and VS Code Copilot.
@@ -127,14 +128,13 @@ Version: 1.41.0
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
-- `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, JSONL fixture validity, the manifest integrity check, and the install, update, and changelog-removals sandbox tests.
+- `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed, then `report-suite-size.sh`.
 - Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; every other `.ai-policy/scripts/test-*.sh` runs unconditionally, because validation discovers them by glob rather than from a list.
 - When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
 - Prose integrity (`scripts/check-prose-integrity.sh`) runs inside repo-specific validation, so a change to the agent-facing rules is checked by something other than its author's reading. It is structural only: it cannot tell whether two passages contradict each other.
-- Repo-specific validation in `scripts/repo-validation.sh` runs `bash -n` on `observation/*.sh`, `py_compile` on `observation/*.py`, the `observation/test_parse.py` parser regression test, a JSONL validity check on the fixture, the manifest integrity check, and the installer, updater, changelog-removals, and observation install/uninstall sandbox tests.
 - No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
 - Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
 

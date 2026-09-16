@@ -43,6 +43,34 @@ bash_payload() {
   printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$(printf '%s' "$1" | jq -Rs .)"
 }
 
+# The hook reads the branch diff for check 3, so every case runs inside a
+# sandbox repository where the diff is controlled. This one has a base commit
+# on main and a work branch touching only code, which is the normal path the
+# first two checks were written against. Later sections make their own.
+GIT="git -c user.email=t@example.com -c user.name=t"
+make_repo() {
+  local dir="$TMP/$1"
+  mkdir -p "$dir/docs" "$dir/sites" "$dir/.claude/skills/tidy" "$dir/.claude/agents" "$dir/.github"
+  ( cd "$dir" && git init -q -b main . \
+    && printf 'x\n' > app.py \
+    && printf '# Project\n@docs/METHOD.md\n' > CLAUDE.md \
+    && printf '# Codex\n' > AGENTS.md \
+    && printf '# Copilot\n' > .github/copilot-instructions.md \
+    && printf '# Method\nRead sites/README.md for fields. See @../sites/README.md for every field.\n' > docs/METHOD.md \
+    && mkdir -p .agents/skills/tidy && printf -- '---\nname: tidy\n---\n# Tidy\n' > .agents/skills/tidy/SKILL.md \
+    && printf '# Reference\n' > sites/README.md \
+    && printf -- '---\nname: tidy\n---\n# Tidy\n' > .claude/skills/tidy/SKILL.md \
+    && printf '# Designer\n' > .claude/agents/designer.md \
+    && $GIT add -A && $GIT commit -qm base && git checkout -q -b work )
+  echo "$dir"
+}
+touch_commit() {  # repo file
+  ( cd "$1" && printf 'changed\n' >> "$2" && $GIT add -A && $GIT commit -qm "touch $2" )
+}
+CODE_REPO="$(make_repo code)"
+touch_commit "$CODE_REPO" app.py
+cd "$CODE_REPO"
+
 body_file() {
   local path="$TMP/$1"; shift
   printf '%s\n' "$@" > "$path"
@@ -179,6 +207,128 @@ assert_allowed "gh pr edit replacing the body with a justified one" \
   "$(bash_payload "gh pr edit 12 --body-file $OK_BODY")"
 assert_blocked "gh pr edit replacing the body with an unjustified one" \
   "$(bash_payload 'gh pr edit 12 --body "Tidied the wording."')"
+
+# ── Agent-facing prose (#295) ──
+#
+# A rule that lived only in prose and memory was skipped on three runs of pull
+# requests. The hook now asks, by path, whether the branch changed anything an
+# agent loads to learn what to do, and requires the body to record the pass.
+
+echo "A branch that changed agent-facing prose must record an aiw-prompt-smith pass:"
+
+PLAIN="$(body_file plain.md "Ran the suite, green. Not verified: the mobile layout, no device to hand.")"
+WITH_PASS="$(body_file withpass.md "Ran the suite, green. Not verified: the mobile layout." "" \
+  "aiw-prompt-smith pass over the diff: cut one line racing an existing rule; nothing else to change.")"
+
+prose_case() {  # label file
+  local repo
+  repo="$(make_repo "prose_$(printf '%s' "$2" | tr -c '[:alnum:]' _)")"
+  touch_commit "$repo" "$2"
+  cd "$repo"
+  assert_blocked "$1, body silent on the pass" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+  assert_allowed "$1, body recording the pass" "$(bash_payload "gh pr create --title x --body-file $WITH_PASS")"
+  cd "$CODE_REPO"
+}
+
+prose_case "a skill, whatever its name" .claude/skills/tidy/SKILL.md
+prose_case "a cross-platform skill" .agents/skills/tidy/SKILL.md
+prose_case "an agent prompt file" .claude/agents/designer.md
+prose_case "AGENTS.md" AGENTS.md
+prose_case "the Copilot entry point" .github/copilot-instructions.md
+prose_case "a file CLAUDE.md includes with an @ line" docs/METHOD.md
+prose_case "a file reached through an inline, file-relative @ token" sites/README.md
+
+echo "The check is for presence; what the record says is the human's to read:"
+# A matcher for "skipped" was tried and dropped: it blocked honest bodies
+# ("n/a for the test file") while catching four spellings of the lie.
+WAIVED="$(body_file waived.md "Ran the suite, green. Not verified: the mobile layout." "" \
+  "aiw-prompt-smith pass waived by the human: 'ship it as is, I have read the diff'.")"
+HONEST_NA="$(body_file honestna.md "Ran the suite, green. Not verified: the mobile layout." "" \
+  "aiw-prompt-smith pass: found nothing to change, n/a for the test file.")"
+SK="$(make_repo record)"; touch_commit "$SK" AGENTS.md; cd "$SK"
+assert_allowed "a waiver in the human's words" "$(bash_payload "gh pr create --title x --body-file $WAIVED")"
+assert_allowed "an honest record that happens to say n/a" "$(bash_payload "gh pr create --title x --body-file $HONEST_NA")"
+cd "$CODE_REPO"
+
+echo "An include the branch deletes still counts:"
+DEL="$(make_repo deleted)"; ( cd "$DEL" && git rm -q docs/METHOD.md && $GIT commit -qm "drop method" ); cd "$DEL"
+assert_blocked "docs/METHOD.md deleted" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+cd "$CODE_REPO"
+
+echo "A stale remote base does not fire on a code-only branch:"
+# origin/main is behind local main, which carries a prose commit; the branch
+# was cut from local main and touched only code. The newest merge-base wins.
+STALE="$(make_repo stale)"; ( cd "$STALE" && git update-ref refs/remotes/origin/main main && git checkout -q main \
+  && printf 'more\n' >> CLAUDE.md && $GIT commit -qam "prose on main" && git checkout -q work && $GIT rebase -q main )
+touch_commit "$STALE" app.py; cd "$STALE"
+assert_allowed "code change with origin/main behind main" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+( cd "$STALE" && git checkout -q main && printf 'x\n' >> AGENTS.md && $GIT commit -qam "agents on main" && git checkout -q work )
+assert_allowed "prose committed on main after the branch, not on the branch" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+cd "$CODE_REPO"
+
+echo "A remote-only base is used when no local one exists:"
+REM="$(make_repo remote_only)"; ( cd "$REM" && git update-ref refs/remotes/origin/main main && git branch -D main >/dev/null ); touch_commit "$REM" AGENTS.md; cd "$REM"
+assert_blocked "AGENTS.md changed against origin/main only" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+cd "$CODE_REPO"
+
+echo "A hostile @ token is never run, followed outside the repository, or read unbounded:"
+# The hostile entry point is on the base, so the branch itself is code-only.
+HOST="$(make_repo hostile)"; ( cd "$HOST" && git checkout -q main \
+  && printf '@../../etc/passwd @/etc/hosts @$(touch %s/pwned) @`touch %s/pwned2` @docs%%2F..%%2F..%%2Fetc/passwd @docs/../../outside.md @%s @docs/METHOD.md\n' "$TMP" "$TMP" "$(printf 'a%.0s' $(seq 1 5000))" >> CLAUDE.md \
+  && ln -s /dev/zero docs/zero.md && printf '@docs/zero.md\n' >> CLAUDE.md \
+  && $GIT add -A && $GIT commit -qm hostile && git checkout -q work && $GIT rebase -q main )
+touch_commit "$HOST" app.py; cd "$HOST"
+assert_allowed "code-only branch with a hostile CLAUDE.md" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+if [ ! -e "$TMP/pwned" ] && [ ! -e "$TMP/pwned2" ]; then
+  PASS=$((PASS + 1)); echo "  PASS: no command from an @ token was executed"
+else
+  FAIL=$((FAIL + 1)); echo "  FAIL: an @ token executed a command"
+fi
+# The hostile line also carries a real include after the bad tokens, so a walk
+# that gave up on the line would miss it. Touching that include must still fire.
+touch_commit "$HOST" docs/METHOD.md
+assert_blocked "the real include on the hostile line is still followed" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+cd "$CODE_REPO"
+
+echo "A policy.env that fails to source falls back to main master:"
+BADPOL="$(make_repo badpolicy)"; ( cd "$BADPOL" && mkdir -p .ai-policy && printf 'PROTECTED_BRANCHES="main"\nfalse\necho "$UNSET_VARIABLE_X"\n' > .ai-policy/policy.env && $GIT add -A && $GIT commit -qm policy ); touch_commit "$BADPOL" AGENTS.md; cd "$BADPOL"
+assert_blocked "AGENTS.md changed with a policy.env that errors" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+cd "$CODE_REPO"
+
+echo "The refusal names the file that made it fire:"
+NESTED="$(make_repo nested_msg)"; touch_commit "$NESTED" sites/README.md; cd "$NESTED"
+ERR="$(printf '%s' "$(bash_payload "gh pr create --title x --body-file $PLAIN")" | "$HOOK" 2>&1 >/dev/null || true)"
+if printf '%s' "$ERR" | grep -q 'sites/README.md' && printf '%s' "$ERR" | grep -qi 'prompt-smith'; then
+  PASS=$((PASS + 1)); echo "  PASS: names sites/README.md and the skill to run"
+else
+  FAIL=$((FAIL + 1)); echo "  FAIL: refusal did not name the file or the skill: $ERR"
+fi
+
+echo "Prose that is only referred to in prose is outside a path rule:"
+# docs/METHOD.md says "Read sites/README.md" but a sibling it does not @-include
+# is not reached. This pins the limit rather than a wish: aiw-prompt-smith's
+# Layer question owns that case at plan time.
+SIB="$(make_repo sibling)"; ( cd "$SIB" && printf 'notes\n' > docs/NOTES.md ); touch_commit "$SIB" docs/NOTES.md; cd "$SIB"
+assert_allowed "a docs file no entry point includes" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+
+echo "Uncommitted prose changes count:"
+DIRTY="$(make_repo dirty)"; ( cd "$DIRTY" && printf 'more\n' >> CLAUDE.md ); cd "$DIRTY"
+assert_blocked "CLAUDE.md edited but not committed" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+
+echo "A code-only branch never sees the check:"
+cd "$CODE_REPO"
+assert_allowed "code change, body silent on the pass" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+
+echo "Where no protected base resolves, the check is skipped rather than failed:"
+NOBASE="$TMP/nobase"; mkdir -p "$NOBASE" && ( cd "$NOBASE" && git init -q -b work . && printf 'x\n' > CLAUDE.md && $GIT add -A && $GIT commit -qm only && printf 'y\n' >> CLAUDE.md )
+cd "$NOBASE"
+assert_allowed "a repository with no main or master, prose dirty in the tree" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+
+echo "The protected base comes from policy.env when present:"
+POL="$(make_repo policy)"; ( cd "$POL" && git branch -m main trunk && mkdir -p .ai-policy && printf 'PROTECTED_BRANCHES="trunk"\n' > .ai-policy/policy.env && $GIT add -A && $GIT commit -qm policy ); touch_commit "$POL" AGENTS.md; cd "$POL"
+assert_blocked "AGENTS.md changed against a trunk base" "$(bash_payload "gh pr create --title x --body-file $PLAIN")"
+
+cd "$CODE_REPO"
 
 # ── MCP route ──
 

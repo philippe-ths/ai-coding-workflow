@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.10.0
+Version: 5.11.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -26,7 +26,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
-Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling and aiw-security-testing (see Non-Functional Dimensions), and aiw-orchestration on the trigger stated in Resource Discipline.
+Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling and aiw-security-testing (see Non-Functional Dimensions), aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
 
 `north-star.md`, if it exists, is the shortest statement of what the project is trying to achieve. Consult it when deciding how and why. A request that pulls the project away from that goal stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
 
