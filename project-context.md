@@ -1,11 +1,11 @@
 # Project Context
 
-Version: 1.40.0
+Version: 1.41.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
 - Primary users are human developers who have an AI coding agent (Copilot, Claude Code, Codex) working in their projects.
-- The core user flow is: install the workflow into a target repository with the agent-driven installer (or by pointing an agent at this repo), then run tasks through the defined workflow with human checkpoints.
+- The core user flow is: install the workflow into a target repository with the agent-driven installer (or by pointing an agent at this repo), then run tasks through the defined workflow.
 - The repository also hosts a local, single-developer session-observation tool used to watch the maintainer's own Claude Code usage across repos.
 
 ## Domain Concepts
@@ -19,6 +19,7 @@ Version: 1.40.0
 - **Policy layer**: the set of shell scripts in `.ai-policy/` that enforce protected-branch and validation-state rules.
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
 - **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
+- **Step owner**: a step a built system runs through a model on every use, given one prompt file naming its role, sealed from the always-on layer, a narrow named interface, and a per-run log; the fifth shape in `aiw-orchestration`, the one that belongs to the built system rather than the task, named in the plan under step ownership by `aiw-planning`.
 - **Deliverable**: what the human will open, read, run, or look at when a task is done, named as a noun in the plan and checked by the `aiw-validation` skill at the done gate.
 - **Done gate**: the three checks run before work is presented for the human's done decision, `aiw-verification` for whether the change is correct, `aiw-validation` for whether the result is what was asked for, and `aiw-housekeeping` for whether anything the task caused should now be removed or moved.
 - **Footprint**: the files a branch changed, the untracked files the task produced, and what those changes left unreferenced, the set `aiw-housekeeping` may act on and outside which mess is a finding rather than work.
@@ -26,7 +27,6 @@ Version: 1.40.0
 - **Removal tier**: which of three levels of evidence a removal needs, set by how far the removed thing reaches rather than how large it is, so the cost of a removal is a property of the thing and not a judgement the agent weighs against the mess.
 - **Archive**: a git-ignored `.archive/` directory holding untracked files a task removed rather than deleted, created on first use with a `.gitignore` containing `*` so it is invisible to git without an entry anywhere else.
 - The `aiw-validation` skill is unrelated to the validation state and validation scripts of the policy layer, which record whether a repository's checks passed.
-- **Checkpoint**: a required human-review pause defined in the workflow before a consequential action.
 - **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
 - **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive per-session metrics with no statistical verdict.
@@ -40,7 +40,6 @@ Version: 1.40.0
 - Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
 - Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
 - Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, deliverable validation, housekeeping, performance profiling, security testing, project-context management, north-star authoring, and execution-shape orchestration, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot and Codex) and `.claude/skills/` (Claude Code).
-- Both skill directories contain the same skills.
 - Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`); each points at the governance files and carries no rules of its own.
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
 - Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
@@ -67,7 +66,7 @@ Version: 1.40.0
 ## Architecture Summary
 - This is primarily a documentation repository; its runtime code is the session-observation tool under `observation/` and the install/update tooling under `scripts/`.
 - Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and the local session-observation tool.
-- Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow, the human reviews checkpoints.
+- Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow.
 - Observation data flow: a SessionStart hook records the Manifest, the `/rate` skill records Ratings, then `observation/collect.py` reads all transcripts under `~/.claude/projects/`, joins the Manifest and Ratings, writes the Session Store, and regenerates a static HTML dashboard.
 - Observation runs on demand with a full rebuild each time; nothing runs in the background except the event-driven Manifest hook.
 - No external service dependencies exist at repository runtime; GitHub is used only for issue and PR tracking.
@@ -77,7 +76,6 @@ Version: 1.40.0
 - `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
 - `jq`: hook scripts and one enforcement test parse JSON with `jq`.
 - `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, and `scripts/repo-validation.sh`; the workflow itself does not need it.
-- A web browser: opens the generated static HTML dashboard; no server is involved.
 
 ## Project Structure
 - `north-star.md`: this repository's goal, that the human stays at the altitude of taste and direction while the AI manages and improves the work beneath them; `ai-workflow.md` step 1 checks an arriving request against it and stops before planning when the request pulls against it.
@@ -106,7 +104,6 @@ Version: 1.40.0
 - The where-am-I-standing guards are skipped for pushes that write to no branch: tag-only and delete-only. `.githooks/pre-push` reads delete-only from the all-zero local sha in git's pre-push input; `block-protected-branch-bash.sh` reads it from the command string (`--delete`, `-d`, `:<ref>`). Both apply the exemption after the target check, so deleting a protected branch stays blocked.
 - `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
-- `.vscode/settings.json`: VS Code Copilot tool permission defaults.
 - `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration, permission defaults, and hook definitions.
 - `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
 - `observation/collect.py`: reads all session transcripts, joins Manifest and Ratings, writes the Session Store, and regenerates the dashboard.

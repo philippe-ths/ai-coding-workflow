@@ -6,6 +6,17 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.10.0 - 2026-09-16
+
+A step the built system runs through a model gets one sealed owner, and an instruction's layer is a decision the plan records.
+
+### Changed
+
+- `aiw-orchestration` adds the **step owner** shape: a step a model runs on every use of the built system gets one prompt file naming its role, sealed from the always-on layer, a narrow named interface, a per-run log, and a routing row ([#299]).
+- `aiw-planning` adds a **Step ownership** element: the plan names the owner, its context in and out, and its per-run numbers, and says which layer any moved or written instructions land in ([#299]).
+- `aiw-prompt-smith` asks which layer a line belongs in before it is written, and triggers on any file an agent loads or opens to learn what to do, whatever it is named ([#299]).
+- `ai-workflow.md` lists step ownership among what planning settles and names the step as a trigger for loading `aiw-orchestration` ([#299]).
+
 ## 5.9.0 - 2026-09-14
 
 The plan and the pull request explain the work through its end impact for the user.
@@ -987,4 +998,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
 [#293]: https://github.com/philippe-ths/ai-coding-workflow/issues/293
 [#296]: https://github.com/philippe-ths/ai-coding-workflow/issues/296
+[#299]: https://github.com/philippe-ths/ai-coding-workflow/issues/299
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289

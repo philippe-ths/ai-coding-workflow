@@ -15,7 +15,7 @@ Planning is step 2 of the task sequence. The plan does not reproduce the rules o
 2. **aiw-planning** (this skill): establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
 3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
 4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, aiw-validation for whether the deliverable this plan named actually exists and does what was asked, and aiw-housekeeping for whether anything the task caused should now be removed or moved.
-5. **aiw-github** again for commit, push, and pull request, each as a separate human-approved action.
+5. **aiw-github** again for commit, push, and pull request, taken without asking once the done gate has run.
 6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
 
 This skill owns step 2. The overview exists so the full sequence is visible at a glance; the other skills own their own territory and their own rules.
@@ -85,6 +85,7 @@ The plan the agent produces for the user should have these elements:
 - **Files and code areas.** What the change will touch.
 - **Implementation approach.** What will be done, not how every line is written: the first meaningful implementation slice, the feedback signal that will test its direction, and later work as revisable direction rather than fixed prescription.
 - **Execution shape.** How the work will be run: solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay passing a chain too large for one context window from agent to agent, and why. Solo is the default and needs no argument; anything else does, because concurrency spends the human's quota and returns a review queue to one person. Load aiw-orchestration to make this call whenever the work looks like it might split, rather than once you have decided it does; it owns the gate and the per-role capability and effort routing.
+- **Step ownership.** When the deliverable includes a step a model runs on every use of the built system, load aiw-orchestration for its step-owner shape and name the agent that owns the step, what its prompt loads and is sealed from, its interface in and out, and what each run records. Where the task moves or writes instructions an agent will read, say which layer they land in and who reads them there; aiw-prompt-smith owns that question. A task that builds no such step and neither moves nor writes such prose says so in a word.
 - **Assumptions.** Separated into issue-sourced and codebase-confirmed. (See "Assumption Classification" below.)
 - **Assumption verification.** How each issue-sourced assumption will be verified before or during implementation.
 - **Risks and edge cases.** Including any higher-risk flag. (See "Higher-Risk Flags" below.)
