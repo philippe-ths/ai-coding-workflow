@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.11.0 - 2026-09-16
+
+A pull request that changed agent-facing prose does not open until the body records an aiw-prompt-smith pass.
+
+### Changed
+
+- `.ai-policy/hooks/check-pr-verification.sh` gains a third check: when the branch changed a skill, an agent prompt file, `ai-workflow.md`, an entry point, or a file an entry point pulls in with an `@` line, the body must record an `aiw-prompt-smith` pass; the refusal names the file that made it fire, and the check is skipped rather than failed where no protected base resolves ([#295]).
+- `.ai-policy/scripts/test-pr-verification-hook.sh` runs every case inside a sandbox repository and covers each path class, the nested include, the uncommitted change, the code-only branch, the missing base, and a `policy.env` base ([#295]).
+- `aiw-github` pre-pull-request readiness names the pass and what counts as agent-facing prose; `ai-workflow.md` lists aiw-prompt-smith among the conditional skills at the done gate ([#295]).
+
 ## 5.10.0 - 2026-09-16
 
 A step the built system runs through a model gets one sealed owner, and an instruction's layer is a decision the plan records.
@@ -997,6 +1007,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#286]: https://github.com/philippe-ths/ai-coding-workflow/issues/286
 [#290]: https://github.com/philippe-ths/ai-coding-workflow/issues/290
 [#293]: https://github.com/philippe-ths/ai-coding-workflow/issues/293
+[#295]: https://github.com/philippe-ths/ai-coding-workflow/issues/295
 [#296]: https://github.com/philippe-ths/ai-coding-workflow/issues/296
 [#299]: https://github.com/philippe-ths/ai-coding-workflow/issues/299
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289
