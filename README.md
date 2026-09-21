@@ -8,7 +8,7 @@ The workflow is written for the agent. The design decision files are written for
 
 The workflow assumes GitHub for issue tracking and branching. It is designed as a tightly coupled human-AI collaboration where each side has defined responsibilities — the human scopes work, reviews plans, and approves actions; the agent plans, implements, and validates. Future versions will support more configurable and automated modes.
 
-**Prerequisites:** bash, git.
+**Prerequisites:** bash, git. **Platforms:** Claude Code, Codex, VS Code Copilot. **Version:** see the latest tag (v5.7.0 at the time of writing).
 
 ## Approach
 
@@ -18,16 +18,17 @@ The first layer was a single monolithic workflow file — one document that told
 
 The current focus is finding the right split between always-on global rules and on-demand rules that are loaded only when relevant. After that: formally defined rules, and eventually multi-agent coordination.
 
-Tipping points are a judgement call. They come from real-world usage in other repositories — observing where agents actually fail, recording those patterns, and learning which new methods work. The `field-notes/observed-ai-failings.md` file is where those lessons accumulate.
+Tipping points are a judgement call. They come from real-world usage in other repositories — observing where agents actually fail, investigating the pattern, and learning which new methods work. Those investigations live in `field-notes/investigations/`, and the decisions they led to in `design/decisions/`.
 
 ## History
 
 1. **Single workflow file.** The project started as one document — `ai-workflow.md` — that told the agent what to do: confirm the task, plan, implement, validate, get approval. No enforcement, no tooling.
-2. **Failures drove new rules.** Real-world usage across multiple repos and agents surfaced repeated failures: agents skipping branches, bypassing checkpoints, running validation in parallel, pushing without approval. Each pattern was recorded in `field-notes/observed-ai-failings.md` and addressed with a targeted workflow rule.
+2. **Failures drove new rules.** Real-world usage across multiple repos and agents surfaced repeated failures: agents skipping branches, bypassing checkpoints, running validation in parallel, pushing without approval. Each pattern was written up as an investigation and addressed with a targeted workflow rule.
 3. **Deterministic enforcement.** Workflow rules alone were not enough — agents ignored them under momentum. The `.ai-policy/` layer and `.githooks/` were added to block protected-branch writes and require passed validation before commit or push, without relying on the agent to comply.
 4. **Agent-specific enforcement.** Git hooks only cover the shell path. Agents that use MCP connectors bypass hooks entirely. Enforcement was extended to Claude Code (PreToolUse hooks) and Codex (disabled_tools + PreToolUse hooks) to cover both execution paths.
 5. **On-demand skills.** The monolithic workflow file grew too large for agent context budgets. Planning and failure analysis were split into standalone skill files loaded only when the workflow step requires them.
-6. **Current: global vs on-demand rules.** Finding the right boundary between rules that must always be loaded and rules that can be deferred to skills.
+6. **Global vs on-demand rules.** Finding the right boundary between rules that must always be loaded and rules that can be deferred to skills.
+7. **Current: the agent runs the loop, the human holds the merge.** From v5 the agent commits, pushes and opens the pull request itself; merging stays a human action. The push gate covers the push itself, not only the commit. A pull request that changed agent-facing prose must record an `aiw-prompt-smith` pass. The done gate asks what the task left behind and whether the right thing was built, not only whether it was built right. A housekeeping audit the human invokes reports what is on disk that should not be. Checks report what they cost without gating on it. Plans and pull requests explain the work through its end impact.
 
 ## Repository Contents
 
