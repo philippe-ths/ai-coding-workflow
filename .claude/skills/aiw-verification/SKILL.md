@@ -62,7 +62,7 @@ End-to-end execution is cheap for an agent. Humans optimise testing practice to 
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the change and carries none of its context, and have it report what it observed. You are the worst verifier of your own change: you exercise what you expected to build and read the output through the same assumptions that shaped the code, the self-referential loop aiw-ground-truth exists to break, reappearing at verification time. A clean-context agent reaches the surface a real user would. Weigh its report in the main loop as evidence, not a verdict.
 
-If end-to-end execution is disproportionate to the change, name why in the justification step's part 3 and treat the unverified path as a known risk. A method that is not disproportionate but simply cannot run is the next section, not this one.
+The cases above are not yours to exempt. If you judge end-to-end execution disproportionate to the change, name why in the justification step's part 3 and ask the human to waive it; the item stays unresolved until they do (see Every Named Surface Gets a Resolution). A method that simply cannot run is the next section.
 
 ## The Refuting Pass
 
@@ -174,7 +174,7 @@ If the unverified surface is large enough that the change cannot be trusted with
 Naming the surface is half the step. The other half is what became of it, settled before the work is presented for the human's done decision. Each item in part 3 ends in one of four states, and a state is reached when its artifact exists, not when its word is written:
 
 - **Checked.** You closed the gap during this task. The artifact is what you ran and what it showed; the item then belongs in part 2.
-- **Tracked.** An issue carries it, and the artifact is the issue number. Proposing that issue is yours; creating it is the human's, under aiw-issue-creation.
+- **Tracked.** An issue carries it, and the artifact is the issue number. File it yourself under aiw-issue-creation.
 - **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
 - **Deferred.** The method has not run yet and you can say when it will, before the human decides. The artifact is the method named, that timing, and the reason for the wait: "the clean-context end-to-end pass, once quota resets in an hour". Deferred is the one state that does not close an item, because its artifact is a commitment rather than a result. Posting the result where the work is presented is what closes it, as Checked, in front of the person deciding. This is the Wait option kept visible rather than finished work held back, and two limits keep it that way. The evidence your modality requires cannot be deferred: a fix with no check that failed before and passes after, or a refactor with no before-and-after comparison, is not ready to present whatever else has run. And if you cannot say when it runs, or it turns out it will not, it is not deferred but "When the Committed Method Cannot Run", where the choice is the human's.
 

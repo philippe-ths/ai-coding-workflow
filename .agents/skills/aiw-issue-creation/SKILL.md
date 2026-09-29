@@ -1,6 +1,6 @@
 ---
 name: aiw-issue-creation
-description: "Structured process for creating follow-up or spin-off GitHub issues during a task. Use this skill when the agent discovers work outside the current scope that should be tracked. The skill exists to prevent implementation-heavy issues that bias the implementing agent and peg to stale code."
+description: "Structured process for creating follow-up or spin-off GitHub issues during a task. Use this skill when the agent discovers work outside the current scope, names a surface unverified at aiw-verification's scoping step, or finds a recurring limitation aiw-init reports, and that work should be tracked. The skill exists to prevent implementation-heavy issues that bias the implementing agent and peg to stale code."
 ---
 
 # Issue Creation
@@ -12,7 +12,7 @@ Read this file when creating a follow-up or spin-off GitHub issue.
 - Search open issues in the repository for overlap with the proposed issue's intent.
 - If a potential overlap is found, surface the overlapping issue to the human before proceeding.
 - Search the codebase for other sites where the same request would apply. A request arrives phrased for the place the human noticed it, which is not always the place it belongs.
-- Only proceed with creation after the human confirms there is no duplicate.
+- If the search finds no overlap, create the issue without asking.
 
 ## When the Request Fits More Than One Site
 

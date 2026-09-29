@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.16.0 - 2026-09-29
+
+Five places where the rules gave an agent two answers to one situation now give one.
+
+### Changed
+
+- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate is put to the human as a waiver and stays unresolved until they give it, instead of being treated as a known risk on the agent's own say ([#234]).
+- `aiw-verification` and `aiw-issue-creation`: the agent files a tracking issue itself after its own duplicate search, and brings the human only an overlap it finds, matching `ai-workflow.md`'s "file it" ([#234]).
+- `aiw-issue-creation`'s description names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
+- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is flagged and tracked, not refreshed inline ([#234]).
+- `ai-workflow.md` Build and Teach: messages stay short except a decision put to the human, which takes the Asking for Guidance shape ([#258]).
+
 ## 5.15.0 - 2026-09-29
 
 A decision the human's written direction already settles is decided and named rather than asked, and a restriction the agent invents while drafting an issue reaches the human instead of passing as theirs.
@@ -1067,3 +1079,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306
 [#312]: https://github.com/philippe-ths/ai-coding-workflow/issues/312
 [#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313
+[#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
+[#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
