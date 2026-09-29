@@ -9,16 +9,7 @@ Read this file when producing or revising an implementation plan at the start of
 
 ## Where This Skill Sits in the Workflow
 
-Planning is step 2 of the task sequence. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. The full sequence, for orientation:
-
-1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
-2. **aiw-planning** (this skill): set the ceremony tier, establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
-3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
-4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, aiw-validation for whether the deliverable this plan named actually exists and does what was asked, and aiw-housekeeping for whether anything the task caused should now be removed or moved.
-5. **aiw-github** again for commit, push, and pull request, taken without asking once the done gate has run.
-6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
-
-This skill owns step 2. The overview exists so the full sequence is visible at a glance; the other skills own their own territory and their own rules.
+Planning is step 3 of the Task Flow in `ai-workflow.md`: after the request is checked against the north-star and the issue and branch are set up, before implementation and the done gate. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. This skill owns Task Flow step 3; the other skills own their own territory and their own rules.
 
 ## Set the Ceremony Tier
 
