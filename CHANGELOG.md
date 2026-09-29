@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.14.0 - 2026-09-29
+
+Projects that install the workflow now get the Jev judge, so their tasks' ceremony tier comes from an outside answer rather than the agent's own call, as it already did here.
+
+### Changed
+
+- The Jev question tool moves from `scripts/jev/` (this repository only) into `.ai-policy/jev/`, which the installer and updater already copy into every target. `aiw-planning` now names `.ai-policy/jev/ask.py`, a path that exists wherever the workflow is installed; before, targets carried the instruction but never the tool, and fell back silently. With no key or no `python3` the agent still sets the tier itself and nothing blocks. The old path is not listed under Removed on purpose: it was never installed, and a target's `scripts/jev/` would be the target's own files ([#312]).
+- `INSTALL.md` says how the judge is switched on (a key in `TYPESAFE_API_KEY` or `~/.typesafe_key`, per machine) and has the installing agent report whether it is live; in a Codex target it is not, because the shipped sandbox has no network access ([#312]).
+- The tool's offline test stays factory-only, at `scripts/test_jev_ask.py`, and validation now fails rather than skips if it goes missing ([#312]).
+
 ## 5.13.1 - 2026-09-29
 
 ### Fixed
@@ -1045,3 +1055,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289
 [#307]: https://github.com/philippe-ths/ai-coding-workflow/issues/307
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306
+[#312]: https://github.com/philippe-ths/ai-coding-workflow/issues/312

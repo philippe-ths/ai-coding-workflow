@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.44.0
+Version: 1.45.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -20,7 +20,7 @@ Version: 1.44.0
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
 - **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
 - **Step owner**: a step a built system runs through a model on every use, given one prompt file naming its role, sealed from the always-on layer, a narrow named interface, and a per-run log; the fifth shape in `aiw-orchestration`, the one that belongs to the built system rather than the task, named in the plan under step ownership by `aiw-planning`.
-- **Ceremony tier**: Light, Standard or Full, set by `aiw-planning` from a task's reach, asking `scripts/jev/ask.py` where present; it sets how much process the task gets and moves only up.
+- **Ceremony tier**: Light, Standard or Full, set by `aiw-planning` from a task's reach, asking `.ai-policy/jev/ask.py` and falling back to the agent's own call; it sets how much process the task gets and moves only up.
 - **Deliverable**: what the human will open, read, run, or look at when a task is done, named as a noun in the plan and checked by the `aiw-validation` skill at the done gate.
 - **Done gate**: the three checks run before work is presented for the human's done decision, `aiw-verification` for whether the change is correct, `aiw-validation` for whether the result is what was asked for, and `aiw-housekeeping` for whether anything the task caused should now be removed or moved.
 - **Footprint**: the files a branch changed, the untracked files the task produced, and what those changes left unreferenced, the set `aiw-housekeeping` may act on and outside which mess is a finding rather than work.
@@ -76,8 +76,8 @@ Version: 1.44.0
 - `bash`: all policy scripts, git hooks, and observation capture scripts are written in bash and validated with `bash -n`.
 - `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
 - `jq`: hook scripts and one enforcement test parse JSON with `jq`.
-- `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, `scripts/jev/`, and `scripts/repo-validation.sh`; the workflow itself does not need it.
-- TypeSafe Jev (`api.typesafe.ai`): answers the questions in `scripts/jev/`; optional, since the tool reports itself unavailable when no key is set.
+- `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, `.ai-policy/jev/`, and `scripts/repo-validation.sh`; the workflow itself does not need it.
+- TypeSafe Jev (`api.typesafe.ai`): answers the questions in `.ai-policy/jev/`; optional, since the tool reports itself unavailable when no key is set.
 
 ## Project Structure
 - `north-star.md`: this repository's goal, that the human stays at the altitude of taste and direction while the AI manages and improves the work beneath them; `ai-workflow.md` step 1 checks an arriving request against it and stops before planning when the request pulls against it.
@@ -127,7 +127,7 @@ Version: 1.44.0
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
-- `scripts/jev/ask.py`: asks Jev one named question from `scripts/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable.
+- `.ai-policy/jev/ask.py`: asks Jev one named question from `.ai-policy/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable; it ships to targets with the rest of `.ai-policy/`.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
 
 ## Testing Overview
@@ -141,7 +141,6 @@ Version: 1.44.0
 ## Maintenance Checklist
 - Update this file when the project structure, key files, or policy rules change.
 - Keep this file aligned with the current codebase, not planned architecture.
-- Keep this file concise and under its 6000-token budget.
 - When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.
 - When this file changes, bump its own `Version:` header per the `project-context.md` version rule in `design/decisions/maintenance.md`.
 - When adding a top-level tracked file, classify it in `install-manifest.json`; validation fails until every tracked file is classified.

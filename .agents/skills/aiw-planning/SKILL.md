@@ -24,7 +24,7 @@ This skill owns step 2. The overview exists so the full sequence is visible at a
 
 Before the baseline, set how much process the task gets. The tier is where the task starts, not a ceiling.
 
-Ask the outside judge first where the repository has one: `gh issue view <n> --json title,body | python3 scripts/jev/ask.py ceremony`. Take its `answer` when `act` is true, unless the issue itself names something on the Full list below, which makes the task Full whatever the answer. When `act` is false, the command exits non-zero, or the tool is absent, classify the task yourself against the same definitions. (Why: judging your own task at its start leans toward more process, and an outside answer with a confidence is the one that can say lighter.)
+Ask the outside judge first: `gh issue view <n> --json title,body | python3 .ai-policy/jev/ask.py ceremony`. Take its `answer` when `act` is true, unless the issue itself names something on the Full list below, which makes the task Full whatever the answer. When `act` is false, the command exits non-zero, or the tool is absent, classify the task yourself against the same definitions. (Why: judging your own task at its start leans toward more process, and an outside answer with a confidence is the one that can say lighter.)
 
 - **Light.** Contained and well understood: wording, a single value, or one call site; cause and fix both clear; nothing else depends on what changes.
 - **Standard.** A real change in behaviour inside one area: one component, script, or feature; the approach is clear; nothing outside that area changes with it.
