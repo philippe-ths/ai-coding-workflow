@@ -106,12 +106,13 @@ Every finding ends in one of the four states the scoping step below requires: ch
 ### When it does not clear
 
 Findings send the work back for repair and a further pass.
-The further pass is also given the previous pass's findings, and marks each one resolved, narrowed, or unchanged; the marking is the reviewer's, not yours.
-The work is converging only when no earlier finding comes back unchanged and no new finding sits in what the repair itself changed.
-Anything else is thrashing, whatever else improved: an unchanged finding is an approach repeated without new evidence, and a defect in the repair is a repair that reopened another surface, which is the non-convergence rule in ai-workflow.md.
+The further pass is also given the previous pass's report as the reviewer wrote it and the repair's own diff, and marks each earlier finding resolved, narrowed, or unchanged and each new finding caused by the repair or not.
+Where you disagree with a marking, the human sees both; you do not overrule it yourself.
+The work is converging only when no earlier finding comes back unchanged and no new finding was caused by the repair.
+Anything else is thrashing, whatever else improved: an unchanged finding is an approach repeated without new evidence, and a defect the repair caused, wherever it lands, is a repair that reopened another surface, which is the non-convergence rule in ai-workflow.md.
 Thrashing stops implementation: invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
-New findings in what the repair did not touch are the reviewer seeing further, not a failed repair: nine design defects, then nine wrong headings in untouched text, is converging.
-A third pass that still returns findings goes to the human with every pass's marked findings, and they decide whether the work goes round again.
+New findings the repair did not cause are the reviewer seeing further, not a failed repair: nine design defects, then nine wrong headings in untouched text, is converging.
+A third pass in one task that still returns findings goes to the human with every pass's marked findings, and they decide whether the work goes round again.
 (Why: a count that holds says nothing on its own, and progress judged by the implementer is the account the pass exists not to rely on.)
 
 ### When it runs

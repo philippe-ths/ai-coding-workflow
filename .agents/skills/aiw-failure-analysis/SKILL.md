@@ -34,7 +34,7 @@ A second attempt framed as a fresh fix is the most common way the audit gets ski
 
 ## Non-Convergence Before Any Done Claim
 
-The workflow's non-convergence rule sends you here with nothing declared done. Successive attempts repairing one surface while reopening another, or repeating an approach without new evidence, is the same trust collapse arriving earlier: the understanding behind the attempts is wrong, and the next attempt inherits it. A refuting pass counts when it is thrashing, which the test in aiw-verification's "When it does not clear" decides. The Hard Stop and the audit apply as written, with the attempts so far standing in for the "done" claim.
+The workflow's non-convergence rule sends you here with nothing declared done. Successive attempts repairing one surface while reopening another, or repeating an approach without new evidence, is the same trust collapse arriving earlier: the understanding behind the attempts is wrong, and the next attempt inherits it. A refuting pass counts when it is thrashing, which the test in aiw-verification's "When it does not clear" decides; repairing a finding that test marks narrowed is the same repair continuing, not a superseded fix. The Hard Stop and the audit apply as written, with the attempts so far standing in for the "done" claim.
 
 ## The Hard Stop
 
