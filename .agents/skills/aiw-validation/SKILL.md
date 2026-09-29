@@ -26,7 +26,7 @@ If the task produces nothing a human meets, say so in the plan. That sentence di
 At the done gate, before the work is presented:
 
 1. **Does it exist?** Go and find it. Committed code that would produce it is not it existing, and a passing test asserting it exists is not it existing.
-2. **Does it do what was asked?** Re-read the human's own words, not the issue. Where the two differ, the words are the request and the issue is a summary that lost something. This question is about the artifact: is the thing there, doing the job it was asked to do. Whether the implementation satisfies the requirement's intent belongs to aiw-verification's refuting pass, which is already provisioned and uses a reviewer who did not write the change.
+2. **Does it do what was asked?** Re-read the human's own words, not the issue. Where the two differ, the words are the request and the issue is a summary that lost something. This question is about the artifact: is the thing there, doing the job it was asked to do. Whether the implementation satisfies the requirement's intent belongs to aiw-verification's refuting pass, which uses a reviewer who did not write the change; at the Light ceremony tier, where that pass does not run, it is your own re-read, as aiw-verification says.
 3. **Is it the thing the project is for?** Re-read `north-star.md` against what is about to be handed over. Task Flow step 1 already checked the request against the goal, so this catches only what drifted between the request and the result, which is its own class: a request can be granted exactly and the result still pull away from the goal.
 
 ## Meet It Where the Human Meets It
