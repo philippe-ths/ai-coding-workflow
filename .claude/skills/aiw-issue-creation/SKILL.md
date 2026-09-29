@@ -5,7 +5,7 @@ description: "Structured process for creating follow-up or spin-off GitHub issue
 
 # Issue Creation
 
-Read this file when creating a follow-up or spin-off GitHub issue.
+Read this file when drafting any GitHub issue.
 
 ## Before Creating the Issue
 
