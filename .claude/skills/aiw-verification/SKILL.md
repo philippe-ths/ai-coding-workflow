@@ -106,13 +106,13 @@ Every finding ends in one of the four states the scoping step below requires: ch
 ### When it does not clear
 
 Findings send the work back for repair and a further pass.
-When a later pass still returns findings, compare it with the pass before and state the comparison from what each pass found, by severity.
-Converging is the reviewer working: a finding narrowed, the worst severity fell, or a defect the repair introduced was caught.
-Thrashing is the same finding returning untouched, or another attempt of the same kind with no new evidence for it.
-A count that holds says nothing: nine design defects then nine wrong headings is converging, and nine of the same finding is not.
-Thrashing is the non-convergence rule in ai-workflow.md: stop implementation, invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
-Converging may go on, and the pull request records each pass's findings by severity with your call that it is converging, so the human can check the call and not only receive it.
-(Why: a repair method that keeps introducing defects is worth the human's eye even while each round improves.)
+The further pass is also given the previous pass's findings, and marks each one resolved, narrowed, or unchanged; the marking is the reviewer's, not yours.
+The work is converging only when no earlier finding comes back unchanged and no new finding sits in what the repair itself changed.
+Anything else is thrashing, whatever else improved: an unchanged finding is an approach repeated without new evidence, and a defect in the repair is a repair that reopened another surface, which is the non-convergence rule in ai-workflow.md.
+Thrashing stops implementation: invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
+New findings in what the repair did not touch are the reviewer seeing further, not a failed repair: nine design defects, then nine wrong headings in untouched text, is converging.
+A third pass that still returns findings goes to the human with every pass's marked findings, and they decide whether the work goes round again.
+(Why: a count that holds says nothing on its own, and progress judged by the implementer is the account the pass exists not to rely on.)
 
 ### When it runs
 

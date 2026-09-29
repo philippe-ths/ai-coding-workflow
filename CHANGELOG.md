@@ -12,7 +12,7 @@ A refuting pass that still finds problems is judged converging or thrashing from
 
 ### Changed
 
-- `aiw-verification` When it does not clear: a later pass that still returns findings is compared with the pass before, by severity. Converging (a finding narrowed, the worst severity fell, or a defect the repair introduced was caught) may go on, with each pass's findings and the agent's call recorded in the pull request; thrashing (the same finding untouched, or another attempt of the same kind without new evidence) stops and goes to `aiw-failure-analysis`. A held count says nothing on its own: in #260, four passes returned 11, 9, 9 and 9 findings of different kinds ([#255]).
+- `aiw-verification` When it does not clear: a further refuting pass is given the previous pass's findings and marks each resolved, narrowed, or unchanged, so progress is the reviewer's judgement, not the implementer's. The work is converging only when no earlier finding comes back unchanged and no new finding sits in what the repair changed; anything else is thrashing, the non-convergence rule, and stops for `aiw-failure-analysis`. New findings in untouched text are the reviewer seeing further: in #260, four passes returned 11, 9, 9 and 9 findings of different kinds. A third pass that still returns findings goes to the human, who decides whether it continues ([#255]).
 - `aiw-failure-analysis` recognises non-convergence before any done claim as an entry trigger, in its description and a short section, pointing to the test in `aiw-verification` rather than restating it. `ai-workflow.md` already routed non-convergence there; the skill did not say why an agent had arrived ([#251]).
 
 ## 5.16.0 - 2026-09-29
