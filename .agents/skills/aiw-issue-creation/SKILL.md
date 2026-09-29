@@ -43,7 +43,7 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 
 ## Restrictions You Introduce
 
-A limit on scope or reach that you add while drafting, what the work will not do or where it will not reach, and that the human did not state, is not written as a requirement. Put it under an `## Agent-introduced limits` heading, settle it before work starts as Asking for Guidance in `ai-workflow.md` says, and record there who settled it and on what. Keeping the issue at the site the human named, above, is their scope rather than a limit you introduce. (Why: the issue is filed under the human's name, so every later step reads an unmarked restriction as theirs.)
+A limit on scope or reach that you add while drafting, what the work will not do or where it will not reach, and that the human did not state, is not written as a requirement. If `north-star.md` rules it out, drop it. Otherwise put it under an `## Agent-introduced limits` heading and to the human before work on the issue starts, and record their answer there. Keeping the issue at the site the human named, above, is their scope rather than a limit you introduce. (Why: the issue is filed under the human's name, so every later step reads an unmarked restriction as theirs.)
 
 ## Keeping Issues Concise
 
