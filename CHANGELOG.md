@@ -6,6 +6,15 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.17.0 - 2026-09-29
+
+A refuting pass that still finds problems is judged converging or thrashing from what each pass found, and non-convergence has a place to land in failure analysis.
+
+### Changed
+
+- `aiw-verification` When it does not clear: a later pass that still returns findings is compared with the pass before, by severity. Converging (a finding narrowed, the worst severity fell, or a defect the repair introduced was caught) may go on, with each pass's findings and the agent's call recorded in the pull request; thrashing (the same finding untouched, or another attempt of the same kind without new evidence) stops and goes to `aiw-failure-analysis`. A held count says nothing on its own: in #260, four passes returned 11, 9, 9 and 9 findings of different kinds ([#255]).
+- `aiw-failure-analysis` recognises non-convergence before any done claim as an entry trigger, in its description and a short section, pointing to the test in `aiw-verification` rather than restating it. `ai-workflow.md` already routed non-convergence there; the skill did not say why an agent had arrived ([#251]).
+
 ## 5.16.0 - 2026-09-29
 
 Five places where the rules gave an agent two answers to one situation now give one.
@@ -1081,3 +1090,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313
 [#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
 [#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
+[#255]: https://github.com/philippe-ths/ai-coding-workflow/issues/255
+[#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251

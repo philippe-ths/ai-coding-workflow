@@ -105,10 +105,14 @@ Every finding ends in one of the four states the scoping step below requires: ch
 
 ### When it does not clear
 
-Work goes back once.
-A second pass that does not clear the same finding is an approach repeated without new evidence, which is the non-convergence rule in ai-workflow.md.
-Stop implementation, invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
-Do not try a third variation.
+Findings send the work back for repair and a further pass.
+When a later pass still returns findings, compare it with the pass before and state the comparison from what each pass found, by severity.
+Converging is the reviewer working: a finding narrowed, the worst severity fell, or a defect the repair introduced was caught.
+Thrashing is the same finding returning untouched, or another attempt of the same kind with no new evidence for it.
+A count that holds says nothing: nine design defects then nine wrong headings is converging, and nine of the same finding is not.
+Thrashing is the non-convergence rule in ai-workflow.md: stop implementation, invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
+Converging may go on, and the pull request records each pass's findings by severity with your call that it is converging, so the human can check the call and not only receive it.
+(Why: a repair method that keeps introducing defects is worth the human's eye even while each round improves.)
 
 ### When it runs
 
