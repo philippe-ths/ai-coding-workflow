@@ -24,9 +24,9 @@ Four places where the rules gave an agent two answers to one situation now give 
 
 ### Changed
 
-- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate is put to the human as a waiver and stays unresolved until they give it, instead of being treated as a known risk on the agent's own say ([#234]).
-- `aiw-issue-creation`'s description triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
-- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when smaller than the sentence describing it and tracked otherwise, never refreshed inline, and `ai-workflow.md`'s task-start line says the same ([#234]).
+- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate gets a resolution like any other named surface, and only the human can waive it, instead of being treated as a known risk on the agent's own say ([#234]).
+- `aiw-issue-creation`'s description, like its body since 5.15.0, triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
+- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when the fix is smaller than the sentence describing it and tracked otherwise, never refreshed inline; `aiw-github`'s handoff check says update, not refresh, and `ai-workflow.md`'s task-start line says the same ([#234]).
 - `ai-workflow.md` Build and Teach no longer sets a length for every message; it says teaching changes the texture of a message, not its volume. The length of a decision put to the human is set in one place, Asking for Guidance ([#258]).
 
 ## 5.15.0 - 2026-09-29
@@ -36,7 +36,7 @@ A decision the human's written direction already settles is decided and named ra
 ### Changed
 
 - `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan, or in its next message when the decision arises later, so the human can overturn it. What the north-star does not settle stays the human's, and Ask First items and decisions a skill reserves for the human are never settled this way. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
-- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is dropped if the north-star rules it out, and otherwise goes under an `## Agent-introduced limits` heading and to the human before work on the issue starts, with their answer recorded there; it is never written as a requirement. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
+- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is dropped if the north-star rules it out, and otherwise goes under an `## Agent-introduced limits` heading and to the human before work on the issue starts, with their answer recorded there; it is never written as a requirement, and the skill body says it is read when drafting any issue. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
 - `aiw-planning` holds a limit under that heading only if the human's recorded answer accepts it, and puts an unanswered one to them before planning further ([#313]).
 
 ## 5.14.0 - 2026-09-29
