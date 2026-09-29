@@ -200,6 +200,81 @@ printf '(delete) 0000000000000000000000000000000000000000 refs/heads/main abc\n'
   | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
 assert_exit "deleting a protected branch still reaches check-push-refs" 4 "$rc"
 
+# ── Validation-state gate: the delete-only exemption (#306) ──
+#
+# Everything above is the protected-branch layer. This section covers the
+# separate validation-state gate (REQUIRE_VALIDATION_BEFORE_PUSH), which the
+# hook only reaches once the protected-branch layer has let a push through.
+# check-push-refs.sh and check-protected-branch.sh are reset to permissive so
+# these cases isolate the validation gate: only check-validation.sh can
+# produce a block from here on, which is what lets a bare exit code tell the
+# two branches apart.
+#
+# "Deleting a protected branch is still refused" needs no new case here: it is
+# refused by check-push-refs.sh before REQUIRE_VALIDATION_BEFORE_PUSH is even
+# read, exactly as test 14 above already shows, whichever way that flag is
+# set.
+
+cat > .ai-policy/scripts/check-push-refs.sh <<'STUB'
+#!/usr/bin/env bash
+cat >/dev/null
+exit 0
+STUB
+chmod +x .ai-policy/scripts/check-push-refs.sh
+
+cat > .ai-policy/scripts/check-protected-branch.sh <<'STUB'
+#!/usr/bin/env bash
+exit 0
+STUB
+chmod +x .ai-policy/scripts/check-protected-branch.sh
+
+# check-validation.sh now simulates a stale validation state by blocking
+# unconditionally. Any case below that still passes proves the gate was
+# skipped, not satisfied.
+cat > .ai-policy/scripts/check-validation.sh <<'STUB'
+#!/usr/bin/env bash
+exit 2
+STUB
+chmod +x .ai-policy/scripts/check-validation.sh
+
+cat > .ai-policy/policy.env <<'ENV'
+PROTECTED_BRANCHES="main master"
+VALIDATION_STATE_FILE=".ai-policy/state/validation.status"
+REQUIRE_VALIDATION_BEFORE_PUSH=true
+VALIDATION_COMMAND="./.ai-policy/scripts/run-validation.sh"
+ENV
+
+# 15. Delete-only push of a non-protected branch: writes no branch's content,
+# so a stale validation state does not refuse it.
+rc=0
+printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "delete-only push passes despite a stale validation state" 0 "$rc"
+
+# 16. Several branch deletions at once — still delete-only, still exempt.
+rc=0
+{
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n'
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/y def\n'
+} | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "multiple branch deletions pass despite a stale validation state" 0 "$rc"
+
+# 17. A deletion alongside a branch update writes content, so this is not
+# delete-only and the stale validation state still blocks the whole push.
+rc=0
+{
+  printf '(delete) 0000000000000000000000000000000000000000 refs/heads/feature/x abc\n'
+  printf 'refs/heads/feature/y abc refs/heads/feature/y def\n'
+} | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "deletion plus branch update is still blocked by validation state" 2 "$rc"
+
+# 18. An ordinary branch push with no deletion at all is unaffected by the
+# exemption: the validation gate still applies.
+rc=0
+printf 'refs/heads/feature abc refs/heads/feature def\n' \
+  | "$HOOK" origin git@example:foo.git >/dev/null 2>&1 || rc=$?
+assert_exit "an ordinary branch push is still blocked by validation state" 2 "$rc"
+
 # ── Summary ──
 
 echo ""

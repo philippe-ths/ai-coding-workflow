@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.13.0
+Version: 5.13.1
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
