@@ -291,10 +291,16 @@ What this cannot check:
     core-skills list in aiw-failure-analysis against the Task Flow steps it
     draws from): only the skill set, the done gate (both directions, among
     skills joined by a list connector) and step positions claimed against the
-    Task Flow by name are compared.
+    Task Flow by name are compared. A done-gate list wrapped across lines, a
+    list naming its own skill and one member, a step claim in other words
+    ("sits at step N"), and a skill on two steps (only the first is compared)
+    are not caught; a skill naming aiw-prompt-smith at the done gate is flagged,
+    since the rules do not say whether it is a gate member.
   - Whether a product file states something true only of this repository in
     words rather than by naming a factory-only path, or names one of the
     ordinary names a target may own (README.md, INSTALL.md, a bare scripts/).
+    A generic path that happens to share a factory-only prefix (docs/adr/,
+    observation/...) is flagged although a target may own one.
   - Whether a skill's description matches what its body actually covers.
   - Whether a rule is good, needed, or reachable by the agent that must follow it.
   A pass means the prose is structurally coherent, never that it is correct.
