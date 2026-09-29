@@ -1,0 +1,17 @@
+{
+  "description": "How much process a task warrants, judged from what is known before work starts. Levels map to the ceremony tiers.",
+  "levels": ["light", "standard", "full"],
+  "act_above": 0.8,
+  "question": {
+    "type": "score",
+    "instructions": {
+      "task": "The state is a software task as it is known before any work starts: usually a GitHub issue title and body.",
+      "question": "How far does the change this task asks for reach? Judge what the change will touch and what depends on it, not how long the description is or how carefully it is written."
+    },
+    "criteria": [
+      "Contained and well understood: the change is wording, a single value, or one call site, the cause and the fix are both already clear, and nothing else in the system depends on what changes.",
+      "A real change in behaviour, but inside one area: it adds or alters what one component, script, or feature does, the approach is clear, and nothing outside that area has to change with it.",
+      "Reaches across boundaries or into something others rely on: it changes hooks, shared contracts or interfaces, rules or instructions that agents follow, schema or stored data, several areas at once, or the cause of the problem is not yet known."
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.42.0
+Version: 1.43.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -47,7 +47,7 @@ Version: 1.42.0
 - Provides a local session-observation tool (`observation/`) that parses Claude Code transcripts into a JSONL Session Store and a self-contained static HTML dashboard.
 - The observation tool is descriptive only: it surfaces how metrics move across workflow versions and over time, and never computes a statistical comparison or pass/fail verdict.
 - Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
-- Does not include a unit-test framework; validation covers shell-script syntax, Python `py_compile`, the observation parser regression test, enforcement integration tests, and JSONL fixture validity.
+- Does not include a unit-test framework; validation covers shell-script syntax, Python `py_compile`, the observation parser regression test, the Jev tool's offline test, enforcement integration tests, and JSONL fixture validity.
 
 ## Important Constraints
 - Agent-facing files must stay short enough to preserve context budget.
@@ -69,13 +69,14 @@ Version: 1.42.0
 - Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow.
 - Observation data flow: a SessionStart hook records the Manifest, the `/rate` skill records Ratings, then `observation/collect.py` reads all transcripts under `~/.claude/projects/`, joins the Manifest and Ratings, writes the Session Store, and regenerates a static HTML dashboard.
 - Observation runs on demand with a full rebuild each time; nothing runs in the background except the event-driven Manifest hook.
-- No external service dependencies exist at repository runtime; GitHub is used only for issue and PR tracking.
+- The only external service at repository runtime is the Jev API; GitHub is used only for issue and PR tracking.
 
 ## Key Dependencies
 - `bash`: all policy scripts, git hooks, and observation capture scripts are written in bash and validated with `bash -n`.
 - `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
 - `jq`: hook scripts and one enforcement test parse JSON with `jq`.
-- `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, and `scripts/repo-validation.sh`; the workflow itself does not need it.
+- `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, `scripts/jev/`, and `scripts/repo-validation.sh`; the workflow itself does not need it.
+- TypeSafe Jev (`api.typesafe.ai`): answers the questions in `scripts/jev/`; optional, since the tool reports itself unavailable when no key is set.
 
 ## Project Structure
 - `north-star.md`: this repository's goal, that the human stays at the altitude of taste and direction while the AI manages and improves the work beneath them; `ai-workflow.md` step 1 checks an arriving request against it and stops before planning when the request pulls against it.
@@ -84,10 +85,10 @@ Version: 1.42.0
 - `INSTALL.md`: agent-actionable entry doc for installing or updating the workflow in a target repository.
 - `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook; `### Removed` bullets lead with the removed path so the updater can extract them.
 - `CONTEXT.md`: glossary of the session-observation domain language.
-- `docs/adr/`: architecture decision records; `0001` and `0002` record the move to descriptive observation and global capture.
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
+- `docs/adr/`: architecture decision records; `0001` and `0002` record the move to descriptive observation and global capture.
 - `field-notes/workflow-reviews/`: archived periodic review outputs, each named by date.
-- `field-notes/investigations/`: findings from issues labelled investigation, each named by date; the 2026-08-21 record concludes that neither the session-observation tool nor the pull request corpus can measure whether independent verification reduces rework, and why. The two Python files beside it rebuild that record's corpus and recompute its figures; they are archival, pinned to that investigation, and not covered by validation.
+- `field-notes/investigations/`: findings from issues labelled investigation, each named by date, beside the Python scripts that rebuild each record's figures; the scripts are archival and not covered by validation.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
@@ -119,16 +120,16 @@ Version: 1.42.0
 - `observation/install-observation.sh`: installs capture and the `/rate` skill into global `~/.claude/`, honoring `CLAUDE_HOME` for testing.
 - `observation/uninstall-observation.sh`: the inverse; removes the hook, skill, and helper scripts and unwires the hook from `settings.json`, keeping recorded data unless `--purge-data` is passed.
 - `scripts/test-observation-install.sh`: sandbox test of the install/uninstall pair against a throwaway `CLAUDE_HOME`.
-- `observation/README.md`: setup and usage for the observation tool.
 - `Makefile`: `observe` rebuilds the store and opens the dashboard; `observe-test` runs the parser test; `classify` prints the product/factory boundary.
 - `scripts/install.sh`: copies the product set for a tool into a target repo, vendors it in the target's `.gitignore`, and installs hooks.
 - `scripts/update.sh`: updates an installed copy by re-copying the current product, auto-detecting tool and profile, and reconciling removals from the source `CHANGELOG.md`.
-- `scripts/classify.sh`: prints the product/factory classification read from `install-manifest.json`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
-- `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
+- `scripts/jev/ask.py`: asks Jev one named question from `scripts/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable.
+- `scripts/jev/test_ask.py`: offline test of the Jev tool, run by repo-specific validation.
+- `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
 
 ## Testing Overview
 - Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed, then `report-suite-size.sh`.

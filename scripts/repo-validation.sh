@@ -3,7 +3,7 @@
 # Invoked by ./.ai-policy/scripts/project-validation.sh when this file exists and is executable.
 # Target repos should supply their own scripts/repo-validation.sh (tests, linters, etc.).
 #
-# This repo's only runtime code is the session-observation tooling under ./observation
+# This repo's runtime code is the session-observation tooling under ./observation and the Jev question tool under ./scripts/jev
 # (see docs/adr/0001 and docs/adr/0002). Each check below is guarded so the validator
 # stays green whether or not a given surface is present.
 set -eu
@@ -70,6 +70,11 @@ fi
 # --- parser regression test: guards the one place the transcript format lives ---
 if command -v python3 >/dev/null 2>&1 && [ -f ./observation/test_parse.py ]; then
   python3 ./observation/test_parse.py
+fi
+
+# --- jev question tool: offline test of request, answer and unavailable handling ---
+if command -v python3 >/dev/null 2>&1 && [ -f ./scripts/jev/test_ask.py ]; then
+  python3 ./scripts/jev/test_ask.py
 fi
 
 # --- the checked-in transcript fixture must be valid JSONL ---

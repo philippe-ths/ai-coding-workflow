@@ -1,0 +1,2396 @@
+[
+ {
+  "pr": 11,
+  "issue": 10,
+  "issue_title": "Add rebase and baseline validation steps to workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.1,
+    "full": 0.89
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 13,
+  "issue": 12,
+  "issue_title": "Track deterministic AI policy hook integration",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 19,
+  "issue": 18,
+  "issue_title": "Simplify CLAUDE.md and refine rationale guidance in design decisions",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.22,
+   "probabilities": {
+    "light": 0.21,
+    "standard": 0.1,
+    "full": 0.69
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 24,
+  "issue": 22,
+  "issue_title": "Selective Inline Rationale",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.78,
+   "probabilities": {
+    "light": 0.05,
+    "standard": 0.05,
+    "full": 0.9
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "light",
+   "full"
+  ]
+ },
+ {
+  "pr": 27,
+  "issue": 23,
+  "issue_title": "Targeted Emphasis on Never Do Rules",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.59,
+   "probabilities": {
+    "light": 0.09,
+    "standard": 0.09,
+    "full": 0.82
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "standard"
+  ]
+ },
+ {
+  "pr": 28,
+  "issue": 21,
+  "issue_title": "Add selective inline rationale and targeted emphasis to ai-workflow.md",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.83,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.09,
+    "full": 0.9
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 37,
+  "issue": 33,
+  "issue_title": "Add agent-level deterministic blocking for protected branch operations \u2014 Claude Code",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 38,
+  "issue": 35,
+  "issue_title": "Add agent-level deterministic blocking for protected branch operations \u2014 Codex",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.96,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 40,
+  "issue": 26,
+  "issue_title": "Split Failure Analysis Mode into a separate on-demand workflow file",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.13,
+    "full": 0.87
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 42,
+  "issue": 41,
+  "issue_title": "Pre-Tool Use hooks fail in VS Code Copilot agent \u2014 branch protection may be inactive",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.96,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.01,
+    "full": 0.98
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 44,
+  "issue": 43,
+  "issue_title": "Skill: code-aware planning",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 46,
+  "issue": 45,
+  "issue_title": "Investigate: skills compatibility with Claude Code",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 48,
+  "issue": 47,
+  "issue_title": "Add project-spec.md to document the ai-coding-workflow repository",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.11,
+   "probabilities": {
+    "light": 0.25,
+    "standard": 0.4,
+    "full": 0.35
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 50,
+  "issue": 49,
+  "issue_title": "docs: fix gaps in workflow design decisions document",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.9,
+   "probabilities": {
+    "light": 0.95,
+    "standard": 0.04,
+    "full": 0.01
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 54,
+  "issue": 53,
+  "issue_title": "Split ai-workflow-design-decisions.md into scoped files",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.45,
+   "probabilities": {
+    "light": 0.17,
+    "standard": 0.63,
+    "full": 0.2
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "light",
+   "standard"
+  ]
+ },
+ {
+  "pr": 56,
+  "issue": 55,
+  "issue_title": "Remove \"Source:\" label from all entries in line-by-line-rationale.md",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.98,
+    "standard": 0.02,
+    "full": 0.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 60,
+  "issue": 58,
+  "issue_title": "Improve existing skills (planning and failure-analysis)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.38,
+   "probabilities": {
+    "light": 0.03,
+    "standard": 0.36,
+    "full": 0.61
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 62,
+  "issue": 61,
+  "issue_title": "Repo audit: clean up branches, update README, expand .gitignore, and tag release",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.35,
+   "probabilities": {
+    "light": 0.15,
+    "standard": 0.13,
+    "full": 0.72
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "full"
+  ]
+ },
+ {
+  "pr": 65,
+  "issue": 63,
+  "issue_title": "Add rebase safety rules to GitHub Workflow section",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.83,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.09,
+    "full": 0.9
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 66,
+  "issue": 64,
+  "issue_title": "Extract Logging and Observability to an on-demand skill",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.75,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.16,
+    "full": 0.84
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 68,
+  "issue": 67,
+  "issue_title": "Add local backup rule before branch switches that affect gitignored files",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.08,
+    "standard": 0.09,
+    "full": 0.83
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 69,
+  "issue": 34,
+  "issue_title": "Add agent-level deterministic blocking for protected branch operations \u2014 VS Code Copilot",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 71,
+  "issue": 36,
+  "issue_title": "Add agent-level deterministic blocking for protected branch operations \u2014 Gemini",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 75,
+  "issue": 74,
+  "issue_title": "Add tracked tool permission defaults for all AI coding tools",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 77,
+  "issue": 76,
+  "issue_title": "AI workflow v2.0.0: writing quality, rule placement, and structural cleanup",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 80,
+  "issue": 79,
+  "issue_title": "Issue-creation skill: add duplicate-check step",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.64,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.76,
+    "full": 0.23
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 82,
+  "issue": 78,
+  "issue_title": "Housekeeping: audit-driven quick fixes",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 83,
+  "issue": 81,
+  "issue_title": "Add explicit pre-PR readiness check to the workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.11,
+   "probabilities": {
+    "light": 0.08,
+    "standard": 0.44,
+    "full": 0.48
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 86,
+  "issue": 85,
+  "issue_title": "Add test readiness checks, feedback loop rules, and testing skill to ai-workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.92,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.05,
+    "full": 0.95
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 88,
+  "issue": 87,
+  "issue_title": "Refactor the largest reference sections in ai-workflow.md into separate files",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.36,
+   "probabilities": {
+    "light": 0.06,
+    "standard": 0.57,
+    "full": 0.37
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 89,
+  "issue": 84,
+  "issue_title": "VS Code Copilot hook blocks PR creation targeting main",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.66,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.23,
+    "full": 0.77
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 91,
+  "issue": 90,
+  "issue_title": "Sync line-by-line rationale with current ai-workflow.md",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.42,
+   "probabilities": {
+    "light": 0.68,
+    "standard": 0.26,
+    "full": 0.06
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 94,
+  "issue": 92,
+  "issue_title": "Add cross-platform agent skills directories",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 95,
+  "issue": 93,
+  "issue_title": "Codex CLI config.toml fails to parse \u2014 schema mismatch",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.26,
+   "probabilities": {
+    "light": 0.7,
+    "standard": 0.1,
+    "full": 0.2
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 97,
+  "issue": 96,
+  "issue_title": "Expand version bump rules to cover all user-facing changes",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.92,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 103,
+  "issue": 102,
+  "issue_title": "Create a skill for project specification management",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.56,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.29,
+    "full": 0.71
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 105,
+  "issue": 100,
+  "issue_title": "Establish naming convention for core AI workflow skills to avoid collisions",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 107,
+  "issue": 99,
+  "issue_title": "Rename project-spec.md to project-context.md to clarify its role",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.06,
+    "standard": 0.02,
+    "full": 0.92
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 115,
+  "issue": 108,
+  "issue_title": "Sub-issue A \u2014 Versioning cleanup",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 116,
+  "issue": 109,
+  "issue_title": "Sub-issue B \u2014 Session tagging",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.38,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.41,
+    "full": 0.59
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 117,
+  "issue": 104,
+  "issue_title": "Protected-branch push hook blocks legitimate tag pushes from main",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.57,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.72,
+    "full": 0.28
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 118,
+  "issue": 110,
+  "issue_title": "Sub-issue C \u2014 Local telemetry storage and redaction pipeline",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.58,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.28,
+    "full": 0.72
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 123,
+  "issue": 113,
+  "issue_title": "Sub-issue E \u2014 Periodic review cadence",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.64,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.23,
+    "full": 0.77
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 126,
+  "issue": 124,
+  "issue_title": "Sub-issue F \u2014 Guided telemetry enablement skill",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.89,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.08,
+    "full": 0.92
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 128,
+  "issue": 127,
+  "issue_title": "Enforce automated non-functional test coverage before deferring to manual verification",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 132,
+  "issue": 131,
+  "issue_title": "Policy validation is not portable between factory and target repos",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 133,
+  "issue": 98,
+  "issue_title": "Failure analysis mode: Claude does not trigger reliably, needs stronger trigger mechanism",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.76,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.16,
+    "full": 0.84
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 135,
+  "issue": 134,
+  "issue_title": "Restructure Plan: ai-coding-workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.92,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.04,
+    "full": 0.95
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 137,
+  "issue": 136,
+  "issue_title": "Make telemetry setup foolproof: copy files, run skill, done",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 139,
+  "issue": 138,
+  "issue_title": "Expand design/research primary sources and align decisions with cited evidence",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.3,
+   "probabilities": {
+    "light": 0.03,
+    "standard": 0.41,
+    "full": 0.56
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 140,
+  "issue": 130,
+  "issue_title": "Remove em-dash usage across skill files to comply with writing-rules.md",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.0,
+   "probabilities": {
+    "light": 0.45,
+    "standard": 0.08,
+    "full": 0.47000000000000003
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 141,
+  "issue": 129,
+  "issue_title": "Add aiw-security-testing skill for dedicated security coverage discipline",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 144,
+  "issue": 143,
+  "issue_title": "Persistent telemetry capture for baseline-and-watch comparison",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.51,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.32,
+    "full": 0.68
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 153,
+  "issue": 152,
+  "issue_title": "Codex silently skips loading core workflow skills due to over-length descriptions",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.0,
+   "probabilities": {
+    "light": 0.49,
+    "standard": 0.27,
+    "full": 0.24
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 164,
+  "issue": 160,
+  "issue_title": "Make installing and updating the workflow agent-driven: point an agent at this repo and it works",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 167,
+  "issue": 166,
+  "issue_title": "Installer appends a duplicate .gitignore block when a manual install already vendored the paths",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.98,
+    "full": 0.01
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 168,
+  "issue": 165,
+  "issue_title": "Update path leaves orphaned legacy skills when upgrading a pre-aiw-prefix install",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.26,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.51,
+    "full": 0.49
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 169,
+  "issue": 114,
+  "issue_title": "Lite-monolithic ai-workflow.md content drift since v2.1.0",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.54,
+   "probabilities": {
+    "light": 0.07,
+    "standard": 0.17,
+    "full": 0.76
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 171,
+  "issue": 170,
+  "issue_title": "Add Resource Discipline section to the AI workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 174,
+  "issue": 173,
+  "issue_title": "Add aiw-prompt-smith skill",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.33,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.43,
+    "full": 0.56
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 176,
+  "issue": 175,
+  "issue_title": "aiw-issue-creation: collapse the prohibition enumeration to one class-level principle",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.42,
+   "probabilities": {
+    "light": 0.15,
+    "standard": 0.09,
+    "full": 0.76
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 179,
+  "issue": 178,
+  "issue_title": "Trim redundant negative-restatement sections across skills",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.63,
+   "probabilities": {
+    "light": 0.06,
+    "standard": 0.12,
+    "full": 0.8200000000000001
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 182,
+  "issue": 180,
+  "issue_title": "Trim skill intro lines that restate the frontmatter description",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.0,
+   "probabilities": {
+    "light": 0.18,
+    "standard": 0.4,
+    "full": 0.42
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "light",
+   "standard"
+  ]
+ },
+ {
+  "pr": 184,
+  "issue": 183,
+  "issue_title": "Workflow leaves sub-agents and built-in tools on the table",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 186,
+  "issue": 185,
+  "issue_title": "Web-search sourcing guidance omits the untrusted-content stance",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.93,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 188,
+  "issue": 187,
+  "issue_title": "\"Asking for Guidance\" only fires when the human names it",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 190,
+  "issue": 189,
+  "issue_title": "prompt-smith should warn against version-transition meta-commentary in authored artifacts",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.38,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.33,
+    "full": 0.63
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 192,
+  "issue": 191,
+  "issue_title": "Add SessionStart drift-reminder hook for project-context.md",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 194,
+  "issue": 193,
+  "issue_title": "Policy layer does not gate PR merges; enforcement tests certify the gap",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 196,
+  "issue": 195,
+  "issue_title": "Protected-branch guards check the current branch, not the ref being pushed",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 198,
+  "issue": 197,
+  "issue_title": "Agent can approve a pull request; approval should be denied, not prompted",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.65,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.23,
+    "full": 0.77
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 199,
+  "issue": 177,
+  "issue_title": "Protected-branch pre-push check over-triggers on branch-delete pushes",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.35,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.56,
+    "full": 0.43
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 201,
+  "issue": 200,
+  "issue_title": "Protected-branch bash hook parses a push refspec twice",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.59,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.73,
+    "full": 0.23
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 203,
+  "issue": 202,
+  "issue_title": "Add user-invoked aiw-init session preflight skill",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 206,
+  "issue": 205,
+  "issue_title": "Validation gate accepts a pass computed against an earlier working tree",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.88,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.08,
+    "full": 0.92
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 207,
+  "issue": 204,
+  "issue_title": "Removed eval/telemetry stack left launchd agents registered and failing",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.93,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 218,
+  "issue": 212,
+  "issue_title": "Evidence records what was checked but not where it was checked",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.96,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 219,
+  "issue": 211,
+  "issue_title": "A fix is verified against its own symptom, not against what the fix could disturb",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.85,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.1,
+    "full": 0.9
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 220,
+  "issue": 214,
+  "issue_title": "An unavailable verification method downgrades itself instead of asking",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 221,
+  "issue": 213,
+  "issue_title": "Superseding the agent's own recent fix does not trigger failure analysis",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.77,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.85,
+    "full": 0.15
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 222,
+  "issue": 208,
+  "issue_title": "A declared unverified surface merges with no record of what happened to it",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 223,
+  "issue": 209,
+  "issue_title": "The same verification gap is re-declared for months instead of escalated once",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 225,
+  "issue": 224,
+  "issue_title": "A declared unverified surface is enforced by the agent's diligence, nothing else",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.87,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.09,
+    "full": 0.91
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 226,
+  "issue": 217,
+  "issue_title": "Record the ai-running-coach PR analysis in observed-ai-failings",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.12,
+   "probabilities": {
+    "light": 0.19,
+    "standard": 0.42,
+    "full": 0.39
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 229,
+  "issue": 216,
+  "issue_title": "Installing a second tool strips the first tool's vendored .gitignore entries",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.74,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.83,
+    "full": 0.16
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 230,
+  "issue": 227,
+  "issue_title": "Agent-facing prose merges with no check but its author's own reading",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 231,
+  "issue": 215,
+  "issue_title": "Does independent verification reduce rework, and on which surfaces?",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "light",
+   "standard"
+  ]
+ },
+ {
+  "pr": 232,
+  "issue": 210,
+  "issue_title": "Verification evidence arrives after the PR is opened, not before the gate",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 236,
+  "issue": 235,
+  "issue_title": "The bare-assertion guard misses the form every pull request here uses",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.49,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.66,
+    "full": 0.33
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 238,
+  "issue": 237,
+  "issue_title": "project-context.md is edited at ship time, and this skill never fires on that path",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.96,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 240,
+  "issue": 239,
+  "issue_title": "project-context.md has no signal at the moment it goes stale",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 243,
+  "issue": 241,
+  "issue_title": "Improve convergence, feedback-bounded planning, and architecture checks",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 245,
+  "issue": 244,
+  "issue_title": "Add an intent oracle: an authored north-star the workflow consults before interrupting the human",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 247,
+  "issue": 246,
+  "issue_title": "Health section records an argument that measurement contradicts",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.97,
+    "standard": 0.03,
+    "full": 0.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 252,
+  "issue": 250,
+  "issue_title": "Verification never asks anyone to find where the work fails",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.93,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 256,
+  "issue": 253,
+  "issue_title": "The agent's silence is a brake where it should be an accelerator",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 259,
+  "issue": 257,
+  "issue_title": "Build and teach, not build and report",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.63,
+   "probabilities": {
+    "light": 0.03,
+    "standard": 0.2,
+    "full": 0.77
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 261,
+  "issue": 260,
+  "issue_title": "Give the agent an execution-shape decision: solo, scouts, or orchestrator",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 266,
+  "issue": 265,
+  "issue_title": "Nothing asks whether an issue or a plan is aimed at the right layer",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.95,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 273,
+  "issue": 271,
+  "issue_title": "Communication rules answer to the work rather than to the north-star",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.95,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 274,
+  "issue": 272,
+  "issue_title": "Reduce the repository: unused profiles, duplicated skill trees, unbounded agent-facing files",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 278,
+  "issue": 272,
+  "issue_title": "Reduce the repository: unused profiles, duplicated skill trees, unbounded agent-facing files",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 280,
+  "issue": 264,
+  "issue_title": "README's skill list is three names behind the tree",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.57,
+   "probabilities": {
+    "light": 0.81,
+    "standard": 0.1,
+    "full": 0.09
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 284,
+  "issue": 282,
+  "issue_title": "Nothing measures what the required checks cost to run, so a suite can grow past the point anyone runs it",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.9,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 287,
+  "issue": 285,
+  "issue_title": "Keeping the project clean and organised is nobody's job in the workflow",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 288,
+  "issue": 286,
+  "issue_title": "Housekeeping cannot see clutter that no single task caused",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 291,
+  "issue": 290,
+  "issue_title": "The validation gate fingerprints the working tree, so a push can ship a commit the gate never validated",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.44,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.36,
+    "full": 0.63
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 292,
+  "issue": 289,
+  "issue_title": "Nothing says the project's state is the agent's to keep",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 294,
+  "issue": 293,
+  "issue_title": "Agent commits, pushes and opens PRs without asking; merge stays human",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.95,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 297,
+  "issue": 296,
+  "issue_title": "Plan and handover name the end impact for the user",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.56,
+   "probabilities": {
+    "light": 0.1,
+    "standard": 0.1,
+    "full": 0.8
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 301,
+  "issue": 298,
+  "issue_title": "Record how Uplift's architecture placed its judgement in the wrong context layers",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.16,
+   "probabilities": {
+    "light": 0.67,
+    "standard": 0.09,
+    "full": 0.24
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 302,
+  "issue": 299,
+  "issue_title": "A recurring judgement-heavy step gets a named owner, context and measurement in the plan",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 303,
+  "issue": 295,
+  "issue_title": "Make aiw-prompt-smith a done-gate step for edits to the agent-facing prose",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 304,
+  "issue": 300,
+  "issue_title": "An open structural issue is weighed at task start before more instance fixes ship",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.13,
+    "full": 0.87
+   },
+   "question_version": "415ee66bb6a7",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ }
+]
