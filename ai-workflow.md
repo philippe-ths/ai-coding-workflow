@@ -30,7 +30,7 @@ Conditional skills load alongside the above when their triggers apply: aiw-perfo
 
 `north-star.md`, if it exists, is the shortest statement of what the project is trying to achieve. Consult it when deciding how and why. A request that pulls the project away from that goal stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
 
-`project-context.md`, if it exists, is read at task start. If stale, flag it. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
+`project-context.md`, if it exists, is read at task start. If stale, treat it as a finding outside the task. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
 
 aiw-housekeeping also runs invoked, over the whole repository instead of one task's footprint, whether or not a task is in flight. It returns a ranked list and removes nothing on its own judgement: the tiers say whether a removal is safe, the human says whether it should happen. A session-start hook reports when the repository is hiding paths through a local exclude rule, which is the signal to run it.
 
