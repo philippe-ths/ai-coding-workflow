@@ -12,9 +12,9 @@ Four places where the rules gave an agent two answers to one situation now give 
 
 ### Changed
 
-- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate is put to the human as a waiver and stays unresolved until they give it, instead of being treated as a known risk on the agent's own say ([#234]).
-- `aiw-issue-creation`'s description triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
-- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when smaller than the sentence describing it and tracked otherwise, never refreshed inline, and `ai-workflow.md`'s task-start line says the same ([#234]).
+- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate gets a resolution like any other named surface, and only the human can waive it, instead of being treated as a known risk on the agent's own say ([#234]).
+- `aiw-issue-creation`'s description, like its body since 5.15.0, triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
+- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when the fix is smaller than the sentence describing it and tracked otherwise, never refreshed inline; `aiw-github`'s handoff check says update, not refresh, and `ai-workflow.md`'s task-start line says the same ([#234]).
 - `ai-workflow.md` Build and Teach no longer sets a length for every message; it says teaching changes the texture of a message, not its volume. The length of a decision put to the human is set in one place, Asking for Guidance ([#258]).
 
 ## 5.15.0 - 2026-09-29

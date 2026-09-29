@@ -62,7 +62,7 @@ End-to-end execution is cheap for an agent. Humans optimise testing practice to 
 
 Drive that end-to-end run with a fresh sub-agent, one that did not write the change and carries none of its context, and have it report what it observed. You are the worst verifier of your own change: you exercise what you expected to build and read the output through the same assumptions that shaped the code, the self-referential loop aiw-ground-truth exists to break, reappearing at verification time. A clean-context agent reaches the surface a real user would. Weigh its report in the main loop as evidence, not a verdict.
 
-The cases above are not yours to exempt. If you judge end-to-end execution disproportionate to the change, name why in the justification step's part 3 and ask the human to waive it; the item stays unresolved until they do (see Every Named Surface Gets a Resolution). A method that simply cannot run is the next section.
+The cases above are not yours to exempt. If you judge end-to-end execution disproportionate to the change, name why in the justification step's part 3 and give it a resolution like any other named surface (see Every Named Surface Gets a Resolution); waiving it is the human's, never yours. A method that simply cannot run is the next section.
 
 ## The Refuting Pass
 
