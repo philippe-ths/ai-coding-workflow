@@ -50,3 +50,16 @@ This keeps the boundary sections lean and genuinely global.
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
 If a principle can live in a reference section instead, put it there.
 (See `design/research/prompt-engineering.md#lost-in-the-middle` for U-shaped positional attention, and `#mosaic-primacy-recency` for the caveat that primacy and recency effects are model-specific. The First Principles section is a high-salience location, but the effect depends on the model, so treat the section as a place for genuinely foundational rules rather than for any rule marked important.)
+
+## Coupling Between Skills
+
+**Naming a neighbour is intended; restating it is not.**
+A skill names the skill that owns adjacent territory, so an agent reading one knows where the next rule lives: aiw-planning names aiw-verification for evidence, aiw-verification names aiw-ground-truth for the oracle.
+That reference is the design working, and a change to one skill's territory is expected to touch the names that route to it.
+A skill that restates what another skill says is unintended coupling: the copy drifts, and a change to the owner then needs a matching edit that nothing prompts.
+Restated content is removed when found, keeping the rule in the skill that owns it and a name everywhere else.
+
+**Co-change across the core is not on its own evidence of a defect.**
+In this repository most tasks change the rules themselves, and a rule about when the human is asked, or what the done gate checks, legitimately touches every skill that routes to it.
+A co-change graph built from that history measures what the work was about as much as how the files are built, and the propagation-cost figure behind the question was sensitive to its thresholds and cannot be recomputed from kept scripts.
+So the decision rests on the distinction above rather than on the graph: the unintended kind is found by reading for restatement and contradiction, the work `scripts/check-prose-integrity.sh` does for what a script can judge.
