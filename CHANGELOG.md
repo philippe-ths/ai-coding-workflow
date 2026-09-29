@@ -6,12 +6,28 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
-## 5.12.1 - 2026-09-29
+## 5.13.1 - 2026-09-29
 
 ### Fixed
 
 - `.githooks/pre-push` no longer refuses a push whose refs are all deletions of non-protected branches for a stale or missing validation state. Post-merge cleanup runs merge, switch to main, pull, delete the branch, and the pull is what leaves the recorded pass looking stale; a delete-only push publishes no content for a validation result to be about, so the gate had nothing to be stale against. The protected-branch check already carried this exemption for the same shape ([#177]); the validation-state gate now reuses the same `DELETE_ONLY`/`HAS_ANY_REF` computed once at the top of the hook rather than a second definition. `check-push-content.sh` (added in [#290]) already skipped a deletion's ref on its own terms and needed no change. A push that writes any ref, or deletes a protected branch, is refused exactly as before ([#306]).
 - `.ai-policy/scripts/test-pre-push-hook.sh` gains four cases against the validation-state gate: a delete-only push passes despite a stale state, several deletions at once still pass, a deletion mixed with a branch update is still blocked, and an ordinary branch push is still blocked ([#306]).
+
+## 5.13.0 - 2026-09-29
+
+Each task starts at a ceremony tier, Light, Standard or Full, that sets how much process it gets, so a small change no longer carries the full process.
+
+### Added
+
+- `aiw-planning`: sets the ceremony tier before the baseline, asking `scripts/jev/ask.py ceremony` where the repository has it and classifying by the same definitions otherwise; the tier sets the plan, baseline, verification and pull request, and moves only up, with the plan put to the human when a task leaves Light ([#307], [#269]).
+- `aiw-planning` bounded-change check: aiming at a deeper, shared layer sets the task at Full.
+
+### Changed
+
+- `ai-workflow.md` Task Flow step 3: at the Light tier the plan is stated and the work proceeds without waiting for agreement.
+- `aiw-verification`: the refuting pass runs at the Standard and Full tiers; at Light the agent reads the request against the change for intent itself.
+- `aiw-github`: the pull request body states the tier, its source, and any move up.
+- `aiw-validation`: at the Light tier the intent check is the agent's own re-read, since the refuting pass does not run there.
 
 ## 5.12.0 - 2026-09-16
 
@@ -1027,4 +1043,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#299]: https://github.com/philippe-ths/ai-coding-workflow/issues/299
 [#300]: https://github.com/philippe-ths/ai-coding-workflow/issues/300
 [#289]: https://github.com/philippe-ths/ai-coding-workflow/issues/289
+[#307]: https://github.com/philippe-ths/ai-coding-workflow/issues/307
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306

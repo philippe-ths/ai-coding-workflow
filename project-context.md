@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.43.0
+Version: 1.44.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -20,6 +20,7 @@ Version: 1.43.0
 - **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
 - **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
 - **Step owner**: a step a built system runs through a model on every use, given one prompt file naming its role, sealed from the always-on layer, a narrow named interface, and a per-run log; the fifth shape in `aiw-orchestration`, the one that belongs to the built system rather than the task, named in the plan under step ownership by `aiw-planning`.
+- **Ceremony tier**: Light, Standard or Full, set by `aiw-planning` from a task's reach, asking `scripts/jev/ask.py` where present; it sets how much process the task gets and moves only up.
 - **Deliverable**: what the human will open, read, run, or look at when a task is done, named as a noun in the plan and checked by the `aiw-validation` skill at the done gate.
 - **Done gate**: the three checks run before work is presented for the human's done decision, `aiw-verification` for whether the change is correct, `aiw-validation` for whether the result is what was asked for, and `aiw-housekeeping` for whether anything the task caused should now be removed or moved.
 - **Footprint**: the files a branch changed, the untracked files the task produced, and what those changes left unreferenced, the set `aiw-housekeeping` may act on and outside which mess is a finding rather than work.
@@ -87,7 +88,6 @@ Version: 1.43.0
 - `CONTEXT.md`: glossary of the session-observation domain language.
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
 - `docs/adr/`: architecture decision records; `0001` and `0002` record the move to descriptive observation and global capture.
-- `field-notes/workflow-reviews/`: archived periodic review outputs, each named by date.
 - `field-notes/investigations/`: findings from issues labelled investigation, each named by date, beside the Python scripts that rebuild each record's figures; the scripts are archival and not covered by validation.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
@@ -128,7 +128,6 @@ Version: 1.43.0
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
 - `scripts/jev/ask.py`: asks Jev one named question from `scripts/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable.
-- `scripts/jev/test_ask.py`: offline test of the Jev tool, run by repo-specific validation.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
 
 ## Testing Overview

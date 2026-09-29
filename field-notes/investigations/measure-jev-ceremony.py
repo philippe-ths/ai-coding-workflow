@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rebuild the corpus and figures for the 2026-09-29 Jev ceremony measurement (#307).
 
-  measure-jev-ceremony.py fetch  WORKDIR   merged PRs that close an issue -> WORKDIR/cases.json
+  measure-jev-ceremony.py fetch  WORKDIR [REPO SAMPLE]   merged PRs that close an issue -> WORKDIR/cases.json
   measure-jev-ceremony.py blind  WORKDIR   hindsight view for labellers  -> WORKDIR/blind.md
   measure-jev-ceremony.py jev    WORKDIR   Jev's tier from the issue alone -> WORKDIR/jev.json
   measure-jev-ceremony.py report WORKDIR   compare with WORKDIR/labels_*.json
@@ -11,7 +11,7 @@ READ ONLY against GitHub. Jev sees only the issue title and body (what is known 
 start); labellers see the issue plus what the merged change touched (hindsight).
 Archival: pinned to this investigation and not covered by validation.
 """
-import json, os, subprocess, sys
+import json, os, random, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "scripts", "jev"))
@@ -22,16 +22,19 @@ def gh(*args):
     return json.loads(subprocess.run(["gh", *args], capture_output=True, text=True, check=True).stdout)
 
 
-def fetch(work):
-    prs = gh("pr", "list", "--state", "merged", "--limit", "500",
+def fetch(work, repo=None, sample=None):
+    where = ["--repo", repo] if repo else []
+    prs = gh("pr", "list", *where, "--state", "merged", "--limit", "1000",
              "--json", "number,title,closingIssuesReferences,files,additions,deletions")
+    prs = [p for p in prs if p["closingIssuesReferences"]]
+    if sample:
+        # A fixed seed, so the same sample is drawn on a rebuild.
+        prs = random.Random(307).sample(prs, int(sample))
     cases = []
     for pr in prs:
         refs = pr["closingIssuesReferences"]
-        if not refs:
-            continue
         # One case per PR, anchored on the first issue it closes.
-        issue = gh("issue", "view", str(refs[0]["number"]), "--json", "number,title,body")
+        issue = gh("issue", "view", str(refs[0]["number"]), *where, "--json", "number,title,body")
         cases.append({
             "pr": pr["number"], "pr_title": pr["title"],
             "issue": issue["number"], "issue_title": issue["title"], "issue_body": issue["body"],
@@ -43,7 +46,7 @@ def fetch(work):
     print(f"{len(cases)} cases")
 
 
-def blind(work):
+def blind(work, *_):
     cases = json.load(open(os.path.join(work, "cases.json")))
     out = []
     for c in cases:
@@ -54,7 +57,7 @@ def blind(work):
     print(f"{len(cases)} cases written")
 
 
-def jev(work):
+def jev(work, *_):
     import ask
     cases = json.load(open(os.path.join(work, "cases.json")))
     results = {}
@@ -66,7 +69,7 @@ def jev(work):
     print(f"{sum(1 for r in results.values() if 'answer' in r)} of {len(results)} answered")
 
 
-def report(work):
+def report(work, *_):
     if work.endswith(".json"):
         # The saved per-case record (2026-09-29-jev-ceremony-data.json) carries everything the report needs.
         saved = json.load(open(work))
@@ -126,4 +129,4 @@ if __name__ == "__main__":
     cmd, work = sys.argv[1], sys.argv[2]
     if not work.endswith(".json"):
         os.makedirs(work, exist_ok=True)
-    {"fetch": fetch, "blind": blind, "jev": jev, "report": report}[cmd](work)
+    {"fetch": fetch, "blind": blind, "jev": jev, "report": report}[cmd](work, *sys.argv[3:])

@@ -110,10 +110,11 @@ A second pass that does not clear the same finding is an approach repeated witho
 Stop implementation, invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
 Do not try a third variation.
 
-### When it cannot be skipped
+### When it runs
 
-It cannot be skipped for any change that alters what the system does.
-Instruction files that direct an agent are what such a system does, so prose is not exempt by being prose.
+It runs on every task at the Standard or Full ceremony tier (aiw-planning), and a Light task that moves up a tier picks it up there.
+At Light, the intent check aiw-validation leaves to this pass is yours: before the justification, re-read the request against the change for work that satisfies its words and not its intent.
+Instruction files that direct an agent are what the system does, so prose is not exempt by being prose.
 A change that alters no behaviour of any kind skips this the way part 3 can be empty: by an argument in terms of what the change is, never by bare assertion.
 If the sub-agent it needs is unavailable, that is the next section, not this one.
 

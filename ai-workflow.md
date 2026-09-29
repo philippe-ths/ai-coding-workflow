@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.12.1
+Version: 5.13.1
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -20,7 +20,7 @@ The skill set enforces disciplines invoked at specific points in a task.
 
 1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins.
+3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins; at the Light tier the plan is stated and the work proceeds.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for human review.
 6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.

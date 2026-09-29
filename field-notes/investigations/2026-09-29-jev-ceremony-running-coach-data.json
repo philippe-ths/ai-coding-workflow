@@ -1,0 +1,2522 @@
+[
+ {
+  "pr": 35,
+  "issue": 28,
+  "issue_title": "Define and add smoke coverage for core application readiness",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.39,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.4,
+    "full": 0.6
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 42,
+  "issue": 41,
+  "issue_title": "Collapse the activity analysis pipeline into one module with a single interface",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 44,
+  "issue": 43,
+  "issue_title": "Type the coach context pack",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 58,
+  "issue": 57,
+  "issue_title": "Phase 1 step 2: fly.toml + basic auth + CORS-from-settings",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.95,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.03,
+    "full": 0.97
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 85,
+  "issue": 74,
+  "issue_title": "Remove or replace \"MVP Mode\" label in nav header",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.59,
+   "probabilities": {
+    "light": 0.74,
+    "standard": 0.25,
+    "full": 0.01
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 90,
+  "issue": 76,
+  "issue_title": "fix: BasicAuthMiddleware fail-opens in production when credentials are unset",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.77,
+   "probabilities": {
+    "light": 0.02,
+    "standard": 0.85,
+    "full": 0.13
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 104,
+  "issue": 100,
+  "issue_title": "Authenticate incoming Strava webhook events (subscription_id / owner_id checks)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.02,
+    "standard": 0.94,
+    "full": 0.04
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 112,
+  "issue": 105,
+  "issue_title": "Realign or remove the Sentry diagnostic left dead by the logs-only decision",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.05,
+    "standard": 0.87,
+    "full": 0.08
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 132,
+  "issue": 131,
+  "issue_title": "Telegram bot token leaks into logs via httpx request logging",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.87,
+    "full": 0.09
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 151,
+  "issue": 141,
+  "issue_title": "M1 \u2014 Grounded reshape (coach report)",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 152,
+  "issue": 142,
+  "issue_title": "M2 \u2014 Trend substrate: compute RunnerBaseline (coach report)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 158,
+  "issue": 157,
+  "issue_title": "Improve mobile UI/UX of the dashboard (header controls overflow on small screens)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.46,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.36,
+    "full": 0.64
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 160,
+  "issue": 149,
+  "issue_title": "M7 \u2014 Adherence learning loop (coach report)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 162,
+  "issue": 147,
+  "issue_title": "M9 \u2014 Self-calibrating correction + non-diagnostic referral (coach report)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.85,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.1,
+    "full": 0.9
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 192,
+  "issue": 171,
+  "issue_title": "Coach over-indexes on low interval-detection confidence instead of coaching the available data",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.94,
+    "full": 0.05
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 193,
+  "issue": 169,
+  "issue_title": "Non-interval activities are penalised in overall confidence for having no intervals",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.73,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.82,
+    "full": 0.17
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 195,
+  "issue": 181,
+  "issue_title": "A2a \u2014 Processed-artifacts layer (consolidated stream view, stored digests, extracted signals)",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 199,
+  "issue": 198,
+  "issue_title": "Move coach model off deprecated claude-sonnet-4-20250514 to claude-sonnet-4-6",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.42,
+   "probabilities": {
+    "light": 0.14,
+    "standard": 0.62,
+    "full": 0.24
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 200,
+  "issue": 167,
+  "issue_title": "Bound the per-runner baseline recompute cost as history grows",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.52,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.68,
+    "full": 0.32
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 201,
+  "issue": 183,
+  "issue_title": "A2c \u2014 Split durable memory: narrative layer + Consolidation job",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 213,
+  "issue": 212,
+  "issue_title": "A4: two-stage salience-gated Exchange cadence + pipeline rework",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 224,
+  "issue": 216,
+  "issue_title": "A4: rollback to a single-shot prompt is not inert for in-flight exchanges with a pending fuller timer",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.41,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.61,
+    "full": 0.38
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 225,
+  "issue": 215,
+  "issue_title": "A4: opener-job crash after ingest can permanently kill the exchange (no recovery path)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 245,
+  "issue": 244,
+  "issue_title": "Strava context calls hang and surface 401s on expired tokens mid-flight",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.29,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.53,
+    "full": 0.47
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 257,
+  "issue": 223,
+  "issue_title": "Chat with Coach: \"Load failed\" error instead of coach response",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.25,
+    "full": 0.75
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 259,
+  "issue": 258,
+  "issue_title": "P1.1: Voice dials \u2014 runner declares a coach voice, the coach speaks in it",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.39,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.4,
+    "full": 0.6
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 262,
+  "issue": 261,
+  "issue_title": "Coach-report read path should fall back to the latest cached report when the active prompt has none (display-safe prompt flip)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.03,
+    "standard": 0.87,
+    "full": 0.1
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 263,
+  "issue": 260,
+  "issue_title": "On-demand coach-report generation 504s under the two-stage prompt (synchronous regen exceeds gateway timeout)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.54,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.3,
+    "full": 0.7
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 265,
+  "issue": 264,
+  "issue_title": "RQ 180s default job timeout kills slow coach generations (fuller turn / regenerate)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.89,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "full"
+  ]
+ },
+ {
+  "pr": 272,
+  "issue": 271,
+  "issue_title": "P1.3: Stance dials \u2014 runner selects a coaching school and two emphasis axes",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.85,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.1,
+    "full": 0.9
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 281,
+  "issue": 274,
+  "issue_title": "A3 message storage: a regenerated report stored a truncated message + tail_degraded while the raw LLM response was complete",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 289,
+  "issue": 285,
+  "issue_title": "P4 slice 1: User materials storage, upload, and distiller",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.89,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 317,
+  "issue": 293,
+  "issue_title": "Activity tables: sticky Laps header overlaps NavBar, and table headers are inconsistent",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.41,
+   "probabilities": {
+    "light": 0.07,
+    "standard": 0.6,
+    "full": 0.33
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 318,
+  "issue": 311,
+  "issue_title": "Pace Variability card shows a bare \"%\" for activities with no pace data",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.65,
+   "probabilities": {
+    "light": 0.77,
+    "standard": 0.23,
+    "full": 0.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 320,
+  "issue": 303,
+  "issue_title": "Receipt pain tap records no location, so the location-scoped pain trend can't use it",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 321,
+  "issue": 314,
+  "issue_title": "Trends page: recharts logs width(-1)/height(-1) warning on initial render",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.63,
+   "probabilities": {
+    "light": 0.21,
+    "standard": 0.75,
+    "full": 0.04
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 327,
+  "issue": 300,
+  "issue_title": "No bulk re-analysis of already-analyzed history after a derivation change",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.27,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.49,
+    "full": 0.51
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 335,
+  "issue": 330,
+  "issue_title": "refactor(coach): a post-activity cadence seam (consolidate the scattered cadence decision)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 341,
+  "issue": 337,
+  "issue_title": "I2: chat-as-continuation \u2014 unify chat into the relationship (shared memory)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.06,
+    "full": 0.94
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 349,
+  "issue": 332,
+  "issue_title": "refactor(analysis): name the analyze() pipeline's ordering invariants",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.32,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.54,
+    "full": 0.45
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 351,
+  "issue": 333,
+  "issue_title": "refactor(notifications): pull report-shape branching behind the notifier seam",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 378,
+  "issue": 363,
+  "issue_title": "perf: vectorize the per-sample median filter in smooth_cadence",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.25,
+    "standard": 0.75,
+    "full": 0.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 382,
+  "issue": 367,
+  "issue_title": "perf: project columns instead of full Activity ORM objects on the trends ALL range",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.81,
+   "probabilities": {
+    "light": 0.08,
+    "standard": 0.87,
+    "full": 0.05
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 387,
+  "issue": 359,
+  "issue_title": "perf: stop shipping unused response payload (raw_summary in list, model deferral, debug dump)",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 392,
+  "issue": 283,
+  "issue_title": "Surface surviving policy violations on a stored coach report in the frontend",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.43,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.62,
+    "full": 0.37
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 395,
+  "issue": 394,
+  "issue_title": "Typography: adopt the three-typeface system (Fraunces / Hanken Grotesk / IBM Plex Mono)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.57,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.28,
+    "full": 0.72
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 405,
+  "issue": 399,
+  "issue_title": "Coach reports activity time in UTC, not the runner's local time",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 409,
+  "issue": 408,
+  "issue_title": "Render the recorded route path on the single activity view (no map)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.86,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.91,
+    "full": 0.09
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 433,
+  "issue": 432,
+  "issue_title": "Trends: add a control for chart detail (bar granularity) \u2014 week / 2-week / month buckets",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.53,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.31,
+    "full": 0.69
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 448,
+  "issue": 439,
+  "issue_title": "Gate optional coach-prompt addenda on data presence (don't ship instructions for absent sections)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.13,
+    "full": 0.87
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 449,
+  "issue": 443,
+  "issue_title": "Include the consolidated stream_view in the default coach pack (remove the deep-dive gating)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.65,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.23,
+    "full": 0.77
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 454,
+  "issue": 453,
+  "issue_title": "Doc: refresh project-context.md for prod coach_message_v11 (v10/v11 + #451 consolidation)",
+  "jev": {
+   "answer": "light",
+   "confidence": 0.96,
+   "probabilities": {
+    "light": 0.98,
+    "standard": 0.01,
+    "full": 0.01
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 459,
+  "issue": 458,
+  "issue_title": "Coach pack reports Strava-sourced HR zones as uncalibrated",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.37,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.58,
+    "full": 0.38
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 474,
+  "issue": 121,
+  "issue_title": "Phase 2: Account deletion with full data cascade",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 478,
+  "issue": 120,
+  "issue_title": "Phase 2: Per-user coach-report notifications",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 481,
+  "issue": 480,
+  "issue_title": "Production config preflight: fail the boot when a fail-closed setting is unset",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.25,
+   "probabilities": {
+    "light": 0.02,
+    "standard": 0.47,
+    "full": 0.51
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 485,
+  "issue": 483,
+  "issue_title": "Coach-report regeneration can return a raw 500 on start ('Couldn't start regeneration')",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.48,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.34,
+    "full": 0.66
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 489,
+  "issue": 487,
+  "issue_title": "Coach report anchors to a warmup walk instead of the run when both land in one block under the receipt cadence",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.67,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.22,
+    "full": 0.78
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 496,
+  "issue": 492,
+  "issue_title": "Deepen the read-time coach signals behind one interface",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 497,
+  "issue": 493,
+  "issue_title": "Collapse the gated-pack-section idiom into a section registry",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 510,
+  "issue": 505,
+  "issue_title": "Repeated \"done\" tap schedules duplicate full-report generations under the receipt cadence",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.86,
+   "probabilities": {
+    "light": 0.02,
+    "standard": 0.91,
+    "full": 0.07
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 511,
+  "issue": 507,
+  "issue_title": "Readiness buckets training days by UTC date while volume buckets by the runner's local date",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.78,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.85,
+    "full": 0.11
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 516,
+  "issue": 512,
+  "issue_title": "Strava webhook does not bind the event's activity to its owner (cross-athlete authorization gap)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.77,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.84,
+    "full": 0.15
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 519,
+  "issue": 515,
+  "issue_title": "A failed block assignment leaves an activity permanently un-grouped with no retry",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.44,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.63,
+    "full": 0.37
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 523,
+  "issue": 522,
+  "issue_title": "Reversible kill-switches to turn off eleven coach inputs",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 531,
+  "issue": 472,
+  "issue_title": "Gate/record the auxiliary Haiku LLM paths (material distiller, narrative consolidation, receipt-voice) under the budget cap",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 553,
+  "issue": 550,
+  "issue_title": "No automated post-deploy verification: a crashed/regressed prod deploy is only caught by a human noticing",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.89,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "full"
+  ]
+ },
+ {
+  "pr": 568,
+  "issue": 562,
+  "issue_title": "Unify Laps and Splits into one view; keep a separate splits breakdown only when laps are device-meaningful",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.32,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.55,
+    "full": 0.45
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 569,
+  "issue": 565,
+  "issue_title": "Weekly Load Trend (4-week view): show the 4 trailing weeks plus the current week, and visualise how the optimal range is derived",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.94,
+    "full": 0.06
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 572,
+  "issue": 571,
+  "issue_title": "Coach memory M1 \u2014 Foundation: RunnerMemoryProfile schema, runner_memory store, ADR 0025",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 574,
+  "issue": 573,
+  "issue_title": "Coach memory M2 \u2014 The update pass (the rewrite-from-source writer)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 585,
+  "issue": 583,
+  "issue_title": "Coach memory M5 \u2014 Validation & cutover readiness",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.79,
+   "probabilities": {
+    "light": 0.02,
+    "standard": 0.1,
+    "full": 0.88
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 591,
+  "issue": 164,
+  "issue_title": "Add a semantic-judge layer to the coach-report eval gate",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.52,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.68,
+    "full": 0.32
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 611,
+  "issue": 594,
+  "issue_title": "[Critical] Single RQ worker serializes coach reports (~40min tail at 10 concurrent users)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.59,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.27,
+    "full": 0.73
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 623,
+  "issue": 605,
+  "issue_title": "Postgres connection pool is unmanaged (default 5+10 per process)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.63,
+   "probabilities": {
+    "light": 0.2,
+    "standard": 0.76,
+    "full": 0.04
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 639,
+  "issue": 636,
+  "issue_title": "hr_recovery_bpm understates interval recovery (peak\u2212mean, not peak\u2212trough) and drives a false 'recovery collapsing' coach narrative",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.06,
+    "full": 0.94
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 649,
+  "issue": 647,
+  "issue_title": "Coach report pack: include per-run distance and duration in the recent-session list",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.7,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.19,
+    "full": 0.81
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 659,
+  "issue": 657,
+  "issue_title": "Runner-memory writer promotes a discussed/questioned coach suggestion into a durable stated plan",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.82,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.12,
+    "full": 0.88
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 660,
+  "issue": 651,
+  "issue_title": "Coach prompt: one general principle for treating runner-stated plans as living threads",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.26,
+   "probabilities": {
+    "light": 0.06,
+    "standard": 0.38,
+    "full": 0.56
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 671,
+  "issue": 667,
+  "issue_title": "Gate chat prompt disciplines on COACH_PROMPT_ID features (like the voice block already is)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.56,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.7,
+    "full": 0.29
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 689,
+  "issue": 685,
+  "issue_title": "Chat with Coach fails with \"couldn't reach your coach\" when used before generating a report",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.47,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.35,
+    "full": 0.65
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 690,
+  "issue": 684,
+  "issue_title": "Activity page shows two conflicting average cadence values (Metrics panel is double the chart)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.67,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.21,
+    "full": 0.79
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 692,
+  "issue": 654,
+  "issue_title": "RPE/HR gap always resolves toward 'HR inflated, trust RPE' \u2014 one-directional interpretation",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.71,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.19,
+    "full": 0.81
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 711,
+  "issue": 658,
+  "issue_title": "Offline eval harness for the runner-memory writer (durable counterpart to the coach-report eval)",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.78,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.85,
+    "full": 0.15
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 715,
+  "issue": 700,
+  "issue_title": "One generation-request assembly behind the three coach generation entry points",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.8,
+   "probabilities": {
+    "light": 0.04,
+    "standard": 0.86,
+    "full": 0.1
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 719,
+  "issue": 555,
+  "issue_title": "Add a resting-HR / HR-recovery data source (device integration) \u2014 prerequisite for the referral red-flag set (#166)",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 748,
+  "issue": 738,
+  "issue_title": "Stream charts: grade (grade_smooth) has the same flat-looks-steep y-axis scaling issue as elevation",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.81,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.88,
+    "full": 0.12
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 749,
+  "issue": 745,
+  "issue_title": "Efficiency trend: same-day activities aren't all selectable; tooltip should group by day and list every activity",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.25,
+    "full": 0.75
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 751,
+  "issue": 740,
+  "issue_title": "Exchange lifecycle: absorb blocks.py Exchange creation/sentinel inheritance and the notification claim/release orchestration",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 755,
+  "issue": 701,
+  "issue_title": "Analysis composition is untested: typed intermediate + single interval-session gate in the orchestrator",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.87,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.08,
+    "full": 0.92
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 756,
+  "issue": 704,
+  "issue_title": "Cleanup follow-ups deferred from the safe pass (PR #703): test-tied dead symbols + duplication folds",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.72,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.18,
+    "full": 0.82
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 757,
+  "issue": 696,
+  "issue_title": "Redraw the cadence seam where the logic lives (cadence adapters drive process_new_activity privates)",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.88,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.08,
+    "full": 0.92
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 775,
+  "issue": 766,
+  "issue_title": "Coach thread, slice 2: the thread surface \u2014 sheet, launcher, switching",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 781,
+  "issue": 770,
+  "issue_title": "Coach thread, slice 6: retire the activity page's chat box",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.98,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 798,
+  "issue": 797,
+  "issue_title": "An unbound runner receives no notifications, indefinitely, and nobody is told",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 807,
+  "issue": 800,
+  "issue_title": "Phase 1: the coach signal has no home \u2014 one declaration, six derived registries",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 811,
+  "issue": 803,
+  "issue_title": "Phase 4: prompt assembly is string surgery \u2014 resolve a prompt from a clause set",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.9,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 812,
+  "issue": 804,
+  "issue_title": "Phase 5: window arithmetic has twelve homes \u2014 one fact stream, one bucketer",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 818,
+  "issue": 817,
+  "issue_title": "Local no-auth degrade resolves an arbitrary runner when the seeded DB has several Strava users",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.78,
+   "probabilities": {
+    "light": 0.12,
+    "standard": 0.86,
+    "full": 0.02
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 820,
+  "issue": 787,
+  "issue_title": "A reply withheld for medical overreach still ships its proposed action card",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.38,
+   "probabilities": {
+    "light": 0.05,
+    "standard": 0.59,
+    "full": 0.36
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "light"
+  ]
+ },
+ {
+  "pr": 836,
+  "issue": 830,
+  "issue_title": "Schedule: an AI-owned view of upcoming planned sessions",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 847,
+  "issue": 842,
+  "issue_title": "The schedule horizon ends in blank weeks when the plan is shorter than the window",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.81,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.13,
+    "full": 0.87
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 865,
+  "issue": 779,
+  "issue_title": "The stated-intent vocabulary lives in two hand-kept copies",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 867,
+  "issue": 809,
+  "issue_title": "The fail-closed auth-gate coverage guard checks nothing under the FastAPI version CI resolves",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.29,
+   "probabilities": {
+    "light": 0.01,
+    "standard": 0.46,
+    "full": 0.53
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 868,
+  "issue": 855,
+  "issue_title": "The coach chat flow diagram has no drift guard",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.37,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.58,
+    "full": 0.42
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 875,
+  "issue": 869,
+  "issue_title": "`alembic/env.py` sees most models only incidentally, so the new drift guard can be blind to one",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.25,
+    "full": 0.75
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 888,
+  "issue": 878,
+  "issue_title": "A tempo session with a warm-up cannot be drafted, and it fails the whole plan",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 891,
+  "issue": 883,
+  "issue_title": "A second confirm silently replaces the plan just accepted",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.68,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.21,
+    "full": 0.79
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 903,
+  "issue": 850,
+  "issue_title": "The prod seed cannot reproduce the schedule screen",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.78,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.86,
+    "full": 0.14
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 906,
+  "issue": 792,
+  "issue_title": "Coach chat flow diagram: conversation-scoped values are presented as turn-scoped",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.91,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.05,
+    "full": 0.95
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 922,
+  "issue": 825,
+  "issue_title": "Thread turns still steer voice at prompt time, so Default is not off there",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 923,
+  "issue": 859,
+  "issue_title": "The coach can settle a plan in conversation that the gate will reject, and the runner is told only that it failed",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 924,
+  "issue": 746,
+  "issue_title": "Efficiency metric ignores conditions (elevation, heat, stops), making cross-activity comparison misleading",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.97,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.02,
+    "full": 0.98
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 942,
+  "issue": 941,
+  "issue_title": "The profile page presents every setting at once, so a runner cannot see what the coach knows about them",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.62,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.75,
+    "full": 0.25
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 952,
+  "issue": 947,
+  "issue_title": "The activity list is a flat run of cards, so a day of training cannot be read as a day",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 954,
+  "issue": 946,
+  "issue_title": "The runner can only ask the coach about one activity at a time, never about a stretch of training",
+  "jev": {
+   "answer": "full",
+   "confidence": 1.0,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.0,
+    "full": 1.0
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "full",
+   "full"
+  ]
+ },
+ {
+  "pr": 979,
+  "issue": 975,
+  "issue_title": "project-context.md is edited at ship time, and the skill that owns it never fires on that path",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.99,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.01,
+    "full": 0.99
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ },
+ {
+  "pr": 992,
+  "issue": 991,
+  "issue_title": "Trends previous-window arrow shows totals for the wrong period",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.9,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.07,
+    "full": 0.93
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "full",
+   "standard",
+   "standard"
+  ]
+ },
+ {
+  "pr": 1002,
+  "issue": 984,
+  "issue_title": "A confirmed plan amendment that fails tells the runner nothing",
+  "jev": {
+   "answer": "full",
+   "confidence": 0.94,
+   "probabilities": {
+    "light": 0.0,
+    "standard": 0.04,
+    "full": 0.96
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "standard",
+   "full",
+   "standard"
+  ]
+ },
+ {
+  "pr": 1007,
+  "issue": 1006,
+  "issue_title": "A confirmed action's outcome follows the runner into a new thread",
+  "jev": {
+   "answer": "standard",
+   "confidence": 0.77,
+   "probabilities": {
+    "light": 0.09,
+    "standard": 0.84,
+    "full": 0.07
+   },
+   "question_version": "4e54c16bad99",
+   "model": "jev-1.13.0"
+  },
+  "labels": [
+   "light",
+   "light",
+   "light"
+  ]
+ }
+]
