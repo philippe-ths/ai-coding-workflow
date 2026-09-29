@@ -12,9 +12,9 @@ A decision the human's written direction already settles is decided and named ra
 
 ### Changed
 
-- `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan or pull request so the human can overturn it, and where it does not clearly reach, says so. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
-- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is checked against the north-star and otherwise put to the human before work starts, never written as a requirement. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
-- `aiw-planning` treats a constraint the agent itself wrote into an issue as the agent's assumption, not the human's requirement ([#313]).
+- `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan, or in its next message when the decision arises later, so the human can overturn it before the work is built. Where the north-star does not clearly reach, the decision is the human's, and Ask First items and decisions a skill reserves for the human are never settled this way. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
+- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, goes under an `## Agent-introduced limits` heading and is settled before work starts, with who settled it recorded there; it is never written as a requirement. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
+- `aiw-planning` treats a limit under that heading as an assumption until it records who settled it, so a planning session can tell the agent's restriction from the human's ([#313]).
 
 ## 5.14.0 - 2026-09-29
 
