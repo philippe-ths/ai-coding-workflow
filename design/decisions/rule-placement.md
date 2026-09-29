@@ -61,5 +61,8 @@ Restated content is removed when found, keeping the rule in the skill that owns 
 
 **Co-change across the core is not on its own evidence of a defect.**
 In this repository most tasks change the rules themselves, and a rule about when the human is asked, or what the done gate checks, legitimately touches every skill that routes to it.
-A co-change graph built from that history measures what the work was about as much as how the files are built, and the propagation-cost figure behind the question was sensitive to its thresholds and cannot be recomputed from kept scripts.
-So the decision rests on the distinction above rather than on the graph: the unintended kind is found by reading for restatement and contradiction, the work `scripts/check-prose-integrity.sh` does for what a script can judge.
+A co-change graph built from that history measures what the work was about as much as how the files are built.
+The propagation-cost figure behind the question moved with its thresholds, so only a before-and-after at fixed settings would mean anything, and the scripts that produced it were not kept; rewriting them to measure a number whose absolute value means nothing is not worth doing when the distinction above can be applied directly.
+So the decision rests on the distinction rather than on the graph.
+Applied to the core, it found one instance of the unintended kind: `aiw-planning` restated the Task Flow from `ai-workflow.md` and the copy had drifted a step behind, and the copy was replaced by a pointer.
+Restatement in general is found by reading; `scripts/check-prose-integrity.sh` catches the narrow cases where a copy can be compared mechanically (done-gate lists, Task Flow step claims) and says in its own output that it cannot judge the rest.
