@@ -294,8 +294,11 @@ What this cannot check:
     Task Flow by name are compared. A done-gate list wrapped across lines, a
     list naming its own skill and one member, a step claim in other words
     ("sits at step N"), and a skill on two steps (only the first is compared)
-    are not caught; a skill naming aiw-prompt-smith at the done gate is flagged,
-    since the rules do not say whether it is a gate member.
+    are not caught, nor are count words ("one of the three checks") or a
+    Task Flow step claimed by a skill the Task Flow does not name. A skill
+    listing aiw-prompt-smith with the done gate's members is flagged, because
+    the Done gate step does not list it; ai-workflow.md adds it at the gate
+    only when agent-facing prose changed.
   - Whether a product file states something true only of this repository in
     words rather than by naming a factory-only path, or names one of the
     ordinary names a target may own (README.md, INSTALL.md, a bare scripts/).

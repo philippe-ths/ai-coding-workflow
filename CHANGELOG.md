@@ -16,7 +16,7 @@ Three ways the prose could disagree with itself are now caught by a script, and 
 
 ### Fixed
 
-- `aiw-planning` called itself step 2 of a sequence it restated for orientation, while `ai-workflow.md`'s Task Flow makes planning step 3; the private copy had never gained the north-star step. The restated sequence is replaced by the step number and a pointer to the Task Flow, which every session already has in context, so there is no copy left to drift ([#262]).
+- `aiw-planning` called itself step 2 of a sequence it restated for orientation, while `ai-workflow.md`'s Task Flow makes planning step 3; the private copy had never gained the north-star step. The restated sequence is replaced by the step number and a pointer to the Task Flow, which every session already has in context, so the numbered copy that drifted is gone ([#262]).
 
 ## 5.16.0 - 2026-09-29
 
