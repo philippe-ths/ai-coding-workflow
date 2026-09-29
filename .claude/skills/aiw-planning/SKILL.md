@@ -53,7 +53,7 @@ When establishing what the codebase does spans several files or areas, route the
 ### Read project context
 
 - If `project-context.md` exists in the repository, read it as part of the baseline check.
-- If `project-context.md` is stale from before this branch, flag it to the human and track it with aiw-issue-creation; do not refresh it inline. Drift this branch causes is updated on this branch, per aiw-project-context-management.
+- If `project-context.md` is stale from before this branch, treat it as a finding outside the task: fix a line smaller than the sentence describing it, track anything larger with aiw-issue-creation, and do not refresh the file inline. Drift this branch causes is updated on this branch, per aiw-project-context-management.
 - If `project-context.md` does not exist and the codebase is non-trivial, flag this and ask whether to scaffold one before proceeding.
 
 ### Run baseline validation

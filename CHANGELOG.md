@@ -13,10 +13,10 @@ Five places where the rules gave an agent two answers to one situation now give 
 ### Changed
 
 - `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate is put to the human as a waiver and stays unresolved until they give it, instead of being treated as a known risk on the agent's own say ([#234]).
-- `aiw-verification` and `aiw-issue-creation`: the agent files a tracking issue itself after its own duplicate search, and brings the human only an overlap it finds, matching `ai-workflow.md`'s "file it" ([#234]).
+- `aiw-verification` and `aiw-issue-creation`: the agent files a tracking issue itself after its own duplicate search, and brings the human only an overlap it finds, matching `ai-workflow.md`'s "file it". Because filing is the agent's alone, the evidence a modality requires, an end-to-end case, and an open refuting finding cannot be closed as Tracked ([#234]).
 - `aiw-issue-creation`'s description names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
-- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is flagged and tracked, not refreshed inline ([#234]).
-- `ai-workflow.md` Build and Teach: messages stay short except a decision put to the human, which takes the Asking for Guidance shape ([#258]).
+- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when smaller than the sentence describing it and tracked otherwise, never refreshed inline ([#234]).
+- `ai-workflow.md` Build and Teach no longer sets a length for every message; it says teaching changes the texture of a message, not its volume. The length of a decision put to the human is set in one place, Asking for Guidance ([#258]).
 
 ## 5.15.0 - 2026-09-29
 
