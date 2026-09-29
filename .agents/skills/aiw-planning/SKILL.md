@@ -1,6 +1,6 @@
 ---
 name: aiw-planning
-description: "Structured planning process for producing a code-aware implementation plan before writing code, including the pre-planning codebase baseline checks (smoke tests and the global suite, test readiness, bounded-change confirmation) and the task modality classification the rest of the plan depends on. Use this skill at the start of every task before any implementation, whether the user says 'plan' or just hands the agent an issue. It owns the codebase baseline check, the modality classification step (procedure in aiw-ground-truth), the plan's structure and required content, the oracle and verification expectations the plan must state, the issue-vs-codebase priority rule, assumption classification, bounded-change confirmation, and handling human feedback at plan review. It does not own oracle definitions or the trust hierarchy (aiw-ground-truth), test mechanics (aiw-testing), evidence and sufficiency (aiw-verification), or post-failure investigation (aiw-failure-analysis)."
+description: "Structured planning process for producing a code-aware implementation plan before writing code, including the pre-planning codebase baseline checks (smoke tests and the global suite, test readiness, bounded-change confirmation) and the task modality classification the rest of the plan depends on. Use this skill at the start of every task before any implementation, whether the user says 'plan' or just hands the agent an issue. It owns the ceremony tier that sets how much process the task gets, the codebase baseline check, the modality classification step (procedure in aiw-ground-truth), the plan's structure and required content, the oracle and verification expectations the plan must state, the issue-vs-codebase priority rule, assumption classification, bounded-change confirmation, and handling human feedback at plan review. It does not own oracle definitions or the trust hierarchy (aiw-ground-truth), test mechanics (aiw-testing), evidence and sufficiency (aiw-verification), or post-failure investigation (aiw-failure-analysis)."
 ---
 
 # Planning
@@ -12,13 +12,37 @@ Read this file when producing or revising an implementation plan at the start of
 Planning is step 2 of the task sequence. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. The full sequence, for orientation:
 
 1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
-2. **aiw-planning** (this skill): establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
+2. **aiw-planning** (this skill): set the ceremony tier, establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
 3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
 4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, aiw-validation for whether the deliverable this plan named actually exists and does what was asked, and aiw-housekeeping for whether anything the task caused should now be removed or moved.
 5. **aiw-github** again for commit, push, and pull request, taken without asking once the done gate has run.
 6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
 
 This skill owns step 2. The overview exists so the full sequence is visible at a glance; the other skills own their own territory and their own rules.
+
+## Set the Ceremony Tier
+
+Before the baseline, set how much process the task gets. The tier is where the task starts, not a ceiling.
+
+Ask the outside judge first where the repository has one: `gh issue view <n> --json title,body | python3 scripts/jev/ask.py ceremony`. Take its `answer` when `act` is true, unless the issue itself names something on the Full list below, which makes the task Full whatever the answer. When `act` is false, the command exits non-zero, or the tool is absent, classify the task yourself against the same definitions. (Why: judging your own task at its start leans toward more process, and an outside answer with a confidence is the one that can say lighter.)
+
+- **Light.** Contained and well understood: wording, a single value, or one call site; cause and fix both clear; nothing else depends on what changes.
+- **Standard.** A real change in behaviour inside one area: one component, script, or feature; the approach is clear; nothing outside that area changes with it.
+- **Full.** Reaches across boundaries or into what others rely on: hooks, shared contracts or interfaces, rules or instructions agents follow, schema or stored data, several areas at once, or a cause not yet known.
+
+Reach sets the tier, not size. A one-line fix to a guard every push passes through reads as Light and is Full.
+
+| | Light | Standard | Full |
+|---|---|---|---|
+| Plan | A few lines, stated, then proceed; the human interrupts rather than approves | A short plan, agreed with the human | The full plan this skill describes, agreed with the human |
+| Baseline | Checks for the touched area; full validation once, before commit | Smoke tests and the global suite, at start and end | As Standard |
+| Verification | The justification step at a line per part, resting on the direct check that it works | The justification, the end-to-end runs aiw-verification makes mandatory, and the refuting pass | Everything aiw-verification asks |
+| New tests or checks | Only what the modality requires | What the change needs | What the change needs |
+| Pull request | Short | Normal | Full |
+
+Move up the moment the work proves bigger: to Full when it touches anything on the Full list or the cause turns out unknown, and at least one tier when a check fails unexpectedly. Do what the new tier asks from that point, its baseline included, and say so in your next message; leaving Light means putting the plan to the human for agreement before going further. Nothing moves a task down once started. Evidence the modality requires holds at every tier, so a Light fix still has its check that fails before and passes after. A task that needs an end-to-end run aiw-verification makes mandatory is not Light.
+
+State the tier and its source, the judge's answer with its confidence or your own call, in the plan and in the pull request body, so what the task cost can be explained afterwards.
 
 ## Establish Codebase Baseline
 
@@ -34,7 +58,7 @@ When establishing what the codebase does spans several files or areas, route the
 
 ### Run baseline validation
 
-- Run smoke tests and the global test suite as they exist now.
+- Run smoke tests and the global test suite as they exist now; at the Light tier, the checks for the touched area.
 - Record which tests pass and which tests fail.
 - Treat pre-existing failures as known for the task's duration.
 - Do not fix pre-existing failures unless the task requires it.
@@ -54,7 +78,7 @@ Bounded runs in two directions. Too large is the familiar one. Aimed above the l
 
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
-- Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan and settle it there rather than stopping to ask which layer to use; the human approves the plan before implementation, so aiming deeper is a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Plan at the requested level when the work survives the deeper fix. Target the deeper layer when it would not, and not both: work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
+- Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan and settle it there rather than stopping to ask which layer to use; a shared layer is something others rely on, so aiming deeper sets the task at Full, where the human approves the plan before implementation and aiming deeper is a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Plan at the requested level when the work survives the deeper fix. Target the deeper layer when it would not, and not both: work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
 - The deeper fix is often already filed as another open issue. Before answering, query the tracker once and narrowly, on the task's area and the behaviour it changes rather than the whole list, for an issue naming a structural cause behind it, and put what came back in the plan: nothing, or the issue and why this work survives it, or the issue and that this work would be discarded by it, in which case the plan proposes working that issue first or taking this task at its layer, and the human decides at plan review as for any deeper fix. Where there is no tracker, say so. A query that returns nothing costs one line. (Why: a tracked class is not a worked one, and a run of sound instance fixes each passing its own gate is what an open structural issue looks like from the inside.)
 
 If the baseline, test readiness, or task scope is unclear after these checks, stop and resolve before drafting the plan.
@@ -75,7 +99,9 @@ For compound tasks (e.g., "fix by adding a feature", "refactor while migrating")
 
 ## What the Plan Must Contain
 
-The plan the agent produces for the user should have these elements:
+At the Light tier the plan is a few lines: the end impact, the change, the check, and the tier with its source, which is where the deliverable and modality are always named, and anything else another step asks the plan to record when it applies. At Standard and Full it has these elements, a line each at Standard:
+
+- **Ceremony tier.** The tier and its source.
 
 - **Branch.** The branch the work will be implemented on.
 - **Goal.** The goal of the change in one or two sentences.
@@ -160,7 +186,7 @@ What "high level" means in practice:
 - "Dependency search across the codebase, including dynamic references" for delete modality.
 - "Failing test that reproduces the bug, then passing after the fix" for fix modality.
 
-Reference aiw-verification for the modality-specific verification requirements that apply. The implementation will run through aiw-verification's full process at done time; the plan's job is to surface the expectation now so it is not a surprise then.
+Reference aiw-verification for the modality-specific verification requirements that apply. The implementation will run through aiw-verification at done time, at the depth its ceremony tier sets; the plan's job is to surface the expectation now so it is not a surprise then.
 
 What the plan names here is a commitment, not an aspiration. If the method turns out to be unavailable when verification runs, aiw-verification requires that to be put to the human as a decision rather than quietly met with something weaker.
 
@@ -190,4 +216,4 @@ Do not enumerate specific tests in the plan. aiw-testing will make those calls d
 - If the human partially approves, update only the unapproved parts and present the revised plan.
 - If the human adds new requirements, assess whether they change the scope and flag if they do.
 - If the human's feedback contradicts the issue, flag the contradiction.
-- After updating the plan, present the revised plan for re-approval before proceeding.
+- After updating the plan, present the revised plan for re-approval before proceeding; at the Light tier, state it and proceed.
