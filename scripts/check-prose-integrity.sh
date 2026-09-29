@@ -294,7 +294,9 @@ What this cannot check:
     Task Flow by name are compared. A done-gate list wrapped across lines, a
     list naming its own skill and one member, a step claim in other words
     ("sits at step N"), and a skill on two steps (only the first is compared)
-    are not caught, nor are count words ("one of the three checks") or a
+    are not caught. These checks read the skills only: ai-workflow.md's other
+    lines, project-context.md, and a skill citing another step by number are
+    not compared. Nor are count words ("one of the three checks") or a
     Task Flow step claimed by a skill the Task Flow does not name. A skill
     listing aiw-prompt-smith with the done gate's members is flagged, because
     the Done gate step does not list it; ai-workflow.md adds it at the gate
