@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.17.0 - 2026-09-29
+
+Three ways the prose could disagree with itself are now caught by a script, and the one it found on first run is fixed.
+
+### Added
+
+- `scripts/check-prose-integrity.sh` checks three invariants a script can judge (factory-only, not shipped). Every skill line that enumerates the done gate (`done gate` or `done-gate`) names exactly the members `ai-workflow.md`'s Task Flow gives it, in both directions. A skill's claim to a Task Flow step ("is step N of the Task Flow", "owns Task Flow step N") matches the step that names it, for every skill on each step, while a skill's own internal numbering is not read. And the skills, `ai-workflow.md` and the entry points name no factory-only path from `install-manifest.json`, with ordinary names a target may own allowed (README.md, INSTALL.md, a bare `scripts/`). Each check fails rather than passes when it finds nothing to compare. Whether two passages contradict in words stays outside it and is printed as such; shipped scripts and hooks are not yet scanned (#317) ([#262]).
+
+### Fixed
+
+- `aiw-planning` called itself step 2 of a sequence it restated for orientation, while `ai-workflow.md`'s Task Flow makes planning step 3; the private copy had never gained the north-star step. The restated sequence is replaced by the step number and a pointer to the Task Flow, which every session already has in context, so there is no copy left to drift ([#262]).
+
 ## 5.16.0 - 2026-09-29
 
 Four places where the rules gave an agent two answers to one situation now give one.
@@ -1080,3 +1092,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313
 [#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
 [#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
+[#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
