@@ -1,6 +1,6 @@
 """Offline test for the Jev question tool.
 
-Run directly: `python3 scripts/jev/test_ask.py` (exits non-zero on failure).
+Run directly: `python3 scripts/test_jev_ask.py` (exits non-zero on failure).
 Also invoked by scripts/repo-validation.sh. Never touches the network: the HTTP
 layer (urllib.request.urlopen) or the one network call (ask.post) is replaced.
 """
@@ -13,7 +13,7 @@ import tempfile
 import time
 import urllib.error
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".ai-policy", "jev"))
 import ask  # noqa: E402
 
 failures = []

@@ -43,7 +43,7 @@ as a local path instead.
    the installer does not create it.
 5. Report what was installed. Mention that invoking the `aiw-init` skill in the
    target scaffolds its `project-checks.md`; the installer does not create that
-   one either.
+   one either. Say whether the Jev judge is live (see Notes).
 
 ## Update (already installed)
 
@@ -68,3 +68,13 @@ as a local path instead.
   entries. A file is deleted from the target only if it was dropped from the
   product between the installed and current versions; local additions are kept.
 - The installer copies only product files; factory files are never installed.
+- **Jev judge.** `aiw-planning` asks TypeSafe's Jev for each task's ceremony
+  tier through `.ai-policy/jev/ask.py`. It is live when a key is in
+  `TYPESAFE_API_KEY` or `~/.typesafe_key`; the key is per machine, so one covers
+  every repository. Without a key, or without `python3`, the agent sets the
+  tier itself and nothing blocks. In a Codex target the shipped
+  `workspace-write` sandbox has no network access, so the judge stays offline
+  there; report it that way. A call costs a fraction of a cent. To switch
+  it on, the human puts the key there themselves: never ask for it in chat or
+  write it into the target, since either leaves the key in a transcript or a
+  file.

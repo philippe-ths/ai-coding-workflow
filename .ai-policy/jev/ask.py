@@ -1,10 +1,10 @@
 """Ask Jev one named question about a piece of state and print a typed answer.
 
 Usage:
-  python3 scripts/jev/ask.py <question> [--state-file PATH]   (state on stdin otherwise)
-  python3 scripts/jev/ask.py --list
+  python3 .ai-policy/jev/ask.py <question> [--state-file PATH]   (state on stdin otherwise)
+  python3 .ai-policy/jev/ask.py --list
 
-Each question is a file in scripts/jev/questions/<name>.json holding the Jev
+Each question is a file in .ai-policy/jev/questions/<name>.json holding the Jev
 question, its level names, and `act_above`: the confidence at or above which the
 answer may be acted on without a second opinion (null until measured). Adding a
 question means adding a file; nothing here changes.
