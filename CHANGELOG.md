@@ -8,12 +8,11 @@ Every `### Removed` bullet must lead with the removed path as a backticked token
 
 ## 5.16.0 - 2026-09-29
 
-Five places where the rules gave an agent two answers to one situation now give one.
+Four places where the rules gave an agent two answers to one situation now give one.
 
 ### Changed
 
 - `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate is put to the human as a waiver and stays unresolved until they give it, instead of being treated as a known risk on the agent's own say ([#234]).
-- `aiw-verification` and `aiw-issue-creation`: the agent files a tracking issue itself after its own duplicate search, and brings the human only an overlap it finds, matching `ai-workflow.md`'s "file it". Because filing is the agent's alone, the evidence a modality requires, evidence the plan committed to, and an end-to-end case cannot be closed as Tracked, matching Ask First on weaker evidence. Filing an issue is treated as the agent's own action, like opening the task's pull request, not as posting to an external service ([#234]).
 - `aiw-issue-creation`'s description triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
 - `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when smaller than the sentence describing it and tracked otherwise, never refreshed inline, and `ai-workflow.md`'s task-start line says the same ([#234]).
 - `ai-workflow.md` Build and Teach no longer sets a length for every message; it says teaching changes the texture of a message, not its volume. The length of a decision put to the human is set in one place, Asking for Guidance ([#258]).
