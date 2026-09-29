@@ -1,6 +1,6 @@
 ---
 name: aiw-issue-creation
-description: "Structured process for creating follow-up or spin-off GitHub issues during a task. Use this skill when the agent discovers work outside the current scope, names a surface unverified at aiw-verification's scoping step, or finds a recurring limitation aiw-init reports, and that work should be tracked. The skill exists to prevent implementation-heavy issues that bias the implementing agent and peg to stale code."
+description: "Structured process for creating follow-up or spin-off GitHub issues during a task. Use this skill whenever the agent drafts an issue, including one the human asked for, and when it discovers work outside the current scope, names a surface unverified at aiw-verification's scoping step, or finds a recurring limitation aiw-init reports, and that work should be tracked. The skill exists to prevent implementation-heavy issues that bias the implementing agent and peg to stale code."
 ---
 
 # Issue Creation
@@ -43,7 +43,7 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 
 ## Restrictions You Introduce
 
-A limit on scope or reach that you add while drafting, what the work will not do or where it will not reach, and that the human did not state, is not written as a requirement. Put it under an `## Agent-introduced limits` heading, settle it before work starts as Asking for Guidance in `ai-workflow.md` says, and record there who settled it and on what. Keeping the issue at the site the human named, above, is their scope rather than a limit you introduce. (Why: the issue is filed under the human's name, so every later step reads an unmarked restriction as theirs.)
+A limit on scope or reach that you add while drafting, what the work will not do or where it will not reach, and that the human did not state, is not written as a requirement. If `north-star.md` rules it out, drop it. Otherwise put it under an `## Agent-introduced limits` heading and to the human before work on the issue starts, and record their answer there. Keeping the issue at the site the human named, above, is their scope rather than a limit you introduce. (Why: the issue is filed under the human's name, so every later step reads an unmarked restriction as theirs.)
 
 ## Keeping Issues Concise
 

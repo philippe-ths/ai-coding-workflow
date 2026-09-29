@@ -106,12 +106,13 @@ Every finding ends in one of the four states the scoping step below requires: ch
 ### When it does not clear
 
 Findings send the work back for repair and a further pass.
-The further pass is also given the previous pass's findings, and marks each one resolved, narrowed, or unchanged; the marking is the reviewer's, not yours.
-The work is converging only when no earlier finding comes back unchanged and no new finding sits in what the repair itself changed.
-Anything else is thrashing, whatever else improved: an unchanged finding is an approach repeated without new evidence, and a defect in the repair is a repair that reopened another surface, which is the non-convergence rule in ai-workflow.md.
+The further pass is also given the previous pass's report as the reviewer wrote it and the repair's own diff, and marks each earlier finding resolved, narrowed, or unchanged and each new finding caused by the repair or not.
+Where you disagree with a marking, the human sees both; you do not overrule it yourself.
+The work is converging only when no earlier finding comes back unchanged and no new finding was caused by the repair.
+Anything else is thrashing, whatever else improved: an unchanged finding is an approach repeated without new evidence, and a defect the repair caused, wherever it lands, is a repair that reopened another surface, which is the non-convergence rule in ai-workflow.md.
 Thrashing stops implementation: invoke aiw-failure-analysis, and tell the human that a refuting finding is what stopped the work.
-New findings in what the repair did not touch are the reviewer seeing further, not a failed repair: nine design defects, then nine wrong headings in untouched text, is converging.
-A third pass that still returns findings goes to the human with every pass's marked findings, and they decide whether the work goes round again.
+New findings the repair did not cause are the reviewer seeing further, not a failed repair: nine design defects, then nine wrong headings in untouched text, is converging.
+A third pass in one task that still returns findings goes to the human with every pass's marked findings, and they decide whether the work goes round again.
 (Why: a count that holds says nothing on its own, and progress judged by the implementer is the account the pass exists not to rely on.)
 
 ### When it runs
@@ -178,7 +179,7 @@ If the unverified surface is large enough that the change cannot be trusted with
 Naming the surface is half the step. The other half is what became of it, settled before the work is presented for the human's done decision. Each item in part 3 ends in one of four states, and a state is reached when its artifact exists, not when its word is written:
 
 - **Checked.** You closed the gap during this task. The artifact is what you ran and what it showed; the item then belongs in part 2.
-- **Tracked.** An issue carries it, and the artifact is the issue number. File it yourself under aiw-issue-creation. The evidence your modality requires, an end-to-end case, and a refuting finding still open cannot be tracked, because filing is yours alone and those need the gap closed or the human's waiver.
+- **Tracked.** An issue carries it, and the artifact is the issue number. File it yourself under aiw-issue-creation. The evidence your modality requires, evidence the plan committed to, and an end-to-end case cannot be tracked, because filing is yours alone and those need the gap closed or the human's waiver.
 - **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
 - **Deferred.** The method has not run yet and you can say when it will, before the human decides. The artifact is the method named, that timing, and the reason for the wait: "the clean-context end-to-end pass, once quota resets in an hour". Deferred is the one state that does not close an item, because its artifact is a commitment rather than a result. Posting the result where the work is presented is what closes it, as Checked, in front of the person deciding. This is the Wait option kept visible rather than finished work held back, and two limits keep it that way. The evidence your modality requires cannot be deferred: a fix with no check that failed before and passes after, or a refactor with no before-and-after comparison, is not ready to present whatever else has run. And if you cannot say when it runs, or it turns out it will not, it is not deferred but "When the Committed Method Cannot Run", where the choice is the human's.
 

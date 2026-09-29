@@ -130,7 +130,7 @@ If the modality requires a trust level higher than what is currently available, 
 ## How to Treat Issue Content vs Codebase Reality
 
 - Treat the issue goal as authoritative.
-- Treat a limit under the issue's `## Agent-introduced limits` heading as an assumption, not the human's requirement, until what is recorded there says who settled it.
+- A limit under the issue's `## Agent-introduced limits` heading is the agent's assumption until the human's answer is recorded under it; with no answer recorded, put it to them before planning further.
 - Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: issues are written before implementation and may not reflect the current codebase.)
 - Do not assume the files, data flow, or control points named in the issue are the real execution path.
 - If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
