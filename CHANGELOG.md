@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.15.0 - 2026-09-29
+
+A decision the human's written direction already settles is decided and named rather than asked, and a restriction the agent invents while drafting an issue reaches the human instead of passing as theirs.
+
+### Changed
+
+- `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan or pull request so the human can overturn it, and where it does not clearly reach, says so. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
+- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is checked against the north-star and otherwise put to the human before work starts, never written as a requirement. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
+- `aiw-planning` treats a constraint the agent itself wrote into an issue as the agent's assumption, not the human's requirement ([#313]).
+
 ## 5.14.0 - 2026-09-29
 
 Projects that install the workflow now get the Jev judge, so their tasks' ceremony tier comes from an outside answer rather than the agent's own call, as it already did here.
@@ -1056,3 +1066,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#307]: https://github.com/philippe-ths/ai-coding-workflow/issues/307
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306
 [#312]: https://github.com/philippe-ths/ai-coding-workflow/issues/312
+[#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313

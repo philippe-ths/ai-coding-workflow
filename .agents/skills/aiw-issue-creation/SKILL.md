@@ -41,6 +41,10 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 - Reference a relevant file by path to locate the concern. A path locates; carrying the code into the issue pegs it. Do not reproduce what a file says or prescribe how to change it. Both peg the issue to today's implementation and bias whoever picks it up toward an approach that may not fit by then.
 - Optionally, a short list of workflow skills that may help whoever implements it. Frame this as a hint to orient the implementing agent, not a mandate or a prescribed solution.
 
+## Restrictions You Introduce
+
+A limit on scope or reach that you add while drafting, what the work will not do or where it will not reach, and that the human did not state, is not written as a requirement. Check it against `north-star.md`; if that does not settle it, put it to the human as a decision before work starts. (Why: the issue is filed under the human's name, so every later step reads your restriction as theirs.)
+
 ## Keeping Issues Concise
 
 - Keep the issue short.

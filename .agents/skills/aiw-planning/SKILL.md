@@ -139,6 +139,7 @@ If the modality requires a trust level higher than what is currently available, 
 ## How to Treat Issue Content vs Codebase Reality
 
 - Treat the issue goal as authoritative.
+- Treat a constraint the agent itself wrote into the issue as its own assumption, not the human's requirement; check it against `north-star.md`, and put it to the human if unsettled.
 - Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: issues are written before implementation and may not reflect the current codebase.)
 - Do not assume the files, data flow, or control points named in the issue are the real execution path.
 - If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.
