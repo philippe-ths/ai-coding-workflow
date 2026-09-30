@@ -59,7 +59,7 @@ Before the first push, check:
 - Scope what the body claims to the evidence that exists as you open it. Evidence you intend to gather is deferred in the justification, named with its method, never written up as though it has already run; post it on the pull request when it arrives, before the human's done decision. (Why: opening a pull request is not the done decision, so the pull request is part of the verification surface rather than the end of it.)
 - Whether the branch changed agent-facing prose: a skill, an agent prompt file, `ai-workflow.md`, an entry point (`CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`), or a file one of those pulls in with an `@` line. If so, aiw-prompt-smith has run over those files and the body records what it found, even when that was nothing to change; the pull request hook blocks a body without that record wherever it can read the branch. (Why: a probe or a reviewer answers the questions it is asked, while prompt-smith reads the artifact against itself.)
 - Whether documentation or README files need updating based on the change.
-- Whether the branch changed what `project-context.md` records, and if so refresh it with the aiw-project-context-management skill.
+- Whether the branch changed what `project-context.md` records, and if so update it with the aiw-project-context-management skill.
 - Whether version numbers need updating.
 - Whether a tagged release is needed.
 - Parent and sub-issue closure status.
