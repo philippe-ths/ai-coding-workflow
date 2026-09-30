@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.20.0 - 2026-09-30
+
+A finding that is another symptom of an open issue's cause is added to that issue instead of filed, so an issue already filed for a cause collects its symptoms.
+
+### Changed
+
+- `aiw-issue-creation`: open issues not proposed for closing are also searched for a shared cause. When the agent can name a cause an open issue's fix would remove that also produces the finding, the finding goes to that issue as a comment naming the cause, adding `aiw:direction` if the finding needs the human; when it cannot name one, it files ([#327]).
+
 ## 5.19.0 - 2026-09-30
 
 The agent files and updates this repository's issues without asking, names each one it touched, and proposes rather than performs any close but completion.
@@ -1117,3 +1125,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
 [#326]: https://github.com/philippe-ths/ai-coding-workflow/issues/326
 [#323]: https://github.com/philippe-ths/ai-coding-workflow/issues/323
+[#327]: https://github.com/philippe-ths/ai-coding-workflow/issues/327

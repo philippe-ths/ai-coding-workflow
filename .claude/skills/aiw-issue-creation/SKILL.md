@@ -10,6 +10,7 @@ Read this file when drafting any GitHub issue.
 ## Before Creating the Issue
 
 - Search the repository's open issues, and those closed as not planned or duplicate, for overlap with the proposed issue's intent. If one overlaps, add what is new as a comment on it instead of filing.
+- Search the open issues not labelled `aiw:close-proposed` for its cause too: an open issue shares it when you can name a cause its fix would remove, and that cause also produces this finding, however different the symptom reads. Add the finding there as a comment naming that cause, and add `aiw:direction` if the finding is direction and the issue lacks it. When you cannot name the cause, file.
 - Search the codebase for other sites where the same request would apply. A request arrives phrased for the place the human noticed it, which is not always the place it belongs.
 
 File without asking. (Why: the human interrupts rather than approves, which is why `ai-workflow.md` has you name each issue you touched.)
