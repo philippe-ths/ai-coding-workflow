@@ -1,6 +1,6 @@
 ---
 name: aiw-github
-description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken after the done gate, safe against silent working-tree loss during branch operations, and short of the one action that stays the human's: the merge."
+description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, closing an issue, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, close an issue, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken after the done gate, safe against silent working-tree loss during branch operations, and short of the merge, which stays the human's."
 ---
 
 # GitHub Workflow
@@ -69,6 +69,10 @@ Before the first push, check:
 - If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - If deterministic policy blocks an action, fix the blocked condition before retrying. Do not bypass the check or treat it as optional.
 - If repo-local policy requires a passed validation state before commit or push, satisfy that requirement through the repository's validation flow.
+
+## Closing an issue
+
+An issue that should close for any reason but completion stays open: add a comment saying why and what it points to (the duplicate, what superseded it, or the commit that already fixed it) and the `aiw:close-proposed` label, creating the label if the repository lacks it. The human closes it or removes the label. (Why: a closed issue stops being seen, so a wrong close is lost where a wrong proposal is one line in a list the human reviews in one pass.)
 
 ## Post-merge cleanup
 

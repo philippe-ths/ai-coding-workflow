@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.19.0 - 2026-09-30
+
+The agent files and updates this repository's issues without asking, names each one it touched, and proposes rather than performs any close but completion.
+
+### Changed
+
+- `ai-workflow.md`: this repository's issues are no longer beyond the task's reach. The agent files, comments, and creates and adds labels without authorisation, naming each issue it touched; rewriting an issue's title or description, closing one for any reason but completion, and removing a label stay the human's ([#323]).
+- `aiw-issue-creation`: filing no longer waits for the human's duplicate confirmation. The overlap search includes issues closed as not planned or duplicate, so a finding the human turned down is not filed again, and an overlapping finding is added to that issue as a comment instead ([#323]).
+- `aiw-verification`: filing a Tracked issue is the agent's. A defect found in the change itself cannot be tracked, since an issue does not make the change correct ([#323]).
+
+### Added
+
+- `aiw-github` "Closing an issue": an issue that should close for any reason but completion stays open with a comment saying why and what it points to and the `aiw:close-proposed` label, for the human to close or clear in one pass ([#323]).
+
 ## 5.18.0 - 2026-09-30
 
 Every issue the agent files now says who acts on it, so the issues that need the human are visible without reading each one.
@@ -1102,3 +1116,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
 [#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
 [#326]: https://github.com/philippe-ths/ai-coding-workflow/issues/326
+[#323]: https://github.com/philippe-ths/ai-coding-workflow/issues/323

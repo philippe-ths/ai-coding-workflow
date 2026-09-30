@@ -9,10 +9,10 @@ Read this file when drafting any GitHub issue.
 
 ## Before Creating the Issue
 
-- Search open issues in the repository for overlap with the proposed issue's intent.
-- If a potential overlap is found, surface the overlapping issue to the human before proceeding.
+- Search the repository's open issues, and those closed as not planned or duplicate, for overlap with the proposed issue's intent. If one overlaps, add what is new as a comment on it instead of filing.
 - Search the codebase for other sites where the same request would apply. A request arrives phrased for the place the human noticed it, which is not always the place it belongs.
-- Only proceed with creation after the human confirms there is no duplicate.
+
+File without asking. (Why: the human interrupts rather than approves, which is why `ai-workflow.md` has you name each issue you touched.)
 
 ## When the Request Fits More Than One Site
 
@@ -26,7 +26,7 @@ Do not ask the human which unit to build. Record what you found and carry on; a 
 
 ## Where These Issues Come From
 
-Follow-up work discovered mid-task is one source. The other is aiw-verification's scoping step: a surface the work named as unchecked, which is not being checked now, is tracked here rather than left as prose. Such an issue names the surface and what would close it, and goes through the same human confirmation as any other — a gap the agent filed unasked is not a resolution. It does not prescribe the check — by the time someone picks it up, the right way to cover that surface may not be the way you would have done it today.
+Follow-up work discovered mid-task is one source. The other is aiw-verification's scoping step: a surface the work named as unchecked, which is not being checked now, is tracked here rather than left as prose. Such an issue names the surface and what would close it. It does not prescribe the check — by the time someone picks it up, the right way to cover that surface may not be the way you would have done it today.
 
 A limitation that keeps producing the same declared gap, which aiw-init's preflight reports when it recurs, arrives here as a third shape. That issue is not about the surface the current task left unchecked; it is about removing the limitation that keeps producing the gap. Name the limitation, list the earlier occurrences as evidence of its cost, and state what would end it. One such issue replaces the whole run of caveats — do not file one per occurrence.
 
