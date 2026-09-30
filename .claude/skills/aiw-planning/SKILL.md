@@ -9,16 +9,7 @@ Read this file when producing or revising an implementation plan at the start of
 
 ## Where This Skill Sits in the Workflow
 
-Planning is step 2 of the task sequence. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. The full sequence, for orientation:
-
-1. **aiw-github** at task start: confirm the GitHub issue, read it and its comments, create or switch to an issue-scoped branch.
-2. **aiw-planning** (this skill): set the ceremony tier, establish the codebase baseline, classify the modality, name the oracle, produce the plan for human review.
-3. **Implementation.** As work proceeds, aiw-ground-truth governs fixtures and oracles, aiw-testing governs test mechanics, aiw-verification governs the evidence required to declare done.
-4. **The done gate** before any "done" claim: aiw-verification's justification step for whether the change is correct, aiw-validation for whether the deliverable this plan named actually exists and does what was asked, and aiw-housekeeping for whether anything the task caused should now be removed or moved.
-5. **aiw-github** again for commit, push, and pull request, taken without asking once the done gate has run.
-6. **aiw-failure-analysis** if a "done" claim is later contradicted; it audits, may surface a plan-level flaw, and may restart the sequence from re-planning.
-
-This skill owns step 2. The overview exists so the full sequence is visible at a glance; the other skills own their own territory and their own rules.
+Planning is step 3 of the Task Flow in `ai-workflow.md`: after the request is checked against the north-star and the issue and branch are set up, before implementation and the done gate. The plan does not reproduce the rules of the other skills; it identifies what each will need to address during implementation and defers the mechanics to them. This skill owns Task Flow step 3; the other skills own their own territory and their own rules.
 
 ## Set the Ceremony Tier
 
@@ -53,7 +44,7 @@ When establishing what the codebase does spans several files or areas, route the
 ### Read project context
 
 - If `project-context.md` exists in the repository, read it as part of the baseline check.
-- If `project-context.md` is stale, flag it to the human. Refreshing project context is its own task per aiw-project-context-management; do not refresh it inline as part of the current task.
+- If `project-context.md` is stale from before this branch, treat it as a finding outside the task: fix it when the fix is smaller than the sentence describing it, track it when it is not with aiw-issue-creation, and do not refresh the file inline. Drift this branch causes is updated on this branch, per aiw-project-context-management.
 - If `project-context.md` does not exist and the codebase is non-trivial, flag this and ask whether to scaffold one before proceeding.
 
 ### Run baseline validation
@@ -139,6 +130,7 @@ If the modality requires a trust level higher than what is currently available, 
 ## How to Treat Issue Content vs Codebase Reality
 
 - Treat the issue goal as authoritative.
+- A limit under the issue's `## Agent-introduced limits` heading holds only if the human's answer recorded under it accepts it; with no answer recorded, put it to them before planning further.
 - Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: issues are written before implementation and may not reflect the current codebase.)
 - Do not assume the files, data flow, or control points named in the issue are the real execution path.
 - If the issue and the current codebase disagree, prioritise the codebase and flag the mismatch to the human.

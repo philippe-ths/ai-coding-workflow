@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.45.0
+Version: 1.46.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -126,6 +126,7 @@ Version: 1.45.0
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
+- `scripts/check-prose-integrity.sh` also checks done-gate lists, Task Flow step claims, and factory-only paths.
 - `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
 - `.ai-policy/jev/ask.py`: asks Jev one named question from `.ai-policy/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable; it ships to targets with the rest of `.ai-policy/`.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
@@ -135,12 +136,11 @@ Version: 1.45.0
 - Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; every other `.ai-policy/scripts/test-*.sh` runs unconditionally, because validation discovers them by glob rather than from a list.
 - When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
 - Prose integrity (`scripts/check-prose-integrity.sh`) runs inside repo-specific validation, so a change to the agent-facing rules is checked by something other than its author's reading. It is structural only: it cannot tell whether two passages contradict each other.
-- No unit test framework exists; there are no automated tests for documentation content or for the generated dashboard's rendering.
+- There are no automated tests for documentation content or for the generated dashboard's rendering.
 - Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
 
 ## Maintenance Checklist
 - Update this file when the project structure, key files, or policy rules change.
-- Keep this file aligned with the current codebase, not planned architecture.
 - When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.
 - When this file changes, bump its own `Version:` header per the `project-context.md` version rule in `design/decisions/maintenance.md`.
 - When adding a top-level tracked file, classify it in `install-manifest.json`; validation fails until every tracked file is classified.

@@ -6,6 +6,39 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.17.0 - 2026-09-29
+
+Three ways the prose could disagree with itself are now caught by a script, and the one it found on first run is fixed.
+
+### Added
+
+- `scripts/check-prose-integrity.sh` checks three invariants a script can judge (factory-only, not shipped). A skill line that enumerates the done gate (`done gate` or `done-gate`) on one line names the members `ai-workflow.md`'s Task Flow gives it, and no skill the Task Flow has dropped. A skill's claim to a Task Flow step ("is step N of the Task Flow", "owns Task Flow step N") matches the step that names it, for every skill on each step, while a skill's own internal numbering is not read. And the skills, `ai-workflow.md` and the entry points name no factory-only path from `install-manifest.json`, with ordinary names a target may own allowed (README.md, INSTALL.md, a bare `scripts/`). The done-gate and step checks fail rather than pass when they find nothing to compare. Its known misses and false positives are printed with its limits, as is whether two passages contradict in words; shipped scripts and hooks are not yet scanned (#317). To fit the new fact under `project-context.md`'s token budget, a Maintenance Checklist line that restated an Important Constraint and a clause duplicating Scope were removed ([#262]).
+
+### Fixed
+
+- `aiw-planning` called itself step 2 of a sequence it restated for orientation, while `ai-workflow.md`'s Task Flow makes planning step 3; the private copy had never gained the north-star step. The restated sequence is replaced by the step number and a pointer to the Task Flow, which every session already has in context, so the numbered copy that drifted is gone ([#262]).
+
+## 5.16.0 - 2026-09-29
+
+Four places where the rules gave an agent two answers to one situation now give one.
+
+### Changed
+
+- `aiw-verification`: the mandatory end-to-end cases are not the agent's to exempt. An end-to-end run judged disproportionate gets a resolution like any other named surface, and only the human can waive it, instead of being treated as a known risk on the agent's own say ([#234]).
+- `aiw-issue-creation`'s description, like its body since 5.15.0, triggers whenever the agent drafts an issue, including one the human asked for, and names all three sources its body covers: out-of-scope discoveries, surfaces left unverified at the scoping step, and recurring limitations reported by `aiw-init` ([#234]).
+- `aiw-project-context-management` and `aiw-planning`: context drift the current branch causes is updated on that branch; drift that was already there is a finding outside the task, fixed when the fix is smaller than the sentence describing it and tracked otherwise, never refreshed inline; `aiw-github`'s handoff check says update, not refresh, and `ai-workflow.md`'s task-start line says the same ([#234]).
+- `ai-workflow.md` Build and Teach no longer sets a length for every message; it says teaching changes the texture of a message, not its volume. The length of a decision put to the human is set in one place, Asking for Guidance ([#258]).
+
+## 5.15.0 - 2026-09-29
+
+A decision the human's written direction already settles is decided and named rather than asked, and a restriction the agent invents while drafting an issue reaches the human instead of passing as theirs.
+
+### Changed
+
+- `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan, or in its next message when the decision arises later, so the human can overturn it. What the north-star does not settle stays the human's, and Ask First items and decisions a skill reserves for the human are never settled this way. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
+- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is dropped if the north-star rules it out, and otherwise goes under an `## Agent-introduced limits` heading and to the human before work on the issue starts, with their answer recorded there; it is never written as a requirement, and the skill body says it is read when drafting any issue. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
+- `aiw-planning` holds a limit under that heading only if the human's recorded answer accepts it, and puts an unanswered one to them before planning further ([#313]).
+
 ## 5.14.0 - 2026-09-29
 
 Projects that install the workflow now get the Jev judge, so their tasks' ceremony tier comes from an outside answer rather than the agent's own call, as it already did here.
@@ -1056,3 +1089,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#307]: https://github.com/philippe-ths/ai-coding-workflow/issues/307
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306
 [#312]: https://github.com/philippe-ths/ai-coding-workflow/issues/312
+[#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313
+[#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
+[#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
+[#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
