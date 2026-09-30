@@ -36,6 +36,19 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 - State why the change is needed and what triggered the discovery.
 - State acceptance criteria if they are clear.
 
+## Who Must Act
+
+Give every issue you file exactly one label saying who acts on it, so the human sees which issues need them without reading each one:
+
+- `aiw:upkeep`: the project's own clutter and machinery, where the fix changes neither what the product does nor a rule an agent follows. A temporary folder nothing clears.
+- `aiw:direction`: everything else, including anything you are unsure of. An issue with no label is read as direction.
+
+(Why: the label is how the human, and anything later that reads it, finds the issues needing their taste or direction, so direction labelled as upkeep hides a decision of theirs, while upkeep labelled as direction only costs a read.)
+
+*The hard case looks internal and is not.* "The report opens with whichever finding was written first" reads as an ordering detail in the code, but fixing it changes what the client sees first, so it is direction.
+
+If the repository lacks the label, create it before filing; if you cannot, file without it.
+
 ## What the Issue May Contain
 
 - Reference a relevant file by path to locate the concern. A path locates; carrying the code into the issue pegs it. Do not reproduce what a file says or prescribe how to change it. Both peg the issue to today's implementation and bias whoever picks it up toward an approach that may not fit by then.

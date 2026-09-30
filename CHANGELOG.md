@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.18.0 - 2026-09-30
+
+Every issue the agent files now says who acts on it, so the issues that need the human are visible without reading each one.
+
+### Added
+
+- `aiw-issue-creation` gives every filed issue exactly one label: `aiw:upkeep` (the project's own clutter and machinery, where the fix changes neither what the product does nor a rule an agent follows) or `aiw:direction` (everything else, and anything uncertain), creating the label on first use and filing without it when that fails. An unlabelled issue, including every existing one and every issue the human files, reads as direction, so a missed label costs the human a read rather than hiding a decision of theirs. The label says what kind an issue is and grants nothing: whether the agent may work any upkeep unasked is not decided here ([#326]).
+
 ## 5.17.0 - 2026-09-29
 
 Three ways the prose could disagree with itself are now caught by a script, and the one it found on first run is fixed.
@@ -1093,3 +1101,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
 [#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
 [#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
+[#326]: https://github.com/philippe-ths/ai-coding-workflow/issues/326
