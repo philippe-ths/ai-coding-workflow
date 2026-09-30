@@ -24,14 +24,19 @@ drop() { local f="$1" p="$2"; grep -v "$p" "$f" > "$f.edit"; mv "$f.edit" "$f"; 
 # time running the checker instead of running cp.
 PRISTINE="$TMP/_pristine"
 mkdir -p "$PRISTINE/.github" \
-         "$PRISTINE/.claude" "$PRISTINE/.agents"
+         "$PRISTINE/.claude" "$PRISTINE/.agents" \
+         "$PRISTINE/scripts" "$PRISTINE/design/decisions"
 cp -R "$ROOT/.claude/skills" "$PRISTINE/.claude/skills"
 cp -R "$ROOT/.agents/skills" "$PRISTINE/.agents/skills"
 cp "$ROOT/ai-workflow.md" "$ROOT/project-context.md" "$ROOT/CLAUDE.md" \
-   "$ROOT/AGENTS.md" "$PRISTINE/"
+   "$ROOT/AGENTS.md" "$ROOT/install-manifest.json" "$PRISTINE/"
 cp "$ROOT/.github/copilot-instructions.md" "$PRISTINE/.github/"
-for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md \
-                .github/copilot-instructions.md \
+# The factory-path check expands scripts/, design/ and docs/ from the files found
+# there, so the fixture carries one file and one subdirectory of each kind it needs.
+cp "$ROOT/scripts/check-manifest.sh" "$PRISTINE/scripts/"
+cp "$ROOT/design/decisions/maintenance.md" "$PRISTINE/design/decisions/"
+for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md install-manifest.json \
+                .github/copilot-instructions.md scripts/check-manifest.sh design/decisions/maintenance.md \
                 .claude/skills/aiw-init/SKILL.md .agents/skills/aiw-init/SKILL.md; do
   [ -e "$PRISTINE/$required" ] || { echo "pristine fixture is missing $required (ROOT=$ROOT)" >&2; exit 2; }
 done
@@ -122,6 +127,81 @@ for t in .claude .agents; do
   edit "$D/$t/skills/aiw-test/SKILL.md" 's/^name: aiw-init$/name: aiw-test/'
 done
 expect "a skill name that is a substring of a documented one is caught" fail "$D" "skill 'aiw-test' exists"
+
+echo "done-gate enumerations:"
+# aiw-github lists the done gate's three skills; dropping one is the hand-propagation
+# miss #260 kept making. Both trees are edited so mirror parity is not what fires.
+D="$(fixture gate-dropped-member)"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-github/SKILL.md" 's/(aiw-verification, aiw-validation, aiw-housekeeping)/(aiw-verification, aiw-validation)/'
+done
+expect "a done-gate list that drops a member is caught" fail "$D" "done-gate list omits"
+
+# The other direction: ai-workflow.md drops a member, the skills still list it.
+D="$(fixture gate-member-removed-upstream)"
+edit "$D/ai-workflow.md" '/Done gate:/s/aiw-housekeeping/housekeeping/'
+expect "a skill list naming a member ai-workflow.md dropped is caught" fail "$D" "does not put in the gate"
+
+# The hyphenated spelling is a done-gate enumeration too.
+D="$(fixture gate-hyphenated)"
+for t in .claude .agents; do
+  printf '\nRun the done-gate: aiw-verification and aiw-validation.\n' >> "$D/$t/skills/aiw-init/SKILL.md"
+done
+expect "a hyphenated done-gate short list is caught" fail "$D" "done-gate list omits"
+
+echo "Task Flow step numbers:"
+D="$(fixture step-number-drift)"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-planning/SKILL.md" 's/owns Task Flow step [0-9]*/owns Task Flow step 9/'
+done
+expect "a skill claiming a different step than Task Flow gives it is caught" fail "$D" "Task Flow makes"
+
+# A skill that is not the first one on its Task Flow line is compared too.
+D="$(fixture step-number-drift-second-skill)"
+for t in .claude .agents; do
+  printf '\nValidation is step 2 of the Task Flow.\n' >> "$D/$t/skills/aiw-validation/SKILL.md"
+done
+expect "a claim by a skill that is not first on its Task Flow line is caught" fail "$D" "Task Flow makes"
+
+# "step 2 of the audit" is a skill's own numbering, not a Task Flow claim.
+D="$(fixture step-private-numbering)"
+for t in .claude .agents; do
+  printf '\nForming a hypothesis is step 2 of the audit below.\n' >> "$D/$t/skills/aiw-failure-analysis/SKILL.md"
+done
+expect "a skill's own internal step numbering is not read as a Task Flow claim" pass "$D"
+
+# Renaming the heading must not turn the check into a green bar that compared nothing.
+D="$(fixture task-flow-renamed)"
+edit "$D/ai-workflow.md" 's/^## Task Flow/## Flow/'
+expect "a Task Flow section that no longer parses fails rather than passing" fail "$D" "Task Flow"
+
+echo "product prose and the factory boundary:"
+D="$(fixture factory-path)"
+for t in .claude .agents; do
+  printf '\nSee observation/collect.py for the numbers.\n' >> "$D/$t/skills/aiw-init/SKILL.md"
+done
+expect "a product skill naming a factory-only path is caught" fail "$D" "factory-only path"
+
+# scripts/ is an ordinary directory name, so it is checked by expansion: a named file
+# under it is this repository's, a bare "scripts/" is not.
+D="$(fixture factory-path-expanded)"
+for t in .claude .agents; do
+  printf '\nRun scripts/check-manifest.sh first.\n' >> "$D/$t/skills/aiw-init/SKILL.md"
+done
+expect "a skill naming a file under scripts/ is caught" fail "$D" "factory-only path"
+
+D="$(fixture factory-subdir)"
+for t in .claude .agents; do
+  printf '\nSee design/decisions/ for the rationale.\n' >> "$D/$t/skills/aiw-init/SKILL.md"
+done
+expect "a skill naming a subdirectory under design/ is caught" fail "$D" "factory-only path"
+
+# A target may own an INSTALL.md, and .ai-policy/scripts/ is not scripts/.
+D="$(fixture ordinary-names)"
+for t in .claude .agents; do
+  printf '\nIf the target has an INSTALL.md, read it. Hooks live in .ai-policy/scripts/check-validation.sh.\n' >> "$D/$t/skills/aiw-init/SKILL.md"
+done
+expect "INSTALL.md and .ai-policy/scripts/ paths are not read as factory-only" pass "$D"
 
 echo "version headers:"
 D="$(fixture no-version)"

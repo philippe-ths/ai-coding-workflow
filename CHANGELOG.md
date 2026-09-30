@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.17.0 - 2026-09-29
+
+Three ways the prose could disagree with itself are now caught by a script, and the one it found on first run is fixed.
+
+### Added
+
+- `scripts/check-prose-integrity.sh` checks three invariants a script can judge (factory-only, not shipped). A skill line that enumerates the done gate (`done gate` or `done-gate`) on one line names the members `ai-workflow.md`'s Task Flow gives it, and no skill the Task Flow has dropped. A skill's claim to a Task Flow step ("is step N of the Task Flow", "owns Task Flow step N") matches the step that names it, for every skill on each step, while a skill's own internal numbering is not read. And the skills, `ai-workflow.md` and the entry points name no factory-only path from `install-manifest.json`, with ordinary names a target may own allowed (README.md, INSTALL.md, a bare `scripts/`). The done-gate and step checks fail rather than pass when they find nothing to compare. Its known misses and false positives are printed with its limits, as is whether two passages contradict in words; shipped scripts and hooks are not yet scanned (#317). To fit the new fact under `project-context.md`'s token budget, a Maintenance Checklist line that restated an Important Constraint and a clause duplicating Scope were removed ([#262]).
+
+### Fixed
+
+- `aiw-planning` called itself step 2 of a sequence it restated for orientation, while `ai-workflow.md`'s Task Flow makes planning step 3; the private copy had never gained the north-star step. The restated sequence is replaced by the step number and a pointer to the Task Flow, which every session already has in context, so the numbered copy that drifted is gone ([#262]).
+
 ## 5.16.0 - 2026-09-29
 
 Four places where the rules gave an agent two answers to one situation now give one.
@@ -1080,3 +1092,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313
 [#234]: https://github.com/philippe-ths/ai-coding-workflow/issues/234
 [#258]: https://github.com/philippe-ths/ai-coding-workflow/issues/258
+[#262]: https://github.com/philippe-ths/ai-coding-workflow/issues/262
