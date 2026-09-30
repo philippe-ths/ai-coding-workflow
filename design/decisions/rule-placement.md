@@ -50,3 +50,19 @@ This keeps the boundary sections lean and genuinely global.
 Only add a line to First Principles if it is genuinely foundational and not adequately expressed by the workflow structure or any reference/boundary section.
 If a principle can live in a reference section instead, put it there.
 (See `design/research/prompt-engineering.md#lost-in-the-middle` for U-shaped positional attention, and `#mosaic-primacy-recency` for the caveat that primacy and recency effects are model-specific. The First Principles section is a high-salience location, but the effect depends on the model, so treat the section as a place for genuinely foundational rules rather than for any rule marked important.)
+
+## Coupling Between Skills
+
+**Naming a neighbour is intended; restating it is not.**
+A skill names the skill that owns adjacent territory, so an agent reading one knows where the next rule lives: aiw-planning names aiw-verification for evidence, aiw-verification names aiw-ground-truth for the oracle. Listing which skills make up a step, such as the three at the done gate, or saying which step sits either side, is naming too.
+That reference is the design working, and a change to one skill's territory is expected to touch the names that route to it.
+A skill that restates what another file says, its rules or a copy of its numbered sequence, is unintended coupling: the copy drifts, and a change to the owner then needs a matching edit that nothing prompts.
+Restated content is removed when found, keeping the rule in the skill that owns it and a name everywhere else.
+
+**Co-change across the core is not on its own evidence of a defect.**
+In this repository most tasks change the rules themselves, and a rule about when the human is asked, or what the done gate checks, legitimately touches every skill that routes to it.
+A co-change graph built from that history measures what the work was about as much as how the files are built.
+The propagation-cost figure behind the question moved with its thresholds, so only a before-and-after at fixed settings would mean anything, and the scripts that produced it were not kept; rewriting them to measure a number whose absolute value means nothing is not worth doing when the distinction above can be applied directly.
+So the decision rests on the distinction rather than on the graph.
+Applied to the core, the instance that had done harm was `aiw-planning`'s numbered copy of the Task Flow from `ai-workflow.md`, which had drifted a step behind; #262 replaces it with a pointer. Planning naming the steps either side of it, and housekeeping running third after verification and validation, are naming in the sense above; they are the first places to look if the order changes.
+Restatement in general is found by reading; #262 adds checks to `scripts/check-prose-integrity.sh` for the narrow cases where a list or a claim can be compared mechanically (done-gate lists, Task Flow step claims), and its output says it cannot judge the rest.
