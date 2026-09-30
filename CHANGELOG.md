@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.15.0 - 2026-09-29
+
+A decision the human's written direction already settles is decided and named rather than asked, and a restriction the agent invents while drafting an issue reaches the human instead of passing as theirs.
+
+### Changed
+
+- `ai-workflow.md` Asking for Guidance: a decision that turns on direction is checked against `north-star.md` first; where it settles the decision, the agent decides and names the line it relied on in the plan, or in its next message when the decision arises later, so the human can overturn it. What the north-star does not settle stays the human's, and Ask First items and decisions a skill reserves for the human are never settled this way. Found when an agent listed ten issues as the human's decisions and seven were settled by the north-star ([#313]).
+- `aiw-issue-creation` gains Restrictions You Introduce: a limit on scope or reach the agent adds while drafting, which the human did not state, is dropped if the north-star rules it out, and otherwise goes under an `## Agent-introduced limits` heading and to the human before work on the issue starts, with their answer recorded there; it is never written as a requirement, and the skill body says it is read when drafting any issue. #307 carried an invented "factory-only" constraint through three pull requests because the issue was filed under the human's name ([#313]).
+- `aiw-planning` holds a limit under that heading only if the human's recorded answer accepts it, and puts an unanswered one to them before planning further ([#313]).
+
 ## 5.14.0 - 2026-09-29
 
 Projects that install the workflow now get the Jev judge, so their tasks' ceremony tier comes from an outside answer rather than the agent's own call, as it already did here.
@@ -1056,3 +1066,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#307]: https://github.com/philippe-ths/ai-coding-workflow/issues/307
 [#306]: https://github.com/philippe-ths/ai-coding-workflow/issues/306
 [#312]: https://github.com/philippe-ths/ai-coding-workflow/issues/312
+[#313]: https://github.com/philippe-ths/ai-coding-workflow/issues/313

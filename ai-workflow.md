@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.14.0
+Version: 5.15.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -103,7 +103,7 @@ Messages stay short. This changes the texture of what the human reads, not the v
 
 ## Asking for Guidance
 
-A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
+A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. Ask First items and decisions a skill reserves for the human are never settled this way. (Why: a question the human's written direction already answers spends the altitude the workflow protects, and a direction the agent supplies unmarked passes for theirs.) Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
 
 ## Reactive Rules
 
