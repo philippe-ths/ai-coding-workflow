@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.21.0
+Version: 5.22.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -122,7 +122,7 @@ The human must complete them.
 
 - Judge whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. These need lived human experience and nothing substitutes for them. Whether the deliverable exists and does what was asked is not that judgement, needs no human, and does not wait for one; aiw-validation covers it.
 - Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
-- Authorise actions that reach beyond the task's own branch, pull request, and this repository's issues: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI. Within the issues the agent files, comments, and creates and adds labels, and names each issue it touched in its next message or the pull request body; rewriting an issue's title or description, closing one for any reason but completion, and removing a label stay the human's.
+- Authorise actions that reach beyond the task's own branch, pull request, and this repository's issues: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI. Within the issues, the agent files, comments, creates labels and puts any label on or takes it off an issue, and names each issue it touched in its next message or the pull request body; rewriting an issue's title or description, closing one for any reason but completion, and taking off `aiw:direction` or `aiw:close-proposed` stay the human's.
 - Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
 - Merge pull requests.
 - Interrupt the AI when it is chasing the wrong root cause, looping on failed approaches, or about to take an action that conflicts with intent.
