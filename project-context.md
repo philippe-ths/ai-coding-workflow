@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.46.0
+Version: 1.47.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -87,9 +87,8 @@ Version: 1.46.0
 - `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook; `### Removed` bullets lead with the removed path so the updater can extract them.
 - `CONTEXT.md`: glossary of the session-observation domain language.
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
-- `docs/adr/`: architecture decision records; `0001` and `0002` record the move to descriptive observation and global capture.
 - `field-notes/investigations/`: findings from issues labelled investigation, each named by date, beside the Python scripts that rebuild each record's figures; the scripts are archival and not covered by validation.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`), each self-contained in a `SKILL.md` file.
+- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`, `aiw-upkeep`), each self-contained in a `SKILL.md` file.
 - `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
 - `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
 - `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.

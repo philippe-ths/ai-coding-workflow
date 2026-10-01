@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.20.1
+Version: 5.21.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -35,6 +35,8 @@ Conditional skills load alongside the above when their triggers apply: aiw-perfo
 aiw-housekeeping also runs invoked, over the whole repository instead of one task's footprint, whether or not a task is in flight. It returns a ranked list and removes nothing on its own judgement: the tiers say whether a removal is safe, the human says whether it should happen. A session-start hook reports when the repository is hiding paths through a local exclude rule, which is the signal to run it.
 
 Before a task is chosen, the human may invoke aiw-init. It runs the repository's declared checks read-only and reports state the human may not be aware of; it starts no work and proposes no fixes. `project-checks.md` records what this repository checks and what normal looks like for each. aiw-init owns it.
+
+An issue labelled `aiw:upkeep` may be worked without the human choosing it, when they or a scheduled run invoke aiw-upkeep, which owns the limits. Its plan is put to the human in the pull request rather than before work begins.
 
 ## Non-Functional Dimensions
 
