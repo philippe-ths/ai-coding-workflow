@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.47.0
+Version: 1.48.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -69,7 +69,7 @@ Version: 1.47.0
 - Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and the local session-observation tool.
 - Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow.
 - Observation data flow: a SessionStart hook records the Manifest, the `/rate` skill records Ratings, then `observation/collect.py` reads all transcripts under `~/.claude/projects/`, joins the Manifest and Ratings, writes the Session Store, and regenerates a static HTML dashboard.
-- Observation runs on demand with a full rebuild each time; nothing runs in the background except the event-driven Manifest hook.
+- Observation runs on demand with a full rebuild each time; only the Manifest hook and, once installed, the upkeep timer run unprompted.
 - The only external service at repository runtime is the Jev API; GitHub is used only for issue and PR tracking.
 
 ## Key Dependencies
@@ -85,7 +85,6 @@ Version: 1.47.0
 - `install-manifest.json`: source of truth for the product/factory boundary; lists product files per profile and tool, authored-in-target files, and factory-only files.
 - `INSTALL.md`: agent-actionable entry doc for installing or updating the workflow in a target repository.
 - `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook; `### Removed` bullets lead with the removed path so the updater can extract them.
-- `CONTEXT.md`: glossary of the session-observation domain language.
 - `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
 - `field-notes/investigations/`: findings from issues labelled investigation, each named by date, beside the Python scripts that rebuild each record's figures; the scripts are archival and not covered by validation.
 - `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`, `aiw-upkeep`), each self-contained in a `SKILL.md` file.
@@ -112,7 +111,6 @@ Version: 1.47.0
 - `observation/pricing.py`: model price table and estimated-cost calculation, since transcripts store no cost.
 - `observation/dashboard.py`: renders the Session Store into a self-contained static HTML dashboard with client-side filters.
 - `observation/test_parse.py`: parser regression test asserting exact values against a checked-in fixture.
-- `observation/fixtures/sample-transcript.jsonl`: a real-shaped transcript fixture with chosen values for the parser test.
 - `observation/capture/manifest-hook.sh`: defensive SessionStart hook that appends a Manifest row and never blocks a session.
 - `observation/capture/record-rating.sh`: appends a 1-4 Rating row, invoked by the `/rate` skill.
 - `observation/capture/rate/SKILL.md`: the global `/rate` skill source.
@@ -120,6 +118,8 @@ Version: 1.47.0
 - `observation/uninstall-observation.sh`: the inverse; removes the hook, skill, and helper scripts and unwires the hook from `settings.json`, keeping recorded data unless `--purge-data` is passed.
 - `scripts/test-observation-install.sh`: sandbox test of the install/uninstall pair against a throwaway `CLAUDE_HOME`.
 - `Makefile`: `observe` rebuilds the store and opens the dashboard; `observe-test` runs the parser test; `classify` prints the product/factory boundary.
+- `upkeep/install-upkeep.sh` adds a weekday 22:00 launchd agent and the status line's quota snapshot; `upkeep/uninstall-upkeep.sh` reverses both.
+- `upkeep/scheduler.py`: picks the project worked in this week with most upkeep issue-days, gates on that snapshot, and runs `aiw-upkeep` headless.
 - `scripts/install.sh`: copies the product set for a tool into a target repo, vendors it in the target's `.gitignore`, and installs hooks.
 - `scripts/update.sh`: updates an installed copy by re-copying the current product, auto-detecting tool and profile, and reconciling removals from the source `CHANGELOG.md`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.

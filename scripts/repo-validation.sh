@@ -11,7 +11,7 @@ set -eu
 # --- shell syntax: any shell scripts shipped with the observation tooling ---
 shell_targets=()
 while IFS= read -r f; do shell_targets+=("$f"); done < <(
-  find ./observation -name '*.sh' -type f 2>/dev/null
+  find ./observation ./upkeep -name '*.sh' -type f 2>/dev/null
 )
 if [ "${#shell_targets[@]}" -gt 0 ]; then
   bash -n "${shell_targets[@]}"
@@ -21,7 +21,7 @@ fi
 if command -v python3 >/dev/null 2>&1; then
   py_targets=()
   while IFS= read -r f; do py_targets+=("$f"); done < <(
-    find ./observation -name '*.py' -type f 2>/dev/null
+    find ./observation ./upkeep -name '*.py' -type f 2>/dev/null
   )
   if [ "${#py_targets[@]}" -gt 0 ]; then
     python3 -m py_compile "${py_targets[@]}"
@@ -65,6 +65,11 @@ fi
 # --- observation capture: install/uninstall against a sandbox CLAUDE_HOME ---
 if [ -x ./scripts/test-observation-install.sh ]; then
   ./scripts/test-observation-install.sh
+fi
+
+# --- upkeep timer: install/uninstall against a sandbox, plus the scheduler's gate tests ---
+if [ -x ./scripts/test-upkeep-install.sh ]; then
+  ./scripts/test-upkeep-install.sh
 fi
 
 # --- parser regression test: guards the one place the transcript format lives ---
