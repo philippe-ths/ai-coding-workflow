@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.22.0 - 2026-10-01
+
+The agent can take a label off an issue, so an escalated upkeep issue reads as direction alone instead of carrying both kinds.
+
+### Changed
+
+- `ai-workflow.md`: the agent takes labels off this repository's issues as well as putting them on; taking off `aiw:direction` or `aiw:close-proposed`, the labels upkeep's pick skips, stays the human's ([#337]).
+- `aiw-upkeep`: escalating an issue, before writing or when a run stops, swaps `aiw:upkeep` for `aiw:direction` rather than adding it ([#337]).
+- `aiw-issue-creation`: a direction finding added to an open issue that shares its cause gives that issue `aiw:direction` in place of any `aiw:upkeep` ([#337]).
+
 ## 5.21.0 - 2026-10-01
 
 The agent can work an upkeep issue nobody chose, when asked or on a schedule, and hands back a pull request that carries its plan.
@@ -1149,3 +1159,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#327]: https://github.com/philippe-ths/ai-coding-workflow/issues/327
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
+[#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337

@@ -14,7 +14,7 @@ Read this file when asked to do upkeep. You are working an issue nobody chose, o
 
 ## Check Before Writing
 
-Predict what the fix will touch. If it reaches anything on aiw-planning's Full list, an Ask First item in `ai-workflow.md`, or CI, it is not upkeep you may work: add `aiw:direction`, comment what it reaches, and pick again.
+Predict what the fix will touch. If it reaches anything on aiw-planning's Full list, an Ask First item in `ai-workflow.md`, or CI, it is not upkeep you may work: swap `aiw:upkeep` for `aiw:direction`, comment what it reaches, and pick again.
 
 ## Work It
 
@@ -32,7 +32,7 @@ Wherever the workflow would stop for the human, stop there instead of deciding f
 - If validation passes on what you have, commit, push, and open a draft pull request labelled `aiw:direction`, whose body says what stopped you, that the rest is unverified, and that no aiw-prompt-smith pass ran.
 - If it does not, stash it with everything untracked under a message naming the issue (`git stash push -u -m "aiw-upkeep #<n>: <reason>"`), and push the branch only if it already holds commits.
 
-Then add `aiw:direction` to the issue and comment what stopped you and where the work is: the draft, the stash, or the branch. (Why: a stopped run that leaves changes in the tree blocks every later run, since upkeep never starts on a dirty tree.)
+Then swap the issue's `aiw:upkeep` for `aiw:direction` and comment what stopped you and where the work is: the draft, the stash, or the branch. (Why: a stopped run that leaves changes in the tree blocks every later run, since upkeep never starts on a dirty tree.)
 
 ## Hand Over
 
