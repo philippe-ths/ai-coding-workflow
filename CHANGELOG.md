@@ -6,6 +6,19 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.21.0 - 2026-10-01
+
+The agent can work an upkeep issue nobody chose, when asked or on a schedule, and hands back a pull request that carries its plan.
+
+### Added
+
+- `aiw-upkeep`: picks the oldest open `aiw:upkeep` issue carrying neither `aiw:direction` nor `aiw:close-proposed` with no open pull request and no upkeep pull request closed without merging, and works nothing while the project has an open upkeep pull request or uncommitted changes. Before writing, an issue whose fix would reach the Full list, an Ask First item or CI gets `aiw:direction` added instead. It branches from the remote default branch and returns the checkout afterwards. The plan is agreed at the pull request rather than before or during the work; only tracked files are removed, each as a tombstone (its path with the commit SHA that restores it). Wherever the workflow would stop for the human, the run stops and keeps the work: as a draft pull request labelled `aiw:direction` when it validates, otherwise in a named stash, leaving the checkout clean and where it was, and comments on the issue where the work is ([#328]).
+- `ai-workflow.md`: an `aiw:upkeep` issue may be worked without the human choosing it, through `aiw-upkeep`, with its plan put to the human in the pull request ([#328]).
+
+### Changed
+
+- `project-context.md` 1.47.0 names `aiw-upkeep` in its skill list; to fit the token budget the `docs/adr/` line, the one least acted on, was removed ([#328]).
+
 ## 5.20.1 - 2026-09-30
 
 A finding filed because its cause matches a closed issue now says so.
@@ -1135,3 +1148,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#323]: https://github.com/philippe-ths/ai-coding-workflow/issues/323
 [#327]: https://github.com/philippe-ths/ai-coding-workflow/issues/327
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
+[#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
