@@ -253,6 +253,41 @@ printf '{"tool_name":"Bash","tool_input":{"command":"git push origin feature/x -
   | "$BASH_HOOK" >/dev/null 2>&1 || rc=$?
 assert_allowed "git push origin feature/x --delete on main (trailing flag)" "$rc"
 
+# ── Planning off the task's branch ──
+
+echo ""
+echo "Planning off the task's branch:"
+
+PLAN_HOOK="$ROOT_DIR/.ai-policy/hooks/block-planning-off-task.sh"
+PLAN_REPO="$(mktemp -d)"
+git -C "$PLAN_REPO" init -q -b main
+git -C "$PLAN_REPO" -c user.name=t -c user.email=t@t -c commit.gpgsign=false commit -q --allow-empty -m init
+
+plan_rc() {
+  rc=0
+  printf '{"tool_name":"Skill","cwd":"%s","tool_input":{"skill":"%s"}}' "$PLAN_REPO" "$1" \
+    | "$PLAN_HOOK" >/dev/null 2>&1 || rc=$?
+}
+
+plan_rc aiw-planning
+assert_blocked "aiw-planning on main" "$rc"
+
+plan_rc projectSettings:aiw-planning
+assert_blocked "namespaced aiw-planning on main" "$rc"
+
+plan_rc aiw-github
+assert_allowed "aiw-github on main (the skill that creates the branch)" "$rc"
+
+git -C "$PLAN_REPO" checkout -q --detach
+plan_rc aiw-planning
+assert_blocked "aiw-planning on a detached HEAD" "$rc"
+
+git -C "$PLAN_REPO" checkout -q -b feat/1-thing
+plan_rc aiw-planning
+assert_allowed "aiw-planning on a task branch" "$rc"
+
+rm -rf "$PLAN_REPO"
+
 # ── Summary ──
 
 echo ""
