@@ -84,6 +84,7 @@ assert_eq "install wires exactly one SessionStart hook" "1" "$hook_count"
 
 # Stand in for data accumulated over months of sessions.
 printf '{"session":"a"}\n' > "$CH/aiw-observation/sessions.jsonl"
+printf '{"task":"#1"}\n' > "$CH/aiw-observation/tasks.jsonl"
 printf '{"session":"a","workflow_version":"3.16.0"}\n' > "$CH/aiw-observation/manifest.jsonl"
 printf '{"session":"a","rating":4}\n' > "$CH/aiw-observation/ratings.jsonl"
 printf '<html></html>\n' > "$CH/aiw-observation/dashboard.html"
