@@ -20,7 +20,7 @@ GitHub actions touch shared state. Each one becomes visible to others the moment
 ## Branch protection and naming
 
 - Never work directly on `main` or `master`.
-- Create or switch to an issue-scoped branch before editing files or making commits.
+- Create or switch to an issue-scoped branch before planning, editing files, or making commits.
 - Use the format `type/short-description` for branch names.
 
 ## Rebasing onto the target branch

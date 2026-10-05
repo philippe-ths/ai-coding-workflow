@@ -6,6 +6,19 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.23.0 - 2026-10-05
+
+Planning runs on the task's own branch, so what a task cost includes its planning.
+
+### Added
+
+- `.ai-policy/hooks/block-planning-off-task.sh`: a Claude Code PreToolUse hook on the Skill tool that blocks loading `aiw-planning` on a protected branch or a detached HEAD, and tells the agent to create the issue and branch first or stay in discussion ([#352]).
+
+### Changed
+
+- `aiw-github`: the issue-scoped branch is created before planning, not only before editing files or committing ([#352]).
+- `project-context.md` 1.50.0 names the hook; to fit the token budget the line on how the context-management reminder emits its context was removed ([#352]).
+
 ## 5.22.0 - 2026-10-01
 
 The agent can take a label off an issue, so an escalated upkeep issue reads as direction alone instead of carrying both kinds.
@@ -1160,3 +1173,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
 [#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337
+[#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352
