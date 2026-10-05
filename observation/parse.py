@@ -49,10 +49,15 @@ def _add_tokens(acc, usage):
     acc["output"] += usage.get("output_tokens") or 0
     acc["cache_read"] += usage.get("cache_read_input_tokens") or 0
     acc["cache_creation"] += usage.get("cache_creation_input_tokens") or 0
+    split = usage.get("cache_creation")
+    if isinstance(split, dict):
+        acc["cache_creation_1h"] += split.get("ephemeral_1h_input_tokens") or 0
 
 
-def _zero_tokens():
-    return {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0}
+def zero_priced_tokens():
+    """Token counts as priced: `cache_creation_1h` is the part of `cache_creation` billed
+    at the 1-hour cache rate. collect.py drops it from the stored totals."""
+    return {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0, "cache_creation_1h": 0}
 
 
 def _new_branch():
@@ -71,7 +76,7 @@ def scan_transcript(path):
     session_id = None
     cwd = None
     timestamps = []
-    tokens = _zero_tokens()
+    tokens = zero_priced_tokens()
     tokens_by_model = {}
     models = Counter()
     tool_counts = Counter()
@@ -162,12 +167,13 @@ def scan_transcript(path):
         return None
 
     for usage, model, reply_branch, day in replies.values():
-        key = model or "unknown"
+        # fast mode is billed at its own rates, so it is priced as a model of its own
+        key = (model or "unknown") + (":fast" if usage.get("speed") == "fast" else "")
         b = branches[reply_branch]
         _add_tokens(tokens, usage)
-        _add_tokens(tokens_by_model.setdefault(key, _zero_tokens()), usage)
-        _add_tokens(b["tokens_by_model"].setdefault(key, _zero_tokens()), usage)
-        _add_tokens(b["days"].setdefault(day, {}).setdefault(key, _zero_tokens()), usage)
+        _add_tokens(tokens_by_model.setdefault(key, zero_priced_tokens()), usage)
+        _add_tokens(b["tokens_by_model"].setdefault(key, zero_priced_tokens()), usage)
+        _add_tokens(b["days"].setdefault(day, {}).setdefault(key, zero_priced_tokens()), usage)
         if model and "synthetic" not in model:
             models[model] += 1
 
