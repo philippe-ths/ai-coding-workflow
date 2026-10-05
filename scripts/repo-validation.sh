@@ -83,20 +83,20 @@ if command -v python3 >/dev/null 2>&1; then
   python3 ./scripts/test_jev_ask.py
 fi
 
-# --- the checked-in transcript fixture must be valid JSONL ---
-if command -v python3 >/dev/null 2>&1 && [ -f ./observation/fixtures/sample-transcript.jsonl ]; then
+# --- the checked-in transcript fixtures must be valid JSONL ---
+if command -v python3 >/dev/null 2>&1 && [ -d ./observation/fixtures ]; then
   python3 - <<'PY'
-import json, sys
-path = "./observation/fixtures/sample-transcript.jsonl"
-with open(path) as fh:
-    for n, line in enumerate(fh, 1):
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            json.loads(line)
-        except json.JSONDecodeError as e:
-            print(f"Invalid JSONL in {path} line {n}: {e}", file=sys.stderr)
-            sys.exit(1)
+import glob, json, sys
+for path in sorted(glob.glob("./observation/fixtures/**/*.jsonl", recursive=True)):
+    with open(path) as fh:
+        for n, line in enumerate(fh, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                json.loads(line)
+            except json.JSONDecodeError as e:
+                print(f"Invalid JSONL in {path} line {n}: {e}", file=sys.stderr)
+                sys.exit(1)
 PY
 fi

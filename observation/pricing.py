@@ -42,3 +42,20 @@ def estimate_cost(model, tokens):
         + (tokens.get("cache_creation", 0) or 0) * rate["cache_write"]
     ) / 1_000_000.0
     return round(cost, 4)
+
+
+def estimate_cost_by_model(tokens_by_model):
+    """Sum estimate_cost over a {model: tokens} map, so each model is priced at its own rate.
+
+    Returns None if any model with non-zero tokens is unknown: a partial sum would
+    read as the whole cost.
+    """
+    total = 0.0
+    for model, tokens in tokens_by_model.items():
+        if not any(tokens.get(k) for k in ("input", "output", "cache_read", "cache_creation")):
+            continue
+        cost = estimate_cost(model, tokens)
+        if cost is None:
+            return None
+        total += cost
+    return round(total, 4)

@@ -83,6 +83,14 @@ _TEMPLATE = r"""<!DOCTYPE html>
 <div class="cards" id="cards"></div>
 
 <section>
+  <h2>Tasks, most expensive first</h2>
+  <p class="vnote">A task is the issue number in a branch name, or the branch name when it has none. Its cost covers every session and subagent that worked on that branch.
+  More than one branch, many sessions, or failure-analysis runs mean the task took more than one attempt. Filtered by repo and date: cost and tokens count only the days in range, so they can differ from the cards above, which count each session whole on the day it started. Branches, sessions, subagents, failure analyses, first and last cover the whole task. Workflow version does not apply to tasks.
+  <span id="tasks-unattributed"></span></p>
+  <div class="tablewrap"><table id="tasks"></table></div>
+</section>
+
+<section>
   <h2>Version comparison</h2>
   <p class="vnote">Each column is one workflow version in the current filter; cells show the value plus the change vs the baseline (&Delta; absolute &middot; &Delta;%).
   Raw totals (cost, tokens, tools, skills) scale with the <b>Sessions</b> row &mdash; read them against it, not on their own.
@@ -116,6 +124,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
 
 <script>
 const SESSIONS = __DATA__;
+const TASKS = __TASKS__;
 const GENERATED = "__GENERATED__";
 
 const $ = id => document.getElementById(id);
@@ -336,9 +345,57 @@ function renderTable(rows){
   $("table").innerHTML = head + body;
 }
 
+// A task's figures inside the date filter, summed from its per-day breakdown, or null if
+// it did no work in range.
+function taskInRange(t, f){
+  let cost=0, known=true, any=false;
+  const tok={input:0,output:0,cache_read:0,cache_creation:0};
+  for (const [d, v] of Object.entries(t.by_day||{})){
+    // a reply with no timestamp has no day, so it counts only when no date is filtered
+    if ((f.from || f.to) && !/^\d{4}-\d{2}-\d{2}$/.test(d)) continue;
+    if (f.from && d < f.from) continue;
+    if (f.to && d > f.to) continue;
+    any = true;
+    if (v.estimated_cost_usd==null) known=false; else cost += v.estimated_cost_usd;
+    for (const k in tok) tok[k] += (v.tokens||{})[k]||0;
+  }
+  return any ? Object.assign({}, t, {estimated_cost_usd: known?cost:null, tokens: tok}) : null;
+}
+
+function filteredTasks(){
+  const f = activeFilters();
+  return TASKS.filter(t => !f.repos.length || f.repos.includes(t.repo)).map(t => taskInRange(t, f)).filter(Boolean);
+}
+
+const TASK_ROWS = 300;
+
+function renderTasks(){
+  const all = filteredTasks();
+  const named = all.filter(t => t.task);
+  const cost = ts => ts.reduce((a,t)=>a+(t.estimated_cost_usd||0),0);
+  const total = cost(all), un = cost(all.filter(t => !t.task));
+  const unpriced = all.filter(t => t.estimated_cost_usd == null).length;
+  $("tasks-unattributed").innerHTML = (total ? `<b>${fmt(un/total*100,1)}%</b> of estimated cost in range (<span class="est">$${fmt(un,2)}</span>) ran outside a task branch (on main, a detached HEAD, a worktree no reply launched, or no branch) and is not attributed to a task.` : "") +
+    (unpriced ? ` ${unpriced} task row${unpriced>1?"s":""} used a model with no price and ${unpriced>1?"are":"is"} left out of that share.` : "");
+  named.sort((a,b)=>(b.estimated_cost_usd||0)-(a.estimated_cost_usd||0));
+  const head = `<tr><th>Repo</th><th>Task</th><th class="num">Est $</th><th class="num">Tokens</th><th class="num">Output</th><th class="num">Branches</th><th class="num">Sessions</th><th class="num">Subagents</th><th class="num">Failure analyses</th><th>First</th><th>Last</th></tr>`;
+  const body = named.slice(0,TASK_ROWS).map(t=>{
+    const tk=t.tokens||{};
+    const tot=(tk.input||0)+(tk.output||0)+(tk.cache_read||0)+(tk.cache_creation||0);
+    return `<tr><td>${t.repo||'<span class=muted>?</span>'}</td><td title="${(t.branches||[]).join(', ')}">${t.task}</td>`+
+      `<td class="num est">${t.estimated_cost_usd==null?'&mdash;':fmt(t.estimated_cost_usd,2)}</td><td class="num">${fmt(tot)}</td><td class="num">${fmt(tk.output||0)}</td>`+
+      `<td class="num">${(t.branches||[]).length}</td><td class="num">${t.sessions}</td><td class="num">${t.subagents}</td>`+
+      `<td class="num">${t.failure_analyses||'<span class=muted>0</span>'}</td>`+
+      `<td>${day(t.first_seen)}</td><td>${day(t.last_seen)}</td></tr>`;
+  }).join("");
+  const more = named.length > TASK_ROWS ? `<tr><td colspan="11" class="muted">Showing the ${TASK_ROWS} most expensive of ${named.length} tasks; filter by repo or date to see the rest.</td></tr>` : "";
+  $("tasks").innerHTML = named.length ? head + body + more : '<tr><td class="muted">No tasks in range.</td></tr>';
+}
+
 function render(){
   const rows = applyFilters();
   renderCards(rows);
+  renderTasks();
   renderCompare(rows);
   renderCharts(rows);
   renderSkills(rows);
@@ -361,8 +418,9 @@ init();
 """
 
 
-def render(rows, generated_at="on demand"):
+def render(rows, tasks=(), generated_at="on demand"):
     data = json.dumps(rows, ensure_ascii=False)
-    html = _TEMPLATE.replace("__DATA__", data)
+    html = _TEMPLATE.replace("__TASKS__", json.dumps(list(tasks), ensure_ascii=False))
+    html = html.replace("__DATA__", data)
     html = html.replace("__GENERATED__", str(generated_at))
     return html

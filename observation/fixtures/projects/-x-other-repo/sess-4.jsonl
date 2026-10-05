@@ -1,0 +1,1 @@
+{"type":"assistant","sessionId":"sess-4","cwd":"/x/other-repo","gitBranch":"feat/7-unrelated","timestamp":"2026-06-02T12:00:00.000Z","message":{"id":"m6","role":"assistant","model":"claude-opus-4-8","usage":{"input_tokens":70,"output_tokens":7,"cache_read_input_tokens":0,"cache_creation_input_tokens":0},"content":[{"type":"text","text":"Another repo's issue 7."}]}}

@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.48.0
+Version: 1.49.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -30,8 +30,9 @@ Version: 1.48.0
 - The `aiw-validation` skill is unrelated to the validation state and validation scripts of the policy layer, which record whether a repository's checks passed.
 - **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
-- **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive per-session metrics with no statistical verdict.
+- **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive metrics with no statistical verdict.
 - **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt from transcripts on demand.
+- **Task**: the issue number in a branch name, or the branch name, that `observation/collect.py` charges each reply to by its branch and each subagent to by its launching branch, written beside the Session Store as `tasks.jsonl`.
 - **Manifest**: a global file written by a SessionStart hook recording each session's `workflow_version` and repo, the only reliable source of the version active during a session.
 - **Rating**: a human 1-4 session quality score recorded live by the global `/rate` skill and matched to its session by repo and time.
 
@@ -45,8 +46,6 @@ Version: 1.48.0
 - Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
 - Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
 - Declares the product/factory boundary in `install-manifest.json`, validated by `scripts/check-manifest.sh` and printed by `make classify`.
-- Provides a local session-observation tool (`observation/`) that parses Claude Code transcripts into a JSONL Session Store and a self-contained static HTML dashboard.
-- The observation tool is descriptive only: it surfaces how metrics move across workflow versions and over time, and never computes a statistical comparison or pass/fail verdict.
 - Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
 - Does not include a unit-test framework; validation covers shell-script syntax, Python `py_compile`, the observation parser regression test, the Jev tool's offline test, enforcement integration tests, and JSONL fixture validity.
 
@@ -110,7 +109,7 @@ Version: 1.48.0
 - `observation/parse.py`: the only module that knows the transcript JSONL format; extracts per-session metrics.
 - `observation/pricing.py`: model price table and estimated-cost calculation, since transcripts store no cost.
 - `observation/dashboard.py`: renders the Session Store into a self-contained static HTML dashboard with client-side filters.
-- `observation/test_parse.py`: parser regression test asserting exact values against a checked-in fixture.
+- `observation/test_parse.py`: parser and task-attribution regression test asserting exact values against checked-in fixtures.
 - `observation/capture/manifest-hook.sh`: defensive SessionStart hook that appends a Manifest row and never blocks a session.
 - `observation/capture/record-rating.sh`: appends a 1-4 Rating row, invoked by the `/rate` skill.
 - `observation/capture/rate/SKILL.md`: the global `/rate` skill source.

@@ -1,0 +1,2 @@
+{"type":"user","sessionId":"sess-3","cwd":"/x/demo-repo","gitBranch":"feat/7-thing","timestamp":"2026-06-03T09:00:00.000Z","message":{"role":"user","content":"Carry on with 7"}}
+{"type":"assistant","sessionId":"sess-3","cwd":"/x/demo-repo","gitBranch":"feat/7-thing","timestamp":"2026-06-03T09:00:05.000Z","message":{"id":"m5","role":"assistant","model":"claude-opus-4-8","usage":{"input_tokens":300,"output_tokens":30,"cache_read_input_tokens":0,"cache_creation_input_tokens":0},"content":[{"type":"text","text":"Continuing."}]}}
