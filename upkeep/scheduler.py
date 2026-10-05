@@ -19,6 +19,7 @@ import calendar
 import fcntl
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -35,7 +36,10 @@ WEEKLY_PACE_PER_DAY = 100 / 7
 # The human's example of a window worth using: "a session that's about to reset
 # but has 40% useage left should be used."
 MIN_SESSION_ROOM = 40
-SCHEDULED_HOURS = (22,)  # a missed night is skipped, not caught up
+SCHEDULED_HOUR = 22
+# launchd fires on time when the machine is awake and on wake when it was not, so a
+# start after the slot's first minute means it was asleep at 22:00: the night is skipped.
+SCHEDULED_GRACE_SECONDS = 60
 RUN_TIMEOUT = 3 * 3600
 PROMPT = "do upkeep"
 KIND_SKIPS = {"aiw:direction", "aiw:close-proposed"}
@@ -161,7 +165,7 @@ def assess(repo, t):
         closed = gh_json(repo, ["pr", "list", "--state", "closed", "--label", "aiw:upkeep", "--limit", "200",
                                 "--json", "mergedAt,closingIssuesReferences"])
     except (RuntimeError, ValueError, OSError, subprocess.TimeoutExpired) as e:
-        return {"skip": f"could not read GitHub: {e}"}
+        return {"skip": f"could not read GitHub: {str(e).splitlines()[0] if str(e) else type(e).__name__}"}
     rejected = {ref["number"] for pr in closed if not pr.get("mergedAt")
                 for ref in pr.get("closingIssuesReferences") or []}
     eligible = [i for i in issues
@@ -191,7 +195,7 @@ def side_findings(repo):
         if proposals:
             out["close_proposed"] = [f"#{p['number']} {p['title']}" for p in proposals]
     except (RuntimeError, ValueError, TypeError, KeyError, OSError, subprocess.TimeoutExpired):
-        pass
+        return None
     return out
 
 
@@ -199,9 +203,11 @@ def side_findings(repo):
 
 def run_upkeep(repo):
     started = time.time()
+    # Hold off idle sleep for the length of the run; a run cut off mid-task leaves work half done.
+    awake = ["caffeinate", "-i"] if shutil.which("caffeinate") else []
     try:
         r = subprocess.run(
-            ["claude", "-p", PROMPT, "--permission-mode", "auto", "--permission-prompts", "none",
+            awake + ["claude", "-p", PROMPT, "--permission-mode", "auto", "--permission-prompts", "none",
              "--output-format", "json"],
             cwd=repo, capture_output=True, text=True, timeout=RUN_TIMEOUT)
     except subprocess.TimeoutExpired:
@@ -223,17 +229,21 @@ def decide(t, scheduled):
     rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t)),
            "mode": "scheduled" if scheduled else "manual"}
     lt = time.localtime(t)
-    if scheduled and (lt.tm_wday >= 5 or lt.tm_hour not in SCHEDULED_HOURS):
-        rec["stopped"] = "outside the weekday 22:00 slot (a missed night is skipped)"
+    if scheduled and (lt.tm_wday >= 5 or lt.tm_hour != SCHEDULED_HOUR
+                      or lt.tm_min * 60 + lt.tm_sec > SCHEDULED_GRACE_SECONDS):
+        rec["stopped"] = "not started at 22:00 on a weekday (asleep then, or outside the slot); the night is skipped"
         return rec, None
 
     repos = [r for r in sorted(recent_repos(t)) if (Path(r) / "ai-workflow.md").is_file()]
-    findings = {}
+    findings, read_any = {}, False
     for repo in repos:
         f = side_findings(repo)
+        read_any = read_any or f is not None
         if f:
             findings[repo] = f
-    rec["findings"] = findings
+    # Recorded only when GitHub answered, so an offline night leaves the last findings standing.
+    if read_any:
+        rec["findings"] = findings
 
     ok, gate = quota_gates(t)
     rec["quota"] = gate
@@ -247,6 +257,11 @@ def decide(t, scheduled):
         (skipped if "skip" in a else candidates)[repo] = a.get("skip", a)
     rec["candidates"] = candidates
     rec["skipped"] = skipped
+    unread = [r for r, why in skipped.items() if why.startswith("could not read GitHub")]
+    if not candidates and unread:
+        # Unread projects may hold eligible upkeep, so "none eligible" would be a guess.
+        rec["stopped"] = f"could not read GitHub for {len(unread)} project(s)"
+        return rec, None
     if not candidates:
         rec["stopped"] = "no project with eligible upkeep"
         return rec, None
@@ -294,12 +309,17 @@ def cmd_report(args):
         print("No upkeep decisions logged yet.")
         return
     latest = None
+    records = []
     for line in lines:
         try:
             r = json.loads(line)
         except ValueError:
+            r = None
+        if isinstance(r, dict):
+            records.append(r)
+        else:
             print("(unreadable log line)")
-            continue
+    for r in sorted(records, key=lambda r: str(r.get("at") or "")):
         head = f"{r.get('at')} {r.get('mode')}: "
         if "chosen" in r:
             run = r.get("run", {})
@@ -314,6 +334,9 @@ def cmd_report(args):
         if "weekly" in q:
             print(f"    quota: week {q['weekly']['used']}% of {q['weekly']['allowance']}% pace, "
                   f"5h room {q['session_room']}%, snapshot {q['snapshot_age_hours']}h old")
+        for repo, a in r.get("candidates", {}).items():
+            if repo != r.get("chosen"):
+                print(f"    candidate {Path(repo).name}: {a['issues']} issues, {a['issue_days']} issue-days")
         for repo, why in r.get("skipped", {}).items():
             print(f"    skipped {Path(repo).name}: {why}")
         if "findings" in r:

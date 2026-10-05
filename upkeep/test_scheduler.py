@@ -11,7 +11,7 @@ os.environ["AIW_UPKEEP_HOME"] = STATE
 import scheduler  # noqa: E402
 
 DAY = 86400
-T = int(time.mktime((2026, 10, 1, 22, 15, 0, 0, 0, -1)))  # a Thursday, 22:15 local
+T = int(time.mktime((2026, 10, 1, 22, 0, 30, 0, 0, -1)))  # a Thursday, 22:00:30 local
 
 
 def snapshot(week_used, five_used, saved=T - 3600, week_resets=T + 3 * DAY, five_resets=T + 3600):
@@ -56,9 +56,14 @@ class QuotaGates(unittest.TestCase):
 
 class ScheduledSlot(unittest.TestCase):
     def test_missed_night_is_skipped(self):
-        rec, chosen = scheduler.decide(T + 3600, scheduled=True)  # 23:15
+        rec, chosen = scheduler.decide(T + 3600, scheduled=True)  # 23:00
         self.assertIsNone(chosen)
-        self.assertIn("outside the weekday 22:00 slot", rec["stopped"])
+        self.assertIn("night is skipped", rec["stopped"])
+
+    def test_a_late_start_means_the_machine_was_asleep_at_22(self):
+        rec, chosen = scheduler.decide(T + 89, scheduled=True)  # 22:01:59, as on 2026-10-02
+        self.assertIsNone(chosen)
+        self.assertIn("asleep then", rec["stopped"])
 
     def test_weekend_is_skipped(self):
         rec, chosen = scheduler.decide(T + 2 * DAY, scheduled=True)  # Saturday
@@ -102,6 +107,39 @@ class Candidates(unittest.TestCase):
         finally:
             scheduler.gh_json, scheduler.sh = real_gh, real_sh
         self.assertEqual(got, {"issues": 1, "issue_days": 10.0})
+
+
+class StopReasons(unittest.TestCase):
+    def test_unreachable_github_is_not_reported_as_an_empty_queue(self):
+        snapshot(week_used=10, five_used=10)
+        real = (scheduler.recent_repos, scheduler.assess, scheduler.side_findings)
+        repo = tempfile.mkdtemp()
+        open(os.path.join(repo, "ai-workflow.md"), "w").close()
+        scheduler.recent_repos = lambda t: {repo: t}
+        scheduler.assess = lambda r, t: {"skip": "could not read GitHub: gh pr list: error connecting to api.github.com"}
+        scheduler.side_findings = lambda r: None
+        try:
+            rec, chosen = scheduler.decide(T, scheduled=True)
+        finally:
+            scheduler.recent_repos, scheduler.assess, scheduler.side_findings = real
+        self.assertIsNone(chosen)
+        self.assertEqual(rec["stopped"], "could not read GitHub for 1 project(s)")
+        self.assertNotIn("findings", rec)
+
+    def test_a_multi_line_gh_error_is_logged_on_one_line(self):
+        repo = tempfile.mkdtemp()
+        os.makedirs(os.path.join(repo, ".claude", "skills", "aiw-upkeep"))
+        open(os.path.join(repo, "ai-workflow.md"), "w").close()
+        open(os.path.join(repo, ".claude", "skills", "aiw-upkeep", "SKILL.md"), "w").close()
+        def offline(*a, **k):
+            raise RuntimeError("gh pr list: error connecting to api.github.com\ncheck your internet connection")
+        real = scheduler.sh
+        scheduler.sh = offline
+        try:
+            got = scheduler.assess(repo, T)
+        finally:
+            scheduler.sh = real
+        self.assertNotIn("\n", got["skip"])
 
 
 if __name__ == "__main__":
