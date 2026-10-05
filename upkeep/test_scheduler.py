@@ -110,12 +110,26 @@ class Candidates(unittest.TestCase):
 
 
 class StopReasons(unittest.TestCase):
+    def test_a_project_in_use_is_skipped(self):
+        snapshot(week_used=10, five_used=10)
+        repo = tempfile.mkdtemp()
+        open(os.path.join(repo, "ai-workflow.md"), "w").close()
+        real = (scheduler.recent_repos, scheduler.side_findings)
+        scheduler.recent_repos = lambda t: {repo: t - 60}
+        scheduler.side_findings = lambda r: {}
+        try:
+            rec, chosen = scheduler.decide(T, scheduled=True)
+        finally:
+            scheduler.recent_repos, scheduler.side_findings = real
+        self.assertIsNone(chosen)
+        self.assertIn("in use", rec["skipped"][repo])
+
     def test_unreachable_github_is_not_reported_as_an_empty_queue(self):
         snapshot(week_used=10, five_used=10)
         real = (scheduler.recent_repos, scheduler.assess, scheduler.side_findings)
         repo = tempfile.mkdtemp()
         open(os.path.join(repo, "ai-workflow.md"), "w").close()
-        scheduler.recent_repos = lambda t: {repo: t}
+        scheduler.recent_repos = lambda t: {repo: t - 3600}
         scheduler.assess = lambda r, t: {"skip": "could not read GitHub: gh pr list: error connecting to api.github.com"}
         scheduler.side_findings = lambda r: None
         try:
@@ -140,6 +154,162 @@ class StopReasons(unittest.TestCase):
         finally:
             scheduler.sh = real
         self.assertNotIn("\n", got["skip"])
+
+
+MODE_SH = """#!/usr/bin/env bash
+set -eu
+cd "$(dirname "$0")/.."
+echo "$1" >> .claude/calls
+[ -f .claude/fail-$1 ] && exit 1
+[ -f .claude/dirty-$1 ] && touch stray.bak
+if [ "$1" = build ]; then mv .claude/skills-off/aiw-upkeep .claude/skills/aiw-upkeep; fi
+if [ "$1" = work ]; then mv .claude/skills/aiw-upkeep .claude/skills-off/aiw-upkeep; fi
+echo "$1" > .claude/mode
+"""
+
+
+def work_mode_project():
+    repo = tempfile.mkdtemp()
+    for d in (".claude/skills", ".claude/skills-off/aiw-upkeep", "scripts"):
+        os.makedirs(os.path.join(repo, d))
+    open(os.path.join(repo, ".claude/skills-off/aiw-upkeep/SKILL.md"), "w").close()
+    with open(os.path.join(repo, ".claude/mode"), "w") as fh:
+        fh.write("work\n")
+    with open(os.path.join(repo, "scripts/mode.sh"), "w") as fh:
+        fh.write(MODE_SH)
+    os.chmod(os.path.join(repo, "scripts/mode.sh"), 0o755)
+    with open(os.path.join(repo, ".gitignore"), "w") as fh:
+        fh.write(".claude/\n")
+    import subprocess
+    for cmd in (["git", "init", "-q", "-b", "main"], ["git", "add", "-A"],
+                ["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-q", "-m", "init"]):
+        subprocess.run(cmd, cwd=repo, check=True)
+    return repo
+
+
+def read(repo, name):
+    with open(os.path.join(repo, name)) as fh:
+        return fh.read().split()
+
+
+class WorkMode(unittest.TestCase):
+    def setUp(self):
+        scheduler.PENDING.unlink(missing_ok=True)
+
+    def test_a_parked_project_is_recognised(self):
+        self.assertTrue(scheduler.in_work_mode(work_mode_project()))
+
+    def test_the_run_happens_in_build_and_work_mode_is_restored(self):
+        repo = work_mode_project()
+        seen = {}
+        def run():
+            seen["mode"] = read(repo, ".claude/mode")[0]
+            return {"outcome": "finished"}
+        out = scheduler.run_in_build_mode(repo, run, {})
+        self.assertEqual(seen["mode"], "build")
+        self.assertEqual(read(repo, ".claude/calls"), ["build", "work"])
+        self.assertEqual(read(repo, ".claude/mode"), ["work"])
+        self.assertNotIn("mode_restore", out)
+        self.assertNotIn("tree_changed", out)
+        self.assertFalse(scheduler.PENDING.exists())
+
+    def test_work_mode_is_restored_and_logged_when_the_run_crashes(self):
+        repo = work_mode_project()
+        def run():
+            raise RuntimeError("boom")
+        out = scheduler.run_in_build_mode(repo, run, {})
+        self.assertEqual(read(repo, ".claude/mode"), ["work"])
+        self.assertIn("boom", out["outcome"])
+
+    def test_a_killed_run_is_repaired_by_the_next_invocation(self):
+        repo = work_mode_project()
+        scheduler.switch_mode(repo, "build")
+        scheduler.set_pending(repo, True)
+        self.assertEqual(scheduler.repair_pending({}, T), [{"repo": repo, "restored": True}])
+        self.assertEqual(read(repo, ".claude/mode"), ["work"])
+        self.assertEqual(scheduler.pending(), [])
+
+    def test_a_repair_sees_through_a_marker_written_last(self):
+        repo = work_mode_project()
+        scheduler.switch_mode(repo, "build")
+        with open(os.path.join(repo, ".claude/mode"), "w") as fh:
+            fh.write("work\n")  # killed after the skills moved, before the marker was written
+        scheduler.set_pending(repo, True)
+        self.assertEqual(scheduler.repair_pending({}, T)[0].get("restored"), True)
+        self.assertTrue(os.path.isfile(os.path.join(repo, ".claude/skills-off/aiw-upkeep/SKILL.md")))
+
+    def test_a_repair_waits_while_the_project_is_in_use(self):
+        repo = work_mode_project()
+        scheduler.switch_mode(repo, "build")
+        scheduler.set_pending(repo, True)
+        got = scheduler.repair_pending({repo: T - 60}, T)
+        self.assertIn("in use", got[0]["error"])
+        self.assertEqual(read(repo, ".claude/mode"), ["build"])
+        self.assertEqual(scheduler.pending(), [repo])
+        scheduler.set_pending(repo, False)
+
+    def test_one_pending_repair_does_not_overwrite_another(self):
+        scheduler.set_pending("/x", True)
+        scheduler.set_pending("/y", True)
+        self.assertEqual(scheduler.pending(), ["/x", "/y"])
+        scheduler.set_pending("/x", False)
+        scheduler.set_pending("/y", False)
+        self.assertFalse(scheduler.PENDING.exists())
+
+    def test_sigterm_mid_run_still_restores_work_mode(self):
+        repo = work_mode_project()
+        code = (
+            "import os, signal, sys\n"
+            f"sys.path.insert(0, {os.path.dirname(os.path.abspath(scheduler.__file__))!r})\n"
+            "import scheduler\n"
+            "signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))\n"
+            "result = {}\n"
+            f"scheduler.run_in_build_mode({repo!r}, lambda: os.kill(os.getpid(), signal.SIGTERM) or {{}}, result)\n"
+        )
+        import subprocess, sys as _sys
+        p = subprocess.run([_sys.executable, "-c", code], env={**os.environ, "AIW_UPKEEP_HOME": tempfile.mkdtemp()})
+        self.assertEqual(p.returncode, 143)
+        self.assertEqual(read(repo, ".claude/calls"), ["build", "work"])
+        self.assertEqual(read(repo, ".claude/mode"), ["work"])
+
+    def test_a_switch_that_dirties_the_tree_means_no_run(self):
+        repo = work_mode_project()
+        open(os.path.join(repo, ".claude/dirty-build"), "w").close()
+        ran = []
+        out = scheduler.run_in_build_mode(repo, lambda: ran.append(1) or {}, {})
+        self.assertEqual(ran, [])
+        self.assertIn("changed the tree", out["mode_switch"])
+        self.assertEqual(read(repo, ".claude/mode"), ["work"])
+
+    def test_a_run_that_leaves_the_tree_changed_is_reported(self):
+        repo = work_mode_project()
+        def run():
+            open(os.path.join(repo, "left-behind.txt"), "w").close()
+            return {"outcome": "finished"}
+        out = scheduler.run_in_build_mode(repo, run, {})
+        self.assertIn("left-behind.txt", out["tree_changed"])
+
+    def test_a_half_switched_project_is_still_flipped(self):
+        repo = work_mode_project()
+        os.rename(os.path.join(repo, ".claude/skills-off/aiw-upkeep"), os.path.join(repo, ".claude/skills/aiw-upkeep"))
+        self.assertTrue(scheduler.in_work_mode(repo))
+
+    def test_a_failed_switch_to_build_means_no_run(self):
+        repo = work_mode_project()
+        open(os.path.join(repo, ".claude/fail-build"), "w").close()
+        ran = []
+        out = scheduler.run_in_build_mode(repo, lambda: ran.append(1) or {}, {})
+        self.assertEqual(ran, [])
+        self.assertEqual(out["outcome"], "not run")
+        self.assertIn("mode.sh build failed", out["mode_switch"])
+
+    def test_a_failed_return_to_work_is_reported(self):
+        repo = work_mode_project()
+        open(os.path.join(repo, ".claude/fail-work"), "w").close()
+        out = scheduler.run_in_build_mode(repo, lambda: {"outcome": "finished"}, {})
+        self.assertIn("mode.sh work failed", out["mode_restore"])
+        self.assertEqual(scheduler.pending(), [repo])
+        scheduler.set_pending(repo, False)
 
 
 if __name__ == "__main__":

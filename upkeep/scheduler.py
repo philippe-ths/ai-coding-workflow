@@ -20,6 +20,7 @@ import fcntl
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import time
@@ -30,6 +31,7 @@ PROJECTS = Path(os.environ.get("AIW_UPKEEP_PROJECTS", Path.home() / ".claude" / 
 QUOTA = STATE / "quota.json"
 LOG = STATE / "runs.jsonl"
 LOCK = STATE / "run.lock"
+PENDING = STATE / "work-mode-pending.json"
 
 RECENT_DAYS = 7
 WEEKLY_PACE_PER_DAY = 100 / 7
@@ -41,6 +43,8 @@ SCHEDULED_HOUR = 22
 # start after the slot's first minute means it was asleep at 22:00: the night is skipped.
 SCHEDULED_GRACE_SECONDS = 60
 RUN_TIMEOUT = 3 * 3600
+# A session this recent may still be open; switching branch or mode under it would disturb it.
+ACTIVE_SECONDS = 30 * 60
 PROMPT = "do upkeep"
 KIND_SKIPS = {"aiw:direction", "aiw:close-proposed"}
 
@@ -152,7 +156,8 @@ def assess(repo, t):
     """Score one repo by the issues aiw-upkeep would actually pick, or say why it is skipped."""
     if not (Path(repo) / "ai-workflow.md").is_file():
         return {"skip": "workflow not installed"}
-    if not (Path(repo) / ".claude" / "skills" / "aiw-upkeep" / "SKILL.md").is_file():
+    parked = in_work_mode(repo)
+    if not parked and not (Path(repo) / ".claude" / "skills" / "aiw-upkeep" / "SKILL.md").is_file():
         return {"skip": "aiw-upkeep not loaded (not installed, or parked)"}
     try:
         if sh(["git", "status", "--porcelain"], cwd=repo).strip():
@@ -175,7 +180,132 @@ def assess(repo, t):
     if not eligible:
         return {"skip": "no eligible upkeep issue"}
     days = sum(max(0.0, (t - iso_epoch(i["createdAt"])) / 86400) for i in eligible)
-    return {"issues": len(eligible), "issue_days": round(days, 1)}
+    out = {"issues": len(eligible), "issue_days": round(days, 1)}
+    if parked:
+        out["work_mode"] = True
+    return out
+
+
+def in_work_mode(repo):
+    """A project in Work Mode that its own scripts/mode.sh can switch for the run.
+
+    Work Mode parks every aiw-* skill but issue creation and swaps in its own CLAUDE.md, so a
+    run there would lack the Task Flow aiw-upkeep relies on. The run happens in Build Mode.
+    """
+    r = Path(repo)
+    try:
+        mode = (r / ".claude" / "mode").read_text().strip()
+    except OSError:
+        return False
+    return (mode == "work" and os.access(r / "scripts" / "mode.sh", os.X_OK)
+            and any((r / ".claude" / d / "aiw-upkeep" / "SKILL.md").is_file() for d in ("skills-off", "skills")))
+
+
+def switch_mode(repo, mode):
+    """Run the project's own mode switch; return an error string, or None on success."""
+    try:
+        sh([str(Path(repo) / "scripts" / "mode.sh"), mode], cwd=repo)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+        return f"scripts/mode.sh {mode} failed: {str(e).splitlines()[0] if str(e) else type(e).__name__}"
+    return None
+
+
+def tree_state(repo):
+    """Branch and status, to tell whether the flip left the checkout as it found it."""
+    try:
+        return (sh(["git", "branch", "--show-current"], cwd=repo).strip(),
+                sh(["git", "status", "--porcelain"], cwd=repo))
+    except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:
+        return ("?", f"unreadable: {e}")
+
+
+def pending():
+    try:
+        return [p for p in json.loads(PENDING.read_text()) if isinstance(p, str)]
+    except (OSError, ValueError, TypeError):
+        return []
+
+
+def set_pending(repo, on):
+    """Track the projects a run switched to Build and has not yet switched back."""
+    repos = [p for p in pending() if p != repo] + ([repo] if on else [])
+    if repos:
+        tmp = PENDING.with_suffix(".tmp")
+        tmp.write_text(json.dumps(repos))
+        os.replace(tmp, PENDING)
+    else:
+        PENDING.unlink(missing_ok=True)
+
+
+def restore_work_mode(repo, before):
+    """Switch back to Work, clear its pending entry, and say what is not as it was."""
+    out = {}
+    back = switch_mode(repo, "work")
+    if back:
+        out["mode_restore"] = back
+    else:
+        set_pending(repo, False)
+    branch, status = tree_state(repo)
+    if (branch, status) != before:
+        out["tree_changed"] = (f"on {branch} (was {before[0]}); "
+                               + ("; ".join(status.strip().splitlines()[:5]) or "clean"))
+    return out
+
+
+def run_in_build_mode(repo, run, result):
+    """Switch a Work Mode project to Build for the run and back to Work whatever happens.
+
+    Fills `result` in place, so a run cut short by SIGTERM still leaves a record. A pending
+    entry names the project before the switch, so a hard kill is repaired by a later invocation.
+    """
+    before = tree_state(repo)
+    set_pending(repo, True)
+    try:
+        err = switch_mode(repo, "build")
+        if not err and not (Path(repo) / ".claude" / "skills" / "aiw-upkeep" / "SKILL.md").is_file():
+            err = "aiw-upkeep missing after switching to build"
+        if not err and tree_state(repo) != before:
+            err = "switching to build changed the tree, so the run would start dirty"
+        if err:
+            result.update({"outcome": "not run", "minutes": 0, "mode_switch": err})
+        else:
+            result["mode_switch"] = "ran in build mode"
+            try:
+                result.update(run())
+            except Exception as e:  # the switch back and the log line matter more than the traceback
+                result.update({"outcome": f"error: {type(e).__name__}: {e}", "minutes": 0})
+    finally:
+        ignore_sigterm()
+        result.update(restore_work_mode(repo, before))
+    return result
+
+
+def ignore_sigterm():
+    """Cleanup is not to be cut short by a second SIGTERM."""
+    try:
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    except ValueError:  # not the main thread
+        pass
+
+
+def repair_pending(recent, t):
+    """Put back Work Mode for projects a killed run left in Build Mode, unless in use."""
+    done = []
+    for repo in pending():
+        r = Path(repo)
+        # The mode scripts write .claude/mode last, so a kill mid-switch leaves the skills live
+        # under a "work" marker: judge by whether aiw-upkeep is loaded, not by the marker.
+        if not (r / ".claude" / "skills" / "aiw-upkeep" / "SKILL.md").is_file():
+            set_pending(repo, False)
+            done.append({"repo": repo, "restored": "already back in work mode"})
+            continue
+        if t - recent.get(repo, 0) < ACTIVE_SECONDS:
+            done.append({"repo": repo, "error": "in use, left in build mode until the next run"})
+            continue
+        out = restore_work_mode(repo, tree_state(repo))
+        done.append({"repo": repo, **({"restored": True} if "mode_restore" not in out else {"error": out["mode_restore"]}),
+                     **({"tree_changed": out["tree_changed"]} if "tree_changed" in out else {})})
+    return done
 
 
 def iso_epoch(s):
@@ -234,7 +364,8 @@ def decide(t, scheduled):
         rec["stopped"] = "not started at 22:00 on a weekday (asleep then, or outside the slot); the night is skipped"
         return rec, None
 
-    repos = [r for r in sorted(recent_repos(t)) if (Path(r) / "ai-workflow.md").is_file()]
+    recent = recent_repos(t)
+    repos = [r for r in sorted(recent) if (Path(r) / "ai-workflow.md").is_file()]
     findings, read_any = {}, False
     for repo in repos:
         f = side_findings(repo)
@@ -253,6 +384,9 @@ def decide(t, scheduled):
 
     candidates, skipped = {}, {}
     for repo in repos:
+        if t - recent[repo] < ACTIVE_SECONDS:
+            skipped[repo] = f"in use: a session was active in the last {ACTIVE_SECONDS // 60} minutes"
+            continue
         a = assess(repo, t)
         (skipped if "skip" in a else candidates)[repo] = a.get("skip", a)
     rec["candidates"] = candidates
@@ -291,13 +425,33 @@ def cmd_run(args):
                 log(rec)
             print(json.dumps(rec, indent=2))
             return
-        rec, chosen = decide(now(), scheduled)
-        if chosen and not dry:
-            rec["run"] = run_upkeep(chosen)
-        if dry:
-            rec["dry_run"] = True
-        else:
-            log(rec)
+        # launchd sends SIGTERM on logout, shutdown or reinstall; raising SystemExit lets the
+        # cleanup blocks below switch Work Mode back and write the log line.
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(143))
+        t = now()
+        rec = {"at": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t)),
+               "mode": "scheduled" if scheduled else "manual", "stopped": "interrupted before a decision"}
+        try:
+            if dry:
+                if pending():
+                    rec["pending_repair"] = pending()
+            elif pending():
+                rec["repaired"] = repair_pending(recent_repos(t), t)
+            decided, chosen = decide(t, scheduled)
+            rec.pop("stopped")
+            rec.update(decided)
+            if chosen and not dry:
+                rec["run"] = {"outcome": "interrupted", "minutes": 0}
+                if rec["candidates"][chosen].get("work_mode"):
+                    run_in_build_mode(chosen, lambda: run_upkeep(chosen), rec["run"])
+                else:
+                    rec["run"].update(run_upkeep(chosen))
+        finally:
+            ignore_sigterm()
+            if dry:
+                rec["dry_run"] = True
+            else:
+                log(rec)
     print(json.dumps(rec, indent=2))
 
 
@@ -325,11 +479,26 @@ def cmd_report(args):
             run = r.get("run", {})
             print(head + f"{Path(r['chosen']).name}, {r.get('why')}: "
                   f"{run.get('outcome', 'not run')}, {run.get('minutes', '?')} min")
+            if run.get("mode_switch"):
+                print(f"    {run['mode_switch']}")
+            if run.get("mode_restore"):
+                print(f"    WORK MODE NOT RESTORED in {Path(r['chosen']).name}: {run['mode_restore']}")
+            if run.get("tree_changed"):
+                print(f"    CHECKOUT NOT AS IT WAS in {Path(r['chosen']).name}: {run['tree_changed']}")
             text = (run.get("result") or "").strip()
             if text:
                 print("    " + text.splitlines()[0][:200])
         else:
             print(head + f"no run, {r.get('stopped')}")
+        reps = r.get("repaired") or []
+        for rep in reps if isinstance(reps, list) else [reps]:
+            name = Path(rep.get("repo", "?")).name
+            if rep.get("error"):
+                print(f"    WORK MODE NOT RESTORED in {name} after a killed run: {rep['error']}")
+            else:
+                print(f"    repaired a killed run: {name} back in work mode")
+            if rep.get("tree_changed"):
+                print(f"    CHECKOUT NOT AS IT WAS in {name}: {rep['tree_changed']}")
         q = r.get("quota", {})
         if "weekly" in q:
             print(f"    quota: week {q['weekly']['used']}% of {q['weekly']['allowance']}% pace, "
