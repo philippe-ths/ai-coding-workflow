@@ -67,73 +67,13 @@ git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1 \
 SOURCE="$(cd "$SOURCE" && git rev-parse --show-toplevel)"
 TARGET="$(cd "$TARGET" && git rev-parse --show-toplevel)"
 
-# Files the manifest declares "seeded": shipped once with defaults, then owned by
-# the target. An existing target copy is kept; only settings it lacks are added.
-seeded_paths="$(jq -r '.seeded[]?' "$MANIFEST")"
-is_seeded() { [ -n "$seeded_paths" ] && printf '%s\n' "$seeded_paths" | grep -Fxq -- "$1"; }
-
-# Name of the setting a SOURCE line declares, or nothing. Accepts leading
-# whitespace, an optional export/readonly/declare prefix, KEY=..., and the
-# conditional form : "${KEY:=...}" quoted or not; a comment declares nothing.
-setting_key() {
-  local re_a='^[[:space:]]*((export|readonly|declare)[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)='
-  local re_b='^[[:space:]]*:[[:space:]]+"?\$\{([A-Za-z_][A-Za-z0-9_]*):?='
-  if [[ "$1" =~ $re_a ]]; then printf '%s' "${BASH_REMATCH[3]}"
-  elif [[ "$1" =~ $re_b ]]; then printf '%s' "${BASH_REMATCH[1]}"
-  fi
-}
-
-# Add to the target copy every setting the source declares and the target lacks,
-# with its default and the comment block directly above it. Nothing else is
-# touched; when nothing is missing the target is not rewritten at all.
-#
-# Presence in the TARGET is judged permissively: any non-comment line holding the
-# key name as a whole word followed by = or := counts (indented, prefixed,
-# mid-line after ';', or inside ${KEY:=}). The costs are asymmetric: a false
-# "absent" appends a default that overrides the human's value when the file is
-# sourced; a false "present" withholds a new key, which can break a script that
-# reads it without a fallback. So a key judged present only from a line that
-# does not plainly set it (a trailing comment, a value, a second assignment) is
-# not added but is named, so the operator can check it is really set.
-#
-# Known limitation: a setting the target deliberately deleted is
-# indistinguishable from a new upstream one without a recorded base, so it comes
-# back with its default. The printed "added new setting" line tells the operator.
-merge_seeded() {
-  local rel="$1" src="$SOURCE/$1" dst="$TARGET/$1" live plain line key block="" add="" n=0
-  live="$(grep -v '^[[:space:]]*#' "$dst" || true)"
-  plain="$(printf '%s\n' "$live" | while IFS= read -r line; do setting_key "$line"; echo; done)"
-  while IFS= read -r line || [ -n "$line" ]; do
-    case "$line" in
-      "#"*) block="$block$line"$'\n'; continue ;;
-    esac
-    key="$(setting_key "$line")"
-    if [ -n "$key" ] && ! printf '%s\n' "$live" | grep -Eq "(^|[^A-Za-z0-9_])$key:?="; then
-      add="$add"$'\n'"$block$line"$'\n'
-      live="$live"$'\n'"$line"
-      n=$((n + 1))
-      echo "  $rel: added new setting $key (default from source)"
-    elif [ -n "$key" ] && ! printf '%s\n' "$plain" | grep -Fxq -- "$key"; then
-      echo "  $rel: did not add setting $key; it appears only on a line that does not plainly set it, so check the target sets it"
-    fi
-    block=""
-  done < "$src"
-  [ "$n" -gt 0 ] || return 0
-  [ -z "$(tail -c1 "$dst")" ] || printf '\n' >> "$dst"
-  printf '%s' "$add" >> "$dst"
-}
-
 # Copy every git-tracked file under a product path, preserving structure.
 copy_tracked() {
   local pathspec="${1%/}" f
   while IFS= read -r f; do
     [ -z "$f" ] && continue
     mkdir -p "$TARGET/$(dirname "$f")"
-    if is_seeded "$f" && [ -e "$TARGET/$f" ]; then
-      merge_seeded "$f"
-    else
-      cp "$SOURCE/$f" "$TARGET/$f"
-    fi
+    cp "$SOURCE/$f" "$TARGET/$f"
   done < <(git -C "$SOURCE" ls-files -- "$pathspec")
 }
 
