@@ -57,7 +57,7 @@ as a local path instead.
    It auto-detects the installed tool and profile from the target. Pass
    `--tool` to override or to disambiguate if several tools are
    installed.
-3. Report the version change and any files that were removed.
+3. Report the version change, any files that were removed, and each `added new setting` or `did not add setting` line the update printed, since those concern the human's policy file.
 
 ## Notes
 

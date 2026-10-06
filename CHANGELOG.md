@@ -6,6 +6,21 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.24.0 - 2026-10-06
+
+Updating a target keeps the policy settings it chose, and still delivers settings an upgrade adds.
+
+### Added
+
+- `install-manifest.json`: a `seeded` list for product files shipped once with defaults and then owned by the target; `.ai-policy/policy.env` is declared there ([#283]).
+- `scripts/check-manifest.sh`: every `seeded` entry must be a single tracked product file ([#283]).
+
+### Changed
+
+- `scripts/install.sh`: a seeded file that already exists in the target is kept, and only settings the target lacks are appended with their defaults and comments, one printed line per setting; a deliberately deleted setting comes back the same way ([#283]).
+- `scripts/update.sh`: surfaces the appended-setting lines, and `INSTALL.md` tells the agent to report them ([#283]).
+- `project-context.md` 1.52.0 records seeded files; the separate line on the installer sandbox tests was removed, since the `scripts/repo-validation.sh` line already names them ([#283]).
+
 ## 5.23.2 - 2026-10-06
 
 Shipped scripts and hooks no longer name files a target does not have without saying how they handle it, and a check now catches the next one.
@@ -1192,6 +1207,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
 [#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337
+[#283]: https://github.com/philippe-ths/ai-coding-workflow/issues/283
 [#317]: https://github.com/philippe-ths/ai-coding-workflow/issues/317
 [#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352

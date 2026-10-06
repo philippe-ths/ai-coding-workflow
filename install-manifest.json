@@ -1,5 +1,5 @@
 {
-  "$comment": "Boundary between product files (copied into a target repo on install) and factory files (this repo's own machinery, never copied). Source-side: this manifest is itself factory-only and is never installed. scripts/check-manifest.sh validates it against git-tracked files; untracked artifacts (e.g. .envrc, .DS_Store, .ai-policy/state/) are out of scope by design. Directory entries end with '/'; file entries do not.",
+  "$comment": "Boundary between product files (copied into a target repo on install) and factory files (this repo's own machinery, never copied). Source-side: this manifest is itself factory-only and is never installed. scripts/check-manifest.sh validates it against git-tracked files; untracked artifacts (e.g. .envrc, .DS_Store, .ai-policy/state/) are out of scope by design. Directory entries end with '/'; file entries do not. 'seeded' lists product files that ship once with defaults and are then owned by the target: install copies them only when absent, and later installs and updates keep the target's copy and append only settings it lacks. It is a property of product files, not a fourth category.",
   "profiles": {
     "full": {
       "shared": [
@@ -26,6 +26,9 @@
       }
     }
   },
+  "seeded": [
+    ".ai-policy/policy.env"
+  ],
   "authored_in_target": [
     "project-context.md",
     "project-checks.md",
