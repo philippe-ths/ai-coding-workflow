@@ -168,6 +168,24 @@ printf 'refs/heads/main %s refs/heads/main %s\n' "$HEAD_BRK" "$HEAD_OK" \
   | "$HOOK" >/dev/null 2>&1 || rc=$?
 assert_exit "bracketed heading style is accepted" 0 "$rc"
 
+# Case F: version bump in a repository with no CHANGELOG.md at HEAD -> skipped, allowed.
+git rm -q CHANGELOG.md
+cat > ai-workflow.md <<'EOF'
+# AI Workflow
+
+Version: 1.3.0
+
+Body.
+EOF
+git add ai-workflow.md
+git commit -q -m "bump 1.3.0 with no changelog"
+HEAD_NOCL="$(git rev-parse HEAD)"
+
+rc=0
+printf 'refs/heads/main %s refs/heads/main %s\n' "$HEAD_NOCL" "$HEAD_BRK" \
+  | "$HOOK" >/dev/null 2>&1 || rc=$?
+assert_exit "repository with no CHANGELOG.md at HEAD is not checked" 0 "$rc"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed out of $((PASS + FAIL)) tests."
 

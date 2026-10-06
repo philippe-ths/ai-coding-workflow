@@ -203,6 +203,17 @@ for t in .claude .agents; do
 done
 expect "INSTALL.md and .ai-policy/scripts/ paths are not read as factory-only" pass "$D"
 
+# Shipped scripts reach every target, so one naming a factory-only path fails unless
+# the line carries the marker that declares its absence is handled on purpose. The
+# path here is reached the way a hook does, as "$ROOT_DIR/<path>", from .githooks/.
+D="$(fixture shipped-script)"
+mkdir -p "$D/.githooks"
+# Brace-form prefix and an escaped slash inside the path, so the scan must handle both to see it.
+printf '%s\n' '#!/usr/bin/env bash' 'pgrep -fq "${ROOT_DIR}/observation\/collect.py"' > "$D/.githooks/pre-push"
+expect "a shipped hook naming a factory-only path via \$ROOT_DIR is caught" fail "$D" "shipped script names"
+printf '#!/usr/bin/env bash\npython3 "$ROOT_DIR/observation/collect.py" # factory-path-ok: skipped in a target\n' > "$D/.githooks/pre-push"
+expect "a marked line in a shipped script is accepted" pass "$D"
+
 echo "version headers:"
 D="$(fixture no-version)"
 drop "$D/project-context.md" '^Version:'

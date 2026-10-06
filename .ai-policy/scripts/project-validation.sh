@@ -30,6 +30,8 @@ done
 # Reports the size of the checks themselves. Reports only; never gates.
 ./.ai-policy/scripts/report-suite-size.sh
 
+# The target's own extension point: this layer ships without it, runs it when
+# present, and warns when absent.
 if [ -x ./scripts/repo-validation.sh ]; then
   echo "Running repo-specific checks from ./scripts/repo-validation.sh ..."
   ./scripts/repo-validation.sh
@@ -38,6 +40,5 @@ else
   echo "         Validation ran ONLY this workflow's policy-layer self-checks."
   echo "         Your project's own tests, linters, and type checks were NOT run,"
   echo "         so a \"passed\" result here does not mean your code is validated."
-  echo "         Wire your checks in by creating an executable ./scripts/repo-validation.sh"
-  echo "         (see README 'Post-install setup')."
+  echo "         Wire your checks in by creating an executable ./scripts/repo-validation.sh."
 fi

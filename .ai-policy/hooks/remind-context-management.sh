@@ -20,23 +20,24 @@
 # the same defensive shape as check-context-drift.sh, for the same reason: an
 # advisory nudge that can break a session is worse than no nudge.
 #
-# Arm 1 deliberately omits two shapes that existing validation already catches.
-# A new top-level tracked file fails scripts/check-manifest.sh, whose coverage
-# check rejects any tracked file no manifest category claims. An added skill
-# directory fails scripts/check-prose-integrity.sh, which asserts that
-# project-context.md names every skill in the tree. Firing on either would put a
-# second guard behind a gate that already holds, and every extra firing spends
-# the credibility the real ones need.
+# Arm 1 deliberately omits two shapes: a new top-level tracked file and an added
+# skill directory. In the repository this policy layer is developed in, validation
+# already catches both (a manifest coverage check, and a prose integrity check that
+# asserts project-context.md names every skill), so firing on either would put a
+# second guard behind a gate that already holds, and every extra firing spends the
+# credibility the real ones need. Those checks exist only in that repository; in a
+# target this hook does not flag either shape, and does not depend on the checks.
 #
-# What it does fire on are the shapes nothing else sees. Prose integrity walks the
-# skills that exist and checks the context file names them; it never walks the
-# other way, so a skill deleted from both trees leaves the context file naming a
-# skill that is gone and validation stays green. The manifest classifies by
-# directory prefix, so a module added, removed or renamed inside .ai-policy/,
-# .githooks/, scripts/ or observation/ is classified the moment it lands and no
-# check asks whether the context file's account of that directory still holds.
-# Nothing at all reads the context file against what the policy layer now
-# enforces, or against what validation now covers.
+# What it does fire on are the shapes nothing else sees. There, prose integrity
+# walks the skills that exist and checks the context file names them; it never
+# walks the other way, so a skill deleted from both trees leaves the context file
+# naming a skill that is gone and validation stays green, and that direction is
+# covered here in every repository. The manifest classifies by directory prefix, so
+# a module added, removed or renamed inside .ai-policy/, .githooks/ or one of the
+# other two top-level directories the pattern below names is classified the moment
+# it lands there, and no check asks whether the context file's account of that
+# directory still holds. Nothing at all reads the context file against what the
+# policy layer now enforces, or against what validation now covers.
 #
 # The signal is that the branch touched something the file is supposed to
 # describe. That is not the same as the file being stale, and the message must
@@ -57,7 +58,7 @@ BASE_BRANCHES="${PROTECTED_BRANCHES:-main master}"
 # additionalContext is a JSON string, so the payload has to be escaped rather
 # than interpolated. Without jq there is no safe way to build it, and a
 # malformed payload on a PreToolUse hook is a worse outcome than a missing
-# reminder — so degrade to silence, as scripts/check-manifest.sh does.
+# reminder — so degrade to silence, as the other hooks here do.
 command -v jq >/dev/null 2>&1 || exit 0
 
 INPUT="$(cat)" || exit 0
@@ -174,16 +175,18 @@ REMOVED="$(printf '%s\n' "$DIFF" | awk -F'\t' '$1 ~ /^[DR]/ { print $2 }' \
 
 hits=""
 
-# A skill removed from either mirrored tree. Prose integrity checks that every
-# skill that exists is named in the context file, never that every skill the
-# context file names still exists, so this direction is uncovered — and only
-# this direction. An added skill is already caught by that check, so removals
-# alone qualify here.
+# A skill removed from either mirrored tree. In the source repository, prose
+# integrity checks that every skill that exists is named in the context file, never
+# that every skill the context file names still exists, so this direction is
+# uncovered — and only this direction. There an added skill is already caught by
+# that check, so removals alone qualify here; in a target nothing catches additions.
 hits="$hits$(printf '%s\n' "$REMOVED" | grep -E '^\.(claude|agents)/skills/[^/]+/')
 "
 
-# An implementation module added, removed or renamed inside a directory the
-# manifest already classifies by prefix.
+# An implementation module added, removed or renamed inside one of the directories
+# the pattern below names (classified by prefix in the source repository's manifest).
+# The last alternative names a directory only the source repository has; a target
+# without it never matches it.
 hits="$hits$(printf '%s\n' "$STRUCTURAL" | grep -E '^(\.ai-policy|\.githooks|scripts|observation)/')
 "
 
@@ -194,6 +197,8 @@ hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(\.ai-policy/hooks/|\.githooks/|\.
 # What validation covers: a check added or removed, or the check set itself.
 hits="$hits$(printf '%s\n' "$STRUCTURAL" | grep -E '(^|/)test-[^/]*\.sh$')
 "
+# The first path is the target's own validation extension point, which
+# project-validation.sh runs when present, so it is real in a target that writes it.
 hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(scripts/repo-validation\.sh|\.ai-policy/scripts/project-validation\.sh)$')
 "
 

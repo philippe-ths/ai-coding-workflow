@@ -8,7 +8,7 @@ set -eu
 # Exit 2 = block, exit 0 = allow.
 #
 # Why: Task Flow puts the issue and branch (step 2) before planning (step 3),
-# and the observation tool charges work to a task by the branch it ran on.
+# and what a task cost is charged to it by the branch the work ran on.
 # Planning done on the default branch belongs to no task, and it cannot be
 # recovered afterwards by reading which issue the work named.
 #
