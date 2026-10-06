@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 # Update an already-installed AI workflow copy in a target repository.
 #
-#   scripts/update.sh --target <dir> --tool <name> [--source <dir>]
+#   scripts/update.sh --target <dir> [--tool <name>] [--source <dir>]
+#
+# Updates EVERY tool installed in the target, plus --tool if given, so no
+# installed tool is left at an older version. A tool counts as installed when
+# the installer's managed .gitignore block lists a path only that tool ships;
+# without a block, entry-point files are used and several of them need --tool.
+# --tool is otherwise only needed to add a tool not yet installed.
 #
 # Reconciles an installed (vendored) copy to the source's current version:
 #   1. Reads the installed version (target ai-workflow.md `Version:`) and the
 #      source version; refuses to downgrade and no-ops if already current.
 #   2. Re-copies the current product set (adds new, overwrites changed; seeded
-#      files are kept and only gain settings they lack) by
-#      delegating to install.sh.
+#      files are kept and only gain settings they lack) by delegating to
+#      install.sh, once per tool.
 #   3. Removes files the source dropped between the two versions, learned from
 #      the source CHANGELOG `### Removed` entries (leading-path convention).
 #      A file is deleted only if it is BOTH named as removed AND absent from the
@@ -28,7 +34,7 @@ while [ $# -gt 0 ]; do
     --source) SOURCE="${2:-}"; shift 2 ;;
     --target) TARGET="${2:-}"; shift 2 ;;
     --tool) TOOL="${2:-}"; shift 2 ;;
-    -h|--help) echo "Usage: update.sh --target <dir> --tool <name> [--source <dir>]"; exit 0 ;;
+    -h|--help) echo "Usage: update.sh --target <dir> [--tool <name>] [--source <dir>]"; echo "Updates every tool installed in the target, plus --tool if given."; exit 0 ;;
     *) echo "error: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -51,20 +57,56 @@ read_version() { awk '/^Version:[[:space:]]*/ { print $2; exit }' "$1" 2>/dev/nu
 
 [ -f "$TARGET/ai-workflow.md" ] || { echo "error: no installed workflow found in target (ai-workflow.md missing); use install.sh" >&2; exit 1; }
 
-# Auto-detect the tool from the installed target when not given.
-if [ -z "$TOOL" ]; then
-  detected=""
-  [ -f "$TARGET/CLAUDE.md" ] && detected="$detected claude"
-  [ -f "$TARGET/AGENTS.md" ] && detected="$detected codex"
-  [ -f "$TARGET/.github/copilot-instructions.md" ] && detected="$detected copilot"
-  detected="$(echo $detected | xargs)"
-  case "$detected" in
-    "")     echo "error: could not detect installed tool; pass --tool" >&2; exit 2 ;;
-    *" "*)  echo "error: multiple tools installed ($detected); pass --tool to choose" >&2; exit 2 ;;
-    *)      TOOL="$detected" ;;
-  esac
+# The tool set is every tool installed in the target, plus --tool if given, so
+# naming one tool never leaves another installed tool at an older version.
+# Installed means the installer's managed .gitignore block lists a path only
+# that tool ships: a repo's own CLAUDE.md or AGENTS.md is not evidence of an
+# install, and a deleted entry point does not hide one.
+case "$TOOL" in ""|claude|codex|copilot) ;; *) echo "error: --tool must be claude|codex|copilot" >&2; exit 2 ;; esac
+BEGIN_MARK="# >>> ai-workflow (vendored, managed by installer) >>>"
+END_MARK="# <<< ai-workflow <<<"
+TOOLS=""
+if [ -f "$TARGET/.gitignore" ] && grep -Fxq -- "$BEGIN_MARK" "$TARGET/.gitignore"; then
+  block_entries="$(mktemp)"
+  awk -v b="$BEGIN_MARK" -v e="$END_MARK" '
+    $0==b { inb=1; next }
+    $0==e { inb=0; next }
+    inb==1 { k=$0; sub(/^[ \t]+/,"",k); sub(/[ \t]+$/,"",k); sub(/\/+$/,"",k); if (k != "") print k }
+  ' "$TARGET/.gitignore" > "$block_entries"
+  for t in claude codex copilot; do
+    while IFS= read -r own; do
+      [ -z "$own" ] && continue
+      if grep -Fxq -- "$own" "$block_entries"; then TOOLS="$TOOLS $t"; break; fi
+    done < <(jq -r --arg t "$t" '[.profiles.full.tools[$t][]] - [.profiles.full.tools | to_entries[] | select(.key != $t) | .value[]] | .[] | sub("/+$"; "")' "$MANIFEST")
+  done
+  rm -f "$block_entries"
+  if [ -n "$TOOL" ]; then
+    case " $TOOLS " in *" $TOOL "*) ;; *) TOOLS="$TOOLS $TOOL" ;; esac
+  fi
+  # An entry point the block does not account for is either the repo's own file
+  # or a tool whose paths an older installer dropped from the block. Neither is
+  # safe to guess, so name it rather than install over it or skip it silently.
+  for pair in "claude:CLAUDE.md" "codex:AGENTS.md" "copilot:.github/copilot-instructions.md"; do
+    t="${pair%%:*}" ep="${pair#*:}"
+    case " $TOOLS " in *" $t "*) continue ;; esac
+    if [ -f "$TARGET/$ep" ]; then
+      echo "note: $ep exists but the installer's .gitignore block has no record of $t, so $t was not updated. If it is the repository's own file, nothing is needed; only if the installer put $t here, rerun with --tool $t, which overwrites $ep."
+    fi
+  done
+else
+  # No managed block (installed before it existed): fall back to entry points,
+  # and ask for --tool when they are ambiguous.
+  if [ -n "$TOOL" ]; then
+    TOOLS="$TOOL"
+  else
+    [ -f "$TARGET/CLAUDE.md" ] && TOOLS="$TOOLS claude"
+    [ -f "$TARGET/AGENTS.md" ] && TOOLS="$TOOLS codex"
+    [ -f "$TARGET/.github/copilot-instructions.md" ] && TOOLS="$TOOLS copilot"
+    case "$(echo $TOOLS)" in *" "*) echo "error: multiple tools installed ($(echo $TOOLS)); pass --tool to choose" >&2; exit 2 ;; esac
+  fi
 fi
-case "$TOOL" in claude|codex|copilot) ;; *) echo "error: --tool must be claude|codex|copilot" >&2; exit 2 ;; esac
+TOOLS="$(echo $TOOLS | xargs)"
+[ -n "$TOOLS" ] || { echo "error: could not detect installed tool; pass --tool" >&2; exit 2; }
 
 installed_version="$(read_version "$TARGET/ai-workflow.md")"
 source_version="$(read_version "$SOURCE/ai-workflow.md")"
@@ -85,10 +127,19 @@ else
 fi
 
 # --- additive: re-copy the current product set (overwrites changed, adds new; seeded files are kept and only gain missing settings) ---
-# Seeded files keep the target's copy; install.sh names each setting it appends.
-install_out="$("$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL")" \
-  || { echo "error: re-copy step failed" >&2; exit 1; }
-printf '%s\n' "$install_out" | grep -E 'added new setting|did not add setting' || true
+# Once per installed tool. Seeded files keep the target's copy; install.sh names
+# each setting it appends or skips, printed once however many tools ran.
+# If any run fails, ai-workflow.md is restored: the first run already copied the
+# new version, and a re-run would otherwise take the "already current" path.
+install_out=""
+wf_backup="$(mktemp)"; cp "$TARGET/ai-workflow.md" "$wf_backup"
+for TOOL in $TOOLS; do
+  install_out="$install_out$("$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL")"$'\n' \
+    || { cp "$wf_backup" "$TARGET/ai-workflow.md"; rm -f "$wf_backup"; echo "error: re-copy step failed" >&2; exit 1; }
+done
+rm -f "$wf_backup"
+seeded_notes="$(printf '%s\n' "$install_out" | grep -E 'added new setting|did not add setting' | awk '!seen[$0]++' || true)"
+if [ -n "$seeded_notes" ]; then printf '%s\n' "$seeded_notes"; else echo "Seeded files: the target already has every setting the source declares."; fi
 
 # Drop paths from the installer-managed .gitignore block (the block is a union,
 # so a path that left the product would otherwise linger forever). Nothing
@@ -190,5 +241,5 @@ EOF
 rm -f "$keep_file"
 prune_gitignore_block "$drop_keys"
 
-echo "Update complete: target now at $source_version (tool: $TOOL); $removed_count file(s) removed."
+echo "Update complete: target now at $source_version (tools: $TOOLS); $removed_count file(s) removed."
 echo "Local additions under vendored paths were left in place."

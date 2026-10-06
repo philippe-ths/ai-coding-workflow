@@ -6,6 +6,17 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.24.1 - 2026-10-06
+
+A target with several agent tools installed can be updated in one run, and no installed tool is left at an older version.
+
+### Changed
+
+- `scripts/update.sh`: updates every tool installed in the target, plus `--tool` if given, instead of refusing a multi-tool target. A tool counts as installed when the installer's `.gitignore` block lists a path only that tool ships, so a repository's own `CLAUDE.md` or `AGENTS.md` is never overwritten, and an entry point the block does not account for is named rather than guessed. Removal reconciliation still runs once across all tools, and a failed re-copy restores the target's version so a re-run retries the whole update ([#233]).
+- `scripts/update.sh`: a target with no managed block keeps the old behaviour of asking for `--tool` when several entry points exist ([#233]).
+- `INSTALL.md`: the update step says every installed tool is updated and `--tool` is only for adding one ([#233]).
+- `project-context.md` 1.52.1 describes the updater accordingly ([#233]).
+
 ## 5.24.0 - 2026-10-06
 
 Updating a target keeps the policy settings it chose, and still delivers settings an upgrade adds.
@@ -1207,6 +1218,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
 [#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337
+[#233]: https://github.com/philippe-ths/ai-coding-workflow/issues/233
 [#283]: https://github.com/philippe-ths/ai-coding-workflow/issues/283
 [#317]: https://github.com/philippe-ths/ai-coding-workflow/issues/317
 [#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
