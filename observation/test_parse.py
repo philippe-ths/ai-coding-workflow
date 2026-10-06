@@ -35,7 +35,7 @@ def check_tasks():
     import collect
 
     with tempfile.TemporaryDirectory() as sdir:
-        rows, tasks = collect.build_rows(sdir, PROJECTS)
+        rows, tasks, history = collect.build_rows(sdir, PROJECTS)
     by_session = {r["session_id"]: r for r in rows}
     check("sessions", sorted(by_session), ["sess-2", "sess-3", "sess-4"])
     s = by_session.get("sess-2") or {"tokens": {}, "subagents": {"tokens": {}}}
@@ -73,6 +73,64 @@ def check_tasks():
     check("two-issue branch", collect.task_of("fix/424-421-one-thread"), "#424")
     check("detached HEAD", collect.task_of("HEAD"), None)
     check("worktree branch", collect.task_of("worktree-agent-a1"), None)
+    check_history(rows, tasks, history)
+
+
+def check_history(rows, tasks, history):
+    """A session whose transcript Claude Code deleted keeps every figure it had."""
+    import json
+    import shutil
+    import tempfile
+
+    import collect
+
+    with tempfile.TemporaryDirectory() as tmp:
+        sdir, pdir = os.path.join(tmp, "store"), os.path.join(tmp, "projects")
+        shutil.copytree(PROJECTS, pdir)
+        # an entry from a future history format is kept, though not read
+        collect.write_jsonl(history + [{"v": 999, "record": {"session_id": "future"}}], sdir, "history.jsonl")
+        # sess-2 carries nested subagents and two of issue 7's branches
+        os.remove(os.path.join(pdir, "-x-demo-repo", "sess-2.jsonl"))
+        shutil.rmtree(os.path.join(pdir, "-x-demo-repo", "sess-2"))
+        rows2, tasks2, history2 = collect.build_rows(sdir, pdir)
+        collect.write_jsonl(history2, sdir, "history.jsonl")
+        rows3, tasks3, _ = collect.build_rows(sdir, pdir)
+
+    deleted = {r["session_id"]: r.pop("transcript_deleted") for r in rows2}
+    check("deleted transcript flagged", deleted, {"sess-2": True, "sess-3": False, "sess-4": False})
+    for r in rows:
+        r.pop("transcript_deleted")
+    check("sessions survive deletion", rows2, rows)
+    check("tasks survive deletion", tasks2, tasks)
+    for r in rows3:
+        r.pop("transcript_deleted")
+    check("history survives a second run", (rows3, tasks3), (rows, tasks))
+    check("other history format kept", [h["v"] for h in history2].count(999), 1)
+
+    # a reply with no timestamp has no day; that must survive the trip through history.jsonl,
+    # and a transcript still on disk that no longer parses is kept from history, not called deleted
+    reply = {"type": "assistant", "sessionId": "sess-9", "cwd": "/x/demo-repo", "gitBranch": "feat/9-x",
+             "message": {"id": "r9", "model": "claude-opus-4-8", "usage": {"input_tokens": 5, "output_tokens": 1}}}
+    with tempfile.TemporaryDirectory() as tmp:
+        sdir, pdir = os.path.join(tmp, "store"), os.path.join(tmp, "projects", "-x-demo-repo")
+        os.makedirs(pdir)
+        transcript = os.path.join(pdir, "sess-9.jsonl")
+        with open(transcript, "w") as fh:
+            fh.write(json.dumps(reply) + "\n")
+        _, before, history9 = collect.build_rows(sdir, os.path.dirname(pdir))
+        collect.write_jsonl(history9, sdir, "history.jsonl")
+        open(transcript, "w").close()
+        rows9, after, _ = collect.build_rows(sdir, os.path.dirname(pdir))
+    check("no-timestamp day survives history", after, before)
+    check("unparseable transcript not called deleted", [r["transcript_deleted"] for r in rows9], [False])
+
+    sess3 = next(r for r in rows if r["session_id"] == "sess-3")
+    ratings = [
+        {"repo": "demo-repo", "timestamp": sess3["started_at"], "rating": 3},
+        {"repo": "demo-repo", "timestamp": "2020-01-01T00:00:00+00:00", "rating": 1},
+    ]
+    check("unmatched ratings", [r["rating"] for r in collect.unmatched_ratings(rows, ratings)], [1])
+    json.dumps(history2)  # history must be plain JSON
 
 
 def check_pricing():

@@ -61,6 +61,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
 <header>
   <h1>AI Workflow &mdash; Session Observation</h1>
   <div class="muted" id="generated"></div>
+  <div class="muted" id="coverage"></div>
 </header>
 
 <div class="howto">
@@ -125,6 +126,7 @@ _TEMPLATE = r"""<!DOCTYPE html>
 <script>
 const SESSIONS = __DATA__;
 const TASKS = __TASKS__;
+const UNMATCHED = __UNMATCHED__;
 const GENERATED = "__GENERATED__";
 
 const $ = id => document.getElementById(id);
@@ -402,8 +404,26 @@ function render(){
   renderTable(rows);
 }
 
+// Claude Code deletes transcripts after cleanupPeriodDays (30 by default); the store keeps
+// what it has seen, so say which period that is and which ratings it cannot place.
+function renderCoverage(){
+  const starts = SESSIONS.map(s=>day(s.started_at)).filter(Boolean).sort();
+  const kept = SESSIONS.filter(s=>s.transcript_deleted).length;
+  let text = starts.length ? `Recorded sessions started between ${starts[0]} and ${starts[starts.length-1]}, with gaps. ` : "";
+  text += kept
+    ? `${kept} session${kept>1?"s are":" is"} kept from history after Claude Code deleted the transcript. `
+    : "";
+  text += "Claude Code deletes a transcript 30 days after its last write by default, and a session deleted before this store first read it is not recorded.";
+  if (UNMATCHED.length) {
+    const list = UNMATCHED.map(r=>`${day(r.timestamp)} ${r.repo} (${r.rating})`).join(", ");
+    text += ` ${UNMATCHED.length} rating${UNMATCHED.length>1?"s match":" matches"} no recorded session: ${list}.`;
+  }
+  $("coverage").textContent = text;
+}
+
 function init(){
   $("generated").textContent = "Generated " + GENERATED + " · " + SESSIONS.length + " sessions total";
+  renderCoverage();
   fillMulti($("f-repo"), uniq(SESSIONS.map(s=>s.repo)));
   fillMulti($("f-version"), uniq(SESSIONS.map(s=>s.workflow_version)));
   ["f-repo","f-version","f-from","f-to"].forEach(id=>$(id).addEventListener("change",render));
@@ -418,9 +438,10 @@ init();
 """
 
 
-def render(rows, tasks=(), generated_at="on demand"):
+def render(rows, tasks=(), generated_at="on demand", unmatched=()):
     data = json.dumps(rows, ensure_ascii=False)
     html = _TEMPLATE.replace("__TASKS__", json.dumps(list(tasks), ensure_ascii=False))
+    html = html.replace("__UNMATCHED__", json.dumps(list(unmatched), ensure_ascii=False))
     html = html.replace("__DATA__", data)
     html = html.replace("__GENERATED__", str(generated_at))
     return html
