@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.23.2 - 2026-10-06
+
+Shipped scripts and hooks no longer name files a target does not have without saying how they handle it, and a check now catches the next one.
+
+### Changed
+
+- `.ai-policy/hooks/check-changelog.sh`: skips a repository with no `CHANGELOG.md` at HEAD instead of blocking its push, since the workflow's changelog lives only in this repository ([#317]).
+- `.ai-policy/hooks/remind-context-management.sh`, `.ai-policy/hooks/block-planning-off-task.sh`, `.ai-policy/scripts/project-validation.sh`: comments that stated source-repository facts as true in a target now say where they hold; the validation warning drops a pointer to a README section that does not exist ([#317]).
+- `scripts/check-prose-integrity.sh`: the factory-path check also scans shipped scripts and hooks under `.ai-policy/` and `.githooks/`, including paths written as `./x`, `$VAR/x` or regex-escaped, and treats `scripts/repo-validation.sh` as the target's extension point; a deliberate mention carries a `factory-path-ok` marker ([#317]).
+
 ## 5.23.1 - 2026-10-06
 
 The context-drift reminder routes stale context the way the rules do, so an agent at session start is no longer told to refresh the file inline.
@@ -1182,5 +1192,6 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
 [#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337
+[#317]: https://github.com/philippe-ths/ai-coding-workflow/issues/317
 [#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352

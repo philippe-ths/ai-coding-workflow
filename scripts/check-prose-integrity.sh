@@ -236,6 +236,28 @@ else
     else
       ok "no product prose file names a factory-only path"
     fi
+    # Shipped scripts and hooks (.ai-policy/, .githooks/) go to every target too, so
+    # a line naming a factory-only path is false there unless the script handles the
+    # absence on purpose. That handling is declared by a "factory-path-ok" marker on
+    # the line, with the reason in the comment beside it; the marker exempts the whole
+    # line. Unlike prose, a script reaches a path as ./x, "$ROOT_DIR/x" or "${ROOT}/x",
+    # or writes it regex-escaped (x\.sh), so a token may follow ./ or a $NAME/ prefix
+    # and backslashes are stripped before matching.
+    # scripts/repo-validation.sh is exempt: it is the target's documented validation
+    # extension point, which project-validation.sh runs when the target writes one.
+    alt_shipped="$(printf '%s\n' "$tokens" | grep -v '^$' | grep -vxF 'scripts/repo-validation.sh' | sed 's/[][\.*^$/+?(){}|]/\\&/g' | paste -sd'|' -)"
+    ship_pre='(^|[^A-Za-z0-9_./-]|\./|\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/)'
+    shits=""
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      shits="$shits$(tr -d '\\' < "$f" | grep -nE "${ship_pre}(${alt_shipped})" | grep -v 'factory-path-ok' | sed "s|^|${f}:|" || true)"$'\n'
+    done < <(find .ai-policy .githooks -type f \( -name '*.sh' -o -name '*.py' -o -path '.githooks/*' \) 2>/dev/null | sort)
+    shits="$(printf '%s' "$shits" | grep -v '^$' || true)"
+    if [ -n "$shits" ]; then
+      while IFS= read -r h; do bad "shipped script names a factory-only path, false in an installed target (handle its absence and mark the line factory-path-ok, or remove it): ${h}"; done <<< "$shits"
+    else
+      ok "no shipped script or hook names a factory-only path unmarked"
+    fi
   fi
 fi
 
@@ -306,6 +328,12 @@ What this cannot check:
     ordinary names a target may own (README.md, INSTALL.md, a bare scripts/).
     A generic path that happens to share a factory-only prefix (docs/adr/,
     observation/...) is flagged although a target may own one.
+  - Whether a shipped script's factory-only mention is handled in fact: the
+    "factory-path-ok" marker is taken on trust and exempts the whole line. A path
+    built in a variable or by a glob is not seen. Shipped files that are not .sh
+    or .py (policy.env, the jev questions) and hook config JSON
+    (.claude/settings.json, .codex/hooks.json, .github/hooks/*.json) are not
+    scanned.
   - Whether a skill's description matches what its body actually covers.
   - Whether a rule is good, needed, or reachable by the agent that must follow it.
   A pass means the prose is structurally coherent, never that it is correct.

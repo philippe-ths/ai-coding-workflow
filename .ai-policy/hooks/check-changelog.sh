@@ -5,6 +5,11 @@ set -eu
 # changes the Version: header in ai-workflow.md without CHANGELOG.md
 # (at HEAD) containing a matching entry for the new version.
 #
+# The workflow's changelog lives only in the source repository, so a repository
+# with no CHANGELOG.md at HEAD is not checked and the hook exits 0. It is also
+# inert where ai-workflow.md is not committed (the installer vendors it in
+# .gitignore, so its Version: header never changes in git).
+#
 # Reads the standard pre-push stdin format:
 #   <local_ref> <local_sha> <remote_ref> <remote_sha>
 # Zero-sha on either side means "no such ref"; we handle new branches
@@ -24,6 +29,9 @@ PAIRS="$(cat || true)"
 if [ -z "$PAIRS" ]; then
   exit 0
 fi
+
+# No changelog at HEAD: nothing to hold entries, so nothing to enforce.
+git cat-file -e "HEAD:$CHANGELOG_FILE" 2>/dev/null || exit 0
 
 extract_version_from_blob() {
   git show "$1:$WORKFLOW_FILE" 2>/dev/null | awk '/^Version:[[:space:]]*/ { print $2; exit }'
