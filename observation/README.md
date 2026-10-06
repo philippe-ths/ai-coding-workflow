@@ -54,8 +54,8 @@ Removes the hook, the `/rate` skill, and the helper scripts, and unwires the hoo
 `~/.claude/settings.json`, leaving every other setting and hook in place. Re-running is safe.
 
 Your recorded data is kept. Add `--purge-data` to remove `manifest.jsonl`, `ratings.jsonl`,
-`sessions.jsonl`, `tasks.jsonl`, and `dashboard.html` as well. The Session Store and dashboard can be
-rebuilt from transcripts; the Manifest and Ratings cannot.
+`history.jsonl`, `sessions.jsonl`, `tasks.jsonl`, and `dashboard.html` as well. The Session Store
+and dashboard can be rebuilt from transcripts and history; the Manifest, Ratings and history cannot.
 
 Run this **before** deleting this repository. Capture installs itself outside the repo, so
 deleting the repo alone leaves the SessionStart hook wired into your global config.
@@ -72,7 +72,10 @@ All under `~/.claude/aiw-observation/` (global, gitignored by being outside any 
 
 - `manifest.jsonl` — session_id to workflow_version, written by the hook
 - `ratings.jsonl` — your `/rate` entries
-- `sessions.jsonl` — the Session Store, rebuilt fully on every `make observe`
+- `history.jsonl` — each session's metrics as last read, so a session survives Claude Code
+  deleting its transcript (after `cleanupPeriodDays`, 30 by default); metrics only, no content
+- `sessions.jsonl` — the Session Store, rebuilt fully on every `make observe` from transcripts
+  still on disk and, for the rest, from history
 - `tasks.jsonl` — one row per task, rebuilt alongside the Session Store
 - `dashboard.html` — the generated dashboard
 

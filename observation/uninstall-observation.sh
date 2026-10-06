@@ -12,7 +12,8 @@
 #   - helper scripts                  <- ~/.claude/aiw-observation/
 #
 # Keeps the data by default: manifest.jsonl and ratings.jsonl are append-only
-# captures that cannot be rebuilt from transcripts, and sessions.jsonl,
+# captures that cannot be rebuilt from transcripts, history.jsonl holds the metrics of
+# sessions whose transcripts Claude Code has since deleted, and sessions.jsonl,
 # tasks.jsonl and dashboard.html are derived but expensive. Pass --purge-data to remove those too.
 #
 # Re-running is safe (idempotent). Override the target with CLAUDE_HOME (used for testing).
@@ -59,7 +60,7 @@ if [ -e "$SKILLS_DIR/rate" ]; then
 fi
 
 if [ "$PURGE_DATA" = "true" ]; then
-  for f in sessions.jsonl tasks.jsonl manifest.jsonl ratings.jsonl dashboard.html; do
+  for f in sessions.jsonl tasks.jsonl history.jsonl manifest.jsonl ratings.jsonl dashboard.html; do
     if [ -e "$OBS_DIR/$f" ]; then
       rm -f "$OBS_DIR/$f"
       REMOVED_ANY=true

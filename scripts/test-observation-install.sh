@@ -85,6 +85,7 @@ assert_eq "install wires exactly one SessionStart hook" "1" "$hook_count"
 # Stand in for data accumulated over months of sessions.
 printf '{"session":"a"}\n' > "$CH/aiw-observation/sessions.jsonl"
 printf '{"task":"#1"}\n' > "$CH/aiw-observation/tasks.jsonl"
+printf '{"v":1}\n' > "$CH/aiw-observation/history.jsonl"
 printf '{"session":"a","workflow_version":"3.16.0"}\n' > "$CH/aiw-observation/manifest.jsonl"
 printf '{"session":"a","rating":4}\n' > "$CH/aiw-observation/ratings.jsonl"
 printf '<html></html>\n' > "$CH/aiw-observation/dashboard.html"
@@ -101,6 +102,7 @@ assert_present "an unrelated skill survives" "$CH/skills/some-other-skill/SKILL.
 assert_present "the Session Store survives by default" "$CH/aiw-observation/sessions.jsonl"
 assert_present "the Manifest survives by default" "$CH/aiw-observation/manifest.jsonl"
 assert_present "the Ratings survive by default" "$CH/aiw-observation/ratings.jsonl"
+assert_present "the history survives by default" "$CH/aiw-observation/history.jsonl"
 assert_present "the dashboard survives by default" "$CH/aiw-observation/dashboard.html"
 
 python3 -c "import json; json.load(open('$CH/settings.json'))" 2>/dev/null &&

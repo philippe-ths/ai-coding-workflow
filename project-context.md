@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.50.0
+Version: 1.51.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -31,7 +31,7 @@ Version: 1.50.0
 - **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
 - **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive metrics with no statistical verdict.
-- **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt from transcripts on demand.
+- **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt on demand from transcripts, or from `history.jsonl` for a session whose transcript Claude Code deleted.
 - **Task**: the issue number in a branch name, or the branch name, that `observation/collect.py` charges each reply to by its branch and each subagent to by its launching branch, written beside the Session Store as `tasks.jsonl`.
 - **Manifest**: a global file written by a SessionStart hook recording each session's `workflow_version` and repo, the only reliable source of the version active during a session.
 - **Rating**: a human 1-4 session quality score recorded live by the global `/rate` skill and matched to its session by repo and time.
@@ -68,7 +68,7 @@ Version: 1.50.0
 - Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and the local session-observation tool.
 - Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow.
 - Observation data flow: a SessionStart hook records the Manifest, the `/rate` skill records Ratings, then `observation/collect.py` reads all transcripts under `~/.claude/projects/`, joins the Manifest and Ratings, writes the Session Store, and regenerates a static HTML dashboard.
-- Observation runs on demand with a full rebuild each time; only the Manifest hook and, once installed, the upkeep timer run unprompted.
+- Observation runs on demand; only the Manifest hook and, once installed, the upkeep timer run unprompted.
 - The only external service at repository runtime is the Jev API; GitHub is used only for issue and PR tracking.
 
 ## Key Dependencies
@@ -105,7 +105,6 @@ Version: 1.50.0
 - `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
 - `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration, permission defaults, and hook definitions.
 - `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
-- `observation/collect.py`: reads all session transcripts, joins Manifest and Ratings, writes the Session Store, and regenerates the dashboard.
 - `observation/parse.py`: the only module that knows the transcript JSONL format; extracts per-session metrics.
 - `observation/pricing.py`: model price table and estimated-cost calculation, since transcripts store no cost.
 - `observation/dashboard.py`: renders the Session Store into a self-contained static HTML dashboard with client-side filters.
