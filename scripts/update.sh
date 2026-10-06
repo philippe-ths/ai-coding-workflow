@@ -90,7 +90,7 @@ if [ -f "$TARGET/.gitignore" ] && grep -Fxq -- "$BEGIN_MARK" "$TARGET/.gitignore
     t="${pair%%:*}" ep="${pair#*:}"
     case " $TOOLS " in *" $t "*) continue ;; esac
     if [ -f "$TARGET/$ep" ]; then
-      echo "note: $ep exists but the installer's .gitignore block has no record of $t, so $t was not updated; if $t is installed, rerun with --tool $t."
+      echo "note: $ep exists but the installer's .gitignore block has no record of $t, so $t was not updated. If it is the repository's own file, nothing is needed; only if the installer put $t here, rerun with --tool $t, which overwrites $ep."
     fi
   done
 else

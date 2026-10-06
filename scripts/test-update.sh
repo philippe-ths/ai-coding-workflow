@@ -260,7 +260,7 @@ T="$(new_target own-agents)"
 printf 'my own agent notes\n' > "$T/AGENTS.md"
 cp "$T/AGENTS.md" "$SANDBOX/own-agents.orig"
 own_out="$("$UPDATE" --source "$FAKE_SRC3" --target "$T" 2>&1)" || bad "update with an own AGENTS.md exited non-zero"
-if printf '%s' "$own_out" | grep -q 'note: AGENTS.md exists .* rerun with --tool codex'; then ok "unaccounted AGENTS.md is named, not skipped silently"; else bad "unaccounted AGENTS.md passed silently"; fi
+if printf '%s' "$own_out" | grep -q 'note: AGENTS.md exists .*rerun with --tool codex'; then ok "unaccounted AGENTS.md is named, not skipped silently"; else bad "unaccounted AGENTS.md passed silently"; fi
 if cmp -s "$SANDBOX/own-agents.orig" "$T/AGENTS.md"; then ok "own AGENTS.md left byte-identical"; else bad "own AGENTS.md was overwritten"; fi
 absent "$T" .codex
 if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "claude still updated"; else bad "claude not updated beside an own AGENTS.md"; fi
