@@ -108,7 +108,7 @@ merge_seeded() {
       "#"*) block="$block$line"$'\n'; continue ;;
     esac
     key="$(setting_key "$line")"
-    if [ -n "$key" ] && ! printf '%s\n' "$live" | grep -Eq "$key:?="; then
+    if [ -n "$key" ] && ! printf '%s\n' "$live" | grep -Eq "(^|[^A-Za-z0-9_])$key:?="; then
       add="$add"$'\n'"$block$line"$'\n'
       live="$live"$'\n'"$line"
       n=$((n + 1))
