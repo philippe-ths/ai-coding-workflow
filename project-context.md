@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.52.0
+Version: 1.52.1
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -120,7 +120,7 @@ Version: 1.52.0
 - `upkeep/install-upkeep.sh` adds a weekday 22:00 launchd agent and the status line's quota snapshot; `upkeep/uninstall-upkeep.sh` reverses both.
 - `upkeep/scheduler.py`: picks the project worked in this week with most upkeep issue-days, gates on that snapshot, and runs `aiw-upkeep` headless.
 - `scripts/install.sh`: copies the product set for a tool into a target repo, vendors it in the target's `.gitignore`, and installs hooks.
-- `scripts/update.sh`: updates an installed copy by re-copying the current product, auto-detecting tool and profile, and reconciling removals from the source `CHANGELOG.md`.
+- `scripts/update.sh`: updates an installed copy by re-copying the current product for every installed tool, and reconciling removals from the source `CHANGELOG.md`.
 - `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.

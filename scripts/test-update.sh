@@ -177,12 +177,100 @@ set_version "$T/ai-workflow.md" 2.14.0
 v="$(awk '/^Version:[[:space:]]*/ {print $2; exit}' "$T/ai-workflow.md")"
 if [ "$v" = "$SRC_VERSION" ]; then ok "auto-detected full/claude and updated"; else bad "auto-detect failed (v=$v)"; fi
 
-echo "ambiguous tool requires --tool:"
-T="$(new_target ambig)"
-"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1
-touch "$T/AGENTS.md"
-"$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1
-if [ "$?" -ne 0 ]; then ok "ambiguous tool errors without --tool"; else bad "should error on ambiguous tool"; fi
+echo "multi-tool target: every installed tool is brought current:"
+FAKE_SRC3="$SANDBOX/fake-src-3"
+mkdir -p "$FAKE_SRC3"
+git -C "$ROOT_DIR" archive HEAD | tar -x -C "$FAKE_SRC3"
+mkdir -p "$FAKE_SRC3/legacy-thing"
+echo legacy > "$FAKE_SRC3/legacy-thing/note.md"
+tmp_manifest="$(mktemp)"
+jq '.profiles.full.shared += ["legacy-thing/"]' "$FAKE_SRC3/install-manifest.json" > "$tmp_manifest" \
+  && mv "$tmp_manifest" "$FAKE_SRC3/install-manifest.json"
+set_version "$FAKE_SRC3/ai-workflow.md" 90.0.0
+( cd "$FAKE_SRC3" && git init -q && git config user.email t@t && git config user.name t \
+    && git add -A && git commit -qm init ) >/dev/null 2>&1
+
+# The source then moves on: drops legacy-thing/ and changes a file each tool ships.
+rm -rf "$FAKE_SRC3/legacy-thing"
+tmp_manifest="$(mktemp)"
+jq '.profiles.full.shared -= ["legacy-thing/"]' "$FAKE_SRC3/install-manifest.json" > "$tmp_manifest" \
+  && mv "$tmp_manifest" "$FAKE_SRC3/install-manifest.json"
+echo "# updated" >> "$FAKE_SRC3/AGENTS.md"
+echo "# updated" >> "$FAKE_SRC3/CLAUDE.md"
+set_version "$FAKE_SRC3/ai-workflow.md" 90.1.0
+tmp_changelog="$(mktemp)"
+{
+  printf '## 90.1.0\n\n### Removed\n\n- `legacy-thing/` no longer shipped.\n\n'
+  cat "$FAKE_SRC3/CHANGELOG.md"
+} > "$tmp_changelog" && mv "$tmp_changelog" "$FAKE_SRC3/CHANGELOG.md"
+( cd "$FAKE_SRC3" && git add -A && git commit -qm drop ) >/dev/null 2>&1
+
+# Source state at 90.0.0 for installing the older copy: reinstall from a copy
+# that still has legacy-thing/ and the unmodified entry points.
+OLD_SRC="$SANDBOX/old-src"
+mkdir -p "$OLD_SRC"
+git -C "$FAKE_SRC3" archive HEAD~1 | tar -x -C "$OLD_SRC"
+( cd "$OLD_SRC" && git init -q && git config user.email t@t && git config user.name t \
+    && git add -A && git commit -qm old ) >/dev/null 2>&1
+
+make_multi() { # name
+  local t; t="$(new_target "$1")"
+  "$INSTALL" --source "$OLD_SRC" --target "$t" --tool claude >/dev/null 2>&1
+  "$INSTALL" --source "$OLD_SRC" --target "$t" --tool codex >/dev/null 2>&1
+  mkdir -p "$t/.claude/skills/my-local-skill"; echo mine > "$t/.claude/skills/my-local-skill/SKILL.md"
+  echo "$t"
+}
+
+echo "a target with no managed block keeps the old refusal when entry points are ambiguous:"
+T="$(make_multi multi-noblock)"
+awk '/^# >>> ai-workflow/{skip=1} !skip{print} /^# <<< ai-workflow/{skip=0}' "$T/.gitignore" > "$T/.gitignore.new" && mv "$T/.gitignore.new" "$T/.gitignore"
+if "$UPDATE" --source "$FAKE_SRC3" --target "$T" >/dev/null 2>&1; then bad "no-block multi-tool target should ask for --tool"; else ok "no-block ambiguous target errors without --tool"; fi
+
+T="$(make_multi multi-auto)"
+"$UPDATE" --source "$FAKE_SRC3" --target "$T" >/dev/null 2>&1 || bad "multi-tool update without --tool exited non-zero"
+if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "claude files refreshed (no --tool)"; else bad "claude files left stale (no --tool)"; fi
+if cmp -s "$FAKE_SRC3/AGENTS.md" "$T/AGENTS.md"; then ok "codex files refreshed (no --tool)"; else bad "codex files left stale (no --tool)"; fi
+absent  "$T" legacy-thing
+present "$T" .claude/skills/my-local-skill/SKILL.md
+
+echo "multi-tool target: --tool on one tool still refreshes the others:"
+T="$(make_multi multi-named)"
+"$UPDATE" --source "$FAKE_SRC3" --target "$T" --tool claude >/dev/null 2>&1 || bad "multi-tool update with --tool exited non-zero"
+if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "claude files refreshed (--tool claude)"; else bad "claude files left stale (--tool claude)"; fi
+if cmp -s "$FAKE_SRC3/AGENTS.md" "$T/AGENTS.md"; then ok "codex files refreshed by --tool claude"; else bad "codex files left stale by --tool claude"; fi
+absent  "$T" legacy-thing
+present "$T" .claude/skills/my-local-skill/SKILL.md
+
+echo "multi-tool target: a deleted entry point is restored, not skipped:"
+T="$(make_multi multi-deleted-entry)"
+rm -f "$T/CLAUDE.md"
+"$UPDATE" --source "$FAKE_SRC3" --target "$T" >/dev/null 2>&1 || bad "update with a deleted entry point exited non-zero"
+if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "deleted CLAUDE.md restored to the new source content"; else bad "deleted CLAUDE.md not restored"; fi
+
+echo "multi-tool target: a setting a seeded file lacks is reported once, not once per tool:"
+T="$(make_multi multi-seeded-once)"
+grep -v '^PROTECTED_BRANCHES=' "$T/.ai-policy/policy.env" > "$T/policy.tmp" && mv "$T/policy.tmp" "$T/.ai-policy/policy.env"
+out="$("$UPDATE" --source "$FAKE_SRC3" --target "$T" 2>&1)" || bad "seeded multi-tool update exited non-zero"
+n="$(printf '%s\n' "$out" | grep -c 'added new setting PROTECTED_BRANCHES')"
+if [ "$n" -eq 1 ]; then ok "added new setting PROTECTED_BRANCHES printed exactly once"; else bad "added new setting PROTECTED_BRANCHES printed $n times"; fi
+
+echo "a repo's own AGENTS.md is not an installed tool:"
+T="$(new_target own-agents)"
+"$INSTALL" --source "$OLD_SRC" --target "$T" --tool claude >/dev/null 2>&1
+printf 'my own agent notes\n' > "$T/AGENTS.md"
+cp "$T/AGENTS.md" "$SANDBOX/own-agents.orig"
+own_out="$("$UPDATE" --source "$FAKE_SRC3" --target "$T" 2>&1)" || bad "update with an own AGENTS.md exited non-zero"
+if printf '%s' "$own_out" | grep -q 'note: AGENTS.md exists .* rerun with --tool codex'; then ok "unaccounted AGENTS.md is named, not skipped silently"; else bad "unaccounted AGENTS.md passed silently"; fi
+if cmp -s "$SANDBOX/own-agents.orig" "$T/AGENTS.md"; then ok "own AGENTS.md left byte-identical"; else bad "own AGENTS.md was overwritten"; fi
+absent "$T" .codex
+if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "claude still updated"; else bad "claude not updated beside an own AGENTS.md"; fi
+
+echo "--tool adds a tool that is not yet installed and still updates the rest:"
+T="$(new_target add-tool)"
+"$INSTALL" --source "$OLD_SRC" --target "$T" --tool claude >/dev/null 2>&1
+"$UPDATE" --source "$FAKE_SRC3" --target "$T" --tool copilot >/dev/null 2>&1 || bad "update --tool copilot exited non-zero"
+present "$T" .github/copilot-instructions.md
+if cmp -s "$FAKE_SRC3/CLAUDE.md" "$T/CLAUDE.md"; then ok "claude still updated when copilot is added"; else bad "claude left stale when copilot is added"; fi
 
 echo "seeded policy.env (edited value survives, new setting arrives, untouched is unchanged):"
 SEED_SRC="$SANDBOX/seed-src"

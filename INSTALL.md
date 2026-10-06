@@ -54,9 +54,10 @@ as a local path instead.
    <source>/scripts/update.sh --target <target>
    ```
 
-   It auto-detects the installed tool and profile from the target. Pass
-   `--tool` to override or to disambiguate if several tools are
-   installed.
+   It detects every installed tool from the target and
+   updates all of them, judged by the installer's `.gitignore` block. Pass
+   `--tool` to add a tool that is not yet installed, or to choose one when
+   the target predates that block and several entry points exist.
 3. Report the version change, any files that were removed, and each `added new setting` or `did not add setting` line the update printed, since those concern the human's policy file.
 
 ## Notes
