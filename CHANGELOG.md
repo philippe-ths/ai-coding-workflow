@@ -6,6 +6,15 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.23.1 - 2026-10-06
+
+The context-drift reminder routes stale context the way the rules do, so an agent at session start is no longer told to refresh the file inline.
+
+### Changed
+
+- `.ai-policy/hooks/check-context-drift.sh`: the reminder treats drift that predates a task as a finding outside it, fixed through `aiw-project-context-management` when smaller than the sentence describing it and filed with `aiw-issue-creation` otherwise, and keeps a refresh the human asks for as the task ([#324]).
+- `.ai-policy/hooks/remind-context-management.sh`: says "update" rather than "refresh" for drift the branch caused, matching the vocabulary #234 settled ([#324]).
+
 ## 5.23.0 - 2026-10-05
 
 Planning runs on the task's own branch, so what a task cost includes its planning.
@@ -1173,4 +1182,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#333]: https://github.com/philippe-ths/ai-coding-workflow/issues/333
 [#328]: https://github.com/philippe-ths/ai-coding-workflow/issues/328
 [#337]: https://github.com/philippe-ths/ai-coding-workflow/issues/337
+[#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352

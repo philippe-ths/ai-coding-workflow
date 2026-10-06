@@ -208,4 +208,4 @@ if [ "$COUNT" -gt 6 ]; then
   SHOWN="$SHOWN, and $((COUNT - 6)) more"
 fi
 
-remind "This branch changes $SHOWN and does not touch $CONTEXT_FILE. If those changes altered what $CONTEXT_FILE records, refresh it with the aiw-project-context-management skill before opening the pull request. If they did not, proceed."
+remind "This branch changes $SHOWN and does not touch $CONTEXT_FILE. If those changes altered what $CONTEXT_FILE records, update it with the aiw-project-context-management skill before opening the pull request. If they did not, proceed."

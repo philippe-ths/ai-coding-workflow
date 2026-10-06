@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # SessionStart hook: reminds the agent when project-context.md may have drifted.
 #
-# It cannot judge drift — that is the agent's job via aiw-project-context-management.
+# It cannot judge drift; that is the agent's job. Its message routes drift the way the
+# rules do (ai-workflow.md, aiw-planning, aiw-project-context-management): drift that
+# predates a task is a finding outside it, not an inline refresh.
 # It emits a coarse commit-count signal: if the context file has not been touched in
 # CONTEXT_DRIFT_THRESHOLD or more commits, print a reminder on stdout. Both Claude Code
 # and Codex add SessionStart stdout to the agent's context.
@@ -40,7 +42,7 @@ esac
 if [ "$N" -ge "$THRESHOLD" ]; then
   cat <<EOF
 NOTE: $CONTEXT_FILE has not been updated in $N commits and may have drifted from the codebase.
-Before starting work, verify it against the current code and refresh it with the aiw-project-context-management skill if stale.
+If you start a task, check it against the code the task touches. Drift that predates the task is a finding outside it: fix it with the aiw-project-context-management skill when the fix is smaller than the sentence describing it, otherwise file it with aiw-issue-creation, and do not refresh the file inline. Drift the task itself causes, or a refresh the human asks for as the task, goes through aiw-project-context-management.
 EOF
 fi
 
