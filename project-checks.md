@@ -28,6 +28,11 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: empty or absent.
 - Matters: `aiw-housekeeping` parks untracked files it removes there instead of deleting them, and it is a holding area rather than storage. Anything still in it is waiting on a decision to restore it or let it go, and because the directory is ignored, nothing else in a session will ever mention it. `git clean -fdx` removes it without warning.
 
+### Local exclude rules
+- Check: `grep -Ev '^[[:space:]]*(#|$)' .git/info/exclude`
+- Normal: the `.DS_Store` line and the block Claude Code writes under `# claude-code-runtime` (its `**/.claude/...` runtime patterns). The 2026-10-06 audit declined removing them, because Claude Code rewrites its block and the `.DS_Store` line is a harmless macOS guard.
+- Matters: any other line is a local rule nobody reviewed, hiding paths from every check there is; the `aiw-housekeeping` audit resolves it.
+
 ### Unpushed commits
 - Check: `git log --branches --not --remotes --oneline`
 - Normal: empty.
