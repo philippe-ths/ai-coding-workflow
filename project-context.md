@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 1.51.0
+Version: 1.52.0
 
 ## Product Summary
 - This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
@@ -29,6 +29,7 @@ Version: 1.51.0
 - **Archive**: a git-ignored `.archive/` directory holding untracked files a task removed rather than deleted, created on first use with a `.gitignore` containing `*` so it is invisible to git without an entry anywhere else.
 - The `aiw-validation` skill is unrelated to the validation state and validation scripts of the policy layer, which record whether a repository's checks passed.
 - **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
+- **Seeded file**: a product file the manifest lists under `seeded`, shipped once with defaults and then owned by the target, so an update keeps the target's copy and appends only the settings it lacks; `.ai-policy/policy.env` is the one seeded file.
 - **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
 - **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive metrics with no statistical verdict.
 - **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt on demand from transcripts, or from `history.jsonl` for a session whose transcript Claude Code deleted.
@@ -124,7 +125,6 @@ Version: 1.51.0
 - `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
 - `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
 - `scripts/check-prose-integrity.sh` also checks done-gate lists, Task Flow step claims, and factory-only paths.
-- `scripts/test-install.sh`, `scripts/test-update.sh`, `scripts/test-changelog-removals.sh`: sandbox tests for the installer, updater, and changelog convention.
 - `.ai-policy/jev/ask.py`: asks Jev one named question from `.ai-policy/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable; it ships to targets with the rest of `.ai-policy/`.
 - `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
 

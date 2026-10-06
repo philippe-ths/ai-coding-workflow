@@ -11,6 +11,10 @@
 #   3. Coverage   — every git-tracked file is classified by exactly one category
 #                   (zero = unclassified new file; >1 = ambiguous/overlapping).
 #
+# Additionally, every 'seeded' entry must be a tracked file that a product entry
+# ships (itself or inside a product directory); anything else would never be
+# copied, so the declaration would be dead.
+#
 # Universe is git-tracked files only; untracked artifacts (.envrc, .DS_Store,
 # .ai-policy/state/) are out of scope by design, since the boundary governs what ships.
 #
@@ -43,6 +47,11 @@ while IFS= read -r p; do [ -n "$p" ] && authored_paths+=("$p"); done < <(
 factory_paths=()
 while IFS= read -r p; do [ -n "$p" ] && factory_paths+=("$p"); done < <(
   jq -r '.factory_only[]?' "$MANIFEST"
+)
+
+seeded_paths=()
+while IFS= read -r p; do [ -n "$p" ] && seeded_paths+=("$p"); done < <(
+  jq -r '.seeded[]?' "$MANIFEST"
 )
 
 errors=0
@@ -103,6 +112,20 @@ while IFS= read -r f; do
     errors=$((errors + 1))
   fi
 done < <(git -C "$ROOT_DIR" ls-files)
+
+# --- 4. seeded: each entry is a tracked file shipped by a product entry ---
+for s in "${seeded_paths[@]:-}"; do
+  [ -z "$s" ] && continue
+  shipped=0
+  for entry in "${product_paths[@]}"; do
+    path_matches "$entry" "$s" && shipped=1
+  done
+  case "$s" in */) shipped=0 ;; esac   # a directory entry is dead: install compares exact file paths
+  if [ "$shipped" -eq 0 ] || ! git -C "$ROOT_DIR" ls-files --error-unmatch -- "$s" >/dev/null 2>&1; then
+    echo "manifest integrity: FAIL — seeded path is not a single tracked product file: $s" >&2
+    errors=$((errors + 1))
+  fi
+done
 
 if [ "$errors" -gt 0 ]; then
   echo "manifest integrity: FAIL ($errors problem(s))" >&2

@@ -184,6 +184,48 @@ touch "$T/AGENTS.md"
 "$UPDATE" --source "$ROOT_DIR" --target "$T" >/dev/null 2>&1
 if [ "$?" -ne 0 ]; then ok "ambiguous tool errors without --tool"; else bad "should error on ambiguous tool"; fi
 
+echo "seeded policy.env (edited value survives, new setting arrives, untouched is unchanged):"
+SEED_SRC="$SANDBOX/seed-src"
+mkdir -p "$SEED_SRC"
+git -C "$ROOT_DIR" archive HEAD | tar -x -C "$SEED_SRC"
+cp "$ROOT_DIR/install-manifest.json" "$SEED_SRC/install-manifest.json"
+( cd "$SEED_SRC" && git init -q && git config user.email t@t && git config user.name t \
+  && git add -A && git commit -qm base ) >/dev/null 2>&1
+T="$(new_target seeded)"
+"$INSTALL" --source "$SEED_SRC" --target "$T" --tool claude >/dev/null 2>&1
+if cmp -s "$T/.ai-policy/policy.env" "$SEED_SRC/.ai-policy/policy.env"; then ok "fresh install copies policy.env as shipped"; else bad "fresh install policy.env differs"; fi
+# untouched target: update changes nothing (bytes and mtime)
+touch -t 202001010000 "$T/.ai-policy/policy.env"
+before="$(cksum < "$T/.ai-policy/policy.env")"; mt_before="$(ls -l "$T/.ai-policy/policy.env" | awk '{print $6,$7,$8}')"
+"$UPDATE" --source "$SEED_SRC" --target "$T" --tool claude >/dev/null 2>&1 || bad "update on untouched target exited non-zero"
+if [ "$before" = "$(cksum < "$T/.ai-policy/policy.env")" ] && [ "$mt_before" = "$(ls -l "$T/.ai-policy/policy.env" | awk '{print $6,$7,$8}')" ]; then ok "untouched policy.env unchanged (bytes and mtime)"; else bad "untouched policy.env was rewritten"; fi
+# target edits a value; source gains a new setting
+# indented, export-form edit; and two assignments on one line (own line removed)
+sed -i.bak -e 's/^PROTECTED_BRANCHES=.*/  export PROTECTED_BRANCHES="main release"/' \
+  -e 's/^REQUIRE_VALIDATION_BEFORE_COMMIT=.*/REQUIRE_VALIDATION_BEFORE_COMMIT="true"; REQUIRE_VALIDATION_BEFORE_PUSH="true"/' \
+  -e '/^REQUIRE_VALIDATION_BEFORE_PUSH=/d' "$T/.ai-policy/policy.env" && rm -f "$T/.ai-policy/policy.env.bak"
+# a longer name ending in the new key must not count as the new key being set
+printf 'MY_NEW_SEEDED_SETTING=1\n' >> "$T/.ai-policy/policy.env"
+printf '\n# Seconds a check may run.\n: "${NEW_SEEDED_SETTING:=42}"\n' >> "$SEED_SRC/.ai-policy/policy.env"
+( cd "$SEED_SRC" && git add -A && git commit -qm newkey ) >/dev/null 2>&1
+out="$("$UPDATE" --source "$SEED_SRC" --target "$T" --tool claude 2>&1)" || bad "update with edited policy.env exited non-zero"
+if grep -qx '  export PROTECTED_BRANCHES="main release"' "$T/.ai-policy/policy.env"; then ok "edited PROTECTED_BRANCHES survived update"; else bad "edited PROTECTED_BRANCHES was reset"; fi
+if [ "$(grep -c 'PROTECTED_BRANCHES=' "$T/.ai-policy/policy.env")" -eq 1 ]; then ok "indented export setting not re-appended"; else bad "PROTECTED_BRANCHES appended despite being present"; fi
+if [ "$(grep -c 'REQUIRE_VALIDATION_BEFORE_PUSH=' "$T/.ai-policy/policy.env")" -eq 1 ]; then ok "two-assignments-on-a-line setting not re-appended"; else bad "REQUIRE_VALIDATION_BEFORE_PUSH re-appended"; fi
+if grep -qxF ': "${NEW_SEEDED_SETTING:=42}"' "$T/.ai-policy/policy.env"; then ok "new setting arrived with its default"; else bad "new setting missing"; fi
+if grep -qx '# Seconds a check may run.' "$T/.ai-policy/policy.env"; then ok "new setting arrived with its comment"; else bad "new setting's comment missing"; fi
+if printf '%s' "$out" | grep -q 'added new setting NEW_SEEDED_SETTING'; then ok "update reported the appended key"; else bad "appended key not reported"; fi
+if printf '%s' "$out" | grep -q 'did not add setting REQUIRE_VALIDATION_BEFORE_PUSH'; then ok "update named the key it judged present from a non-plain line"; else bad "key judged present from a non-plain line was skipped silently"; fi
+# a second update adds nothing more
+before="$(cksum < "$T/.ai-policy/policy.env")"
+"$UPDATE" --source "$SEED_SRC" --target "$T" --tool claude >/dev/null 2>&1
+if [ "$before" = "$(cksum < "$T/.ai-policy/policy.env")" ]; then ok "second update is idempotent"; else bad "second update changed policy.env"; fi
+# a commented-out assignment in the target does not count as present
+sed -i.bak '/NEW_SEEDED_SETTING:=/s/^/# /' "$T/.ai-policy/policy.env" && rm -f "$T/.ai-policy/policy.env.bak"
+"$UPDATE" --source "$SEED_SRC" --target "$T" --tool claude >/dev/null 2>&1
+if grep -qxF ': "${NEW_SEEDED_SETTING:=42}"' "$T/.ai-policy/policy.env"; then ok "commented-out assignment is re-added as a setting"; else bad "commented-out assignment counted as present"; fi
+present "$T" .ai-policy/policy.env
+
 echo
 echo "Results: $pass passed, $fail failed."
 [ "$fail" -eq 0 ]

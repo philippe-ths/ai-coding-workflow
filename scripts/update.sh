@@ -6,7 +6,8 @@
 # Reconciles an installed (vendored) copy to the source's current version:
 #   1. Reads the installed version (target ai-workflow.md `Version:`) and the
 #      source version; refuses to downgrade and no-ops if already current.
-#   2. Re-copies the current product set (adds new, overwrites changed) by
+#   2. Re-copies the current product set (adds new, overwrites changed; seeded
+#      files are kept and only gain settings they lack) by
 #      delegating to install.sh.
 #   3. Removes files the source dropped between the two versions, learned from
 #      the source CHANGELOG `### Removed` entries (leading-path convention).
@@ -83,9 +84,11 @@ else
   echo "Updating target from $installed_version to $source_version."
 fi
 
-# --- additive: re-copy the current product set (overwrites changed, adds new) ---
-"$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL" >/dev/null \
+# --- additive: re-copy the current product set (overwrites changed, adds new; seeded files are kept and only gain missing settings) ---
+# Seeded files keep the target's copy; install.sh names each setting it appends.
+install_out="$("$SCRIPT_DIR/install.sh" --source "$SOURCE" --target "$TARGET" --tool "$TOOL")" \
   || { echo "error: re-copy step failed" >&2; exit 1; }
+printf '%s\n' "$install_out" | grep -E 'added new setting|did not add setting' || true
 
 # Drop paths from the installer-managed .gitignore block (the block is a union,
 # so a path that left the product would otherwise linger forever). Nothing
