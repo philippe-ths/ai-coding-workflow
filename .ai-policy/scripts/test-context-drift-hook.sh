@@ -59,6 +59,14 @@ for i in 1 2 3; do
   git -C "$R" add "file-$i.txt" && git -C "$R" commit -q -m "work $i"
 done
 assert_reminder "3 commits behind, threshold 3 -> reminder" "$(run_hook "$R")"
+# Drift found at session start predates the task, so the reminder must route it
+# the way the rules do: a finding outside the task, never a refresh done inline.
+OUT="$(run_hook "$R")"
+if printf '%s' "$OUT" | grep -q "finding outside it" && printf '%s' "$OUT" | grep -q "do not refresh the file inline"; then
+  PASS=$((PASS + 1)); echo "  PASS: reminder routes stale context as a finding outside the task"
+else
+  FAIL=$((FAIL + 1)); echo "  FAIL: reminder tells the agent to refresh inline (got: $OUT)"
+fi
 
 # 2. Context file within threshold -> silent.
 R="$SANDBOX/under"; init_repo "$R"
