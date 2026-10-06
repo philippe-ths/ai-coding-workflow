@@ -1,45 +1,71 @@
 """Estimated session cost from token counts.
 
 Claude Code transcripts store no cost figure (cost is null on disk), so cost here
-is ESTIMATED: token counts times the public list price for the model tier. It is a
+is ESTIMATED: token counts times the public list price for the model. It is a
 convenience signal, not an authoritative bill. Token counts themselves are exact.
 
-Maintenance: update RATES when prices change or a new model tier ships. An unknown
-model yields a null estimate rather than a wrong one.
+Source: https://platform.claude.com/docs/en/about-claude/pricing, read 2026-10-05.
+
+Maintenance: add a model to RATES when it ships, by its model ID, and re-read the
+source when prices change. An unknown model yields a null estimate rather than a
+wrong one, so a new model is never priced as its predecessor.
 """
 
-# USD per 1,000,000 tokens, by model tier. cache_write is the 5-minute ephemeral rate.
+import re
+
+# USD per 1,000,000 tokens: (base input, output, cache-read multiplier of base input).
+# Cache writes are 1.25x base input for the 5-minute cache and 2x for the 1-hour cache.
+# A ":fast" key is fast mode, whose premium base rates the caching multipliers stack on.
 RATES = {
-    "opus":   {"input": 15.0, "output": 75.0, "cache_read": 1.50, "cache_write": 18.75},
-    "sonnet": {"input": 3.0,  "output": 15.0, "cache_read": 0.30, "cache_write": 3.75},
-    "haiku":  {"input": 0.80, "output": 4.0,  "cache_read": 0.08, "cache_write": 1.0},
+    "claude-fable-5-1": (10.0, 50.0, 0.025),
+    "claude-fable-5": (10.0, 50.0, 0.1),
+    "claude-opus-5-5": (4.0, 20.0, 0.05),
+    "claude-opus-5-5:fast": (8.0, 40.0, 0.05),
+    "claude-opus-5": (5.0, 25.0, 0.1),
+    "claude-opus-5:fast": (10.0, 50.0, 0.1),
+    "claude-opus-4-8": (5.0, 25.0, 0.1),
+    "claude-opus-4-8:fast": (10.0, 50.0, 0.1),
+    "claude-opus-4-7": (5.0, 25.0, 0.1),
+    "claude-opus-4-6": (5.0, 25.0, 0.1),
+    "claude-opus-4-5": (5.0, 25.0, 0.1),
+    "claude-sonnet-5-5": (2.0, 10.0, 0.1),
+    "claude-sonnet-5": (2.0, 10.0, 0.1),
+    "claude-sonnet-4-6": (3.0, 15.0, 0.1),
+    "claude-sonnet-4-5": (3.0, 15.0, 0.1),
+    "claude-haiku-4-5": (1.0, 5.0, 0.1),
 }
 
+WRITE_5M = 1.25
+WRITE_1H = 2.0
 
-def _tier(model):
+# A dated snapshot ("-20251001") or a context-window suffix ("[1m]") prices as its model.
+_SUFFIX = re.compile(r"(-\d{8})?(\[[^\]]*\])?(?=(:fast)?$)")
+
+
+def _rate(model):
     if not isinstance(model, str):
         return None
-    m = model.lower()
-    if "opus" in m:
-        return "opus"
-    if "sonnet" in m:
-        return "sonnet"
-    if "haiku" in m:
-        return "haiku"
-    return None
+    return RATES.get(_SUFFIX.sub("", model.lower(), count=1))
 
 
 def estimate_cost(model, tokens):
-    """Return estimated USD (float, rounded) for a token dict, or None if the model is unknown."""
-    tier = _tier(model)
-    if tier is None:
+    """Return estimated USD (float, rounded) for a token dict, or None if the model is unknown.
+
+    `cache_creation` is all cache writes; `cache_creation_1h`, where present, is the
+    part written to the 1-hour cache, and the rest is priced at the 5-minute rate.
+    """
+    rate = _rate(model)
+    if rate is None:
         return None
-    rate = RATES[tier]
+    base_in, out, read_mult = rate
+    writes = tokens.get("cache_creation", 0) or 0
+    writes_1h = min(tokens.get("cache_creation_1h", 0) or 0, writes)
     cost = (
-        (tokens.get("input", 0) or 0) * rate["input"]
-        + (tokens.get("output", 0) or 0) * rate["output"]
-        + (tokens.get("cache_read", 0) or 0) * rate["cache_read"]
-        + (tokens.get("cache_creation", 0) or 0) * rate["cache_write"]
+        (tokens.get("input", 0) or 0) * base_in
+        + (tokens.get("output", 0) or 0) * out
+        + (tokens.get("cache_read", 0) or 0) * base_in * read_mult
+        + (writes - writes_1h) * base_in * WRITE_5M
+        + writes_1h * base_in * WRITE_1H
     ) / 1_000_000.0
     return round(cost, 4)
 

@@ -33,7 +33,7 @@ import webbrowser
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dashboard  # noqa: E402
-from parse import _parse_ts, parse_subagent, parse_transcript  # noqa: E402
+from parse import _parse_ts, parse_subagent, parse_transcript, zero_priced_tokens  # noqa: E402
 from pricing import estimate_cost_by_model  # noqa: E402
 
 
@@ -116,7 +116,7 @@ def task_of(branch):
 
 def _merge_tokens(into, tokens_by_model):
     for model, toks in tokens_by_model.items():
-        acc = into.setdefault(model, {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0})
+        acc = into.setdefault(model, zero_priced_tokens())
         for k in acc:
             acc[k] += toks.get(k, 0) or 0
 

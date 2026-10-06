@@ -9,7 +9,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from parse import parse_transcript  # noqa: E402
+from parse import parse_transcript, scan_transcript  # noqa: E402
 from pricing import estimate_cost  # noqa: E402
 
 FIXTURE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "sample-transcript.jsonl")
@@ -44,6 +44,8 @@ def check_tasks():
     check("session.tokens.output", s["tokens"].get("output"), 184)
     check("session.subagents.count", s["subagents"].get("count"), 3)
     check("session.subagents.input", s["subagents"]["tokens"].get("input"), 490)
+    # the 1-hour split is a pricing input, not a stored metric
+    check("stored token fields", sorted(s["tokens"]), ["cache_creation", "cache_read", "input", "output"])
 
     by_task = {(t["repo"], t["task"]): t for t in tasks}
     check("task keys", sorted(by_task, key=str), sorted([
@@ -59,8 +61,8 @@ def check_tasks():
     day1 = (t7.get("by_day") or {}).get("2026-06-02") or {}
     check("#7.day1.input", (day1.get("tokens") or {}).get("input"), 1680)
     check("#7.day2.input", ((t7.get("by_day") or {}).get("2026-06-03") or {}).get("tokens", {}).get("input"), 300)
-    # day 1: opus 1200 in / 120 out, sonnet 400 / 40, haiku 80 / 8, each priced at its own rate
-    check("#7.day1.estimated_cost_usd", day1.get("estimated_cost_usd"), 0.0289)
+    # day 1: opus-4-8 1200 in / 120 out, sonnet-4-6 400 / 40, haiku-4-5 80 / 8, each priced at its own rate
+    check("#7.day1.estimated_cost_usd", day1.get("estimated_cost_usd"), 0.0109)
     check("other-repo #7.input", (by_task.get(("other-repo", "#7")) or {}).get("tokens", {}).get("input"), 70)
     check("other.tokens.input", (by_task.get(("demo-repo", "feat/other-work")) or {}).get("tokens", {}).get("input"), 50)
     un = by_task.get(("demo-repo", None)) or {}
@@ -131,6 +133,52 @@ def check_history(rows, tasks, history):
     json.dumps(history2)  # history must be plain JSON
 
 
+def check_pricing():
+    """Prices per model ID at the cited list rates, cache writes split by duration."""
+    import json
+    import tempfile
+
+    m = 1_000_000
+    # opus-5-5: $4 in, $20 out, reads at 0.05x ($0.20), 5m writes $5, 1h writes $8
+    check("opus-5-5 cost", estimate_cost("claude-opus-5-5", {
+        "input": m, "output": m, "cache_read": m, "cache_creation": m, "cache_creation_1h": 400_000,
+    }), 30.4)
+    check("dated model id", estimate_cost("claude-haiku-4-5-20251001", {"input": m}), 1.0)
+    # the two models carrying most real spend: input, output, read, 5m write each per million
+    every = {"input": m, "output": m, "cache_read": m, "cache_creation": m}
+    check("opus-5 cost", estimate_cost("claude-opus-5", every), 36.75)
+    check("sonnet-5 cost", estimate_cost("claude-sonnet-5", every), 14.7)
+    check("fast mode rate", estimate_cost("claude-opus-5:fast", {"input": m}), 10.0)
+    # a newer model in a known family is not priced as its predecessor
+    check("unknown newer model", estimate_cost("claude-opus-6", {"input": m}), None)
+
+    # a fast reply is keyed apart from standard ones, and the 1h share of its cache writes is kept
+    reply = {"type": "assistant", "sessionId": "s", "timestamp": "2026-06-01T10:00:00Z", "message": {
+        "id": "r1", "model": "claude-opus-5", "usage": {
+            "input_tokens": 10, "output_tokens": 1, "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 30, "speed": "fast",
+            "cache_creation": {"ephemeral_5m_input_tokens": 10, "ephemeral_1h_input_tokens": 20},
+        }}}
+    with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as fh:
+        fh.write(json.dumps(reply) + "\n")
+    try:
+        raw = scan_transcript(fh.name)
+    finally:
+        os.unlink(fh.name)
+    by_model = raw["tokens_by_model"]
+    check("fast key", sorted(by_model), ["claude-opus-5:fast"])
+    check("1h cache writes", by_model.get("claude-opus-5:fast", {}).get("cache_creation_1h"), 20)
+    # task and per-day costs are priced from the per-branch maps, so the split must reach them too
+    branch = raw["branches"].get(None, {})
+    check("1h by branch", branch.get("tokens_by_model", {}).get("claude-opus-5:fast", {}).get("cache_creation_1h"), 20)
+    check("1h by day", branch.get("days", {}).get("2026-06-01", {}).get("claude-opus-5:fast", {}).get("cache_creation_1h"), 20)
+    import collect
+
+    merged = {}
+    collect._merge_tokens(merged, by_model)
+    check("1h cache writes merged", merged.get("claude-opus-5:fast", {}).get("cache_creation_1h"), 20)
+
+
 def main():
     rec = parse_transcript(FIXTURE)
     assert rec is not None, "parser returned None on fixture"
@@ -160,13 +208,14 @@ def main():
     # user_turns: 2 human prompts (string + text block); injected/tool_result/sidechain excluded
     check("user_turns", rec["user_turns"], 2)
 
-    # estimated cost (opus rates): exact hand-computed value
+    # estimated cost at opus-4-8 rates: exact hand-computed value
     cost = estimate_cost(rec["model"], rec["tokens"])
-    check("estimated_cost_usd", cost, 0.0979)
+    check("estimated_cost_usd", cost, 0.0326)
     # unknown model -> no estimate
     check("estimate_unknown_model", estimate_cost("some-future-model", rec["tokens"]), None)
 
     check_tasks()
+    check_pricing()
 
     if failures:
         print("PARSER TEST FAILED:")
