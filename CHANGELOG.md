@@ -6,6 +6,15 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.25.0 - 2026-10-08
+
+A plan lists the open bugs filed against the area a task touches, so meeting one mid-task is not blamed on the change, fixed in passing, or captured as correct behaviour.
+
+### Changed
+
+- `aiw-planning`: the baseline runs the tracker query at every tier and records open defects filed against the task's area, other than those the task resolves, beside pre-existing test failures; a symptom counts as a filed bug only once it reproduces without the change. The deeper-fix check reads the same query ([#366]).
+- `aiw-ground-truth`: behaviour an open issue reports as a defect is current, not known-good; wherever current behaviour is the oracle it is kept and marked as the bug, and it is never the expected value for what the task makes correct ([#366]).
+
 ## 5.24.1 - 2026-10-06
 
 A target with several agent tools installed can be updated in one run, and no installed tool is left at an older version.
@@ -1223,3 +1232,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#317]: https://github.com/philippe-ths/ai-coding-workflow/issues/317
 [#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352
+[#366]: https://github.com/philippe-ths/ai-coding-workflow/issues/366

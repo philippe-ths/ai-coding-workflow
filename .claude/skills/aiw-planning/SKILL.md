@@ -47,12 +47,13 @@ When establishing what the codebase does spans several files or areas, route the
 - If `project-context.md` is stale from before this branch, treat it as a finding outside the task: fix it when the fix is smaller than the sentence describing it, track it when it is not with aiw-issue-creation, and do not refresh the file inline. Drift this branch causes is updated on this branch, per aiw-project-context-management.
 - If `project-context.md` does not exist and the codebase is non-trivial, flag this and ask whether to scaffold one before proceeding.
 
-### Run baseline validation
+### Run baseline validation and query the tracker
 
 - Run smoke tests and the global test suite as they exist now; at the Light tier, the checks for the touched area.
-- Record which tests pass and which tests fail.
-- Treat pre-existing failures as known for the task's duration.
-- Do not fix pre-existing failures unless the task requires it.
+- Query the tracker once and narrowly, at every tier, on the task's area and the behaviour it changes rather than the whole list. It looks for open issues reporting a defect there, labelled as a bug or not, and for one naming a structural cause behind the task, which "Confirm the task is a bounded change" weighs. Where there is no tracker or no result, say so in a line.
+- Record in the plan which tests pass and which fail, and the open defects the query found other than those this task resolves, or that there were none. (Why: a filed bug with no failing test is a known failure the suite cannot show.)
+- Treat the failures and defects recorded above as known for the task's duration. A symptom that resembles a filed bug counts as that bug only once it reproduces on the code before your change; until then it is evidence against the change.
+- Do not fix either unless the task requires it.
 
 ### Check test readiness
 
@@ -70,7 +71,7 @@ Bounded runs in two directions. Too large is the familiar one. Aimed above the l
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
 - Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan and settle it there rather than stopping to ask which layer to use; a shared layer is something others rely on, so aiming deeper sets the task at Full, where the human approves the plan before implementation and aiming deeper is a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Plan at the requested level when the work survives the deeper fix. Target the deeper layer when it would not, and not both: work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
-- The deeper fix is often already filed as another open issue. Before answering, query the tracker once and narrowly, on the task's area and the behaviour it changes rather than the whole list, for an issue naming a structural cause behind it, and put what came back in the plan: nothing, or the issue and why this work survives it, or the issue and that this work would be discarded by it, in which case the plan proposes working that issue first or taking this task at its layer, and the human decides at plan review as for any deeper fix. Where there is no tracker, say so. A query that returns nothing costs one line. (Why: a tracked class is not a worked one, and a run of sound instance fixes each passing its own gate is what an open structural issue looks like from the inside.)
+- The deeper fix is often already filed as another open issue, and the baseline's tracker query looks for it. Put what it found behind the task in the plan: nothing, or the issue and why this work survives it, or the issue and that this work would be discarded by it, in which case the plan proposes working that issue first or taking this task at its layer, and the human decides at plan review as for any deeper fix. (Why: a tracked class is not a worked one, and a run of sound instance fixes each passing its own gate is what an open structural issue looks like from the inside.)
 
 If the baseline, test readiness, or task scope is unclear after these checks, stop and resolve before drafting the plan.
 
@@ -109,7 +110,7 @@ At the Light tier the plan is a few lines: the end impact, the change, the check
 - **Risks and edge cases.** Including any higher-risk flag. (See "Higher-Risk Flags" below.)
 - **Architectural boundaries.** For each documented boundary the task affects, the deterministic check that enforces it, or its absence as an unverified surface. Do not add enforcement tooling unless the approved scope requires it.
 - **Verification approach.** What evidence will be required to declare done. (See "Verification Approach in the Plan" below.)
-- **Testing notes.** What test infrastructure exists, what gaps exist, what will be needed. (See "Testing Notes in the Plan" below.)
+- **Testing notes.** The baseline's failing tests and recorded defects, what test infrastructure exists, what gaps exist, what will be needed. (See "Testing Notes in the Plan" below.)
 - **Remaining uncertainties.** What is still ambiguous before implementation begins.
 
 ## The Oracle Section
