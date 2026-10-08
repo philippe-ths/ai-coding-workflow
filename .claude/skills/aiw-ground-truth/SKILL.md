@@ -27,6 +27,8 @@ Classify every input and expected output the work will rely on. Highest trust fi
 
 The hard case is evidence that is true. A cross-user data leak was once downgraded to mere config fragility on the evidence that the recipient setting was "set in prod today". True, and read from the web process, while the worker that actually sends had no such setting. The leak ran for a week and outlived two later fixes that inherited the same framing. "In prod" named a deployment; the question it had to answer was which process, because that is the place the code runs.
 
+**Current is not the same as correct.** Behaviour an open issue reports as a defect is current behaviour and not known-good, however real the capture, whether or not the planning baseline recorded it (aiw-planning owns that query). Wherever current behaviour is the oracle, as in a refactor, a migrate, or the characterisation around a fix or feature, keep it and mark it as the bug, so preserving it is a choice the next reader can see. It is never the expected value for what the task sets out to make correct.
+
 For every fixture or expected output the work relies on, record its trust level alongside it. Mark synthetic fixtures visibly wherever they appear — in filenames, headers, or inline comments — so no future read mistakes them for higher-trust data. (Why: trust level decays silently when the marker is missing; the next reader assumes provenance from absence of warning.)
 
 When the trust level required for the task is not available, do not silently substitute a lower level. Apply the sourcing protocol below.
