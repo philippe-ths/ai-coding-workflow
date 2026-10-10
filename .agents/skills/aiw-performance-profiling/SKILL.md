@@ -1,6 +1,6 @@
 ---
 name: aiw-performance-profiling
-description: "Automated performance and UI-state-transition coverage rules. Use this skill when implementing changes to user interfaces, reactive state, heavy data loops, caching logic, or any code path where runtime speed affects usability. The skill exists to prevent the pattern where functional tests pass while real-world execution becomes sluggish or stutters."
+description: "Automated performance and UI-state-transition coverage. Use when changing user interfaces, reactive state, heavy data loops, caching logic, or any code path where runtime speed affects usability, so passing functional tests do not hide sluggish real-world behaviour."
 ---
 
 # Performance Profiling and Latency Coverage

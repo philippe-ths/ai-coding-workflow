@@ -1,6 +1,6 @@
 ---
 name: aiw-testing
-description: "Mechanical craft rules for writing tests well: choosing the right test level, consuming ground truth from aiw-ground-truth rather than fabricating it, organising tests for independence and clarity, and avoiding anti-patterns that produce green suites with no real authority. Use this skill whenever the agent is about to write or modify a test, choose a fixture, pick a test level (unit, integration, end-to-end), decide whether to mock a component, refactor test code, fill a coverage gap from aiw-verification, write a regression test, or when tempted to assert on internal calls or private state. It does not decide what counts as correct (aiw-ground-truth) or whether tests are sufficient evidence (aiw-verification). It owns test mechanics, test-level selection, modality-specific testing emphasis referencing aiw-ground-truth, the anti-patterns that produce misleading green bars, and the hygiene rules that keep a suite a reliable signal."
+description: "Craft rules for writing tests: choosing the test level, consuming ground truth rather than fabricating it, keeping tests independent, and avoiding anti-patterns that produce green suites with no authority. Use whenever about to write, modify, or refactor a test, choose a fixture or test level, decide whether to mock, write a regression test, fill a coverage gap, or when tempted to assert on internal calls or private state."
 ---
 
 # Testing

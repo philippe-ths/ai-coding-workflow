@@ -1,6 +1,6 @@
 ---
 name: aiw-init
-description: "User-invoked session preflight. Runs the repository's declared checks read-only and reports project state the human may not be aware of: open issues and pull requests, work left in flight, errors in recent logs, dependent services that are down, approaching expiries, and drift in the project's own documents. Use this skill when the human invokes it by name, or asks what the state of the project is, what they were in the middle of, what has changed since last session, or whether anything needs attention before they start. It maintains `project-checks.md`, the per-repository record of what is worth checking and what normal looks like for each check. It reports observations and never decides what to do about them; choosing the next task stays with the human."
+description: "Session preflight: runs the repository's declared checks read-only and reports state the human may not know about, such as open issues and pull requests, work left in flight, errors in recent logs, services that are down, and drift in the project's own documents. Use when the human invokes it, or asks what state the project is in, what they were in the middle of, what changed since last session, or whether anything needs attention. Maintains `project-checks.md`; never chooses the next task."
 ---
 
 # Init

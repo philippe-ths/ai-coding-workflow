@@ -111,6 +111,27 @@ for t in .claude .agents; do
 done
 expect "a whitespace-only description is caught" fail "$D" "description is empty"
 
+D="$(fixture oversize-desc)"
+long="$(printf 'x%.0s' $(seq 601))"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-init/SKILL.md" "s/^description:.*\$/description: \"$long\"/"
+done
+expect "a description over the size cap is caught" fail "$D" "description is over"
+
+D="$(fixture cap-boundary)"
+long="$(printf 'x%.0s' $(seq 600))"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-init/SKILL.md" "s/^description:.*\$/description: \"$long\"/"
+done
+expect "a description exactly at the size cap passes" pass "$D"
+
+D="$(fixture block-desc)"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-init/SKILL.md" 's/^description:.*$/description: >\
+  folded text the one-line read cannot measure/'
+done
+expect "a block-scalar description is caught" fail "$D" "block scalar"
+
 echo "documented skill set:"
 D="$(fixture undocumented)"
 for t in .claude .agents; do

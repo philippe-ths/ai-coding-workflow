@@ -1,6 +1,6 @@
 ---
 name: aiw-project-context-management
-description: "Structured process for initializing and updating `project-context.md`, a repository's factual reference of current implementation truth. Use this skill before any edit to that file, including adding a single fact from work just completed, and when the human asks to create, scaffold, refresh, or correct the project context, with phrasings like 'update the context', 'the architecture summary is out of date', 'document the project structure', or 'the project-context.md is stale'. Also use it when the current branch's changes to routes, schema, sync rules, dependencies, project structure, or test coverage have drifted the file from the codebase; drift that was already there is a finding outside the task, not a refresh done inline. The skill exists to prevent context files from drifting into planned architecture, roadmap language, or multi-sentence lines that degrade agent parsing in future sessions."
+description: "Process for creating and updating `project-context.md`, a repository's factual reference of current implementation truth. Use before any edit to that file, even a single fact, and when the human asks to create, scaffold, refresh, or correct the project context, as in 'update the context', 'document the project structure', or 'the architecture summary is out of date'. Use it also when the branch's changes to routes, schema, sync rules, dependencies, structure, or tests have drifted it from the code; older drift is a finding, not an inline refresh."
 ---
 
 # Project Context Management
