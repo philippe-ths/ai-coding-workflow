@@ -1,6 +1,6 @@
 ---
 name: aiw-ground-truth
-description: "Establishes where trusted inputs and expected outputs come from during coding tasks, so the agent's tests, fixtures, and assumed-correct values have authority not invented by the agent. Use this skill before generating a test fixture, constructing expected output, mocking an external system, reusing earlier fixtures, deleting code, or assuming what 'correct' means, and at the start of every task to classify the work into one or more of the nine modalities (New, Feature, Fix, Refactor, Improve, Investigate, Migrate, Configure, Delete). It owns the trust hierarchy for ground-truth sources, the canonical modality decision procedure shared across the workflow, modality-specific oracle rules, the sourcing protocol when real ground truth is missing, storage and provenance for ground-truth artifacts, and the boundary distinguishing ground truth from test setup. It breaks the closed loop where the agent writes the code, fixtures, and tests and reads its own results with no external check."
+description: "Sets where trusted inputs and expected outputs come from, so tests, fixtures, and assumed-correct values are not invented by the agent. Use before generating a fixture, constructing expected output, mocking an external system, reusing earlier fixtures, deleting code, or assuming what 'correct' means, and at the start of every task to classify its modality (New, Feature, Fix, Refactor, Improve, Investigate, Migrate, Configure, Delete)."
 ---
 
 # Ground Truth

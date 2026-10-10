@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.25.1 - 2026-10-10
+
+Skill descriptions say only when to load each skill, so the 17 of them cost about half as many tokens in every session.
+
+### Changed
+
+- All skills except `aiw-upkeep`: frontmatter descriptions keep what the skill does and when to load it, and leave what it owns to its body; together they fall from about 15,100 to about 7,600 characters ([#374]).
+
 ## 5.25.0 - 2026-10-08
 
 A plan lists the open bugs filed against the area a task touches, so meeting one mid-task is not blamed on the change, fixed in passing, or captured as correct behaviour.
@@ -1233,3 +1241,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#324]: https://github.com/philippe-ths/ai-coding-workflow/issues/324
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352
 [#366]: https://github.com/philippe-ths/ai-coding-workflow/issues/366
+[#374]: https://github.com/philippe-ths/ai-coding-workflow/issues/374

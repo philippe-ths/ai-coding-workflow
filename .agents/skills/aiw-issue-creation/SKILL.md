@@ -1,6 +1,6 @@
 ---
 name: aiw-issue-creation
-description: "Structured process for creating follow-up or spin-off GitHub issues during a task. Use this skill whenever the agent drafts an issue, including one the human asked for, and when it discovers work outside the current scope, names a surface unverified at aiw-verification's scoping step, or finds a recurring limitation aiw-init reports, and that work should be tracked. The skill exists to prevent implementation-heavy issues that bias the implementing agent and peg to stale code."
+description: "Process for drafting GitHub issues, including follow-up or spin-off issues during a task, so they state intent rather than implementation. Use whenever drafting an issue, including one the human asked for, and when work outside the current scope, a surface left unverified by aiw-verification, or a recurring limitation reported by aiw-init should be tracked."
 ---
 
 # Issue Creation

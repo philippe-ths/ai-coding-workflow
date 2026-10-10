@@ -1,6 +1,6 @@
 ---
 name: aiw-security-testing
-description: "Automated security testing rules for changes that touch authentication, authorisation, untrusted input, file-path or shell-command construction, secret handling, external API consumers, or data-access boundaries. Use this skill whenever the change crosses a trust boundary or processes input that could be hostile, even if the surface looks routine. The skill exists to prevent the pattern where happy-path tests pass while negative paths, boundaries, and threat-model assumptions go unchecked."
+description: "Automated security testing for changes that touch authentication, authorisation, untrusted input, file-path or shell-command construction, secret handling, external API consumers, or data-access boundaries. Use whenever a change crosses a trust boundary or handles input that could be hostile, even when it looks routine, so negative paths and threat assumptions are checked and not only the happy path."
 ---
 
 # Security Testing

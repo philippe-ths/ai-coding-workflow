@@ -1,6 +1,6 @@
 ---
 name: aiw-verification
-description: "Governs how the agent confirms a change actually works before declaring a task complete. Use this skill at the end of every implementation pass and whenever the agent is about to say 'done', 'this works', 'tests pass', 'ready to commit', or 'ready to push'. Also use when interpreting runtime output, deciding whether to run the full system end-to-end, claiming a refactor preserves behaviour, a fix is fixed, a migration is complete, or a delete is safe. It forces the agent to justify every time that its checks cover the change and to name the unverified surface, breaking the 'all tests pass, system is broken' failure mode. It owns the required justification step before declaring done, the evidence hierarchy from static checks to end-to-end runs on real artifacts, the rules for when end-to-end execution is mandatory, reading runtime output as evidence not exit codes, modality-aware requirements referencing aiw-ground-truth, and the scoping step that names what was not checked."
+description: "Requires a justification that the checks cover the change, naming what was not checked, before a task is declared complete. Use at the end of every implementation pass and whenever about to say 'done', 'this works', 'tests pass', 'ready to commit', or 'ready to push'; also when reading runtime output, deciding on an end-to-end run, or claiming a refactor preserves behaviour, a fix is fixed, a migration is complete, or a delete is safe."
 ---
 
 # Verification

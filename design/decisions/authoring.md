@@ -165,7 +165,8 @@ The base rules apply.
 The frontmatter description is the only part of the skill always present in the system prompt; the body loads only if the agent decides the skill applies.
 Write the description in third person.
 State both what the skill does and when to use it, with concrete triggers: filenames, command patterns, or task phrases.
-Keep descriptions under 1024 characters.
+Keep descriptions under 600 bytes, enforced by `scripts/check-prose-integrity.sh`: every description loads into every session of every target, so the description says when to load the skill and leaves what the skill owns to the body.
+The cap also keeps well inside the 1024-character limit older Codex versions enforced by refusing the skill (#152).
 A vague or first-person description causes the wrong skill to be invoked, or none at all.
 (See `design/research/skills.md#skill-description-trigger-selection` and `#tool-to-agent-retrieval-context-dilution`.)
 

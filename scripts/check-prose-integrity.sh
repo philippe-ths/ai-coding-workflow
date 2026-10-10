@@ -29,6 +29,7 @@ head_() { [ "$VERBOSE" = 1 ] && echo "$1"; return 0; }
 AGENT_DIR=".agents/skills"
 CLAUDE_DIR=".claude/skills"
 ENTRY_POINTS=("CLAUDE.md" "AGENTS.md" ".github/copilot-instructions.md")
+DESC_MAX=600
 
 head_ "Skill mirror parity:"
 a_list="$(ls "$AGENT_DIR" 2>/dev/null | sort)"
@@ -78,6 +79,15 @@ for s in $c_list; do
   desc="${desc#"${desc%%[![:space:]]*}"}"; desc="${desc%"${desc##*[![:space:]]}"}"
   [ "$name" = "$s" ] || bad "$s: frontmatter name '$name' does not match its directory"
   [ -n "$desc" ] || bad "$s: frontmatter description is empty (nothing would load this skill)"
+  # Every description loads into every session of every target, and older Codex
+  # versions refused a skill whose description passed 1024 characters (#152).
+  # Bytes, not characters, so the count is the same under any locale. Only an
+  # inline description can be measured from its one line, so a block scalar fails.
+  case "$desc" in
+    [\>\|]*) bad "$s: description is a YAML block scalar; write it on one line so its size can be checked" ;;
+    *) [ "$(printf '%s' "$desc" | wc -c)" -le "$DESC_MAX" ] \
+         || bad "$s: description is over $DESC_MAX bytes (it loads every session; say when to load the skill, and leave what it owns to the body)" ;;
+  esac
   [ "$name" = "$s" ] && [ -n "$desc" ] && ok "$s: name matches directory, description present"
 done
 

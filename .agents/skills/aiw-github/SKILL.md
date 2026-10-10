@@ -1,6 +1,6 @@
 ---
 name: aiw-github
-description: "Rules for every GitHub and git history action during a task: starting work on an issue, switching branches, rebasing, committing, pushing, opening a pull request, closing an issue, post-merge cleanup, and handling parent and sub-issue hierarchies. Use this skill whenever the agent is about to read a GitHub issue at task start, create or switch to a branch, run a rebase, create a commit, push to remote, open a pull request, close an issue, or run post-merge cleanup, even if the user does not name the action explicitly. Also use when the agent encounters a parent issue with sub-issues, when a deterministic policy hook blocks a git action, or when the agent suspects new commits have landed on the target branch since the last rebase. The skill exists to keep GitHub actions traceable to an issue, taken after the done gate, safe against silent working-tree loss during branch operations, and short of the merge, which stays the human's."
+description: "Rules for git and GitHub actions during a task: reading the issue at task start, creating or switching branches, rebasing, committing, pushing, opening a pull request, closing an issue, post-merge cleanup, and parent and sub-issue hierarchies. Use whenever about to take any of these actions, even if the user does not name it, and when a policy hook blocks a git action or new commits may have landed on the target branch."
 ---
 
 # GitHub Workflow

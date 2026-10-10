@@ -1,6 +1,6 @@
 ---
 name: aiw-planning
-description: "Structured planning process for producing a code-aware implementation plan before writing code, including the pre-planning codebase baseline checks (smoke tests and the global suite, test readiness, bounded-change confirmation) and the task modality classification the rest of the plan depends on. Use this skill at the start of every task before any implementation, whether the user says 'plan' or just hands the agent an issue. It owns the ceremony tier that sets how much process the task gets, the codebase baseline check, the modality classification step (procedure in aiw-ground-truth), the plan's structure and required content, the oracle and verification expectations the plan must state, the issue-vs-codebase priority rule, assumption classification, bounded-change confirmation, and handling human feedback at plan review. It does not own oracle definitions or the trust hierarchy (aiw-ground-truth), test mechanics (aiw-testing), evidence and sufficiency (aiw-verification), or post-failure investigation (aiw-failure-analysis)."
+description: "Produces a code-aware implementation plan before any code is written: ceremony tier, codebase baseline (smoke tests, the global suite, open defects, test readiness, bounded-change check), modality classification, and the oracle and verification the plan commits to. Use at the start of every task before implementation, whether the user says 'plan' or just hands over an issue, and when revising a plan after the human's feedback."
 ---
 
 # Planning

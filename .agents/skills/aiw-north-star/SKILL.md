@@ -1,6 +1,6 @@
 ---
 name: aiw-north-star
-description: "Structured process for authoring and updating `north-star.md`, the shortest statement of what a project is trying to achieve. Use this skill when the human asks to create, scaffold, revise, or check the north-star, with phrasings like 'what is this project for', 'set up a north-star', or 'is that still the goal'. Use it also, and without being asked, when a request that has just arrived would take the project away from its stated goal, before any planning happens: that conflict means either the request is wrong or the goal has moved, and neither is the agent's call. The skill exists because a project's direction is the one thing no oracle can derive: the codebase shows what is, the spec shows what is asked, and neither says what the project is trying to achieve."
+description: "Authors and updates `north-star.md`, the shortest statement of what a project is trying to achieve. Use when the human asks to create, set up, revise, or check the project's goal, with phrasings like 'what is this project for' or 'is that still the goal'. Use it unprompted, before any planning, when an arriving request would take the project away from its stated goal: either the request is wrong or the goal has moved, and the human decides which."
 ---
 
 # North Star
