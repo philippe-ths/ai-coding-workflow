@@ -6,6 +6,17 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.29.0 - 2026-10-13
+
+The agent no longer stops mid-work on a fixed list of "ask first" items. A change that breaks what others rely on is a direction decision and reaches the human as one, installing a dependency is the human's to approve, and weaker verification evidence is a choice put to them in the pull request.
+
+### Changed
+
+- `ai-workflow.md`: the Ask First section is gone. Asking for Guidance says a change to a recorded constraint or contract, a schema, sync behaviour, or a public interface turns on direction, and that a direction decision the north-star does not settle stops the work it affects until the human answers, in the plan or during implementation; The Human is Responsible For adds approving a new dependency, since it brings in third-party code ([#382]).
+- `aiw-verification`: when the committed verification method cannot run, the agent gathers what it can and puts accept, wait, or narrow to the human in the pull request, rather than stopping the work ([#382]).
+- `aiw-housekeeping`: removing what something outside the repository could refer to is a direction decision rather than an Ask First item ([#382]).
+- `aiw-upkeep`: its Ask First references name a direction decision, a new dependency, and the human's items instead ([#382]).
+
 ## 5.28.0 - 2026-10-13
 
 A plan reaches the human before work starts only when it holds a decision of taste or direction; otherwise the agent states it, works, and the human judges plan and work together at the pull request.
@@ -1277,4 +1288,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#374]: https://github.com/philippe-ths/ai-coding-workflow/issues/374
 [#375]: https://github.com/philippe-ths/ai-coding-workflow/issues/375
 [#376]: https://github.com/philippe-ths/ai-coding-workflow/issues/376
+[#382]: https://github.com/philippe-ths/ai-coding-workflow/issues/382
 [#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384

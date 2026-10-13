@@ -124,13 +124,13 @@ The plan named the evidence this task would produce. Sometimes that method is no
 
 Substituting a weaker method and disclosing it honestly is not the honest option it appears to be. The disclosure is real; the decision is still the agent's, and it is not the agent's to make. Accepting weaker evidence changes what the done claim is worth, and what it is worth is the human's call. aiw-ground-truth already forbids silently substituting a lower trust level for an *input*; the same rule applies to *evidence*.
 
-Stop and put it to the human in the Asking for Guidance format, with these options:
+Do not stop the work for it. Gather the evidence you can, and put the choice to the human in the pull request, under the justification's part 3, with these options:
 
 - **Accept the weaker evidence**, with the reduced worth of the claim stated plainly rather than buried.
 - **Wait** until the committed method is available.
 - **Narrow the claim** to what the available evidence does support, and leave the rest unverified and named.
 
-Recommend one, then wait.
+Recommend one. Until the human answers, the item stands as a waiver request; they answer it as part of their done decision, before merge.
 
 "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance. Nothing about the sentence is false, and the human still never got to make the choice.
 
@@ -175,7 +175,7 @@ Naming the surface is half the step. The other half is what became of it, settle
 
 - **Checked.** You closed the gap during this task. The artifact is what you ran and what it showed; the item then belongs in part 2.
 - **Tracked.** An issue carries it, and the artifact is the issue number. Filing it is yours, under aiw-issue-creation. A defect found in the change itself cannot be tracked, since an issue does not make the change correct.
-- **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver.
+- **Waived.** The human accepted the gap. The artifact is their words, and what they were told when they said them. You cannot waive on their behalf, and silence is not a waiver. A waiver may be requested in the pull request, and until the human answers it is a request, not a waiver.
 - **Deferred.** The method has not run yet and you can say when it will, before the human decides. The artifact is the method named, that timing, and the reason for the wait: "the clean-context end-to-end pass, once quota resets in an hour". Deferred is the one state that does not close an item, because its artifact is a commitment rather than a result. Posting the result where the work is presented is what closes it, as Checked, in front of the person deciding. This is the Wait option kept visible rather than finished work held back, and two limits keep it that way. The evidence your modality requires cannot be deferred: a fix with no check that failed before and passes after, or a refactor with no before-and-after comparison, is not ready to present whatever else has run. And if you cannot say when it runs, or it turns out it will not, it is not deferred but "When the Committed Method Cannot Run", where the choice is the human's.
 
 Name the gap by its cause rather than by the task. "No real external-model call — the API key is unfunded" can be recognised the next time it appears; "could not fully test the coach for #712" cannot, and a gap nobody can find is a gap that gets declared fresh forever.
