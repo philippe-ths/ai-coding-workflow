@@ -116,7 +116,15 @@ Using `core.hooksPath` instead of copying hooks into `.git/hooks/` means the hoo
 
 The pre-commit hook runs two checks in order:
 1. Protected branch check: blocks the commit if on a protected branch.
-2. Validation check (if enabled): blocks the commit if validation has not passed.
+2. Validation check (if enabled): blocks the commit unless a full validation pass is recorded for the current tree, or the repository's own `scripts/commit-check.sh` passes.
+
+The commit check exists because the agent commits at the end of every small loop, so each commit is a known-good point a failed loop can return to.
+A full run per loop would make that pattern too costly to follow, and a gate that fires on the normal path trains people to route around it.
+The hook passes the commit's changed paths on stdin and the repository decides what covers them; the hook cannot judge that scope itself.
+Absent or not executable, the commit needs full validation, so a target that writes no commit check keeps the stricter gate.
+The trade is that a local branch can hold commits that passed only the fast check.
+Push is where that stops: the pre-push gate still requires a full pass against the content being pushed.
+Like the validation pass, the commit check reads the working tree rather than the index.
 
 The protected branch check runs first because it is the cheaper operation and the more fundamental violation.
 There is no point checking validation status if the commit should not happen on this branch at all.
