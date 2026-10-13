@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.28.0 - 2026-10-13
+
+A plan reaches the human before work starts only when it holds a decision of taste or direction; otherwise the agent states it, works, and the human judges plan and work together at the pull request.
+
+### Changed
+
+- `ai-workflow.md` Task Flow step 3 and `aiw-planning`: the plan is stated and the work proceeds at every tier; a taste or direction decision that `north-star.md` does not settle, including aiming deeper than the request, is agreed with the human before what depends on it is built. The separate `aiw-upkeep` exception goes, since it is now the rule ([#384]).
+- `aiw-github`: the pull request body states the plan's approach and each direction decision with who settled it, since that is where the human now judges the plan ([#384]).
+- `aiw-planning` feedback on a plan: the revised plan is stated and work proceeds, unless the feedback raised a direction decision; `ai-workflow.md` Build and Teach keeps reasoning in a plan only where it puts a decision to the human; `aiw-orchestration` states a non-solo shape where the human can interrupt it, rather than waiting for agreement ([#384]).
+
 ## 5.27.0 - 2026-10-13
 
 `ai-workflow.md` carries only what an agent needs before any skill has loaded, so it costs about 1,400 fewer tokens in every session (about 3,510 to 2,100).
@@ -1267,3 +1277,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#374]: https://github.com/philippe-ths/ai-coding-workflow/issues/374
 [#375]: https://github.com/philippe-ths/ai-coding-workflow/issues/375
 [#376]: https://github.com/philippe-ths/ai-coding-workflow/issues/376
+[#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384

@@ -25,13 +25,15 @@ Reach sets the tier, not size. A one-line fix to a guard every push passes throu
 
 | | Light | Standard | Full |
 |---|---|---|---|
-| Plan | A few lines, stated, then proceed; the human interrupts rather than approves | A short plan, agreed with the human | The full plan this skill describes, agreed with the human |
+| Plan | A few lines | A short plan | The full plan this skill describes |
 | Baseline | Checks for the touched area; full validation once, before commit | Smoke tests and the global suite, at start and end | As Standard |
 | Verification | The justification step at a line per part, resting on the direct check that it works | The justification, the end-to-end runs aiw-verification makes mandatory, and the refuting pass | Everything aiw-verification asks |
 | New tests or checks | Only what the modality requires | What the change needs | What the change needs |
 | Pull request | Short | Normal | Full |
 
-Move up the moment the work proves bigger: to Full when it touches anything on the Full list or the cause turns out unknown, and at least one tier when a check fails unexpectedly. Do what the new tier asks from that point, its baseline included, and say so in your next message; leaving Light means putting the plan to the human for agreement before going further. Nothing moves a task down once started. Evidence the modality requires holds at every tier, so a Light fix still has its check that fails before and passes after. A task that needs an end-to-end run aiw-verification makes mandatory is not Light.
+At every tier the plan is stated and the work proceeds: the human interrupts rather than approves, and judges the plan with the work at the pull request. A decision in the plan that turns on taste or direction, and that `north-star.md` does not settle, is the exception: put it to the human as Asking for Guidance in `ai-workflow.md` describes, and implement nothing until they answer. Aiming deeper than the request, below, is always such a decision, and the other points where this skill says to flag something to the human and ask still stop the same way.
+
+Move up the moment the work proves bigger: to Full when it touches anything on the Full list or the cause turns out unknown, and at least one tier when a check fails unexpectedly. Do what the new tier asks from that point, its baseline included, and say so in your next message; leaving Light means stating the fuller plan the new tier asks for before going further. Nothing moves a task down once started. Evidence the modality requires holds at every tier, so a Light fix still has its check that fails before and passes after. A task that needs an end-to-end run aiw-verification makes mandatory is not Light.
 
 State the tier and its source, the judge's answer with its confidence or your own call, in the plan and in the pull request body, so what the task cost can be explained afterwards.
 
@@ -70,8 +72,8 @@ Bounded runs in two directions. Too large is the familiar one. Aimed above the l
 
 - If the issue contains multiple unrelated objectives, flag this and ask the human whether to split them into separate tasks.
 - If the task would require changes across many unrelated areas of the codebase, flag the risk and suggest decomposition.
-- Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan and settle it there rather than stopping to ask which layer to use; a shared layer is something others rely on, so aiming deeper sets the task at Full, where the human approves the plan before implementation and aiming deeper is a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Plan at the requested level when the work survives the deeper fix. Target the deeper layer when it would not, and not both: work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
-- The deeper fix is often already filed as another open issue, and the baseline's tracker query looks for it. Put what it found behind the task in the plan: nothing, or the issue and why this work survives it, or the issue and that this work would be discarded by it, in which case the plan proposes working that issue first or taking this task at its layer, and the human decides at plan review as for any deeper fix. (Why: a tracked class is not a worked one, and a run of sound instance fixes each passing its own gate is what an open structural issue looks like from the inside.)
+- Ask whether the approach is aimed above the layer where the cause lives: would the real fix, one layer down, discard this work? A patch at every caller is discarded by repairing the shared helper they all call; a reminder to do something by hand is discarded by the check that enforces it. Name the answer in the plan. Plan at the requested level when the work survives the deeper fix, and carry on. Target the deeper layer when it would not, and not both; a shared layer is something others rely on, so aiming deeper sets the task at Full and is a direction decision: put it to the human before implementation, as a proposal they can refuse rather than silent scope expansion or an unrequested refactor. Work the deeper fix would discard does not become worth doing by being small. An issue that already names other sites where the request applies has done the finding, not made the call; building at the shared layer instead is this step's decision to take.
+- The deeper fix is often already filed as another open issue, and the baseline's tracker query looks for it. Put what it found behind the task in the plan: nothing, or the issue and why this work survives it, or the issue and that this work would be discarded by it, in which case the plan proposes working that issue first or taking this task at its layer, and the human decides before implementation, as for any deeper fix. (Why: a tracked class is not a worked one, and a run of sound instance fixes each passing its own gate is what an open structural issue looks like from the inside.)
 
 If the baseline, test readiness, or task scope is unclear after these checks, stop and resolve before drafting the plan.
 
@@ -204,9 +206,9 @@ Do not enumerate specific tests in the plan. aiw-testing will make those calls d
 - One sentence per item where possible.
 - The plan is a structured handoff to implementation, not a substitute for it.
 
-## Handling Human Feedback at Plan Review
+## Handling Human Feedback on the Plan
 
-- If the human partially approves, update only the unapproved parts and present the revised plan.
+- Update only the parts the feedback touches.
 - If the human adds new requirements, assess whether they change the scope and flag if they do.
 - If the human's feedback contradicts the issue, flag the contradiction.
-- After updating the plan, present the revised plan for re-approval before proceeding; at the Light tier, state it and proceed.
+- After updating the plan, state it and proceed, unless the feedback raised a direction decision of its own, which goes to the human first.
