@@ -12,12 +12,14 @@ The agent works in small loops: one change, the check that covers it, a commit. 
 
 ### Added
 
-- `.githooks/pre-commit`: when the repository ships an executable `scripts/commit-check.sh`, a commit runs it with the changed paths on stdin instead of requiring a full validation pass. Without it, commits need full validation as before, and a full pass for the current tree always suffices ([#390]).
+- `.githooks/pre-commit`: when the repository ships an executable `scripts/commit-check.sh`, a commit runs it with the changed paths on stdin instead of requiring a full validation pass. Without it, commits need full validation as before, and a full pass for the current tree always suffices. A target that already keeps an executable `scripts/commit-check.sh` for another purpose should rename it, since the hook now runs it at every commit ([#390]).
 
 ### Changed
 
 - `ai-workflow.md` Task Flow step 4: work in small loops that each end in a checked commit; a loop whose check fails gets one fix, then returns to the last commit and retries smaller. Nothing inside a loop is claimed done; a committed loop that later proves wrong is a contradicted "done" claim ([#390]).
-- `ai-workflow.md` The Human is Responsible For: resetting the task branch to the agent's own unpushed commit after a failed loop, discarding only that loop's changes, no longer needs approval ([#390]).
+- `ai-workflow.md` The Human is Responsible For: after a failed loop, discarding that loop's own uncommitted changes to return to the last commit no longer needs approval, provided the tree was clean when the loop began ([#390]).
+- `aiw-failure-analysis`: the one fix a failed loop gets, and returning to the last commit, are not contradicted "done" claims ([#390]).
+- `aiw-upkeep`: a stopped run pushes its branch only if validation passes on the commits it holds, since those may have passed only a commit check ([#390]).
 - `aiw-github`: commits happen at the end of each loop; push and pull request still wait for the done gate. `aiw-verification`, `aiw-housekeeping`, and `aiw-planning` no longer assume the work is uncommitted at the done gate ([#390]).
 
 ## 5.30.0 - 2026-10-13

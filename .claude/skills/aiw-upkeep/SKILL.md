@@ -29,7 +29,7 @@ Label a finished pull request `aiw:upkeep`.
 Wherever the workflow would stop for the human, stop there instead of deciding for them: the work reaching anything on aiw-planning's Full list, a direction decision, an item under The Human is Responsible For or a choice a skill reserves for them, a conflict you cannot resolve without one. Keep the work, and leave the checkout clean and back where it was:
 
 - If validation passes on what you have, commit, push, and open a draft pull request labelled `aiw:direction`, whose body says what stopped you, that the rest is unverified, and that no aiw-prompt-smith pass ran.
-- If it does not, stash it with everything untracked under a message naming the issue (`git stash push -u -m "aiw-upkeep #<n>: <reason>"`), and push the branch only if it already holds commits.
+- If it does not, stash it with everything untracked under a message naming the issue (`git stash push -u -m "aiw-upkeep #<n>: <reason>"`), and push the branch only if it already holds commits and validation passes on them.
 
 Then swap the issue's `aiw:upkeep` for `aiw:direction` and comment what stopped you and where the work is: the draft, the stash, or the branch. (Why: a stopped run that leaves changes in the tree blocks every later run, since upkeep never starts on a dirty tree.)
 

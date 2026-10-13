@@ -7,7 +7,7 @@ description: "Rules for git and GitHub actions during a task: reading the issue 
 
 ## Why this skill exists
 
-GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, taken only after the done gate, and safe against working-tree surprises. The merge is the human's, and the policy layer blocks the agent from it deterministically.
+GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, every one that reaches the remote taken only after the done gate, and safe against working-tree surprises. The merge is the human's, and the policy layer blocks the agent from it deterministically.
 
 ## Starting work on an issue
 
