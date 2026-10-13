@@ -29,6 +29,12 @@ if [ "$REQUIRE_VALIDATION_BEFORE_COMMIT" = "true" ]; then
     # through GIT_INDEX_FILE. The check runs with git's repository-local
     # variables cleared, so a test that builds its own sandbox repository
     # cannot write into the index this commit is built from.
+    # A repository reached only through --git-dir has nothing for the check to
+    # find once those variables are gone, so it keeps the full validation gate.
+    if ! (cd "$ROOT_DIR" && env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git rev-parse --git-dir >/dev/null 2>&1); then
+      "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
+      exit 0
+    fi
     # shellcheck disable=SC2046
     unset $(git rev-parse --local-env-vars)
     if printf '%s\n' "$CHANGED" | (cd "$ROOT_DIR" && "$COMMIT_CHECK"); then
