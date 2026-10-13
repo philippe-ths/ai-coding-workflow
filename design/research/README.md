@@ -40,4 +40,4 @@ Finding: ...
 Citation paths are repo-relative.
 Broken citations are detectable by grep.
 Every claim in a decision file that originates from research must carry a citation.
-Inline rationale in `ai-workflow.md` is unchanged in form: still `(Why: ...)` for judgment-calling rules.
+Inline rationale in skills is unchanged in form: still `(Why: ...)` for judgment-calling rules; `ai-workflow.md` leaves it to the owning skill.

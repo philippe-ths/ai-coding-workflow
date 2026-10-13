@@ -43,7 +43,7 @@ The third bullet is where most of the work is, and a boundary drawn on the first
 
 It reads rather than runs, but it is still a procedure rather than an instinct: take the names the diff stopped calling, importing, reading, or passing, and search for each one. What comes back with only its own definition is the candidate. Skipping this bullet is skipping the skill, whatever the first two returned.
 
-Everything else is outside this step. It is not untouchable, and the standing rule in ai-workflow.md still governs what becomes of it; what it is not is housekeeping you do now under this skill. (Why: a done-gate step permitted to act anywhere puts unrelated change in every pull request, and the human reviewing one cannot then tell the task from the tidying.)
+Everything else is outside this step. It is not untouchable, and ai-workflow.md's resolve-or-track rule still governs what becomes of it; what it is not is housekeeping you do now under this skill. (Why: a done-gate step permitted to act anywhere puts unrelated change in every pull request, and the human reviewing one cannot then tell the task from the tidying.)
 
 The boundary is on what you act on, not on what you notice. What you noticed while doing the work still counts, and this is not a licence to go browsing the repository for more.
 

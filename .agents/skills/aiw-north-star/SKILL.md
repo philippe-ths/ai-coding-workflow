@@ -9,7 +9,7 @@ Read this file before creating or editing `north-star.md`, and when a request pu
 
 ## Why This Skill Exists
 
-The workflow knows what the system does, because the codebase says so. It knows what the system should do, because the spec says so. Nothing says what the project is trying to achieve, so every judgement turning on the project's direction is resolved by interrupting the human.
+The workflow knows what the system does, because the codebase says so. It knows what the system should do, because the human's request says so. Nothing says what the project is trying to achieve, so every judgement turning on the project's direction is resolved by interrupting the human.
 
 ## What Goes In
 

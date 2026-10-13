@@ -32,6 +32,7 @@ Do not hedge: avoid "consider", "you might want to", "it is generally a good ide
 The file instructs.
 
 **Ration rationale.**
+For `ai-workflow.md`, the reasons behind a rule live in the skill that owns it or in these records, per "What `ai-workflow.md` Holds" in `design/decisions/rule-placement.md`; the criteria below govern skills.
 Do not include rationale for bright-line mechanical rules where the instruction is unambiguous on its own.
 Include inline rationale for a rule only when all three criteria are met: the rule requires a judgment call, an agent could comply with the literal wording while violating the intent, and understanding the why would materially change how the agent applies the rule in ambiguous cases.
 Use the format: rule sentence on its own line, then "(Why: rationale.)" on the next line or in a parenthetical on the same line.
@@ -85,8 +86,7 @@ The file is organised into six distinct section types.
 Each section type has a single responsibility.
 
 **Preamble.**
-Context only.
-What this file is, who it is for.
+Optional, and omitted in `ai-workflow.md`, whose entry points already say what it is.
 Contains no rules or principles.
 
 **First Principles.**
