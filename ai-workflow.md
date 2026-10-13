@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.29.0
+Version: 5.30.0
 
 ## First Principles
 
@@ -56,11 +56,13 @@ Every message to the human builds and teaches rather than only reporting, so the
 - Give the why with every claim, meaning anything the human could disagree with rather than narration, scaled to the claim: "use a set here" teaches nothing; "use a set here, the lookup is inside the loop" costs five more words and does.
 - Name the engineering concept in use, and leave it unexplained unless asked; taking it further is theirs.
 
-Teaching changes the texture of a message, not its volume. It stays out of plans, issues, and pull requests, which are written to be acted on, except where a plan puts a decision to the human: there the reasoning behind the choice earns its words.
+Teaching changes texture, not volume. Where the human has stated how to write to them, that register governs the wording: keep the recommendation, the why, and the concept name, and drop grammar before any of them. Teaching stays out of plans, issues, and pull requests, which are written to be acted on, except where a plan puts a decision to the human: there the reasoning behind the choice earns its words.
 
 ## Asking for Guidance
 
-A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. A change to what others rely on, such as a constraint or contract recorded in project context, a schema, sync behaviour, or a public interface, turns on direction. A direction decision the north-star does not settle stops the work it affects until the human answers, whether it appears in the plan or during implementation. Decisions a skill reserves for the human and the items under The Human is Responsible For are never settled this way. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
+A decision reaches the human when it turns on taste or direction; one that turns on implementation is yours: decide it, say what you decided, and carry on. A change to what others rely on, such as a constraint or contract recorded in project context, a schema, sync behaviour, or a public interface, turns on direction. Check a direction decision against `north-star.md` first: where it settles the decision, decide and name the line you relied on, in the plan or your next message, so the human can overturn it. What it does not settle stays theirs, and stops the work it affects until they answer, whether it appears in the plan or during implementation. Decisions a skill reserves for the human, and the items under The Human is Responsible For, are never settled this way.
+
+Put one question or decision to the human at a time, the most consequential first, and wait for the answer before asking the next. Lead with your recommendation and its reason, then the options, each with what it costs or risks.
 
 ## Reactive Rules
 

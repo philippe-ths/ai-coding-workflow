@@ -124,13 +124,13 @@ The plan named the evidence this task would produce. Sometimes that method is no
 
 Substituting a weaker method and disclosing it honestly is not the honest option it appears to be. The disclosure is real; the decision is still the agent's, and it is not the agent's to make. Accepting weaker evidence changes what the done claim is worth, and what it is worth is the human's call. aiw-ground-truth already forbids silently substituting a lower trust level for an *input*; the same rule applies to *evidence*.
 
-Do not stop the work for it. Gather the evidence you can, and put the choice to the human in the pull request, under the justification's part 3, with these options:
+Do not stop the work for it. Gather the evidence you can, and put the choice to the human in the pull request, under the justification's part 3: lead with your recommendation, then these options:
 
 - **Accept the weaker evidence**, with the reduced worth of the claim stated plainly rather than buried.
 - **Wait** until the committed method is available.
 - **Narrow the claim** to what the available evidence does support, and leave the rest unverified and named.
 
-Recommend one. Until the human answers, the item stands as a waiver request; they answer it as part of their done decision, before merge.
+Until the human answers, the item stands as a waiver request; they answer it as part of their done decision, before merge.
 
 "Sub-agents were unavailable, so the end-to-end evidence is self-verified" is a decision reported as a circumstance. Nothing about the sentence is false, and the human still never got to make the choice.
 
