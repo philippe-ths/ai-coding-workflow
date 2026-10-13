@@ -108,6 +108,8 @@ The shipped validator (`./.ai-policy/scripts/project-validation.sh`) checks only
 
 To close that gap, create an executable `./scripts/repo-validation.sh` at the root of your repo and have it run your tests, linters, and type checks. The shipped validator invokes it automatically when present (and the warning disappears once it is). The file is not part of the shipped policy layer, so each repo owns its own; see this repo's `scripts/repo-validation.sh` for a worked example.
 
+**Commits are checkpoints; push is the gate.** The agent commits after each small checked change, so it has a known-good point to return to, and the full checks run at the start of a task and before push. `REQUIRE_VALIDATION_BEFORE_COMMIT` in `.ai-policy/policy.env` ships as `false` for that reason; set it to `true` to require a full validation pass on every commit as well.
+
 ## Session Observation (this repo)
 
 This repository hosts a local, single-developer tool for observing your own Claude Code usage across all your repos. It is descriptive only: it shows how metrics move over time and across workflow versions and leaves the judgement to you, deliberately replacing an earlier statistical telemetry-and-evaluation stack. See [`docs/adr/0001`](docs/adr/0001-descriptive-session-observation-over-statistical-comparison.md) for why, and [`observation/README.md`](observation/README.md) for details.

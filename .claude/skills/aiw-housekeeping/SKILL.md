@@ -35,7 +35,7 @@ Act on what this task caused, and nothing else. That is:
 - the untracked files present: `git status --porcelain -uall`
 - whatever those changes left with no remaining reference, reached from the diff rather than by browsing
 
-Use that first command rather than the three-dot `main...HEAD` form. At the done gate the work is usually still uncommitted, because commit is the next step and not this one, and the three-dot form compares commits: it reports the committed part of the branch and silently omits everything staged or unstaged, which on this step is most of it.
+Use that first command rather than the three-dot `main...HEAD` form. At the done gate part of the work may still be uncommitted, and the three-dot form compares commits: it reports the committed part of the branch and silently omits everything staged or unstaged.
 
 Untracked files that predate the branch are outside, and so are ignored files. Build output and caches are held by whatever produces them.
 
@@ -116,7 +116,7 @@ Where the human declines an item, that is a fact about the repository and it bel
 
 Removal feels permanent, and an agent that believes that behaves timidly. For a file that is in a commit the belief is simply false, and the answer is the fact rather than a mechanism: git holds that version, and `git checkout <commit> -- <path>` brings it back. Say so, and delete the file. A second copy on disk is worse than history, because it is invisible in review and a later search cannot tell it from live code.
 
-The axis is whether it is in a commit, not whether it is tracked. At this step the task's work is usually not committed yet, so a file this task added and staged is held by nothing at all, exactly like an untracked one, and `git checkout` recovers nothing for it. Treat it as the case below.
+The axis is whether it is in a commit, not whether it is tracked. A file this task added and staged but has not committed is held by nothing at all, exactly like an untracked one, and `git checkout` recovers nothing for it. Treat it as the case below.
 
 Files no commit holds are the real case. Nothing holds them, so deleting one is irreversible.
 
@@ -134,7 +134,7 @@ At the done gate, one line in the pull request body, beside the verification jus
 
 Name anything archived on that line as well. Archived files are invisible to git before and after, so nothing else records them.
 
-Where the task's work is already committed, put these changes in a commit of their own, so the removal reads on its own. Where it is not, which is the common case at this step because commit is the next one, they land inside the task's commit and the line above is the only thing telling a reviewer the task from the tidying.
+Put these changes in a commit of their own, so the removal reads on its own rather than inside a loop's commit.
 
 An audit leaves the list, and after the human has been through it, whatever they declined recorded in `project-checks.md`. Removals they approved leave a commit of their own, because an audit has no task work to sit inside.
 

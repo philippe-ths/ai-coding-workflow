@@ -6,6 +6,17 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.0 - 2026-10-13
+
+The agent works in small loops: one change, the check that covers it, a commit. A loop that fails returns to the last commit instead of being patched on top of. Commits are checkpoints, so a fresh install no longer requires a validation pass to commit; the full checks run at the start of a task and before push, which still requires a pass.
+
+### Changed
+
+- `ai-workflow.md` Task Flow step 4: work in small loops that each end in a checked commit; a loop whose check fails gets one fix, then returns to the last commit and retries smaller. Nothing inside a loop is claimed done; a committed loop that later proves wrong is a contradicted "done" claim. The full checks run at the planning baseline and the done gate; between them each loop runs only its own check ([#390]).
+- `ai-workflow.md` The Human is Responsible For: after a failed loop, discarding that loop's own uncommitted changes to return to the last commit no longer needs approval, provided the tree was clean when the loop began ([#390]).
+- `.ai-policy/policy.env`: `REQUIRE_VALIDATION_BEFORE_COMMIT` ships as `false`. The file is seeded, so an existing target keeps its own value; set it to `false` to commit per loop without a validation run each time ([#390]).
+- `aiw-github`: commits happen at the end of each loop, staging the files the loop changed by name; push and pull request still wait for the done gate. `aiw-failure-analysis`: the one fix a failed loop gets, and returning to the last commit, are not contradicted "done" claims. `aiw-upkeep`: a stopped run pushes its branch only if validation passes on its commits. `aiw-verification`, `aiw-housekeeping`, and `aiw-planning` no longer assume the work is uncommitted at the done gate ([#390]).
+
 ## 5.30.0 - 2026-10-13
 
 Messages to the human follow the register they have asked for in their wording, and a question leads with the recommendation; on a small probe, decision messages came out 4 to 16% shorter.
@@ -1299,4 +1310,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#376]: https://github.com/philippe-ths/ai-coding-workflow/issues/376
 [#382]: https://github.com/philippe-ths/ai-coding-workflow/issues/382
 [#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384
+[#390]: https://github.com/philippe-ths/ai-coding-workflow/issues/390
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385

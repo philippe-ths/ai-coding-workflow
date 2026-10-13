@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.30.0
+Version: 5.31.0
 
 ## First Principles
 
@@ -14,9 +14,9 @@ Version: 5.30.0
 1. **Request arrival:** check the request against `north-star.md`, the shortest statement of what the project is trying to achieve. A request that pulls against it stops before planning for aiw-north-star, and the human decides whether the request or the goal is wrong. If the file is absent in a non-trivial codebase, ask whether to scaffold it.
 2. **Task start:** aiw-github (issue, branch).
 3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership). The plan is stated and the work proceeds, and the human judges it with the work at the pull request; where it holds a decision of taste or direction that `north-star.md` does not settle, that decision is agreed with the human before implementation begins.
-4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
+4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. Work in small loops: one change, the check that covers it, then a commit on the task branch, so every commit is a known-good point to return to. Inside a loop nothing is claimed done yet: a failed check gets one fix, and if that fails too, return to the last commit and retry the step smaller rather than repairing on top of a failure. The full checks run at the start, as planning's baseline, and at the end, at the done gate; between them each loop runs only its own check. A committed loop that later proves wrong is a contradicted "done" claim. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for the human's done decision.
-6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
+6. **GitHub actions:** aiw-github for push and PR, taken without asking once the done gate has run.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
 Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling, aiw-security-testing, aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
@@ -78,5 +78,5 @@ This rule overrides the rest of the workflow when triggered.
 - First-hand reports of runtime behaviour, which are evidence you cannot dismiss.
 - Authorising anything that reaches beyond the task's branch, its pull request, and this repository's issues: deploying, commenting on other pull requests, posting to external services, modifying CI.
 - Rewriting an issue's title or description, closing one for any reason but completion, and removing `aiw:direction` or `aiw:close-proposed`. Filing, commenting, and creating or applying any other label are yours, naming each issue you touched in your next message or the pull request body.
-- Approving a new dependency, since it brings in third-party code, and local actions that are hard to reverse: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading a dependency.
+- Approving a new dependency, since it brings in third-party code, and local actions that are hard to reverse: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading a dependency. The exception is a failed loop: discarding its own uncommitted changes, tracked and untracked, to return to the last commit is yours, provided the tree was clean when the loop began.
 - Merging pull requests, and deciding when the work is complete.

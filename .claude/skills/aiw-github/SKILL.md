@@ -7,7 +7,7 @@ description: "Rules for git and GitHub actions during a task: reading the issue 
 
 ## Why this skill exists
 
-GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, taken only after the done gate, and safe against working-tree surprises. The merge is the human's, and the policy layer blocks the agent from it deterministically.
+GitHub actions touch shared state. Each one becomes visible to others the moment it lands. Branch operations can silently lose untracked files. Issues anchor scope; without one, work drifts and commits lose traceability. This skill keeps each action anchored to an issue, every one that reaches the remote taken only after the done gate, and safe against working-tree surprises. The merge is the human's, and the policy layer blocks the agent from it deterministically.
 
 ## Starting work on an issue
 
@@ -42,7 +42,7 @@ Before any operation that moves the working tree to a different branch state (re
 
 ## Commits, pushes, and pull requests
 
-Commit, push, and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
+Commit at the end of each implementation loop, as Task Flow step 4 in `ai-workflow.md` sets out, without asking. Stage the files the loop changed by name rather than everything in the tree, so build output and stray files do not ride into a checkpoint. Where the repository's commit gate needs a full validation run, a commit costs that run, so commit at the loops worth returning to. Push and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
 
 - Push and open the pull request when the pre-pull-request checks below pass.
 - Post evidence that was deferred in the justification on the task's own pull request when it arrives. Commenting on any other pull request stays the human's.

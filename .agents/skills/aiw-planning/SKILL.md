@@ -26,7 +26,7 @@ Reach sets the tier, not size. A one-line fix to a guard every push passes throu
 | | Light | Standard | Full |
 |---|---|---|---|
 | Plan | A few lines | A short plan | The full plan this skill describes |
-| Baseline | Checks for the touched area; full validation once, before commit | Smoke tests and the global suite, at start and end | As Standard |
+| Baseline | Checks for the touched area; full validation once, before push | Smoke tests and the global suite, at start and end | As Standard |
 | Verification | The justification step at a line per part, resting on the direct check that it works | The justification, the end-to-end runs aiw-verification makes mandatory, and the refuting pass | Everything aiw-verification asks |
 | New tests or checks | Only what the modality requires | What the change needs | What the change needs |
 | Pull request | Short | Normal | Full |

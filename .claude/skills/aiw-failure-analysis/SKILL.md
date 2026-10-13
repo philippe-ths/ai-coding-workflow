@@ -30,6 +30,8 @@ So the trigger also fires on the agent's own signals. Any of these is a contradi
 - A second pull request, branch, or commit is opening against an issue you already closed or claimed done.
 - You found the defect yourself, before anyone reported it, while the first fix was still in flight.
 
+Inside an implementation loop nothing is claimed done until its check passes and it is committed, so the one fix a failed loop gets, and returning to the last commit, are not among these.
+
 A second attempt framed as a fresh fix is the most common way the audit gets skipped. The framing is what does it: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed here. Notice the framing and treat it as the trigger. Catching it yourself is the cheaper moment, not a confession.
 
 ## The Hard Stop
