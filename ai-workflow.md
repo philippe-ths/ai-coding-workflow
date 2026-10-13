@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.28.0
+Version: 5.29.0
 
 ## First Principles
 
@@ -38,15 +38,6 @@ Protect your context window and the human's quota, but never by doing less than 
 - ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping; stop only when no reading is safe to act on, or a wrong one would mean redoing the work rather than adjusting it.
 - ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not, and tell the human only what changes a decision of theirs.
 
-### Ask First
-
-Stop and ask the human before doing any of the following:
-
-- ASK before adding a new dependency.
-- ASK before changing a constraint or contract recorded in project context.
-- ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
-- ASK before accepting verification evidence weaker than the plan committed to. If the committed method cannot run, that is a decision about what the done claim is worth, and it is the human's.
-
 ### Never Do
 
 Do not do any of the following under any circumstances:
@@ -69,7 +60,7 @@ Teaching changes the texture of a message, not its volume. It stays out of plans
 
 ## Asking for Guidance
 
-A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. Ask First items and decisions a skill reserves for the human are never settled this way. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
+A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. A change to what others rely on, such as a constraint or contract recorded in project context, a schema, sync behaviour, or a public interface, turns on direction. A direction decision the north-star does not settle stops the work it affects until the human answers, whether it appears in the plan or during implementation. Decisions a skill reserves for the human and the items under The Human is Responsible For are never settled this way. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
 
 ## Reactive Rules
 
@@ -85,5 +76,5 @@ This rule overrides the rest of the workflow when triggered.
 - First-hand reports of runtime behaviour, which are evidence you cannot dismiss.
 - Authorising anything that reaches beyond the task's branch, its pull request, and this repository's issues: deploying, commenting on other pull requests, posting to external services, modifying CI.
 - Rewriting an issue's title or description, closing one for any reason but completion, and removing `aiw:direction` or `aiw:close-proposed`. Filing, commenting, and creating or applying any other label are yours, naming each issue you touched in your next message or the pull request body.
-- Approving destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
+- Approving a new dependency, since it brings in third-party code, and local actions that are hard to reverse: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading a dependency.
 - Merging pull requests, and deciding when the work is complete.

@@ -66,7 +66,7 @@ Loading is agent-driven: the core workflow instructs the agent to read the file 
 This approach works across all agent tools because file reading is a universal capability.
 Tool-native mechanisms (such as Claude Code path-scoped rules or @imports) can supplement agent-driven loading but should not replace it as the primary mechanism.
 
-Keep boundary rules (Always Do, Ask First, Never Do) in the core file.
+Keep boundary rules (Always Do, Never Do) in the core file.
 These are context-free and must be in context at all times.
 
 Extracted files live in two skill directories: `.agents/skills/` (cross-platform, for VS Code Copilot and Codex) and `.claude/skills/` (Claude Code).

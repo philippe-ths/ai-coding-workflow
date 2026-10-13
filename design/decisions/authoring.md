@@ -111,7 +111,7 @@ Rules about that topic live here, not scattered across the workflow or boundary 
 **Boundary rules.**
 Global, context-free rules that apply regardless of which step or topic is active.
 Rules that do not fit into reference sections.
-Three tiers: Always Do, Ask First, Never Do.
+Two tiers: Always Do and Never Do. What the human decides lives in Asking for Guidance and The Human is Responsible For, not in a list of mid-work stops.
 
 **The Human is Responsible For.**
 What the AI cannot do.
