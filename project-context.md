@@ -10,7 +10,7 @@ Version: 2.1.0
 ## Constraints
 - No work happens on `main` or `master`: git hooks and agent hooks block commits and pushes there.
 - A push needs a validation pass recorded for the current working tree, so any change to tracked or untracked, non-ignored content after a run voids the pass.
-- A commit needs either that pass or `scripts/commit-check.sh` passing on the commit's changed paths; it runs the structural checks and only the tests that are changed or name a changed file.
+- A commit needs either that pass or `scripts/commit-check.sh` passing on the commit's changed paths, which runs the structural checks and only the tests it selects for those paths.
 - A push is refused from a dirty tree, and for a ref whose tip is not `HEAD`, since only `HEAD` carries the content validation read.
 - The agent cannot merge or approve a pull request; hooks block both on the shell and MCP routes.
 - Opening or editing a pull request is blocked unless the body carries a verification justification and its unverified-surface section is more than a bare "none".
