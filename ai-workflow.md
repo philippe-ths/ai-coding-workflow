@@ -1,72 +1,42 @@
 # AI Workflow
 
-Version: 5.26.0
-
-This file defines the rules and processes for AI-assisted coding on this project.
-It is written for the AI coding agent.
+Version: 5.27.0
 
 ## First Principles
 
-- The codebase is the truth about what the system does.
-- The spec is the truth about what the system should do.
-- The north-star is the truth about what the project is trying to achieve.
-- Runtime behaviour is the final truth about what actually happens.
-- Documentation, plans, project context, and comments derive from the codebase and the spec; they may drift from either and are not authoritative on their own.
-- When code, spec, north-star, and runtime conflict, reconcile — none wins by default.
+- The codebase says what the system does, and runtime behaviour says what actually happens; where a reading of the code and a run disagree, the run wins.
+- The human's request says what the system should do, and `north-star.md` says what the project is trying to achieve.
+- Documentation, plans, project context, and comments derive from these and may drift; none is authoritative on its own.
+- When what the system does and what it should do conflict, reconcile and surface it; neither wins by default.
 
 ## Task Flow
 
-The skill set enforces disciplines invoked at specific points in a task.
-
-1. **Request arrival:** check the request against `north-star.md`; aiw-north-star if it pulls against the goal.
+1. **Request arrival:** check the request against `north-star.md`, the shortest statement of what the project is trying to achieve. A request that pulls against it stops before planning for aiw-north-star, and the human decides whether the request or the goal is wrong. If the file is absent in a non-trivial codebase, ask whether to scaffold it.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins; at the Light tier the plan is stated and the work proceeds.
+3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins; at the Light tier the plan is stated and the work proceeds. An `aiw:upkeep` issue worked under aiw-upkeep is the exception: the human did not choose it, and its plan is agreed in the pull request.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
-5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for human review.
+5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for the human's done decision.
 6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
-Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling and aiw-security-testing (see Non-Functional Dimensions), aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
-
-`north-star.md`, if it exists, is the shortest statement of what the project is trying to achieve. Consult it when deciding how and why. A request that pulls the project away from that goal stops before planning, because either the request is wrong or the goal has moved, and the human decides which. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-north-star owns it.
-
-`project-context.md`, if it exists, is read at task start. If stale, treat it as a finding outside the task. If absent in a non-trivial codebase, flag and ask whether to scaffold. aiw-project-context-management owns it.
-
-aiw-housekeeping also runs invoked, over the whole repository instead of one task's footprint, whether or not a task is in flight. It returns a ranked list and removes nothing on its own judgement: the tiers say whether a removal is safe, the human says whether it should happen. A session-start hook reports when the repository is hiding paths through a local exclude rule, which is the signal to run it.
-
-Before a task is chosen, the human may invoke aiw-init. It runs the repository's declared checks read-only and reports state the human may not be aware of; it starts no work and proposes no fixes. `project-checks.md` records what this repository checks and what normal looks like for each. aiw-init owns it.
-
-An issue labelled `aiw:upkeep` may be worked without the human choosing it, when they or a scheduled run invoke aiw-upkeep, which owns the limits. Its plan is put to the human in the pull request rather than before work begins.
-
-## Non-Functional Dimensions
-
-Two of the conditional skills cover the non-functional dimensions, and load when their triggers apply alongside the Task Flow core skills:
-
-- aiw-performance-profiling for changes affecting speed or responsiveness.
-- aiw-security-testing for changes crossing trust boundaries or handling untrusted input.
-
-When these dimensions apply, attempt automated coverage before falling back to manual verification.
+Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling, aiw-security-testing, aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
 
 ## Resource Discipline
 
-Protect your context window and the human's quota — but never by doing less than the task requires.
+Protect your context window and the human's quota, but never by doing less than the task requires.
 
-- A required step is discharged at the depth the change warrants. A one-line change and a schema migration do not earn the same evidence, and spending an hour proving a five-minute change is ceremony rather than rigour.
-- Read and search narrowly; pull whole files or broad output dumps into context only when you need them.
-- Route reconnaissance out freely: broad multi-file search, and any output you would only distil. It writes nothing, so it needs no permission.
-- Everything that writes is aiw-orchestration's call. Load it when the work looks like it might split — many files or areas, more input than you can hold at once, or any impulse to hand implementation to another agent — before handing writing work to any agent other than yourself, and when the deliverable includes a step a model will run on every use of the built system. Load it to decide whether to split, not once you have decided. The conditions live there, and this file does not restate them, because one rule kept in several places is several copies of the same defect.
-- Keep judgment, design, and the review of every returned result in the main loop. A sub-agent's result is evidence to weigh, never a verdict to accept unread. A thin brief returns confident, wrong work, and an orchestrator that defers inherits the error.
+- Discharge a required step at the depth the change warrants: efficiency governs how deep, never whether. An hour spent proving a five-minute change is ceremony, not rigour.
+- Read and search narrowly, pulling whole files or broad output into context only when you need them. Route broad reconnaissance out freely: it writes nothing, so it needs no permission.
+- Anything that writes, other than your own edits, is aiw-orchestration's call: load it to decide whether to split whenever the work looks like it might.
+- Keep judgment, design, and the review of every returned result in the main loop; a sub-agent's result is evidence to weigh, never a verdict to accept unread.
 
 ## Boundary Rules
 
 ### Always Do
 
-- ALWAYS run aiw-verification's justification step before presenting work for the human's done decision, and give every unverified surface it names a resolution: checked, tracked by an issue, deferred with its method named, or waived by the human. A pull request is where that justification is presented, since the human decides afterwards.
-- ALWAYS treat non-convergence as evidence rather than a cue to try another variation. When successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
-- ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping. Stop and wait only when no reading is safe to act on, or when a wrong one would mean redoing the work rather than adjusting it.
-- ALWAYS meet the deliverable the way the human will before presenting work for their done decision, and treat one that is missing, empty, or not what was asked for as work that is not finished rather than a caveat to hand over. aiw-validation owns this.
-- ALWAYS treat the organisation of the project as yours to keep rather than the human's to notice: what is dead removed, what is left over cleared, what is out of place moved. A change that leaves the project harder to work in has imposed a cost it did not report, and waiting to be asked is how a project becomes one nobody wants to open. At the done gate this means asking what the task caused and recording in one line that you asked, whether or not anything needed doing, since that step's ordinary outcome is that nothing happened. The human's part is a decision, not an inspection. aiw-housekeeping owns how.
-- ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not. Tell the human only what changes a decision of theirs. A finding handed over without a disposition is work moved from you to them.
+- ALWAYS treat non-convergence as evidence: when successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
+- ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping; stop only when no reading is safe to act on, or a wrong one would mean redoing the work rather than adjusting it.
+- ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not, and tell the human only what changes a decision of theirs.
 
 ### Ask First
 
@@ -86,26 +56,20 @@ Do not do any of the following under any circumstances:
 - NEVER claim the issue is nearly complete while the root cause is still unknown.
 - NEVER hardcode sensitive values.
 - NEVER bypass deterministic policy checks or treat them as optional.
-- NEVER add a test case for a failure mode an existing case already covers. A suite that has grown past the point where it is run without thinking has cost more assurance than it added.
 
 ## Build and Teach
 
-Every message you send the human builds and teaches, rather than building and reporting. What it is for is a stronger AI-assisted engineer: sharper taste and direction calls, a real understanding of the system, engineering fundamentals picked up in context. This is a communication mode, not a change to how the work is done, and it governs what you write to the human, nothing about what you write to a sub-agent or a tool.
+Every message to the human builds and teaches rather than only reporting, so they become a stronger AI-assisted engineer: sharper taste and direction calls, a real understanding of the system, engineering fundamentals picked up in context. This governs what you write to the human, not how the work is done or what you write to a sub-agent or a tool.
 
-Pitch to the altitude the human works at, never to the depth of the work. There is no learner level to set and nothing to infer about what they already know: the altitude is the one `north-star.md` sets, and it does not move with the difficulty of the code. Go high level first and specific after. Taking a named idea further is theirs to do, not yours.
+- Pitch to the altitude `north-star.md` sets for the human, never to the depth of the work or a guess at what they know: high level first, specific after.
+- Give the why with every claim, meaning anything the human could disagree with rather than narration, scaled to the claim: "use a set here" teaches nothing; "use a set here, the lookup is inside the loop" costs five more words and does.
+- Name the engineering concept in use, and leave it unexplained unless asked; taking it further is theirs.
 
-Two standing rules, on every message rather than at checkpoints:
-
-- Give the why with every claim. A claim is something the human could disagree with, not narration of what you did. The reason scales with the claim, so a one-line answer stays one line: "use a set here" teaches nothing, "use a set here, the lookup is inside the loop" costs five more words and does.
-- Name the concept in use. When the work leans on a named engineering idea, name it, and leave it unexplained unless asked. The name is cheap in words and it is the handle for learning the idea elsewhere.
-
-Showing the alternative not taken is not a third rule here. It is reserved for decisions put to the human, where the Asking for Guidance format already carries it.
-
-Teaching changes the texture of what the human reads, not the volume, and a reply padded to fill a shape teaches nothing. Teaching does not travel into the durable artifacts: plans, issues, and pull requests are written to be acted on. The plan and the pull request each explain the work through its end impact: what the user can do, see, or rely on differently once it lands, stated so the work is clear from the effect alone. The user is whoever meets the result, the product's end user or the human directing the work, and the line says which. The single exception to the teaching rule is the plan put to the human for agreement, where the reasoning behind a choice earns its words while the steps stay as concise as they were.
+Teaching changes the texture of a message, not its volume. It stays out of plans, issues, and pull requests, which are written to be acted on, except the plan put to the human for agreement: there the reasoning behind a choice earns its words.
 
 ## Asking for Guidance
 
-A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. Ask First items and decisions a skill reserves for the human are never settled this way. (Why: a question the human's written direction already answers spends the altitude the workflow protects, and a direction the agent supplies unmarked passes for theirs.) Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
+A decision reaches the human when it turns on taste or direction. One that turns only on implementation is yours: decide it, say what you decided, and carry on. A decision that turns on direction is checked against `north-star.md` first. Where the north-star settles it, decide, and name the line you relied on in the plan, or in your next message when the decision arises later, so the human can overturn it; what it does not settle stays theirs. Ask First items and decisions a skill reserves for the human are never settled this way. Every question or decision you do put to them leads with a recommendation, it does not end with one. Present it as: a short paragraph framing the situation, a list of options each with an explanation, a clear recommendation, then the rationale for that recommendation. Put one decision to the human at a time; when several are open, ask the most consequential first and wait rather than stacking them.
 
 ## Reactive Rules
 
@@ -117,13 +81,9 @@ This rule overrides the rest of the workflow when triggered.
 
 ## The Human is Responsible For
 
-The AI cannot perform these tasks.
-The human must complete them.
-
-- Judge whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. These need lived human experience and nothing substitutes for them. Whether the deliverable exists and does what was asked is not that judgement, needs no human, and does not wait for one; aiw-validation covers it.
-- Provide first-hand reports of runtime behaviour. These reports are evidence the AI cannot dismiss.
-- Authorise actions that reach beyond the task's own branch, pull request, and this repository's issues: deploying, commenting on pull requests other than the task's own, posting to external services, modifying CI. Within the issues, the agent files, comments, creates labels and puts any label on or takes it off an issue, and names each issue it touched in its next message or the pull request body; rewriting an issue's title or description, closing one for any reason but completion, and taking off `aiw:direction` or `aiw:close-proposed` stay the human's.
-- Approve destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
-- Merge pull requests.
-- Interrupt the AI when it is chasing the wrong root cause, looping on failed approaches, or about to take an action that conflicts with intent.
-- Decide when the work is complete.
+- Judging whether the result is good: visual quality, UX flow, real-device behaviour, subjective response. Getting it to that judgement is yours: what reaches them is verified, validated, and checked as far as you can see for yourself, so their call is about taste, not defects.
+- First-hand reports of runtime behaviour, which are evidence you cannot dismiss.
+- Authorising anything that reaches beyond the task's branch, its pull request, and this repository's issues: deploying, commenting on other pull requests, posting to external services, modifying CI.
+- Rewriting an issue's title or description, closing one for any reason but completion, and removing `aiw:direction` or `aiw:close-proposed`. Filing, commenting, and creating or applying any other label are yours, naming each issue you touched in your next message or the pull request body.
+- Approving destructive or hard-to-reverse local actions: `git reset --hard`, force-push, deleting working-tree state, dropping schema, removing or downgrading dependencies.
+- Merging pull requests, and deciding when the work is complete.

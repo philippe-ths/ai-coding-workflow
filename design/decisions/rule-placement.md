@@ -2,6 +2,13 @@
 
 Covers where rules belong within `ai-workflow.md`: canonical location, section boundaries, and structural discipline.
 
+## What `ai-workflow.md` Holds
+
+`ai-workflow.md` loads into every session, so it carries what an agent needs before any skill has loaded: routing (which skill, when), authority (what is the human's), and the rules every message follows.
+A line stays only if an agent with no skill loaded would act wrongly without it, and no skill description or hook already makes that happen.
+The reasons behind a rule live in the skill that owns it or in these decision records; the workflow keeps the trigger and the owner's name.
+A rule whose trigger is known to fire too weakly keeps its always-on copy even when a skill description repeats it: Reactive Rules stays for that reason while #370 is open.
+
 ## Rule Placement
 
 **One canonical location per rule.**

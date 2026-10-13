@@ -10,9 +10,8 @@ This file contains rules for writing automated security tests before deferring t
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections. Consult them when writing security tests:
+This skill works alongside these skills. Consult them when writing security tests:
 
-- **Non-Functional Dimensions**: defines when automated coverage must be attempted before manual verification.
 - **aiw-testing**: general test construction rules. This skill covers the security-specific subset.
 - **aiw-failure-analysis**: covers what to do when a reported behaviour contradicts what a security test claims.
 

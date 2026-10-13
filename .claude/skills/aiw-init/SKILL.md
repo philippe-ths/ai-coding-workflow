@@ -1,6 +1,6 @@
 ---
 name: aiw-init
-description: "Session preflight: runs the repository's declared checks read-only and reports state the human may not know about, such as open issues and pull requests, work left in flight, errors in recent logs, services that are down, and drift in the project's own documents. Use when the human invokes it, or asks what state the project is in, what they were in the middle of, what changed since last session, or whether anything needs attention. Maintains `project-checks.md`; never chooses the next task."
+description: "Session preflight: runs the repository's declared checks read-only and reports state the human may not know about, such as open issues and pull requests, work left in flight, errors in recent logs, services that are down, and drift in the project's own documents. Use when the human invokes it, or asks what state the project is in, what they were in the middle of, what changed since last session, whether everything still works, or whether anything needs attention. Maintains `project-checks.md`; never chooses the next task."
 ---
 
 # Init

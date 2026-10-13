@@ -9,9 +9,8 @@ Rules for writing automated performance and UI-state-transition tests before def
 
 ## Related Workflow Sections
 
-This skill works alongside these workflow sections. Consult them when writing performance tests:
+This skill works alongside these skills. Consult them when writing performance tests:
 
-- **Non-Functional Dimensions**: defines when automated coverage must be attempted before manual verification.
 - **aiw-testing**: general test construction rules. This skill covers the performance-specific subset.
 - **aiw-verification**: owns the rule for adding observability when automated tests cannot reach the runtime path. This skill covers the pre-commit automated-test side of that evidence.
 - **aiw-failure-analysis**: owns ad-hoc diagnostics added during a post-failure audit. This skill covers automated performance coverage written before completion, not diagnostics added after a contradicted "done" claim.

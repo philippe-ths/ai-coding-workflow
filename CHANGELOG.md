@@ -6,6 +6,19 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.27.0 - 2026-10-13
+
+`ai-workflow.md` carries only what an agent needs before any skill has loaded, so it costs about 1,400 fewer tokens in every session (about 3,510 to 2,100).
+
+### Changed
+
+- `ai-workflow.md`: a line stays only if an agent with no skill loaded would act wrongly without it and no skill description or hook already makes that happen. Task Flow drops the paragraphs on `north-star.md`, `project-context.md`, the housekeeping audit, and `aiw-init`, which their skills and the entry points already route; a missing north-star and the `aiw-upkeep` plan exception move into steps 1 and 3. Always Do keeps non-convergence, uncertain readings, and resolve-or-track, and drops the verification, deliverable, and organisation items the done gate's skills own. Never Do drops the duplicate-test rule `aiw-testing` owns. Resource Discipline, Build and Teach, and The Human is Responsible For keep their rules in fewer words, except that the end-impact line for plans and pull requests is left to `aiw-planning` and `aiw-validation`, and the human's duty to interrupt is left to Task Flow step 4 ([#376]).
+- `ai-workflow.md` First Principles: the undefined "spec" becomes the human's request, and a run of the system wins over a reading of the code ([#376]).
+- `ai-workflow.md` The Human is Responsible For: the human judges whether the result is good, and getting it to that judgement, verified, validated, and checked as far as the agent can see, is the agent's ([#376]).
+- `ai-workflow.md`: the Non-Functional Dimensions section is gone; `aiw-performance-profiling` and `aiw-security-testing` carry their own triggers and their automated-first rule ([#376]).
+- `aiw-init`: its description also routes asking whether everything still works, which the cut Task Flow paragraph had carried ([#376]).
+- `aiw-testing`: the rule against duplicate tests keeps the wording Never Do had, a failure mode an existing case already covers ([#376]).
+
 ## 5.26.0 - 2026-10-13
 
 `project-context.md` records what an agent would get wrong without being told, not a map of the repository, so it costs far fewer tokens in every session. To shrink an existing file, ask the agent to refresh the project context.
@@ -1253,3 +1266,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#366]: https://github.com/philippe-ths/ai-coding-workflow/issues/366
 [#374]: https://github.com/philippe-ths/ai-coding-workflow/issues/374
 [#375]: https://github.com/philippe-ths/ai-coding-workflow/issues/375
+[#376]: https://github.com/philippe-ths/ai-coding-workflow/issues/376
