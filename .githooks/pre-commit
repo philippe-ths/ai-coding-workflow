@@ -9,6 +9,27 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 . "$ROOT_DIR/.ai-policy/policy.env"
 
 if [ "$REQUIRE_VALIDATION_BEFORE_COMMIT" = "true" ]; then
+  # A full validation pass recorded against the current tree always suffices.
+  if "$ROOT_DIR/.ai-policy/scripts/check-validation.sh" >/dev/null 2>&1; then
+    exit 0
+  fi
+
+  # The repository's own fast check, when it ships one, stands in for full
+  # validation at commit time, so each small checked change can be a commit to
+  # return to. It reads the paths the commit changes on stdin and decides what
+  # covers them. The push gate still requires full validation, so nothing this
+  # check lets through leaves the machine unvalidated. Absent or not
+  # executable, the commit needs full validation as before.
+  COMMIT_CHECK="$ROOT_DIR/scripts/commit-check.sh"
+  if [ -x "$COMMIT_CHECK" ]; then
+    if git diff --cached --name-only --no-renames | (cd "$ROOT_DIR" && "$COMMIT_CHECK"); then
+      exit 0
+    fi
+    echo "Blocked: the commit check (./scripts/commit-check.sh) failed."
+    echo "Fix what it reports, or return to the last commit, then commit again."
+    exit 2
+  fi
+
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
 fi
 

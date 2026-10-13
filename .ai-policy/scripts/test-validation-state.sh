@@ -323,6 +323,55 @@ git commit -qm "allowed after revalidating" 2>&1 || rc=$?
 assert_exit "git commit succeeds once validation matches the tree" 0 "$rc"
 assert_ne "the commit landed" "$before" "$(git rev-parse HEAD)"
 
+# ── Runtime: the repository's commit check stands in for full validation ──
+# A repository that ships ./scripts/commit-check.sh commits on that check alone,
+# so each small checked change can be a commit to return to. The push gate is
+# untouched, so what leaves the machine is still fully validated.
+
+mkdir -p scripts
+printf '#!/usr/bin/env bash\ncat > build-output.txt\nexit 0\n' > scripts/commit-check.sh
+chmod +x scripts/commit-check.sh
+git add scripts/commit-check.sh
+git commit -qm "add a passing commit check" 2>&1 || true
+
+before="$(git rev-parse HEAD)"
+echo "changed under a commit check" > source.txt
+git add source.txt
+rc=0
+git commit -qm "allowed by the commit check" 2>&1 || rc=$?
+assert_exit "a passing commit check allows the commit without a current validation pass" 0 "$rc"
+assert_ne "the commit checked by the commit check landed" "$before" "$(git rev-parse HEAD)"
+assert_eq "the commit check receives the paths the commit changes" "source.txt" "$(cat build-output.txt 2>/dev/null)"
+
+printf '#!/usr/bin/env bash\necho "touched-area tests failed"\nexit 1\n' > scripts/commit-check.sh
+before="$(git rev-parse HEAD)"
+echo "changed under a failing commit check" > source.txt
+git add -A
+rc=0
+out="$(git commit -m "should be blocked by the commit check" 2>&1)" || rc=$?
+assert_ne "a failing commit check blocks the commit" "0" "$rc"
+assert_contains "the blocked commit shows the check's output" "touched-area tests failed" "$out"
+assert_contains "the blocked commit names the commit check" "commit check" "$out"
+assert_eq "no commit object was created by the failed check" "$before" "$(git rev-parse HEAD)"
+
+"$RUN" >/dev/null 2>&1
+rc=0
+git commit -qm "allowed by a full pass despite the failing check" 2>&1 || rc=$?
+assert_exit "a full validation pass for the current tree allows the commit whatever the commit check says" 0 "$rc"
+
+chmod -x scripts/commit-check.sh
+printf '#!/usr/bin/env bash\nexit 0\n' > scripts/commit-check.sh
+before="$(git rev-parse HEAD)"
+echo "changed with a non-executable commit check" > source.txt
+git add source.txt
+rc=0
+git commit -qm "should fall back to the validation gate" >/dev/null 2>&1 || rc=$?
+assert_ne "a non-executable commit check falls back to requiring validation" "0" "$rc"
+assert_eq "no commit object was created on fallback" "$before" "$(git rev-parse HEAD)"
+git reset -q --hard HEAD
+rm -rf scripts build-output.txt
+git rm -rq --cached scripts 2>/dev/null || true
+
 # ── The run reports what it took ──
 #
 # Reported, never gated on. The first line of the state file must stay
