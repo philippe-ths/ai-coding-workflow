@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.27.0
+Version: 5.28.0
 
 ## First Principles
 
@@ -13,7 +13,7 @@ Version: 5.27.0
 
 1. **Request arrival:** check the request against `north-star.md`, the shortest statement of what the project is trying to achieve. A request that pulls against it stops before planning for aiw-north-star, and the human decides whether the request or the goal is wrong. If the file is absent in a non-trivial codebase, ask whether to scaffold it.
 2. **Task start:** aiw-github (issue, branch).
-3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership), agreed with the human before implementation begins; at the Light tier the plan is stated and the work proceeds. An `aiw:upkeep` issue worked under aiw-upkeep is the exception: the human did not choose it, and its plan is agreed in the pull request.
+3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership). The plan is stated and the work proceeds, and the human judges it with the work at the pull request; where it holds a decision of taste or direction that `north-star.md` does not settle, that decision is agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
 5. **Done gate:** aiw-verification for whether the change is correct, aiw-validation for whether the result is what was asked for, then aiw-housekeeping for whether anything the task caused should now be removed or moved. All three run before work is presented for the human's done decision.
 6. **GitHub actions:** aiw-github for commit, push, PR, taken without asking once the done gate has run.
@@ -65,7 +65,7 @@ Every message to the human builds and teaches rather than only reporting, so the
 - Give the why with every claim, meaning anything the human could disagree with rather than narration, scaled to the claim: "use a set here" teaches nothing; "use a set here, the lookup is inside the loop" costs five more words and does.
 - Name the engineering concept in use, and leave it unexplained unless asked; taking it further is theirs.
 
-Teaching changes the texture of a message, not its volume. It stays out of plans, issues, and pull requests, which are written to be acted on, except the plan put to the human for agreement: there the reasoning behind a choice earns its words.
+Teaching changes the texture of a message, not its volume. It stays out of plans, issues, and pull requests, which are written to be acted on, except where a plan puts a decision to the human: there the reasoning behind the choice earns its words.
 
 ## Asking for Guidance
 

@@ -6,7 +6,7 @@ AI coding agents routinely skip validation, expand scope beyond what was approve
 
 The workflow is written for the agent. The design decision files are written for the human maintainer.
 
-The workflow assumes GitHub for issue tracking and branching. It is designed as a tightly coupled human-AI collaboration where each side has defined responsibilities — the human scopes work, reviews plans, and approves actions; the agent plans, implements, and validates. Future versions will support more configurable and automated modes.
+The workflow assumes GitHub for issue tracking and branching. It is designed as a tightly coupled human-AI collaboration where each side has defined responsibilities — the human scopes work, decides questions of taste and direction, and merges; the agent plans, implements, and validates. Future versions will support more configurable and automated modes.
 
 **Prerequisites:** bash, git. **Platforms:** Claude Code, Codex, VS Code Copilot. **Version:** see the latest tag (v5.7.0 at the time of writing).
 

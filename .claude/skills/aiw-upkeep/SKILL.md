@@ -18,16 +18,15 @@ Predict what the fix will touch. If it reaches anything on aiw-planning's Full l
 
 ## Work It
 
-Branch from the default branch as it is on the remote, run the Task Flow from task start, and when you finish put the checkout back on the branch it was on. Two things differ:
+Branch from the default branch as it is on the remote, run the Task Flow from task start, and when you finish put the checkout back on the branch it was on. One thing differs:
 
-- The plan is agreed at the pull request, not before or during the work: write it at the top of the body, where the human judges plan and work together at merge. (Why: upkeep needs no taste or direction, so review at merge protects everything agreement beforehand would.)
 - Remove only tracked files, each as a tombstone: the pull request lists its path with `git checkout <sha> -- <path>`, the SHA being the commit your branch started from.
 
 Label a finished pull request `aiw:upkeep`.
 
 ## When the Work Needs the Human
 
-Wherever the workflow would stop for the human, stop there instead of deciding for them: the tier rising to Full, an Ask First item or a choice a skill reserves for them, a conflict you cannot resolve without one. Keep the work, and leave the checkout clean and back where it was:
+Wherever the workflow would stop for the human, stop there instead of deciding for them: the work reaching anything on aiw-planning's Full list, an Ask First item or a choice a skill reserves for them, a conflict you cannot resolve without one. Keep the work, and leave the checkout clean and back where it was:
 
 - If validation passes on what you have, commit, push, and open a draft pull request labelled `aiw:direction`, whose body says what stopped you, that the rest is unverified, and that no aiw-prompt-smith pass ran.
 - If it does not, stash it with everything untracked under a message naming the issue (`git stash push -u -m "aiw-upkeep #<n>: <reason>"`), and push the branch only if it already holds commits.

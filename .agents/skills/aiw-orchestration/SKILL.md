@@ -35,7 +35,7 @@ The gate governs work that writes. Two things sit outside it and are not yours t
 - **Reconnaissance.** Scouts write nothing, so they open no coordination surface and carry no merge cost, and their output is bulk the main loop would distil anyway. aiw-planning requires it whenever the baseline spans several areas.
 - **Review.** A reviewer needs the work's output to start, so review can never satisfy the independence test above and this gate has nothing to say about it. aiw-verification decides when a clean-context or refuting agent is required, and its answer is not a shape you choose.
 
-State the chosen shape and the reason in the plan, before any fan-out happens. Concurrency spends the human's quota and returns a review queue to one person, so the shape is theirs to challenge while it is still cheap to change.
+State the chosen shape and the reason in the plan, before any fan-out happens. Concurrency spends the human's quota and returns a review queue to one person, so state it where the human can interrupt it while it is still cheap to change.
 
 *The hard case is work that looks parallel and is not.* "Add the new field to the model, the API, the serialiser, and the three call sites" reads as five independent pieces and is one chain: every downstream piece needs the shape the first one settles, so five builders either wait or guess, and the orchestrator pays to reconcile five guesses about a decision it could have made once. Compare "apply the same rename across forty files that already agree on the rename": genuinely independent, mechanical, fully specified, and a fan-out that pays. The test is not how many files are touched. It is whether a piece can start before another finishes.
 
