@@ -6,6 +6,16 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.26.0 - 2026-10-13
+
+`project-context.md` records what an agent would get wrong without being told, not a map of the repository, so it costs far fewer tokens in every session. To shrink an existing file, ask the agent to refresh the project context.
+
+### Changed
+
+- `aiw-project-context-management`: the file keeps a line only when an agent would do something wrong without it and cannot learn it from the code in one step. Its sections are Product Summary, Constraints, Build and Validate, Domain Terms, and Maintenance; the structure, architecture, and dependency sections are gone, the scan looks for requirements rather than walking the tree, the budget falls from 6000 to 2000 tokens, and a refresh rewrites an overview-shaped file to the new shape ([#375]).
+- `ai-workflow.md`: the Ask First rule that pointed at project context now covers changing a constraint or contract it records, since the file no longer documents architecture or patterns; `AGENTS.md` and `.github/copilot-instructions.md` describe the file the same way ([#375]).
+- `.ai-policy/hooks/remind-context-management.sh`: the pull-request reminder fires on changes to the repository's gates (policy hooks and scripts, check scripts, CI workflows) and to what validation covers, and no longer on a module or skill added, removed, or renamed ([#375]).
+
 ## 5.25.1 - 2026-10-10
 
 Skill descriptions say only when to load each skill, so the 17 of them cost about half as many tokens in every session.
@@ -1242,3 +1252,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#352]: https://github.com/philippe-ths/ai-coding-workflow/issues/352
 [#366]: https://github.com/philippe-ths/ai-coding-workflow/issues/366
 [#374]: https://github.com/philippe-ths/ai-coding-workflow/issues/374
+[#375]: https://github.com/philippe-ths/ai-coding-workflow/issues/375

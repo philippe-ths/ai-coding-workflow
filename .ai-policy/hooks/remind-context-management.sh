@@ -20,27 +20,17 @@
 # the same defensive shape as check-context-drift.sh, for the same reason: an
 # advisory nudge that can break a session is worse than no nudge.
 #
-# Arm 1 deliberately omits two shapes: a new top-level tracked file and an added
-# skill directory. In the repository this policy layer is developed in, validation
-# already catches both (a manifest coverage check, and a prose integrity check that
-# asserts project-context.md names every skill), so firing on either would put a
-# second guard behind a gate that already holds, and every extra firing spends the
-# credibility the real ones need. Those checks exist only in that repository; in a
-# target this hook does not flag either shape, and does not depend on the checks.
+# Arm 1 fires on what the context file records: requirements, meaning what the
+# repository's gates enforce and what validation covers. In a target the policy
+# layer is vendored and git-ignored, so there it fires on the target's own CI
+# workflows, check scripts, and validation extension point. It does not fire on a module
+# or skill added, removed or renamed, because the file is not an inventory of the
+# tree and an agent reads the tree directly. Firing on inventory changes would
+# send agents to write the map back in, and every firing that leads nowhere
+# spends the credibility the real ones need.
 #
-# What it does fire on are the shapes nothing else sees. There, prose integrity
-# walks the skills that exist and checks the context file names them; it never
-# walks the other way, so a skill deleted from both trees leaves the context file
-# naming a skill that is gone and validation stays green, and that direction is
-# covered here in every repository. The manifest classifies by directory prefix, so
-# a module added, removed or renamed inside .ai-policy/, .githooks/ or one of the
-# other two top-level directories the pattern below names is classified the moment
-# it lands there, and no check asks whether the context file's account of that
-# directory still holds. Nothing at all reads the context file against what the
-# policy layer now enforces, or against what validation now covers.
-#
-# The signal is that the branch touched something the file is supposed to
-# describe. That is not the same as the file being stale, and the message must
+# The signal is that the branch touched something behind a requirement the file
+# records. That is not the same as the file being stale, and the message must
 # not claim it is: a meaningful share of firings will be changes that altered
 # nothing the file records, so proceeding has to read as an acceptable answer.
 
@@ -160,38 +150,30 @@ ALL="$(printf '%s\n' "$DIFF" | cut -f2- | tr '\t' '\n' | grep -v '^$' | sort -u)
 # considered. Nothing to say.
 printf '%s\n' "$ALL" | grep -qxF "$CONTEXT_FILE" && exit 0
 
-# (a) Paths whose shape means the context file's account of the repo may no
-# longer hold. Structural rows are adds, deletes and both ends of a rename;
-# content-only edits qualify for the two shapes where what changed is the rule
-# itself rather than the file inventory.
+# (a) Paths whose change means a requirement the context file records may no
+# longer hold. Structural rows are adds, deletes and both ends of a rename: a
+# check added or removed changes what validation covers even when no rule text
+# changed.
 STRUCTURAL="$(printf '%s\n' "$DIFF" | awk -F'\t' '
   $1 ~ /^[AD]/ { print $2 }
   $1 ~ /^R/    { print $2; if (NF >= 3) print $3 }
 ' | grep -v '^$' | sort -u)"
 
-# Paths that left the tree: deletions, and the vacated end of a rename.
-REMOVED="$(printf '%s\n' "$DIFF" | awk -F'\t' '$1 ~ /^[DR]/ { print $2 }' \
-  | grep -v '^$' | sort -u)"
-
 hits=""
-
-# A skill removed from either mirrored tree. In the source repository, prose
-# integrity checks that every skill that exists is named in the context file, never
-# that every skill the context file names still exists, so this direction is
-# uncovered — and only this direction. There an added skill is already caught by
-# that check, so removals alone qualify here; in a target nothing catches additions.
-hits="$hits$(printf '%s\n' "$REMOVED" | grep -E '^\.(claude|agents)/skills/[^/]+/')
-"
-
-# An implementation module added, removed or renamed inside one of the directories
-# the pattern below names (classified by prefix in the source repository's manifest).
-# The last alternative names a directory only the source repository has; a target
-# without it never matches it.
-hits="$hits$(printf '%s\n' "$STRUCTURAL" | grep -E '^(\.ai-policy|\.githooks|scripts|observation)/')
-"
 
 # What the policy layer enforces, however it changed.
 hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(\.ai-policy/hooks/|\.githooks/|\.github/hooks/|\.ai-policy/policy\.env$|\.claude/settings\.json$|\.codex/hooks\.json$)')
+"
+# The gates the hooks call and the validation state they read. The policy layer
+# keeps them beside its helpers in one directory, so they are named.
+hits="$hits$(printf '%s\n' "$ALL" | grep -E '^\.ai-policy/scripts/(check-[^/]*|tree-fingerprint|run-validation|mark-validation-[^/]*|install-hooks)\.sh$')
+"
+# A repository's own gates: check scripts, CI workflows, and in the source
+# repository the manifest every tracked file must appear in. In a target the
+# policy layer is vendored and never shows in a diff, so these are what arm 1
+# watches there.
+hits="$hits$(printf '%s\n' "$ALL" | grep -E '^(scripts/check-[^/]*\.sh|\.github/workflows/|install-manifest\.json$)')"  # factory-path-ok: an absent path never matches
+hits="$hits
 "
 
 # What validation covers: a check added or removed, or the check set itself.

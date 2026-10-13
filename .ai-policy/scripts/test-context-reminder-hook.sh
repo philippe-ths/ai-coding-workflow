@@ -123,21 +123,47 @@ echo "Arm 1 — a pull request about to open on a branch that changed what the c
 R="$SANDBOX/module-added"; init_repo "$R"
 echo "new" > "$R/.ai-policy/hooks/new-guard.sh"
 commit_all "$R" "add a guard"
-assert_reminder "module added under .ai-policy/ -> reminder" \
+assert_reminder "hook added under .ai-policy/hooks/ -> reminder" \
   "$(run_hook "$R" "$SHELL_PR_PAYLOAD")" "new-guard.sh"
 
 # The same branch shape reached by the MCP route.
 assert_reminder "same branch via the MCP create route -> reminder" \
   "$(run_hook "$R" "$MCP_PR_PAYLOAD")" "aiw-project-context-management"
 
-# A skill removed from a mirrored tree. Prose integrity walks the skills that
-# exist and checks the context file names them, never the other way, so a
-# context file left naming a deleted skill passes validation.
-R="$SANDBOX/skill-removed"; init_repo "$R"
-rm -rf "$R/.claude/skills/aiw-testing"
-commit_all "$R" "drop a skill"
-assert_reminder "skill directory removed -> reminder" \
-  "$(run_hook "$R" "$SHELL_PR_PAYLOAD")" "SKILL.md"
+# A gate the hooks call, changed in place: it exists on the base branch first.
+R="$SANDBOX/gate-changed"; init_repo "$R"
+git -C "$R" checkout -q main
+mkdir -p "$R/.ai-policy/scripts"
+echo "gate" > "$R/.ai-policy/scripts/check-something.sh"
+commit_all "$R" "seed a gate"
+git -C "$R" checkout -q -B feat/work main
+echo "gate changed" > "$R/.ai-policy/scripts/check-something.sh"
+commit_all "$R" "change a gate"
+assert_reminder "policy gate script changed in place -> reminder" \
+  "$(run_hook "$R" "$SHELL_PR_PAYLOAD")" "check-something.sh"
+
+# Every named gate fires, not only the check-* pattern: each is a separate
+# alternative in the hook, and dropping any one must fail here.
+R="$SANDBOX/named-gates"; init_repo "$R"
+mkdir -p "$R/.ai-policy/scripts"
+for f in .ai-policy/scripts/tree-fingerprint.sh .ai-policy/scripts/run-validation.sh \
+         .ai-policy/scripts/mark-validation-pass.sh .ai-policy/scripts/install-hooks.sh \
+         scripts/check-gate.sh install-manifest.json; do  # factory-path-ok: a sandbox path
+  echo "x" > "$R/$f"
+done
+commit_all "$R" "touch every named gate"
+OUT="$(run_hook "$R" "$SHELL_PR_PAYLOAD")"
+for f in tree-fingerprint.sh run-validation.sh mark-validation-pass.sh install-hooks.sh check-gate.sh install-manifest.json; do  # factory-path-ok: a sandbox path
+  assert_reminder "named gate $f -> reminder" "$OUT" "$f"
+done
+
+# A CI workflow, the gate a target owns.
+R="$SANDBOX/ci-changed"; init_repo "$R"
+mkdir -p "$R/.github/workflows"
+echo "on: push" > "$R/.github/workflows/ci.yml"
+commit_all "$R" "add CI"
+assert_reminder "CI workflow added -> reminder" \
+  "$(run_hook "$R" "$SHELL_PR_PAYLOAD")" "ci.yml"
 
 # What the policy layer enforces, changed in place.
 R="$SANDBOX/policy-changed"; init_repo "$R"
@@ -174,15 +200,19 @@ commit_all "$R" "documentation only"
 assert_silent "documentation-only diff -> silent" \
   "$(run_hook "$R" "$SHELL_PR_PAYLOAD")"
 
-# Deliberately excluded: a new top-level tracked file already fails the
-# manifest's coverage check, and an added skill already fails prose integrity.
-# Firing here would put a second guard behind a gate that holds.
-R="$SANDBOX/already-gated"; init_repo "$R"
+# Inventory changes: the context file records requirements, not the tree, so a
+# module or skill added or removed is not something it describes.
+R="$SANDBOX/inventory-only"; init_repo "$R"
 echo "top level" > "$R/NEWFILE.md"
+echo "helper" > "$R/scripts/new-helper.sh"
 mkdir -p "$R/.claude/skills/aiw-brand-new"
 echo "skill" > "$R/.claude/skills/aiw-brand-new/SKILL.md"
-commit_all "$R" "shapes existing validation already catches"
-assert_silent "new top-level file and added skill -> silent (already gated)" \
+rm -rf "$R/.claude/skills/aiw-testing"
+mkdir -p "$R/.ai-policy/scripts" "$R/observation"
+echo "helper" > "$R/.ai-policy/scripts/some-helper.sh"
+echo "x = 1" > "$R/observation/new_module.py"  # factory-path-ok: a sandbox path
+commit_all "$R" "inventory changes only"
+assert_silent "module, policy helper, top-level file and skill added or removed -> silent" \
   "$(run_hook "$R" "$SHELL_PR_PAYLOAD")"
 
 # Editing an open pull request is not the moment the branch is first presented.
