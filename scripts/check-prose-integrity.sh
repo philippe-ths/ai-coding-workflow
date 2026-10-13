@@ -263,10 +263,9 @@ else
     # line. Unlike prose, a script reaches a path as ./x, "$ROOT_DIR/x" or "${ROOT}/x",
     # or writes it regex-escaped (x\.sh), so a token may follow ./ or a $NAME/ prefix
     # and backslashes are stripped before matching.
-    # scripts/repo-validation.sh and scripts/commit-check.sh are exempt: they are the
-    # target's documented extension points, which project-validation.sh and the
-    # pre-commit hook run when the target writes them.
-    alt_shipped="$(printf '%s\n' "$tokens" | grep -v '^$' | grep -vxF -e 'scripts/repo-validation.sh' -e 'scripts/commit-check.sh' | sed 's/[][\.*^$/+?(){}|]/\\&/g' | paste -sd'|' -)"
+    # scripts/repo-validation.sh is exempt: it is the target's documented validation
+    # extension point, which project-validation.sh runs when the target writes one.
+    alt_shipped="$(printf '%s\n' "$tokens" | grep -v '^$' | grep -vxF 'scripts/repo-validation.sh' | sed 's/[][\.*^$/+?(){}|]/\\&/g' | paste -sd'|' -)"
     ship_pre='(^|[^A-Za-z0-9_./-]|\./|\$\{?[A-Za-z_][A-Za-z0-9_]*\}?/)'
     shits=""
     while IFS= read -r f; do

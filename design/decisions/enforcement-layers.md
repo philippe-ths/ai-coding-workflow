@@ -116,15 +116,13 @@ Using `core.hooksPath` instead of copying hooks into `.git/hooks/` means the hoo
 
 The pre-commit hook runs two checks in order:
 1. Protected branch check: blocks the commit if on a protected branch.
-2. Validation check (if enabled): blocks the commit unless a full validation pass is recorded for the current tree, or the repository's own `scripts/commit-check.sh` passes.
+2. Validation check (if enabled): blocks the commit if validation has not passed for the current tree.
 
-The commit check exists because the agent commits at the end of every small loop, so each commit is a known-good point a failed loop can return to.
+The validation check at commit ships disabled (`REQUIRE_VALIDATION_BEFORE_COMMIT="false"`).
+The agent commits at the end of every small loop, so a commit is a checkpoint a failed loop can return to rather than a claim the work is done.
 A full run per loop would make that pattern too costly to follow, and a gate that fires on the normal path trains people to route around it.
-The hook passes the commit's changed paths on stdin and the repository decides what covers them; the hook cannot judge that scope itself.
-Absent or not executable, the commit needs full validation, so a target that writes no commit check keeps the stricter gate.
-The trade is that a local branch can hold commits that passed only the fast check.
-Push is where that stops: the pre-push gate still requires a full pass against the content being pushed.
-Like the validation pass, the commit check reads the working tree rather than the index.
+Each layer then has one job: the agent's own check proves each loop, the full checks run at the start of the task and at the done gate, and the pre-push gate keeps anything unvalidated from leaving the machine.
+The trade is that a local branch can hold commits no deterministic check has seen; push is where that stops.
 
 The protected branch check runs first because it is the cheaper operation and the more fundamental violation.
 There is no point checking validation status if the commit should not happen on this branch at all.
@@ -132,14 +130,12 @@ There is no point checking validation status if the commit should not happen on 
 ### pre-push hook
 
 The pre-push hook mirrors the pre-commit hook structure: protected branch check first, then validation check.
-This provides a second enforcement point at push time.
-Even if an agent or human bypasses pre-commit (e.g. with `--no-verify`), the push hook catches it.
-Having both hooks means the feedback is early (at commit time) but the enforcement is redundant (at push time).
+With validation off at commit, it is the only point that requires a validation pass, and the only one the content must clear before anyone else sees it.
 
 ### Why both hooks exist
 
-Pre-commit gives fast feedback: the agent learns immediately that it cannot commit without validation.
-Pre-push provides a safety net: if pre-commit was bypassed, the invalid state does not reach the remote.
+Pre-commit refuses a commit on a protected branch at the moment it is attempted, and where a repository turns its validation check on, it gives that feedback at commit time too.
+Pre-push holds both rules again where the content leaves the machine, so a bypassed pre-commit (e.g. `--no-verify`) does not reach the remote.
 The cost of running both is negligible (two shell script invocations), and the benefit is defence in depth.
 (See `design/research/deterministic-enforcement.md#google-sre-defense-in-depth` for the independent-layers-and-compartmentalization principle applied to system reliability.)
 

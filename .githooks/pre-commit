@@ -9,42 +9,6 @@ ROOT_DIR="$(git rev-parse --show-toplevel)"
 . "$ROOT_DIR/.ai-policy/policy.env"
 
 if [ "$REQUIRE_VALIDATION_BEFORE_COMMIT" = "true" ]; then
-  # A full validation pass recorded against the current tree always suffices.
-  if "$ROOT_DIR/.ai-policy/scripts/check-validation.sh" >/dev/null 2>&1; then
-    exit 0
-  fi
-
-  # The repository's own fast check, when it ships one, stands in for full
-  # validation at commit time, so each small checked change can be a commit to
-  # return to. It reads the paths the commit changes on stdin and decides what
-  # covers them. The push gate still requires full validation, so nothing this
-  # check lets through leaves the machine unvalidated. Absent or not
-  # executable, the commit needs full validation as before.
-  COMMIT_CHECK="$ROOT_DIR/scripts/commit-check.sh"
-  if [ -x "$COMMIT_CHECK" ]; then
-    # Taken before the check runs, so a failing diff blocks rather than
-    # reaching the check as an empty list.
-    CHANGED="$(git -c core.quotePath=false diff --cached --name-only --no-renames)"
-    # `git commit -a` and `git commit <paths>` hand the hook a temporary index
-    # through GIT_INDEX_FILE. The check runs with git's repository-local
-    # variables cleared, so a test that builds its own sandbox repository
-    # cannot write into the index this commit is built from.
-    # A repository reached only through --git-dir has nothing for the check to
-    # find once those variables are gone, so it keeps the full validation gate.
-    if ! (cd "$ROOT_DIR" && env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE git rev-parse --git-dir >/dev/null 2>&1); then
-      "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
-      exit 0
-    fi
-    # shellcheck disable=SC2046
-    unset $(git rev-parse --local-env-vars)
-    if printf '%s\n' "$CHANGED" | (cd "$ROOT_DIR" && "$COMMIT_CHECK"); then
-      exit 0
-    fi
-    echo "Blocked: the commit check (./scripts/commit-check.sh) failed."
-    echo "Fix what it reports, or return to the last commit, then commit again."
-    exit 2
-  fi
-
   "$ROOT_DIR/.ai-policy/scripts/check-validation.sh"
 fi
 

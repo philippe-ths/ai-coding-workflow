@@ -68,7 +68,7 @@ Before the first push, check:
 
 - If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - If deterministic policy blocks an action, fix the blocked condition before retrying. Do not bypass the check or treat it as optional.
-- If repo-local policy blocks a commit or push, satisfy it through the repository's own flow: its commit check where it has one, its validation flow otherwise.
+- If repo-local policy requires a passed validation state before commit or push, satisfy that requirement through the repository's validation flow.
 
 ## Closing an issue
 
