@@ -110,6 +110,34 @@ def main(tmp):
     ask.post = lambda body, key: score_response({"0": 1.0, "1": 0.0, "2": 0.0}, 1.0)
     check("no act without threshold", with_question({"act_above": None}, lambda: ask.ask("ceremony", "x")[1]["act"]), False)
 
+    # When the judge does not act, no level is presented as its answer: the most likely level
+    # is `lean`, and the probabilities behind it are in the output and in the log row.
+    probs = {"0": 0.32, "1": 0.12, "2": 0.56}
+    ask.post = lambda body, key: score_response(probs, 0.0)
+    r = with_question({"act_above": 0.8}, lambda: ask.ask("ceremony", "x")[1])
+    check("no act: answer is null", r.get("answer"), None)
+    check("no act: lean", r.get("lean"), "full")
+    check("no act: probabilities", r["probabilities"], {"light": 0.32, "standard": 0.12, "full": 0.56})
+    ask.post = lambda body, key: score_response(probs, 0.9)
+    r = with_question({"act_above": 0.8}, lambda: ask.ask("ceremony", "x")[1])
+    check("act: answer is the level", (r["answer"], "lean" in r), ("full", False))
+    ask.post = lambda body, key: {"answers": {"q": {"type": "choice", "choice": "a",
+                                                    "probabilities": {"a": 0.4, "b": 0.6}, "confidence": 0.1}}}
+    r = with_question({"act_above": 0.8}, lambda: ask.ask("ceremony", "x")[1])
+    check("no act choice", (r.get("answer"), r.get("lean")), (None, "a"))
+    log_path = os.path.join(tmp, "probe.jsonl")
+    real_log, os.environ["AIW_JEV_LOG"] = os.environ["AIW_JEV_LOG"], log_path
+    ask.post = lambda body, key: score_response(probs, 0.0)
+    with_question({"act_above": 0.8}, lambda: ask.ask("ceremony", "x"))
+    ask.post = lambda body, key: score_response(probs, 0.9)
+    with_question({"act_above": 0.8}, lambda: ask.ask("ceremony", "x"))
+    os.environ["AIW_JEV_LOG"] = real_log
+    with open(log_path) as fh:
+        rows = [json.loads(line) for line in fh]
+    want_p = {"light": 0.32, "standard": 0.12, "full": 0.56}
+    check("log row no act", (rows[0].get("answer"), rows[0].get("lean"), rows[0].get("probabilities")), (None, "full", want_p))
+    check("log row act", (rows[1].get("answer"), rows[1].get("probabilities")), ("full", want_p))
+
     # Noul and Choice answers.
     for p, want in ((0.9, 0.8), (0.1, 0.8), (0.5, 0.0)):
         ask.post = lambda body, key, p=p: {"answers": {"q": {"type": "noul", "noul": p}}, "usage": "odd"}
@@ -118,7 +146,7 @@ def main(tmp):
     # The choice is Jev's pick, which need not be the highest listed probability after rounding.
     ask.post = lambda body, key: {"answers": {"q": {"type": "choice", "choice": "a",
                                                     "probabilities": {"a": 0.4, "b": 0.6}, "confidence": 0.6}}}
-    r = ask.ask("ceremony", "x")[1]
+    r = with_question({"act_above": 0.5}, lambda: ask.ask("ceremony", "x")[1])
     check("choice answer", (r["answer"], r["confidence"]), ("a", 0.6))
 
     # Malformed responses are unavailable, never a traceback.

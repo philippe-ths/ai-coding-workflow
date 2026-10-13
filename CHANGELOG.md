@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.3 - 2026-10-13
+
+A ceremony judge that did not act no longer reads as having answered, and its run log keeps the probabilities behind each answer.
+
+### Fixed
+
+- `.ai-policy/jev/ask.py`: when `act` is false, `answer` is null and the likeliest level is reported as `lean`; each run log row records `lean` and the per-level `probabilities`. `aiw-planning` reports a judge that did not act as no answer, with its lean and confidence ([#340]).
+
 ## 5.31.2 - 2026-10-13
 
 The session-start clutter note no longer fires on every session where Claude Code runs.
@@ -1330,3 +1338,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385
 [#391]: https://github.com/philippe-ths/ai-coding-workflow/issues/391
 [#364]: https://github.com/philippe-ths/ai-coding-workflow/issues/364
+[#340]: https://github.com/philippe-ths/ai-coding-workflow/issues/340
