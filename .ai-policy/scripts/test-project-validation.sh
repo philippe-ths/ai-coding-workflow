@@ -82,6 +82,33 @@ assert_contains "present repo-validation is invoked" "$out_present" "REPO_CHECKS
 assert_not_contains "present repo-validation does not warn" "$out_present" "$WARN_MARKER"
 
 echo ""
+echo "Syntax-check per-file regression tests:"
+
+# Case C — syntax error in .ai-policy/hooks/ (not the first directory): must fail.
+# This is the regression test for issue #391 where bash -n with multiple files
+# as arguments treated only the first file as the script and the rest as arguments.
+printf '#!/usr/bin/env bash\nif [ 1 ]; then\necho "unclosed if"\n' > .ai-policy/hooks/broken.sh
+rc=0
+out_broken="$(./.ai-policy/scripts/project-validation.sh 2>&1)" || rc=$?
+assert_exit "syntax error in hooks fails" 1 "$rc"
+assert_contains "syntax error in hooks is reported" "$out_broken" "Syntax error in ./.ai-policy/hooks/broken.sh"
+
+# Case D — same syntax error but in .githooks/ (last directory): must fail.
+rm .ai-policy/hooks/broken.sh
+printf '#!/usr/bin/env bash\necho "missing quote\n' > .githooks/broken
+rc=0
+out_broken="$(./.ai-policy/scripts/project-validation.sh 2>&1)" || rc=$?
+assert_exit "syntax error in .githooks fails" 1 "$rc"
+assert_contains "syntax error in .githooks is reported" "$out_broken" "Syntax error in ./.githooks/broken"
+
+# Case E — fix the syntax error, validation passes.
+printf '#!/usr/bin/env bash\necho "valid now"\n' > .githooks/broken
+rc=0
+out_fixed="$(./.ai-policy/scripts/project-validation.sh 2>&1)" || rc=$?
+assert_exit "fixed syntax error passes" 0 "$rc"
+assert_not_contains "fixed syntax error does not report error" "$out_fixed" "Syntax error"
+
+echo ""
 echo "Results: $PASS passed, $FAIL failed out of $((PASS + FAIL)) tests."
 
 if [ "$FAIL" -gt 0 ]; then
