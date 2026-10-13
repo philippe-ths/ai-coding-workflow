@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 2.1.0
+Version: 2.2.0
 
 ## Product Summary
 - This repository is a project-agnostic AI coding workflow: rules, skills, and a policy layer that an installer copies into a target repository for Claude Code, Codex, or VS Code Copilot.
@@ -41,6 +41,7 @@ Version: 2.1.0
 - `core.hooksPath` must be `.githooks`, set by `./.ai-policy/scripts/install-hooks.sh`.
 - `.ai-policy/jev/ask.py` needs a TypeSafe key and exits 3 when the key or service is unavailable.
 - `make classify` prints the product and factory boundary.
+- `scripts/probe-loop-rule.sh` A/B-tests the small-loop rule with headless agents and spends model quota, so it is never part of validation; re-run it when that rule, or one beside it, changes.
 - Nothing tests documentation meaning, the dashboard's rendering, or the scripts under `field-notes/`.
 
 ## Domain Terms
