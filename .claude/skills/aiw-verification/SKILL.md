@@ -1,11 +1,11 @@
 ---
 name: aiw-verification
-description: "Requires a justification that the checks cover the change, naming what was not checked, before a task is declared complete. Use at the end of every implementation pass and whenever about to say 'done', 'this works', 'tests pass', 'ready to commit', or 'ready to push'; also when reading runtime output, deciding on an end-to-end run, or claiming a refactor preserves behaviour, a fix is fixed, a migration is complete, or a delete is safe."
+description: "Requires a justification that the checks cover the change, naming what was not checked, before a task is declared complete. Use at the end of every implementation pass and whenever about to say 'done', 'this works', 'tests pass', 'ready to push', or 'ready for a pull request'; also when reading runtime output, deciding on an end-to-end run, or claiming a refactor preserves behaviour, a fix is fixed, a migration is complete, or a delete is safe."
 ---
 
 # Verification
 
-Read this file before declaring any task complete, before claiming "this works", before moving toward commit, push, or pull request, and whenever the agent is about to interpret tool output as success.
+Read this file before declaring any task complete, before claiming "this works", before moving toward push or pull request, and whenever the agent is about to interpret tool output as success.
 
 ## Why This Skill Exists
 

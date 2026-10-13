@@ -42,7 +42,7 @@ Before any operation that moves the working tree to a different branch state (re
 
 ## Commits, pushes, and pull requests
 
-Commit, push, and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
+Commit at the end of each implementation loop, as Task Flow step 4 in `ai-workflow.md` sets out, without asking. Where the repository's commit gate needs a full validation run, a commit costs that run, so commit at the loops worth returning to. Push and open the pull request yourself, without asking, once the done gate (aiw-verification, aiw-validation, aiw-housekeeping) has run for the work. (Why: an issue-scoped branch and its pull request reach nobody until merged, the merge is blocked to the agent by the policy layer, and the pull request is where the human's done decision starts rather than a step they authorise on the way to it.)
 
 - Push and open the pull request when the pre-pull-request checks below pass.
 - Post evidence that was deferred in the justification on the task's own pull request when it arrives. Commenting on any other pull request stays the human's.
@@ -68,7 +68,7 @@ Before the first push, check:
 
 - If Git `core.hooksPath` is not `.githooks`, run `./.ai-policy/scripts/install-hooks.sh`.
 - If deterministic policy blocks an action, fix the blocked condition before retrying. Do not bypass the check or treat it as optional.
-- If repo-local policy requires a passed validation state before commit or push, satisfy that requirement through the repository's validation flow.
+- If repo-local policy blocks a commit or push, satisfy it through the repository's own flow: its commit check where it has one, its validation flow otherwise.
 
 ## Closing an issue
 

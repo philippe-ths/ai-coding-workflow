@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.0 - 2026-10-13
+
+The agent works in small loops: one change, the check that covers it, a commit. A loop that fails returns to the last commit instead of being patched on top of. A repository can supply a fast commit check so these commits do not each cost a full validation run; push still needs one.
+
+### Added
+
+- `.githooks/pre-commit`: when the repository ships an executable `scripts/commit-check.sh`, a commit runs it with the changed paths on stdin instead of requiring a full validation pass. Without it, commits need full validation as before, and a full pass for the current tree always suffices ([#390]).
+
+### Changed
+
+- `ai-workflow.md` Task Flow step 4: work in small loops that each end in a checked commit; a loop whose check fails gets one fix, then returns to the last commit and retries smaller. Nothing inside a loop is claimed done; a committed loop that later proves wrong is a contradicted "done" claim ([#390]).
+- `ai-workflow.md` The Human is Responsible For: resetting the task branch to the agent's own unpushed commit after a failed loop, discarding only that loop's changes, no longer needs approval ([#390]).
+- `aiw-github`: commits happen at the end of each loop; push and pull request still wait for the done gate. `aiw-verification`, `aiw-housekeeping`, and `aiw-planning` no longer assume the work is uncommitted at the done gate ([#390]).
+
 ## 5.30.0 - 2026-10-13
 
 Messages to the human follow the register they have asked for in their wording, and a question leads with the recommendation; on a small probe, decision messages came out 4 to 16% shorter.
@@ -1299,4 +1313,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#376]: https://github.com/philippe-ths/ai-coding-workflow/issues/376
 [#382]: https://github.com/philippe-ths/ai-coding-workflow/issues/382
 [#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384
+[#390]: https://github.com/philippe-ths/ai-coding-workflow/issues/390
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385
