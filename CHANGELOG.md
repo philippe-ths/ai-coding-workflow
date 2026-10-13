@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.2 - 2026-10-13
+
+The session-start clutter note no longer fires on every session where Claude Code runs.
+
+### Fixed
+
+- `.ai-policy/hooks/check-hidden-clutter.sh`: entries in a tool-managed block of `.git/info/exclude`, headed by its marker comment (`# claude-code-runtime`), no longer count toward the threshold when they carry the tool's own `**/.claude/` prefix; entries a person added, including ones appended straight after the block, still do ([#364]).
+
 ## 5.31.1 - 2026-10-13
 
 Validation now syntax-checks every policy-layer script; before, a syntax error in any script but the first passed.
@@ -1321,3 +1329,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#390]: https://github.com/philippe-ths/ai-coding-workflow/issues/390
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385
 [#391]: https://github.com/philippe-ths/ai-coding-workflow/issues/391
+[#364]: https://github.com/philippe-ths/ai-coding-workflow/issues/364
