@@ -8,7 +8,19 @@
 # not mistaken for the host project's own tests/lint/type-checks having run.
 set -eu
 
-bash -n ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*
+# One bash -n per file: given several files, bash checks only the first and treats
+# the rest as its arguments.
+SYNTAX_ERRORS=0
+for script in ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*; do
+  [ -f "$script" ] || continue
+  if ! bash -n "$script"; then
+    echo "Syntax error in $script" >&2
+    SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
+  fi
+done
+if [ "$SYNTAX_ERRORS" -gt 0 ]; then
+  exit 1
+fi
 
 for t in ./.ai-policy/scripts/test-*.sh; do
   [ -x "$t" ] || continue

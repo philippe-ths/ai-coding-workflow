@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.1 - 2026-10-13
+
+Validation now syntax-checks every policy-layer script; before, a syntax error in any script but the first passed.
+
+### Fixed
+
+- `.ai-policy/scripts/project-validation.sh`: runs `bash -n` once per file across `.ai-policy/scripts`, `.ai-policy/hooks` and `.githooks`, naming each file that fails; one call over all of them checked only the first ([#391]).
+
 ## 5.31.0 - 2026-10-13
 
 The agent works in small loops: one change, the check that covers it, a commit. A loop that fails returns to the last commit instead of being patched on top of. Commits are checkpoints, so a fresh install no longer requires a validation pass to commit; the full checks run at the start of a task and before push, which still requires a pass.
@@ -1312,3 +1320,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384
 [#390]: https://github.com/philippe-ths/ai-coding-workflow/issues/390
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385
+[#391]: https://github.com/philippe-ths/ai-coding-workflow/issues/391
