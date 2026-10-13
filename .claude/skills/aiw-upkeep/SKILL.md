@@ -22,7 +22,7 @@ Branch from the default branch as it is on the remote, run the Task Flow from ta
 
 - Remove only tracked files, each as a tombstone: the pull request lists its path with `git checkout <sha> -- <path>`, the SHA being the commit your branch started from.
 
-Label a finished pull request `aiw:upkeep`.
+Label a finished pull request `aiw:upkeep`; one that does not complete its issue also follows the last paragraph of When the Work Needs the Human.
 
 ## When the Work Needs the Human
 
@@ -31,7 +31,7 @@ Wherever the workflow would stop for the human, stop there instead of deciding f
 - If validation passes on what you have, commit, push, and open a draft pull request labelled `aiw:direction`, whose body says what stopped you, that the rest is unverified, and that no aiw-prompt-smith pass ran.
 - If it does not, stash it with everything untracked under a message naming the issue (`git stash push -u -m "aiw-upkeep #<n>: <reason>"`), and push the branch only if it already holds commits and validation passes on them.
 
-Then swap the issue's `aiw:upkeep` for `aiw:direction` and comment what stopped you and where the work is: the draft, the stash, or the branch. (Why: a stopped run that leaves changes in the tree blocks every later run, since upkeep never starts on a dirty tree.)
+Whenever a run ends with its issue not complete, whether it stopped or shipped a pull request that does part of the issue, and whatever the reason for leaving the rest, swap the issue's `aiw:upkeep` for `aiw:direction` and comment what remains and where the work is: the pull request, the draft, the stash, or the branch. A pull request that does not complete its issue says so in its body, names the remainder, and refers to the issue without a closing keyword such as `Closes #<n>`, in its body or any commit message. (Why: a later run takes any issue still labelled `aiw:upkeep`, so it would pick up exactly what was handed to the human, and a closing keyword would close the issue on merge with the remainder in it. A stopped run that leaves changes in the tree blocks every later run, since upkeep never starts on a dirty tree.)
 
 ## Hand Over
 
