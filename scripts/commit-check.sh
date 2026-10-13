@@ -50,7 +50,23 @@ for t in ./.ai-policy/scripts/test-*.sh ./scripts/test-*.sh ./scripts/test_*.py 
   esac
   run=false
   for p in "${CHANGED[@]}"; do
-    if [ "./$p" = "$t" ] || grep -qF "$(basename "$p")" "$t"; then
+    if [ "./$p" = "$t" ]; then
+      run=true
+      break
+    fi
+    # Prose is covered by the prose and manifest checks above. The tests that
+    # merely name a Markdown file mostly install or copy it, and would put the
+    # slowest suites on every prose loop, so a Markdown file selects only a test
+    # named for it: CHANGELOG.md selects test-changelog-*.
+    case "$p" in
+      *.md)
+        stem="$(basename "$p" .md | tr '[:upper:]' '[:lower:]')"
+        case "$(basename "$t")" in
+          *"$stem"*) run=true; break ;;
+        esac
+        continue ;;
+    esac
+    if grep -qF "$(basename "$p")" "$t"; then
       run=true
       break
     fi
