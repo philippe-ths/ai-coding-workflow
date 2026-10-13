@@ -35,7 +35,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 ### Agent-facing files
 
 - `ai-workflow.md` — canonical workflow for AI-assisted coding tasks, including planning, checkpoints, validation, failure analysis, and GitHub handoff rules.
-- `project-context.md` — factual reference for this repository's implementation state, authored using the `aiw-project-context-management` skill.
+- `project-context.md` — the requirements an agent in this repository would get wrong without being told, authored using the `aiw-project-context-management` skill.
 - `project-checks.md` — what this repository is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
 
 ### Agent instruction entry points
@@ -46,7 +46,7 @@ Tipping points are a judgement call. They come from real-world usage in other re
 
 ### Skills
 
-- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`). Used by VS Code Copilot and Codex.
+- `.agents/skills/` — cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`, `aiw-upkeep`). Used by VS Code Copilot and Codex.
 - `.claude/skills/` — Claude Code skill definitions (same skills as `.agents/skills/`).
 
 ### Policy enforcement

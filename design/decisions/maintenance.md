@@ -34,7 +34,7 @@ Every change to the canonical `Version:` header in `ai-workflow.md` requires a m
 **`project-context.md` version.**
 `project-context.md` carries its own `Version:` header, independent of the canonical `ai-workflow.md` version, identifying the state of this repo's context document.
 Bump it whenever the document is updated to reflect a change in the codebase it describes; it is not shipped to target repos, so its version neither affects nor is affected by the canonical version.
-Apply the same X.Y.Z scheme: patch (Z) for a small factual correction or wording fix, minor (Y) for adding or restructuring a section or documenting newly added project structure, major (X) for a wholesale rewrite.
+Apply the same X.Y.Z scheme: patch (Z) for a small factual correction or wording fix, minor (Y) for adding or restructuring a section or recording a new requirement, major (X) for a wholesale rewrite.
 Changes to `project-context.md` do not require a `CHANGELOG.md` entry or a tagged release.
 
 **Tagged releases.**

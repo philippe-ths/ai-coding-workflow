@@ -1,143 +1,54 @@
 # Project Context
 
-Version: 1.52.1
+Version: 2.0.0
 
 ## Product Summary
-- This repository provides project-agnostic governance files for AI-assisted coding, enabling a human to maintain consistent guardrails for an AI coding agent across repositories.
-- Primary users are human developers who have an AI coding agent (Copilot, Claude Code, Codex) working in their projects.
-- The core user flow is: install the workflow into a target repository with the agent-driven installer (or by pointing an agent at this repo), then run tasks through the defined workflow.
-- The repository also hosts a local, single-developer session-observation tool used to watch the maintainer's own Claude Code usage across repos.
+- This repository is a project-agnostic AI coding workflow: rules, skills, and a policy layer that an installer copies into a target repository for Claude Code, Codex, or VS Code Copilot.
+- Its users are developers who direct an AI coding agent in their own repositories.
+- It also holds a local tool, under `observation/`, that reads the maintainer's own Claude Code sessions across repositories.
 
-## Domain Concepts
-- **AI workflow**: the step-by-step process defined in `ai-workflow.md` that the agent follows for every task.
-- **Project context**: a factual reference document (`project-context.md`) describing the target repository's current implementation state, authored using the `aiw-project-context-management` skill.
-- **Project checks**: a per-repository document (`project-checks.md`) recording what is worth checking at session start and what normal looks like for each check, maintained by the `aiw-init` skill.
-- **North star**: a per-repository statement (`north-star.md`) holding the shortest form of the goal a project is trying to achieve, and nothing else, authored by the `aiw-north-star` skill through an interview with the human.
-- **Session preflight**: a read-only run of the declared checks that reports project state the human may not be aware of and starts no work.
-- **Validation state**: a local runtime artifact (`.ai-policy/state/validation.status`) recording whether validation passed and, for a pass, a fingerprint of the working tree it was computed against.
-- **Tree fingerprint**: a hash of tracked and untracked-not-ignored content, produced by `.ai-policy/scripts/tree-fingerprint.sh`, which ties a validation result to the content that produced it so a pass from an earlier tree cannot satisfy the gate.
-- **Policy layer**: the set of shell scripts in `.ai-policy/` that enforce protected-branch and validation-state rules.
-- **Skill**: a domain-specific instruction file loaded on demand by the agent when a workflow step requires it.
-- **Execution shape**: how a task is run — solo in the main loop, with read-only scouts, as an orchestrator over builders and reviewers, or as a relay handing a dependent chain along one agent at a time — stated in every plan, and decided by the `aiw-orchestration` skill, the only file holding the conditions.
-- **Step owner**: a step a built system runs through a model on every use, given one prompt file naming its role, sealed from the always-on layer, a narrow named interface, and a per-run log; the fifth shape in `aiw-orchestration`, the one that belongs to the built system rather than the task, named in the plan under step ownership by `aiw-planning`.
-- **Ceremony tier**: Light, Standard or Full, set by `aiw-planning` from a task's reach, asking `.ai-policy/jev/ask.py` and falling back to the agent's own call; it sets how much process the task gets and moves only up.
-- **Deliverable**: what the human will open, read, run, or look at when a task is done, named as a noun in the plan and checked by the `aiw-validation` skill at the done gate.
-- **Done gate**: the three checks run before work is presented for the human's done decision, `aiw-verification` for whether the change is correct, `aiw-validation` for whether the result is what was asked for, and `aiw-housekeeping` for whether anything the task caused should now be removed or moved.
-- **Footprint**: the files a branch changed, the untracked files the task produced, and what those changes left unreferenced, the set `aiw-housekeeping` may act on and outside which mess is a finding rather than work.
-- **Audit mode**: `aiw-housekeeping` invoked by the human, scanning the whole repository instead of a footprint and returning a ranked list the human approves in one pass; it removes nothing on its own judgement, because the tiers say whether a removal is safe and not whether it should happen.
-- **Removal tier**: which of three levels of evidence a removal needs, set by how far the removed thing reaches rather than how large it is, so the cost of a removal is a property of the thing and not a judgement the agent weighs against the mess.
-- **Archive**: a git-ignored `.archive/` directory holding untracked files a task removed rather than deleted, created on first use with a `.gitignore` containing `*` so it is invisible to git without an entry anywhere else.
-- The `aiw-validation` skill is unrelated to the validation state and validation scripts of the policy layer, which record whether a repository's checks passed.
-- **Install manifest**: the source-of-truth file (`install-manifest.json`) declaring, per tool, which files are product (installed into a target) and which are factory (this repo's own machinery, never installed).
-- **Seeded file**: a product file the manifest lists under `seeded`, shipped once with defaults and then owned by the target, so an update keeps the target's copy and appends only the settings it lacks; `.ai-policy/policy.env` is the one seeded file.
-- **Vendored install**: installed governance files recorded in the target's `.gitignore` so they are not committed into the target's own history.
-- **Session observation**: the local tooling under `observation/` that reads Claude Code session transcripts and presents descriptive metrics with no statistical verdict.
-- **Session Store**: a global JSONL file (`~/.claude/aiw-observation/sessions.jsonl`) holding one metrics row per session, rebuilt on demand from transcripts, or from `history.jsonl` for a session whose transcript Claude Code deleted.
-- **Task**: the issue number in a branch name, or the branch name, that `observation/collect.py` charges each reply to by its branch and each subagent to by its launching branch, written beside the Session Store as `tasks.jsonl`.
-- **Manifest**: a global file written by a SessionStart hook recording each session's `workflow_version` and repo, the only reliable source of the version active during a session.
-- **Rating**: a human 1-4 session quality score recorded live by the global `/rate` skill and matched to its session by repo and time.
+## Constraints
+- No work happens on `main` or `master`: git hooks and agent hooks block commits and pushes there.
+- A commit or push needs a validation pass recorded for the current working tree, so any change to tracked or untracked, non-ignored content after a run voids the pass.
+- A push is refused from a dirty tree, and for a ref whose tip is not `HEAD`, since only `HEAD` carries the content validation read.
+- The agent cannot merge or approve a pull request; hooks block both on the shell and MCP routes.
+- Opening or editing a pull request is blocked unless the body carries a verification justification and its unverified-surface section is more than a bare "none".
+- That body must also record an `aiw-prompt-smith` pass when the branch changed agent-facing prose: skills, agent files, `ai-workflow.md`, the entry points, or a file an entry point pulls in with an `@` line, which includes this file.
+- The pull request hook must read the body before the command runs, so it blocks a body file path built from a shell variable and a body file the same command creates.
+- A version bump in `ai-workflow.md` needs a matching `CHANGELOG.md` entry; the pre-push hook rejects it otherwise.
+- `### Removed` bullets in `CHANGELOG.md` lead with the removed path, because the updater deletes files from them.
+- Every tracked file is classified in `install-manifest.json` as product, factory, or authored-in-target, and validation fails until it is.
+- Product files install into targets and factory files never leave this repository.
+- Product prose (skills, `ai-workflow.md`, the entry points) may not name a factory-only path; a shipped script may, only on a line marked `factory-path-ok`.
+- `.claude/skills/` and `.agents/skills/` carry the same skills with identical content.
+- Each skill's `name:` matches its directory, and its description is one line of at most 600 bytes.
+- `README.md` names every skill.
+- This file stays at or under 2000 tokens and `north-star.md` at or under 400, counted as bytes/4.
+- `CLAUDE.md`, `AGENTS.md`, and `.github/copilot-instructions.md` each reference `ai-workflow.md` and `project-context.md` and carry no rules of their own.
+- A change that alters agent behaviour in a target bumps the `ai-workflow.md` version, as `design/decisions/maintenance.md` sets out; this file carries its own version.
+- The cost of the checks is reported and never gated on.
+- The Session Store records metrics only, never prompt or code content.
+- `observation/uninstall-observation.sh` and `upkeep/uninstall-upkeep.sh` each reverse what their install script adds outside this repository, keeping recorded data unless told otherwise.
 
-## Scope
-- Defines a reusable AI coding workflow (`ai-workflow.md`) with planning, validation, scope-control, failure-analysis, and GitHub handoff rules.
-- Provides a project-context management skill (`aiw-project-context-management`) for authoring and maintaining a repository's `project-context.md`.
-- Provides a local policy enforcement layer (`.ai-policy/`) with scripts that enforce protected-branch and validation-state rules.
-- Provides git hooks (`.githooks/pre-commit`, `.githooks/pre-push`) that block commits and pushes when policy checks fail.
-- Provides agent skills for session preflight, code-aware planning, ground-truth sourcing, failure analysis, GitHub handoff, issue creation, test construction, verification, deliverable validation, housekeeping, performance profiling, security testing, project-context management, north-star authoring, and execution-shape orchestration, located in two directories: `.agents/skills/` (cross-platform, for VS Code Copilot and Codex) and `.claude/skills/` (Claude Code).
-- Provides agent instruction entry points for VS Code Copilot (`.github/copilot-instructions.md`), Claude Code (`CLAUDE.md`), and Codex (`AGENTS.md`); each points at the governance files and carries no rules of its own.
-- Checks the agent-facing prose for structural coherence (`scripts/check-prose-integrity.sh`), wired into validation so it runs without a human choosing to run it.
-- Provides an agent-driven installer (`scripts/install.sh`) and updater (`scripts/update.sh`) that copy the product file set for a chosen tool into a target repository, vendor them in the target's `.gitignore`, and reconcile removals on update from `CHANGELOG.md`.
-- Declares the product/factory boundary in `install-manifest.json`, validated by `scripts/check-manifest.sh` and printed by `make classify`.
-- Observation capture (a SessionStart Manifest hook and the `/rate` skill) installs once into the developer's global `~/.claude/` config so it fires in every repo; only the reader and dashboard live in this repo. `observation/uninstall-observation.sh` reverses it, so deleting this repository does not strand a hook in global config.
-- Does not include a unit-test framework; validation covers shell-script syntax, Python `py_compile`, the observation parser regression test, the Jev tool's offline test, enforcement integration tests, and JSONL fixture validity.
+## Build and Validate
+- `./.ai-policy/scripts/run-validation.sh` runs validation and records the result the commit and push gate reads; it takes about four minutes.
+- Validation runs `bash -n` on the policy layer, every executable `.ai-policy/scripts/test-*.sh` (found by glob, so a test without the executable bit never runs), then `scripts/repo-validation.sh`.
+- `scripts/repo-validation.sh` lists its checks by name and skips any that is not executable, so a new factory test under `scripts/` runs only once it is added there and made executable.
+- `scripts/check-prose-integrity.sh` enforces the prose constraints above, and also that every skill listing the done gate names the same members as `ai-workflow.md` and that a skill claiming a Task Flow step number matches it.
+- It is structural only: it cannot tell whether two passages contradict.
+- Shipped hooks and policy scripts use only `bash`, `git`, and `jq`, since a target may have no `python3`; `python3` is needed by `observation/`, `.ai-policy/jev/`, and this repository's validation.
+- `core.hooksPath` must be `.githooks`, set by `./.ai-policy/scripts/install-hooks.sh`.
+- `.ai-policy/jev/ask.py` needs a TypeSafe key and exits 3 when the key or service is unavailable.
+- `make classify` prints the product and factory boundary.
+- Nothing tests documentation meaning, the dashboard's rendering, or the scripts under `field-notes/`.
 
-## Important Constraints
-- Agent-facing files must stay short enough to preserve context budget.
-- The cost of the checks is reported and never gated on: two designs that gated on it, one on runtime and one on bytes, each blocked an unchanged working tree.
-- `project-context.md` must stay under 6000 tokens.
-- `north-star.md` must stay under 400 tokens.
-- `scripts/check-prose-integrity.sh` fails validation when either budget is exceeded, counting tokens as bytes/4 rather than measuring them.
-- No work may be done directly on `main` or `master`; the policy layer and git hooks enforce this at commit and push time.
-- Validation must pass before commit or push when hooks are installed.
-- All facts in `project-context.md` must reflect implementation truth, not planned architecture.
-- The Session Store records metrics only, never prompt or code content, so pooling sessions from many repos locally needs no redaction.
-- `install-manifest.json` must classify every git-tracked file as product, factory, or authored-in-target; `scripts/check-manifest.sh` enforces this in validation.
-- Installed governance files are vendored: the installer records them in the target's `.gitignore` and does not commit them to the target's history.
-- `CHANGELOG.md` `### Removed` bullets must lead with the removed path so the update path can delete dropped files; `scripts/check-changelog-removals.sh` enforces this (factory-only, not shipped).
+## Domain Terms
+- **Target**: a repository the workflow is installed into.
+- **Seeded file**: a product file shipped once and then owned by the target; `.ai-policy/policy.env` is the only one.
+- **Validation state**: `.ai-policy/state/validation.status`, the policy layer's record of a validation run, unrelated to the `aiw-validation` skill.
+- **Manifest** in `observation/` means the per-session record of the workflow version, not `install-manifest.json`.
+- **Session Store**: `~/.claude/aiw-observation/sessions.jsonl`, one metrics row per session, rebuilt on demand.
 
-## Architecture Summary
-- This is primarily a documentation repository; its runtime code is the session-observation tool under `observation/` and the install/update tooling under `scripts/`.
-- Four layers exist: agent-facing governance files (workflow and context documents), on-demand skill files loaded at specific workflow steps, a local policy enforcement layer (scripts and git hooks), and the local session-observation tool.
-- Primary data flow: the agent-driven installer (`scripts/install.sh`) copies the product files into a target repository, the agent reads them before each task, the agent follows the workflow.
-- Observation data flow: a SessionStart hook records the Manifest, the `/rate` skill records Ratings, then `observation/collect.py` reads all transcripts under `~/.claude/projects/`, joins the Manifest and Ratings, writes the Session Store, and regenerates a static HTML dashboard.
-- Observation runs on demand; only the Manifest hook and, once installed, the upkeep timer run unprompted.
-- The only external service at repository runtime is the Jev API; GitHub is used only for issue and PR tracking.
-
-## Key Dependencies
-- `bash`: all policy scripts, git hooks, and observation capture scripts are written in bash and validated with `bash -n`.
-- `git`: hooks integrate with the git commit and push lifecycle via `core.hooksPath .githooks`.
-- `jq`: hook scripts and one enforcement test parse JSON with `jq`.
-- `python3`: required by the observation tool (`observation/*.py`), the Manifest hook, `.ai-policy/jev/`, and `scripts/repo-validation.sh`; the workflow itself does not need it.
-- TypeSafe Jev (`api.typesafe.ai`): answers the questions in `.ai-policy/jev/`; optional, since the tool reports itself unavailable when no key is set.
-
-## Project Structure
-- `north-star.md`: this repository's goal, that the human stays at the altitude of taste and direction while the AI manages and improves the work beneath them; `ai-workflow.md` step 1 checks an arriving request against it and stops before planning when the request pulls against it.
-- `ai-workflow.md`: canonical workflow steps, validation rules, scope controls, and GitHub handoff rules for the AI agent; its `Version:` header is the canonical project version.
-- `install-manifest.json`: source of truth for the product/factory boundary; lists product files per profile and tool, authored-in-target files, and factory-only files.
-- `INSTALL.md`: agent-actionable entry doc for installing or updating the workflow in a target repository.
-- `CHANGELOG.md`: Common Changelog record of every version bump; enforced by the pre-push changelog hook; `### Removed` bullets lead with the removed path so the updater can extract them.
-- `design/`: maintenance documentation for the repository; `design/decisions/` holds concern-scoped rationale files, `design/research/` holds primary-source notes with stable anchor IDs cited by those decisions, and `design/explorations/` holds dated exploratory writing.
-- `field-notes/investigations/`: findings from issues labelled investigation, each named by date, beside the Python scripts that rebuild each record's figures; the scripts are archival and not covered by validation.
-- `.agents/skills/`: cross-platform skill definitions (`aiw-init`, `aiw-planning`, `aiw-ground-truth`, `aiw-github`, `aiw-failure-analysis`, `aiw-issue-creation`, `aiw-testing`, `aiw-verification`, `aiw-validation`, `aiw-housekeeping`, `aiw-performance-profiling`, `aiw-security-testing`, `aiw-project-context-management`, `aiw-prompt-smith`, `aiw-north-star`, `aiw-orchestration`, `aiw-upkeep`), each self-contained in a `SKILL.md` file.
-- `.claude/skills/`: Claude Code skill definitions (same skills as `.agents/skills/`), each self-contained in a `SKILL.md` file.
-- `.github/copilot-instructions.md`: VS Code Copilot agent instructions pointing to `ai-workflow.md` and `project-context.md`.
-- `AGENTS.md`: Codex agent instructions; structure mirrors `.github/copilot-instructions.md`.
-- `CLAUDE.md`: Claude Code agent instructions; points at the governance files and carries no tool-specific rules.
-- `.ai-policy/policy.env`: declares protected branches, validation state file path, validation command, and optionally `SUITE_PATHS`, the files counted as this repository's checks.
-- `.ai-policy/scripts/`: shell scripts for running validation, marking pass/fail state, and testing enforcement; `report-suite-size.sh` reports how many files and bytes this repository's checks come to and never gates; `run-validation.sh` reports how long each run took, also never gated on; `check-validation.sh` is the commit and push gate and blocks unless the recorded pass matches the fingerprint `tree-fingerprint.sh` computes for the current tree; `project-validation.sh` is the portable policy-layer check (shell-script syntax plus enforcement tests gated on the agent entry points installed) and invokes `scripts/repo-validation.sh` afterwards when present, warning loudly when it is absent.
-- `.ai-policy/hooks/`: hook logic scripts invoked by `.githooks/`, `.claude/settings.json`, `.codex/hooks.json`, and `.github/hooks/`, including `check-changelog.sh` (pre-push, rejects `ai-workflow.md` version bumps without a matching `CHANGELOG.md` entry), `check-context-drift.sh` (SessionStart, advisory reminder when `project-context.md` is `CONTEXT_DRIFT_THRESHOLD`+ commits behind HEAD; wired for Claude Code and Codex only), `block-pr-merge.sh` (PreToolUse, blocks agent pull-request merges on the shell and MCP routes unconditionally; wired for all three tools), and `block-pr-approve.sh` (PreToolUse, blocks agent pull-request approvals on both routes, failing closed on an unreadable MCP review event; review comments and change requests pass), and `check-pr-verification.sh` (PreToolUse, blocks opening or editing a pull request whose body carries no verification justification or whose unverified-surface section is a bare assertion, and blocks a body it cannot read rather than passing it over; wired for all three tools).
-- `check-pr-verification.sh` also blocks a body that records no `aiw-prompt-smith` pass when the branch changed agent-facing prose, found by path: skills, agent files, `ai-workflow.md`, the entry points, and files an entry point pulls in with an `@` line.
-- `.ai-policy/hooks/block-planning-off-task.sh`: PreToolUse on the Skill tool, blocks loading `aiw-planning` on a protected branch or a detached HEAD so planning runs on the task's branch; Claude Code only, since the other tools load a skill by reading its file.
-- `.ai-policy/hooks/check-hidden-clutter.sh`: SessionStart advisory reporting when `.git/info/exclude` carries `HIDDEN_CLUTTER_THRESHOLD` or more entries, the signal to run the audit; wired for Claude Code and Codex, and never blocks.
-- `.ai-policy/hooks/remind-context-management.sh`: PreToolUse advisory reminder pointing at `aiw-project-context-management` before a pull request opens on a branch that changed what `project-context.md` records without touching it, and before the context file is written.
-- `.ai-policy/scripts/check-push-refs.sh` is the authoritative protected-branch check for pushes; `.githooks/pre-push` pipes git's resolved refs to it, and it blocks when any pushed ref targets a protected branch.
-- Guards answer one of two questions. `check-push-refs.sh` and the refspec check in `block-protected-branch-bash.sh` ask what a write targets; `check-protected-branch.sh` and the current-branch check ask where the agent is standing; `block-pr-merge.sh` asks neither and blocks the action outright, because a pull-request merge names no branch and reaches a protected branch without writing to one locally.
-- The where-am-I-standing guards are skipped for pushes that write to no branch: tag-only and delete-only. `.githooks/pre-push` reads delete-only from the all-zero local sha in git's pre-push input; `block-protected-branch-bash.sh` reads it from the command string (`--delete`, `-d`, `:<ref>`). Both apply the exemption after the target check, so deleting a protected branch stays blocked.
-- `.githooks/pre-commit`, `.githooks/pre-push`: git hooks that call `.ai-policy/` scripts to enforce policy.
-- `.github/hooks/block-protected-branch.json`: VS Code Copilot PreToolUse hook configuration for protected branch enforcement.
-- `.codex/config.toml`, `.codex/hooks.json`: Codex-specific agent configuration, permission defaults, and hook definitions.
-- `.claude/settings.json`: Claude Code settings including hook configuration and tool permission defaults.
-- `observation/parse.py`: the only module that knows the transcript JSONL format; extracts per-session metrics.
-- `observation/pricing.py`: model price table and estimated-cost calculation, since transcripts store no cost.
-- `observation/dashboard.py`: renders the Session Store into a self-contained static HTML dashboard with client-side filters.
-- `observation/test_parse.py`: parser and task-attribution regression test asserting exact values against checked-in fixtures.
-- `observation/capture/manifest-hook.sh`: defensive SessionStart hook that appends a Manifest row and never blocks a session.
-- `observation/capture/record-rating.sh`: appends a 1-4 Rating row, invoked by the `/rate` skill.
-- `observation/capture/rate/SKILL.md`: the global `/rate` skill source.
-- `observation/install-observation.sh`: installs capture and the `/rate` skill into global `~/.claude/`, honoring `CLAUDE_HOME` for testing.
-- `observation/uninstall-observation.sh`: the inverse; removes the hook, skill, and helper scripts and unwires the hook from `settings.json`, keeping recorded data unless `--purge-data` is passed.
-- `scripts/test-observation-install.sh`: sandbox test of the install/uninstall pair against a throwaway `CLAUDE_HOME`.
-- `Makefile`: `observe` rebuilds the store and opens the dashboard; `observe-test` runs the parser test; `classify` prints the product/factory boundary.
-- `upkeep/install-upkeep.sh` adds a weekday 22:00 launchd agent and the status line's quota snapshot; `upkeep/uninstall-upkeep.sh` reverses both.
-- `upkeep/scheduler.py`: picks the project worked in this week with most upkeep issue-days, gates on that snapshot, and runs `aiw-upkeep` headless.
-- `scripts/install.sh`: copies the product set for a tool into a target repo, vendors it in the target's `.gitignore`, and installs hooks.
-- `scripts/update.sh`: updates an installed copy by re-copying the current product for every installed tool, and reconciling removals from the source `CHANGELOG.md`.
-- `scripts/check-manifest.sh`: validates that the manifest classifies every git-tracked file exactly once.
-- `scripts/check-changelog-removals.sh`: enforces the leading-path convention on `### Removed` bullets (factory-only).
-- `scripts/check-prose-integrity.sh`: checks the invariants of the agent-facing prose that a script can judge without an editorial call (skill-tree parity, frontmatter, the documented skill set, version headers, size budget, entry-point parity), reports a single summary line unless something fails or `--verbose` is passed, and prints what it cannot cover; `scripts/test-prose-integrity.sh` asserts each check fires.
-- `scripts/check-prose-integrity.sh` also checks done-gate lists, Task Flow step claims, and factory-only paths.
-- `.ai-policy/jev/ask.py`: asks Jev one named question from `.ai-policy/jev/questions/` and prints a typed answer with its confidence, exiting 3 when the key or service is unavailable; it ships to targets with the rest of `.ai-policy/`.
-- `scripts/repo-validation.sh`: this repo's repo-specific validation; runs shell and Python checks on `observation/`, the parser regression test, the Jev tool's offline test, JSONL fixture validity, the manifest integrity check, and the install, update, changelog-removals, and observation install/uninstall sandbox tests.
-
-## Testing Overview
-- Policy-layer validation (`./.ai-policy/scripts/project-validation.sh`, portable across repos) runs `bash -n` on `.ai-policy/scripts/`, `.ai-policy/hooks/`, and `.githooks/`, then the enforcement test scripts whose matching agent entry point is installed, then `report-suite-size.sh`.
-- Enforcement test scripts are gated as follows: `test-claude-code-enforcement.sh` requires `.claude/`; `test-codex-enforcement.sh` requires `.codex/`; `test-vscode-copilot-enforcement.sh` requires `.github/hooks/`; every other `.ai-policy/scripts/test-*.sh` runs unconditionally, because validation discovers them by glob rather than from a list.
-- When `scripts/repo-validation.sh` is absent, `project-validation.sh` warns loudly that only the policy layer ran rather than skipping silently, so a fresh install cannot present a green-but-empty gate; `test-project-validation.sh` regression-tests both the absent (warns, still passes) and present (runs it, no warning) branches.
-- Prose integrity (`scripts/check-prose-integrity.sh`) runs inside repo-specific validation, so a change to the agent-facing rules is checked by something other than its author's reading. It is structural only: it cannot tell whether two passages contradict each other.
-- There are no automated tests for documentation content or for the generated dashboard's rendering.
-- Manual verification is the primary check for documentation changes and for the dashboard's visual behaviour.
-
-## Maintenance Checklist
-- Update this file when the project structure, key files, or policy rules change.
-- When a user-facing file changes, bump the version in `ai-workflow.md` following the guidance in `design/decisions/maintenance.md`.
-- When this file changes, bump its own `Version:` header per the `project-context.md` version rule in `design/decisions/maintenance.md`.
-- When adding a top-level tracked file, classify it in `install-manifest.json`; validation fails until every tracked file is classified.
+## Maintenance
+- Update this file when an enforced rule, a contract, or how the repository builds and validates changes.
+- When this file changes, bump its own `Version:` header per `design/decisions/maintenance.md`.

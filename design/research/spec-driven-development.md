@@ -13,11 +13,19 @@ Finding: Lulla et al. execute AI coding agents on 124 pull requests across 10 re
 
 ---
 
+## An overview of the code does not help agents find files, and context files can lower success {#context-files-overview-no-help}
+
+Source: https://arxiv.org/abs/2602.11988
+Extracted: 2026-10-13
+Finding: Gloaguen et al. (ICLR 2026) run coding agents on SWE-bench Lite and on AGENTbench, a set of issues from repositories with developer-committed context files, with and without a repository-level context file. LLM-generated context files lower the average resolution rate by 0.5% on SWE-bench Lite and 2% on AGENTbench; developer-written files raise it by about 4% on AGENTbench for every agent tested except Claude Code. Both kinds add 2.45 to 3.92 steps per task and raise cost by 20% to 23%, because agents explore more broadly when given more requirements to satisfy. The number of steps before an agent first touches a file the reference patch modified is not meaningfully reduced by the presence of a context file, so a repository overview does not speed navigation. The authors recommend that human-written context files describe only minimal requirements, such as specific tooling to use. This conflicts in part with `#agents-md-runtime-tokens`, which found a context file reduced runtime and output tokens; neither isolates which content does the work, but this study's navigation measure is direct evidence against overview content specifically.
+
+---
+
 ## Content of real agent context files skews functional, not aspirational {#agent-readmes-content-study}
 
 Source: https://arxiv.org/abs/2511.12884
 Extracted: 2026-04-23
-Finding: Chatlatanagulchai et al. analyze 2,303 agent context files from 1,925 repositories and classify their content against 16 instruction types. Developers overwhelmingly populate these files with functional, codebase-grounded context: implementation details (69.9%), architecture (67.7%), and build/run commands (62.3%). Non-functional concerns like security (14.5%) and performance (14.5%) are rarely specified. The files are not static documentation — they evolve through frequent small additions and behave more like configuration code than prose. This supports treating a project-context file as a factual reference about the current codebase (what exists, how it builds, how it is structured) rather than a roadmap or aspirational spec, and it flags that guardrail content is systematically underrepresented in practice.
+Finding: Chatlatanagulchai et al. analyze 2,303 agent context files from 1,925 repositories and classify their content against 16 instruction types. Developers overwhelmingly populate these files with functional, codebase-grounded context: implementation details (69.9%), architecture (67.7%), and build/run commands (62.3%). Non-functional concerns like security (14.5%) and performance (14.5%) are rarely specified. The files are not static documentation — they evolve through frequent small additions and behave more like configuration code than prose. This supports treating a project-context file as a factual reference about the current codebase (what holds now, and how it builds) rather than a roadmap or aspirational spec, and it flags that guardrail content is systematically underrepresented in practice.
 
 ---
 

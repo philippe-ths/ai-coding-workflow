@@ -100,15 +100,25 @@ done
 # routed around, which costs more than the dangling reference it would catch.
 
 head_ "Documented skill set matches the tree:"
+# README.md is where the skill set is documented for a reader. project-context.md
+# records requirements rather than an inventory, so it is not asked to list them.
 doc_fails=0
-pc="$(<project-context.md)"
+rd="$(<README.md)"
 for s in $c_list; do
   # Word boundary, hyphen included: `aiw-testing` must not satisfy `aiw-test`.
   # Newline is outside the boundary class, so it separates tokens like any space.
-  [[ $pc =~ (^|[^A-Za-z0-9_-])${s}([^A-Za-z0-9_-]|$) ]] \
-    || { bad "skill '$s' exists but project-context.md never names it"; doc_fails=$((doc_fails + 1)); }
+  [[ $rd =~ (^|[^A-Za-z0-9_-])${s}([^A-Za-z0-9_-]|$) ]] \
+    || { bad "skill '$s' exists but README.md never names it"; doc_fails=$((doc_fails + 1)); }
 done
-[ "$doc_fails" -eq 0 ] && ok "project-context.md names every skill in the tree"
+# The other direction, read only from README's skill-list line: a skill deleted
+# from both trees must not stay listed. Free prose elsewhere in README is not read.
+listed="$(grep -E '^- `\.agents/skills/`' README.md | grep -oE 'aiw-[a-z-]+[a-z]' | sort -u)"
+[ -n "$listed" ] || { bad "README.md has no '- \`.agents/skills/\`' line listing skills, so a skill deleted from the tree would stay listed unnoticed"; doc_fails=$((doc_fails + 1)); }
+for s in $listed; do
+  printf '%s\n' "$c_list" | grep -qxF "$s" \
+    || { bad "README.md lists skill '$s', which does not exist"; doc_fails=$((doc_fails + 1)); }
+done
+[ "$doc_fails" -eq 0 ] && ok "README.md names every skill in the tree, and lists none that is gone"
 
 head_ "Done-gate enumerations agree:"
 # ai-workflow.md's Task Flow names the done gate's members; every other line that
@@ -295,7 +305,7 @@ check_budget() { # file, token budget
     bad "$1 is ~$_t tokens, over its declared $2-token budget; drop a line rather than raising the budget"
   fi
 }
-check_budget project-context.md 6000
+check_budget project-context.md 2000
 check_budget north-star.md 400
 
 head_ "Entry-point parity:"

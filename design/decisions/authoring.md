@@ -123,11 +123,10 @@ Written for an AI coding agent.
 The human does not need to read it during a task.
 The human reads it when maintaining or updating the file.
 
-The project context records current implementation truth.
-The project could theoretically be recreated, in broad terms, from this file.
+The project context records the requirements of the repository: what an agent would get wrong without being told and cannot learn from the code in one step.
+It is not a map of the repository, because an agent reads the tree directly when a task needs it.
 The project context is a factual reference, not a roadmap.
-The project context helps an AI agent orient quickly before planning changes.
-(See `design/research/spec-driven-development.md#agents-md-runtime-tokens` for measured cost impact and `#agent-readmes-content-study` for the factual-not-aspirational framing.)
+(See `design/research/spec-driven-development.md#agents-md-runtime-tokens` for the efficiency gain a context file can bring, `#context-files-overview-no-help` for why an overview of the code earns none of it, and `#agent-readmes-content-study` for the factual-not-aspirational framing.)
 
 **Content rules.**
 Prefer present-tense facts over future intentions.
@@ -140,16 +139,17 @@ Keep names aligned with real module, path, and entity names.
 
 **Section shape.**
 Use stable sections so agents can parse the file quickly.
-Include Product Summary, Domain Concepts, Scope, Important Constraints, Architecture Summary, Key Dependencies, Project Structure, Testing Overview, Known tools available, and Human notes.
-Remove empty sections only when the project has no reliable information for that section.
+Include Product Summary, Constraints, Build and Validate, Domain Terms, and Maintenance.
+Do not include sections that list paths, modules, dependencies, or architecture layers.
+Remove a section when nothing in the repository passes the keep test for it.
 Use one bullet per fact in list sections.
 
 **Maintenance.**
-Update the context file when routes, schema, sync rules, persistence, or provider behavior changes.
-Update the context file when build, runtime, or dependency boundaries change.
+Update the context file when an enforced rule, a contract, or how the project builds and validates changes.
+Do not update it because a module or path was added, removed, or renamed.
 During reviews, remove stale lines instead of accumulating historical notes.
 Update outdated terms when the codebase is renamed or refactored.
-Keep the file under 300 lines.
+Keep the file under 2000 tokens, enforced in this repository by `scripts/check-prose-integrity.sh`.
 Give a new fact its own line rather than extending a line that already exists.
 Treat the file as full: once it is at the limit, adding a fact means choosing which line leaves.
 Merge overlapping facts and remove low-value detail to make that room.

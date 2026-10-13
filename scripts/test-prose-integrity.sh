@@ -28,14 +28,14 @@ mkdir -p "$PRISTINE/.github" \
          "$PRISTINE/scripts" "$PRISTINE/design/decisions"
 cp -R "$ROOT/.claude/skills" "$PRISTINE/.claude/skills"
 cp -R "$ROOT/.agents/skills" "$PRISTINE/.agents/skills"
-cp "$ROOT/ai-workflow.md" "$ROOT/project-context.md" "$ROOT/CLAUDE.md" \
+cp "$ROOT/ai-workflow.md" "$ROOT/project-context.md" "$ROOT/README.md" "$ROOT/CLAUDE.md" \
    "$ROOT/AGENTS.md" "$ROOT/install-manifest.json" "$PRISTINE/"
 cp "$ROOT/.github/copilot-instructions.md" "$PRISTINE/.github/"
 # The factory-path check expands scripts/, design/ and docs/ from the files found
 # there, so the fixture carries one file and one subdirectory of each kind it needs.
 cp "$ROOT/scripts/check-manifest.sh" "$PRISTINE/scripts/"
 cp "$ROOT/design/decisions/maintenance.md" "$PRISTINE/design/decisions/"
-for required in ai-workflow.md project-context.md CLAUDE.md AGENTS.md install-manifest.json \
+for required in ai-workflow.md project-context.md README.md CLAUDE.md AGENTS.md install-manifest.json \
                 .github/copilot-instructions.md scripts/check-manifest.sh design/decisions/maintenance.md \
                 .claude/skills/aiw-init/SKILL.md .agents/skills/aiw-init/SKILL.md; do
   [ -e "$PRISTINE/$required" ] || { echo "pristine fixture is missing $required (ROOT=$ROOT)" >&2; exit 2; }
@@ -138,9 +138,17 @@ for t in .claude .agents; do
   cp -R "$D/$t/skills/aiw-init" "$D/$t/skills/aiw-brand-new"
   edit "$D/$t/skills/aiw-brand-new/SKILL.md" 's/^name: aiw-init$/name: aiw-brand-new/'
 done
-expect "a skill absent from project-context.md is caught" fail "$D" "never names it"
+expect "a skill absent from README.md is caught" fail "$D" "never names it"
 
-# project-context.md names aiw-testing and never aiw-test, so a substring match
+D="$(fixture listed-but-gone)"
+rm -rf "$D/.claude/skills/aiw-upkeep" "$D/.agents/skills/aiw-upkeep"
+expect "a skill README.md lists but that is gone is caught" fail "$D" "does not exist"
+
+D="$(fixture readme-list-gone)"
+drop "$D/README.md" '^- `.agents/skills/`'
+expect "a README.md with no skill-list line is caught" fail "$D" "no '- "
+
+# README.md names aiw-testing and never aiw-test, so a substring match
 # would read the longer name as documenting the shorter one.
 D="$(fixture substring-skill)"
 for t in .claude .agents; do
@@ -244,6 +252,14 @@ echo "size budget:"
 D="$(fixture oversize)"
 for i in $(seq 1 400); do echo "- filler line $i"; done >> "$D/project-context.md"
 expect "project-context.md over its token budget is caught" fail "$D" "budget"
+
+# The boundary: 8000 bytes is 2000 tokens and passes; one byte more fails only
+# once the estimate reaches 2001, at 8004.
+pad_to() { local f="$1" n="$2"; { echo "Version: 1.0.0"; } > "$f"; local have; have=$(wc -c < "$f"); head -c $((n - have - 1)) /dev/zero | tr '\0' 'x' >> "$f"; echo >> "$f"; }
+D="$(fixture at-budget)"; pad_to "$D/project-context.md" 8000
+expect "project-context.md at exactly its token budget passes" pass "$D" ""
+D="$(fixture over-budget-by-one)"; pad_to "$D/project-context.md" 8004
+expect "project-context.md one token over its budget is caught" fail "$D" "budget"
 
 # The reason the budget is counted in tokens rather than lines: one fused line
 # adds weight without adding a line, and walked straight past the old check.

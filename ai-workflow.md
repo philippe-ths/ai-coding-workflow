@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.25.1
+Version: 5.26.0
 
 This file defines the rules and processes for AI-assisted coding on this project.
 It is written for the AI coding agent.
@@ -73,7 +73,7 @@ Protect your context window and the human's quota — but never by doing less th
 Stop and ask the human before doing any of the following:
 
 - ASK before adding a new dependency.
-- ASK before changing architecture, patterns, or conventions documented in project context.
+- ASK before changing a constraint or contract recorded in project context.
 - ASK before changing database schema, sync behaviour, public interfaces, or shared contracts.
 - ASK before accepting verification evidence weaker than the plan committed to. If the committed method cannot run, that is a decision about what the done claim is worth, and it is the human's.
 
