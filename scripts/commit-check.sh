@@ -5,6 +5,8 @@
 #
 # Runs the cheap structural checks every time, then only the tests that touch
 # what changed: a test file that changed, or one that names a changed file.
+# Checks with no file of their own to match on, such as the observation fixture
+# check in repo-validation.sh, wait for the push gate.
 set -eu
 
 CHANGED=()
@@ -16,7 +18,15 @@ if [ "${#CHANGED[@]}" -eq 0 ]; then
   exit 0
 fi
 
-bash -n ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*
+# One file per call: `bash -n a b` checks only a, reading b as an argument.
+for f in ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*; do
+  if [ -f "$f" ]; then bash -n "$f"; fi
+done
+for p in "${CHANGED[@]}"; do
+  case "$p" in
+    *.sh) if [ -f "$p" ]; then bash -n "$p"; fi ;;
+  esac
+done
 
 ./scripts/check-manifest.sh
 ./scripts/check-prose-integrity.sh >/dev/null
@@ -24,7 +34,7 @@ bash -n ./.ai-policy/scripts/*.sh ./.ai-policy/hooks/*.sh ./.githooks/*
 py_targets=()
 for p in "${CHANGED[@]}"; do
   case "$p" in
-    *.py) [ -f "$p" ] && py_targets+=("$p") ;;
+    *.py) if [ -f "$p" ]; then py_targets+=("$p"); fi ;;
   esac
 done
 if [ "${#py_targets[@]}" -gt 0 ] && command -v python3 >/dev/null 2>&1; then
@@ -32,8 +42,12 @@ if [ "${#py_targets[@]}" -gt 0 ] && command -v python3 >/dev/null 2>&1; then
 fi
 
 ran=0
-for t in ./.ai-policy/scripts/test-*.sh ./scripts/test-*.sh; do
-  [ -x "$t" ] || continue
+for t in ./.ai-policy/scripts/test-*.sh ./scripts/test-*.sh ./scripts/test_*.py ./observation/test_*.py; do
+  [ -f "$t" ] || continue
+  case "$t" in
+    *.py) command -v python3 >/dev/null 2>&1 || continue ;;
+    *) [ -x "$t" ] || continue ;;
+  esac
   run=false
   for p in "${CHANGED[@]}"; do
     if [ "./$p" = "$t" ] || grep -qF "$(basename "$p")" "$t"; then
@@ -43,7 +57,10 @@ for t in ./.ai-policy/scripts/test-*.sh ./scripts/test-*.sh; do
   done
   if [ "$run" = "true" ]; then
     echo "commit-check: $t"
-    "$t" >/dev/null || { echo "commit-check: $t failed; run it directly to see why."; exit 1; }
+    case "$t" in
+      *.py) python3 "$t" >/dev/null 2>&1 ;;
+      *) "$t" >/dev/null ;;
+    esac || { echo "commit-check: $t failed; run it directly to see why."; exit 1; }
     ran=$((ran + 1))
   fi
 done

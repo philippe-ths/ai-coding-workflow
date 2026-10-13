@@ -343,6 +343,30 @@ assert_exit "a passing commit check allows the commit without a current validati
 assert_ne "the commit checked by the commit check landed" "$before" "$(git rev-parse HEAD)"
 assert_eq "the commit check receives the paths the commit changes" "source.txt" "$(cat build-output.txt 2>/dev/null)"
 
+# `git commit -a` hands the hook a temporary index through an absolute
+# GIT_INDEX_FILE. A commit check whose tests build their own sandbox repository
+# must not write into it, or the commit is built from the sandbox's tree.
+cat > scripts/commit-check.sh <<'CHECK'
+#!/usr/bin/env bash
+set -eu
+cat > /dev/null
+nested="$(mktemp -d)"
+trap 'rm -rf "$nested"' EXIT
+cd "$nested"
+git init -q .
+echo "sandbox content" > sandbox-only.txt
+git add sandbox-only.txt
+git -c user.email=t@example.com -c user.name=T commit -qm "sandbox" >/dev/null
+CHECK
+git add scripts/commit-check.sh
+git commit -qm "commit check that runs a sandbox repository" >/dev/null 2>&1 || true
+echo "changed for commit -a" > source.txt
+rc=0
+git commit -qam "commit -a through a sandboxing commit check" >/dev/null 2>&1 || rc=$?
+assert_exit "git commit -a succeeds when the commit check runs its own repository" 0 "$rc"
+assert_eq "the commit -a tree holds the real change" "changed for commit -a" "$(git show HEAD:source.txt 2>/dev/null)"
+assert_eq "the commit -a tree holds nothing from the sandbox" "" "$(git ls-tree --name-only HEAD sandbox-only.txt)"
+
 printf '#!/usr/bin/env bash\necho "touched-area tests failed"\nexit 1\n' > scripts/commit-check.sh
 before="$(git rev-parse HEAD)"
 echo "changed under a failing commit check" > source.txt
