@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.5 - 2026-10-13
+
+Failure analysis now recognises non-convergence as its trigger, so an agent the workflow sends there for it does not conclude the stop does not apply.
+
+### Fixed
+
+- `aiw-failure-analysis`: non-convergence (attempts that repair one surface while reopening another, or repeat an approach without new evidence) beyond the one fix and smaller retry a failed loop gets is a trigger though nothing was declared done; the audit is run against the plan, skipping the audits that examine a sign-off ([#251]).
+
 ## 5.31.4 - 2026-10-13
 
 An upkeep run that finishes part of an issue and leaves the rest to the human no longer leaves that rest for the next unattended run.
@@ -1348,3 +1356,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#364]: https://github.com/philippe-ths/ai-coding-workflow/issues/364
 [#340]: https://github.com/philippe-ths/ai-coding-workflow/issues/340
 [#341]: https://github.com/philippe-ths/ai-coding-workflow/issues/341
+[#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
