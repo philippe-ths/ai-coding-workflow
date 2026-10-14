@@ -47,7 +47,35 @@ EXCLUDE="$GITDIR/info/exclude"
 # Count rules, not files: one line per deliberate act of hiding something. A single
 # pattern covering hundreds of build artifacts is one decision; sixteen files added
 # one at a time is sixteen, and that difference is the signal.
-N="$(grep -cEv '^[[:space:]]*(#|$)' "$EXCLUDE" 2>/dev/null)" || N=""
+#
+# Lines a tool manages are not decisions anyone made, so they do not count. A managed
+# block starts at its marker comment line and runs to the next blank line, the next
+# comment line, or end of file; inside it, only lines with the tool's own prefix are
+# exempt, since a person appending to the file lands inside a block that ends at EOF.
+# Each entry is "marker|prefix". To cover another tool, add its entry here.
+MANAGED_BLOCKS=(
+  "# claude-code-runtime|**/.claude/"
+)
+
+N=0
+PREFIX=""
+while IFS= read -r line || [ -n "$line" ]; do
+  # Trim surrounding whitespace.
+  line="${line#"${line%%[![:space:]]*}"}"
+  line="${line%"${line##*[![:space:]]}"}"
+  if [ -z "$line" ]; then PREFIX=""; continue; fi
+  case "$line" in
+    '#'*)
+      PREFIX=""
+      for b in "${MANAGED_BLOCKS[@]}"; do
+        if [ "$line" = "${b%%|*}" ]; then PREFIX="${b#*|}"; break; fi
+      done
+      continue
+      ;;
+  esac
+  if [ -n "$PREFIX" ] && [ "${line#"$PREFIX"}" != "$line" ]; then continue; fi
+  N=$((N + 1))
+done < "$EXCLUDE" 2>/dev/null || N=""
 case "$N" in
   ''|*[!0-9]*) exit 0 ;;
 esac
