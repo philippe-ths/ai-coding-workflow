@@ -14,7 +14,7 @@ Read this file when asked to do upkeep. You are working an issue nobody chose, o
 
 ## Check Before Writing
 
-Predict what the fix will touch. If it reaches anything on aiw-planning's Full list, a direction decision, a new dependency, or CI, it is not upkeep you may work: swap `aiw:upkeep` for `aiw:direction`, comment what it reaches, and pick again.
+Predict what the fix will touch. If it reaches anything on aiw-planning's Full list, a direction decision, a new dependency, or CI, it is not upkeep you may work: swap `aiw:upkeep` for `aiw:direction`, comment what it reaches, and pick again. Splitting a file without changing behaviour reaches only that file and this repository's imports of it, however many areas those sit in, unless the file is itself on the Full list or code outside the repository imports it.
 
 ## Work It
 

@@ -92,8 +92,9 @@ done
 cat <<EOF
 Each commit adds to the file already open and no single task owns its size. For each
 file no open issue already covers, file an aiw:upkeep issue to split it without changing
-behaviour (aiw-issue-creation), and name the issues in your next message. Do not split
-anything as part of whatever task starts now.
+behaviour (aiw-issue-creation), and name the issues when you next report. A file whose
+split the human closed as not planned is their decision: leave it. Never stop work in
+flight for this, and never split anything as part of the current task.
 EOF
 
 exit 0

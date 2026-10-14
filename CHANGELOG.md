@@ -18,7 +18,8 @@ In a long-lived project the agent now notices, at session start, large files tha
 
 ### Changed
 
-- `aiw-issue-creation`: `aiw:upkeep` covers the project's structure too, such as a growing file split without changing behaviour ([#405]).
+- `aiw-issue-creation`: `aiw:upkeep` covers the project's structure too, such as a growing file split without changing behaviour, but not a change to an interface others rely on ([#405]).
+- `aiw-upkeep`: a behaviour-preserving split reaches only the file and this repository's imports of it, so updating importers across areas does not make it direction ([#405]).
 
 ## 5.33.0 - 2026-10-14
 
