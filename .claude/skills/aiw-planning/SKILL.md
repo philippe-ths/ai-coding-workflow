@@ -15,7 +15,7 @@ Planning is step 3 of the Task Flow in `ai-workflow.md`: after the request is ch
 
 Before the baseline, set how much process the task gets. The tier is where the task starts, not a ceiling.
 
-Ask the outside judge first: `gh issue view <n> --json title,body | python3 .ai-policy/jev/ask.py ceremony`. Take its `answer` when `act` is true, unless the issue itself names something on the Full list below, which makes the task Full whatever the answer. When `act` is false, the command exits non-zero, or the tool is absent, classify the task yourself against the same definitions. (Why: judging your own task at its start leans toward more process, and an outside answer with a confidence is the one that can say lighter.)
+Ask the outside judge first: `gh issue view <n> --json title,body | python3 .ai-policy/jev/ask.py ceremony`. Take its `answer` when `act` is true, unless the issue itself names something on the Full list below, which makes the task Full whatever the answer. When `act` is false, `answer` is null and the judge has given no answer: its `lean` is only the likeliest level, not a verdict. Classify the task yourself against the same definitions, as when the command exits non-zero or the tool is absent. (Why: judging your own task at its start leans toward more process, and an outside answer with a confidence is the one that can say lighter.)
 
 - **Light.** Contained and well understood: wording, a single value, or one call site; cause and fix both clear; nothing else depends on what changes.
 - **Standard.** A real change in behaviour inside one area: one component, script, or feature; the approach is clear; nothing outside that area changes with it.
@@ -35,7 +35,7 @@ At every tier the plan is stated and the work proceeds: the human interrupts rat
 
 Move up the moment the work proves bigger: to Full when it touches anything on the Full list or the cause turns out unknown, and at least one tier when a check fails unexpectedly. Do what the new tier asks from that point, its baseline included, and say so in your next message; leaving Light means stating the fuller plan the new tier asks for before going further. Nothing moves a task down once started. Evidence the modality requires holds at every tier, so a Light fix still has its check that fails before and passes after. A task that needs an end-to-end run aiw-verification makes mandatory is not Light.
 
-State the tier and its source, the judge's answer with its confidence or your own call, in the plan and in the pull request body, so what the task cost can be explained afterwards.
+State the tier and its source, the judge's answer with its confidence or your own call (when the judge did not act, say it gave no answer, with its lean and confidence), in the plan and in the pull request body, so what the task cost can be explained afterwards.
 
 ## Establish Codebase Baseline
 

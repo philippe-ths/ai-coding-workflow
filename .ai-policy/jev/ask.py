@@ -18,7 +18,8 @@ Unavailable is never an error for the caller to fix: it means "decide without me
 The key comes from TYPESAFE_API_KEY, else ~/.typesafe_key (AIW_JEV_KEY_FILE overrides
 the path). Every call that gets past usage checks appends one row to
 ~/.claude/aiw-jev/runs.jsonl (AIW_JEV_LOG overrides) recording the answer and its
-cost, never the state itself.
+cost, never the state itself. When `act` is false, `answer` is null and the likeliest level is
+`lean`: the judge was unsure, and no level is its verdict. Rows also carry `probabilities`.
 """
 
 import datetime
@@ -174,6 +175,11 @@ def _interpret(question, response):
         raise ValueError(kind)
     threshold = question.get("act_above")
     out["act"] = threshold is not None and out["confidence"] >= threshold
+    if not out["act"] and "answer" in out:
+        # Unsure is not a verdict: the top level is only the likeliest of levels it could not
+        # choose between, so it goes under `lean` and `answer` stays empty.
+        out["lean"] = out["answer"]
+        out["answer"] = None
     return out
 
 
@@ -226,6 +232,8 @@ def ask(name, state_text):
         outcome="answered",
         model=result["model"],
         answer=result.get("answer", result.get("noul")),
+        lean=result.get("lean"),
+        probabilities=result.get("probabilities"),
         confidence=result["confidence"],
         act=result["act"],
         latency_ms=int((time.monotonic() - started) * 1000),
