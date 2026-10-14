@@ -136,16 +136,16 @@ assert_note "path with a space -> note naming it" "$(run_hook "$R")" "src/my big
 R="$SANDBOX/subdir"; make_repo "$R" src/big.py 90 150; mkdir -p "$R/docs"
 assert_note "run from a subdirectory -> note" "$(run_hook "$R/docs")" "src/big.py"
 
-# 14. More than five hits -> the five largest are named.
+# 14. More than ten hits -> the ten largest are named.
 R="$SANDBOX/many"; make_repo "$R" seed.txt 1 1
-for n in 110 120 130 140 150 160; do lines "$n" > "$R/f$n.py"; done
+for n in 110 120 130 140 150 160 170 180 190 200 210; do lines "$n" > "$R/f$n.py"; done
 git -C "$R" add -A; git -C "$R" commit -q -m many
 out="$(run_hook "$R")"
-assert_note "six hits -> note" "$out" "f160.py"
-if printf '%s' "$out" | grep -q "^NOTE: 6 file" && ! printf '%s' "$out" | grep -qF "f110.py" && printf '%s' "$out" | grep -qF "...and 1 more."; then
-  PASS=$((PASS + 1)); echo "  PASS: six hits counted, smallest left unnamed and counted as more"
+assert_note "eleven hits -> note" "$out" "f210.py"
+if printf '%s' "$out" | grep -q "^NOTE: 11 file" && ! printf '%s' "$out" | grep -qF "f110.py" && printf '%s' "$out" | grep -qF "...and 1 more."; then
+  PASS=$((PASS + 1)); echo "  PASS: eleven hits counted, smallest left unnamed and counted as more"
 else
-  FAIL=$((FAIL + 1)); echo "  FAIL: six hits counted, smallest left unnamed and counted as more (got: $out)"
+  FAIL=$((FAIL + 1)); echo "  FAIL: eleven hits counted, smallest left unnamed and counted as more (got: $out)"
 fi
 
 # 15. Not a git repository -> silent, exit 0.

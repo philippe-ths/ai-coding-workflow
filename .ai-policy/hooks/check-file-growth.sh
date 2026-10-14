@@ -3,8 +3,8 @@
 #
 # Rot in a long-lived codebase is not produced at task granularity: each commit adds to
 # the file already open, every one passes its own gate, and no task ever owns "this file
-# is now too big". This hook is the cheap counter that notices. It cannot judge whether a
-# file should be split; that is the human's call via aiw-housekeeping's audit. It counts
+# is now too big". This hook is the cheap counter that notices, and its note has the agent
+# file an upkeep issue per file, so the split becomes a task someone owns. It counts
 # committed text files of at least FILE_GROWTH_LINES lines that grew by at least
 # FILE_GROWTH_MIN lines over the last FILE_GROWTH_WINDOW commits, and names the largest.
 #
@@ -85,15 +85,15 @@ HITS="$(
 N="$(printf '%s\n' "$HITS" | wc -l | tr -d ' ')"
 
 echo "NOTE: $N file(s) of $LINES_MIN+ lines grew by $GROWTH_MIN+ lines over the last $WINDOW commits:"
-printf '%s\n' "$HITS" | head -n 5 | while read -r now was path; do
+printf '%s\n' "$HITS" | head -n 10 | while read -r now was path; do
   echo "  $path: $was -> $now lines"
 done
-[ "$N" -le 5 ] || echo "  ...and $((N - 5)) more."
+[ "$N" -le 10 ] || echo "  ...and $((N - 10)) more."
 cat <<EOF
-Each commit adds to the file already open and no single task owns its size. Run the
-aiw-housekeeping audit to rank these with the rest of what has built up. Whether a file
-should be split is the human's call. Report it to the human; do not act on it as part of
-whatever task starts now.
+Each commit adds to the file already open and no single task owns its size. For each
+file no open issue already covers, file an aiw:upkeep issue to split it without changing
+behaviour (aiw-issue-creation), and name the issues in your next message. Do not split
+anything as part of whatever task starts now.
 EOF
 
 exit 0
