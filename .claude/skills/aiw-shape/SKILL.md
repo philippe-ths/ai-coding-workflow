@@ -1,6 +1,6 @@
 ---
 name: aiw-shape
-description: "Shapes a request with the human before planning: shows cheap things to react to, such as mockups, directions side by side, a sample of the finished result, a spike, or smaller and bolder versions of the request, until they pick one, then records the pick and their reason on the issue. Use when the human asks to shape, sketch, mock up or explore options for a request. When a request arrives and you cannot say what done looks like, offer it in one line beside your best reading, carry on with that reading unless they take it up, and never run it unasked."
+description: "Shapes a request with the human before planning: shows cheap things to react to, such as mockups, directions side by side, a sample of the finished result, a spike, or smaller and bolder versions of the request, until they pick one, then records the pick and their reason on the issue. Use when the human asks to shape, sketch, mock up or explore options for a request, or takes up the offer of it made at request arrival. Never run it unasked."
 ---
 
 # Shape
