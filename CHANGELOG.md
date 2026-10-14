@@ -8,11 +8,11 @@ Every `### Removed` bullet must lead with the removed path as a backticked token
 
 ## 5.32.0 - 2026-10-14
 
-A pull request body now opens with what changes for the user, so the human can judge the effect without translating a list of files.
+A pull request body describes the change under "What changes for the user", in that user's terms, so the human can judge the effect without translating a list of files.
 
 ### Added
 
-- `aiw-github`: pre-pull-request readiness confirms the body opens with what changes for the user and which user, in their terms, with files named only after it ([#402]).
+- `aiw-github`: pre-pull-request readiness confirms the body's account of the change is a section headed "What changes for the user", in that user's terms, with no separate file list ([#402]).
 
 ## 5.31.5 - 2026-10-13
 
