@@ -54,8 +54,8 @@ deny() {
     echo "Invoke aiw-prompt-smith over those files, then record in the body what the pass found," >&2
     echo "even when it found nothing to change. The hook checks that it ran, not that it was good." >&2
   elif [ "${3:-}" = "request" ]; then
-    echo "Quote the human's own words under a '## Request' heading: the issue's ## Request, an issue" >&2
-    echo "body a person wrote, or what they said in the conversation, with every correction since." >&2
+    echo "Quote the human's own words as '>' lines under a '## Request' heading: the issue's ## Request," >&2
+    echo "an issue body a person wrote, or what they said in the conversation, with every correction since." >&2
     echo "Where no human asked, as in an upkeep run, say so there and quote the issue. See aiw-github." >&2
   else
     echo "See aiw-verification's justification step. Part 3 names what was not checked;" >&2
