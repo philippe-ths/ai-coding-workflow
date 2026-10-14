@@ -21,7 +21,7 @@ A list of questions is the failure this skill exists to avoid. It hands the huma
 
 Pick the move that answers what is most unclear, and make it cheap.
 
-- **Mockup.** A text sketch in the chat, or a clickable page where you can publish one privately to the human, when the request has a surface someone looks at.
+- **Mockup.** A text sketch in the chat, or, where a clickable page would show it better, offer one and publish it on their yes, when the request has a surface someone looks at.
 - **Directions side by side.** Two or three genuinely different takes, each with what it costs, when the approach is open. Say which you would pick and why, as for any choice put to the human.
 - **A sample of done.** What the human would read or run when it is finished, such as the output, the report or the message, when the request is a behaviour rather than a screen.
 - **Smaller, as asked, bolder.** The smallest version still worth having, the one asked for, and one they may not know is possible, each with what it costs. Finding the best version of the request is part of shaping, not a detour from it.
@@ -37,13 +37,15 @@ If two rounds pass with nothing picked, stop making variants, because more optio
 
 ## What It Leaves Behind
 
-The shape is the chosen mockup or example, the done line, and the human's reason for the pick quoted word for word. If they gave no reason, record none rather than writing one for them. (Why: when the build meets a case the mockup does not cover, their reason settles it, and a paraphrase carries your reading instead.)
+The shape records three things, and who wrote each decides what it is worth:
 
-Put the mockup in a form the issue holds: text or a screenshot. A link to a published page is an extra, since it can go private or stale.
+- **Their words**, quoted exactly: the reply in which they picked, and their reason if they gave one. These are the request. If they gave no reason, record none rather than writing one for them.
+- **The done line** they OK'd. You wrote it, so it is not quoted as theirs, but it is what planning and validation check the result against.
+- **The mockup or example** they picked, as text. It is your reading, there to make the done line concrete. A link to a published page is an extra, since it can go private or stale.
+
+Where the build meets a case the done line does not cover, their reason settles it. (Why: a paraphrase of why they picked carries your reading instead of theirs.)
 
 - **New request:** finish by filing the issue with aiw-issue-creation, the shape under a `## Shape` heading in its body.
 - **Existing issue:** add the shape as a comment opening with a `## Shape` heading, because rewriting the body is the human's. A later shape replaces an earlier one.
-
-Of the shape, the request is the pick, the done line they OK'd, and their quoted reason; the mockup around them is your reading.
 
 Planning then starts from the shape as part of the request.
