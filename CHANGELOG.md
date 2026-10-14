@@ -6,6 +6,19 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.35.0 - 2026-10-14
+
+The human can now shape a request with the agent before it is planned: the agent shows mockups, directions or samples of the finished result until they pick one, and the pick, with their reason in their own words, is recorded on the issue and checked against at handover. When the agent cannot say what done looks like for a request, it offers this in one line and waits for the answer before filing the issue.
+
+### Added
+
+- `aiw-shape`: opt-in skill that shapes a request by showing things to react to rather than asking questions, keeps spikes in scratch space and uncommitted, ends on the human's pick and a one-line definition of done, and records the shape in a new issue's body or a `## Shape` comment on an existing one ([#408]).
+
+### Changed
+
+- `ai-workflow.md`: Task Flow step 1 offers `aiw-shape` when done is unclear for a request the human made, and waits before task start ([#408]).
+- `aiw-github`, `aiw-planning`, `aiw-validation`: the done line the human OK'd in a `## Shape` on the issue, with their quoted pick and reason, joins the request; planning takes it as the deliverable and validation checks the result against it ([#408]).
+
 ## 5.34.0 - 2026-10-14
 
 In a long-lived project the agent now notices, at session start, large files that are still growing, and files an upkeep issue to split each, so the accretion no single task owns gets an owner before it needs a rewrite. A project can declare its horizon in `north-star.md`; one declared one-shot is spared the note.
@@ -1397,3 +1410,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
+[#408]: https://github.com/philippe-ths/ai-coding-workflow/issues/408

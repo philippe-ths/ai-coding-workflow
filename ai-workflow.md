@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.34.0
+Version: 5.35.0
 
 ## First Principles
 
@@ -11,7 +11,7 @@ Version: 5.34.0
 
 ## Task Flow
 
-1. **Request arrival:** check the request against `north-star.md`, the shortest statement of what the project is trying to achieve. A request that pulls against it stops before planning for aiw-north-star, and the human decides whether the request or the goal is wrong. If the file is absent in a non-trivial codebase, ask whether to scaffold it.
+1. **Request arrival:** check the request against `north-star.md`, the shortest statement of what the project is trying to achieve. A request that pulls against it stops before planning for aiw-north-star, and the human decides whether the request or the goal is wrong. If the file is absent in a non-trivial codebase, ask whether to scaffold it. If you cannot say what done looks like for a request the human made, offer aiw-shape in one line and wait for their answer before task start.
 2. **Task start:** aiw-github (issue, branch).
 3. **Planning:** aiw-planning (ceremony tier, baseline, modality, oracle, plan, execution shape, step ownership). The plan is stated and the work proceeds, and the human judges it with the work at the pull request; where it holds a decision of taste or direction that `north-star.md` does not settle, that decision is agreed with the human before implementation begins.
 4. **Implementation:** aiw-ground-truth and aiw-testing invoked as work proceeds. Work in small loops: one change, the check that covers it, then a commit on the task branch, so every commit is a known-good point to return to. Inside a loop nothing is claimed done yet: a failed check gets one fix, and if that fails too, return to the last commit and retry the step smaller rather than repairing on top of a failure. The full checks run at the start, as planning's baseline, and at the end, at the done gate; between them each loop runs only its own check. A committed loop that later proves wrong is a contradicted "done" claim. From here the work runs without step-by-step authorisation; the human interrupts rather than approves each step, and can only interrupt what they can see.
