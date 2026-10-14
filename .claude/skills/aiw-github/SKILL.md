@@ -81,6 +81,6 @@ After the human merges the pull request:
 - Check whether the local issue branch has unmerged commits before deleting it.
 - Switch to the main branch.
 - Pull latest changes from remote.
-- Close the GitHub issue.
+- Close the GitHub issue if the pull request completed it, judged from its body and the issue's comments; leave open an issue whose pull request or latest comment names a remainder, and reopen it if the merge closed it.
 - If the issue uses checkboxes, check off completed items.
 - Comment on the issue with key findings or direction changes.
