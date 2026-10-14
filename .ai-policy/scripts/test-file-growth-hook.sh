@@ -160,6 +160,30 @@ assert_silent "non-numeric threshold -> silent" "$( ( cd "$R" && FILE_GROWTH_LIN
 # 17. The reporting path still exits 0.
 assert_exit_zero "note path -> exit 0" "$SANDBOX/grown"
 
+# 18. Excludes are globs for git, not the shell: a matching file in the cwd must not
+#     narrow them to its own name.
+R="$SANDBOX/lockcwd"; make_repo "$R" yarn.lock 90 150
+mkdir -p "$R/sub"; lines 150 > "$R/sub/x.lock"; git -C "$R" add -A; git -C "$R" commit -q -m lock
+assert_silent "root and nested lockfiles, run from root -> silent" "$(run_hook "$R")"
+assert_silent "root and nested lockfiles, run from sub -> silent" "$(run_hook "$R/sub")"
+
+# 19. A non-ASCII name is matched across the window, not reported as grown from 0.
+R="$SANDBOX/unicode"; make_repo "$R" "café.py" 150 152
+assert_silent "non-ASCII name, stable -> silent" "$(run_hook "$R")"
+R="$SANDBOX/unicode-grown"; make_repo "$R" "café.py" 90 150
+assert_note "non-ASCII name, grown -> note naming it raw" "$(run_hook "$R")" "café.py"
+
+# 20. A name git still quotes cannot be matched, so it is skipped, never "grown from 0".
+R="$SANDBOX/quoted"; make_repo "$R" 'q"uote.py' 150 152
+assert_silent "quoted name, stable -> silent" "$(run_hook "$R")"
+
+# 21. The horizon is the line's value, not a word anywhere on it.
+R="$SANDBOX/horizon-value"; make_repo "$R" src/big.py 90 150
+printf 'Horizon: not one-shot, long-lived\n' > "$R/north-star.md"
+assert_note "Horizon value mentions one-shot but is not it -> note" "$(run_hook "$R")"
+printf '**Horizon:** one-shot\n' > "$R/north-star.md"
+assert_silent "**Horizon:** one-shot -> silent" "$(run_hook "$R")"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed."
 [ "$FAIL" -eq 0 ]

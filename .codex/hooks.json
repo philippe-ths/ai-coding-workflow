@@ -27,7 +27,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-file-growth.sh\""
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/check-file-growth.sh\"",
+            "timeout": 5
           }
         ]
       }

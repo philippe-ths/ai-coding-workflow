@@ -45,10 +45,11 @@ TOP="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 
 HORIZON_FILE="$TOP/north-star.md"
 if [ -r "$HORIZON_FILE" ]; then
-  horizon="$(grep -iE '^[[:space:]]*horizon:' "$HORIZON_FILE" 2>/dev/null | head -n 1 | tr '[:upper:]' '[:lower:]' | tr -d ' -')"
-  case "$horizon" in
-    *oneshot*) exit 0 ;;
-  esac
+  # The value after the first `Horizon:` line, lowercased, with markdown emphasis,
+  # spaces and dashes dropped, so "One-Shot" and "**Horizon:** one shot" both read.
+  horizon="$(grep -iE '^[[:space:]*_]*horizon[*_]*:' "$HORIZON_FILE" 2>/dev/null | head -n 1 \
+    | sed 's/^[^:]*://' | tr '[:upper:]' '[:lower:]' | tr -d ' \t*_-')"
+  [ "$horizon" = "oneshot" ] && exit 0
 fi
 
 # A repository younger than the window has no "before" to compare against, and every
@@ -56,30 +57,35 @@ fi
 BASE="$(git rev-list -n 1 --skip="$WINDOW" HEAD 2>/dev/null)" || exit 0
 [ -n "$BASE" ] || exit 0
 
+# Excludes are pathspec globs for git, so the shell must not expand them first.
+set -f
 SPECS=(.)
 for p in $EXCLUDE; do SPECS+=(":(exclude,glob)**/$p"); done
+set +f
 
-# Line counts of committed text files at HEAD; -I skips binaries.
-HITS=""
-N=0
-while IFS= read -r row; do
-  count="${row##*:}"
-  path="${row#HEAD:}"
-  path="${path%:*}"
-  case "$count" in ''|*[!0-9]*) continue ;; esac
-  [ "$count" -ge "$LINES_MIN" ] || continue
-  before="$(git show "$BASE:$path" 2>/dev/null | wc -l | tr -d ' ')"
-  case "$before" in ''|*[!0-9]*) before=0 ;; esac
-  [ $((count - before)) -ge "$GROWTH_MIN" ] || continue
-  N=$((N + 1))
-  HITS="$HITS$count $before $path
-"
-done < <(cd "$TOP" && git grep -I -c '' HEAD -- "${SPECS[@]}" 2>/dev/null)
-
-[ "$N" -ge 1 ] || exit 0
+# Line counts of committed text files at both ends of the window, one git grep each
+# (-I skips binaries). quotePath=false leaves non-ASCII names raw; a name git still
+# quotes (a quote, backslash, tab or newline in it) cannot be matched across the two
+# lists, so it is skipped rather than reported as grown from nothing.
+counts() {
+  ( cd "$TOP" && git -c core.quotePath=false grep -I -c '' "$1" -- "${SPECS[@]}" 2>/dev/null )
+}
+HITS="$(
+  { counts "$BASE" | sed "s/^$BASE:/B:/"; counts HEAD | sed 's/^HEAD:/H:/'; } \
+  | awk -v min="$LINES_MIN" -v grow="$GROWTH_MIN" '
+      {
+        if (!match($0, /:[0-9]+$/)) next
+        side = substr($0, 1, 1); path = substr($0, 3, RSTART - 3); n = substr($0, RSTART + 1) + 0
+        if (substr(path, 1, 1) == "\"") next
+        if (side == "B") { before[path] = n; next }
+        if (n >= min && n - before[path] >= grow) printf "%d %d %s\n", n, before[path] + 0, path
+      }' | sort -nr
+)"
+[ -n "$HITS" ] || exit 0
+N="$(printf '%s\n' "$HITS" | wc -l | tr -d ' ')"
 
 echo "NOTE: $N file(s) of $LINES_MIN+ lines grew by $GROWTH_MIN+ lines over the last $WINDOW commits:"
-printf '%s' "$HITS" | sort -nr | head -n 5 | while read -r now was path; do
+printf '%s\n' "$HITS" | head -n 5 | while read -r now was path; do
   echo "  $path: $was -> $now lines"
 done
 [ "$N" -le 5 ] || echo "  ...and $((N - 5)) more."
