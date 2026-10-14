@@ -1,6 +1,6 @@
 ---
 name: aiw-housekeeping
-description: "Asks whether anything a task caused should now be removed or moved: a code path the change orphaned, a file left behind, a thing in the wrong place. Use at the done gate, after aiw-verification and aiw-validation, on every task, before presenting work for the human's done decision. Use it also over the whole repository when the human asks for a cleanup, tidy-up, or audit, asks what has built up or what leftover files are, or a session-start note reports paths hidden by a local exclude rule; that mode returns a ranked list for the human to approve."
+description: "Asks whether anything a task caused should now be removed or moved: a code path the change orphaned, a file left behind, a thing in the wrong place. Use at the done gate, after aiw-verification and aiw-validation, on every task, before presenting work for the human's done decision. Use it also over the whole repository when the human asks for a cleanup, tidy-up, or audit, asks what has built up or what leftover files are, or a session-start note reports paths hidden by a local exclude rule or large files still growing; that mode returns a ranked list for the human to approve."
 ---
 
 # Housekeeping
@@ -79,7 +79,7 @@ Where there is no tracker to file to, saying so is the disposition. What is not 
 
 ## The Audit
 
-Run it when the human asks, or when a session-start note reports the repository hiding paths through `.git/info/exclude`.
+Run it when the human asks, or when a session-start note reports the repository hiding paths through `.git/info/exclude` or large files still growing.
 
 The output is one list, not a conversation. The human should be able to approve it in a single pass, so every row carries what it costs and what the evidence says, and the list is short enough to read in one sitting.
 
@@ -88,6 +88,7 @@ The output is one list, not a conversation. The human should be able to approve 
 - Paths hidden by `.git/info/exclude`. A `.gitignore` rule is committed, reviewed and shared, so what it hides is a documented decision. A local exclude rule is none of those, so what it hides is invisible to review, to anyone else who clones the repository, and to every other check there is. Resolve each entry against what is still on disk, because a rule outlives the file it hid; where an entry resolves to nothing, the rule is itself the leftover and the line is what goes. Where you propose removing a file the rule hides, the line goes with it, or the next thing to land on that name is hidden too.
 - Untracked files no rule hides, and how long they have been sitting there.
 - What the repository's own `project-checks.md` declares and nobody has cleared. Read that file rather than assuming what is in it: it is per-repository, its checks are its own, and each states the normal it is measured against.
+- Large files still growing, the ones the session-start note named. Each commit adds to the file already open, so a file's size is a cost no single task owns. Report its lines now and at the start of the note's window, and recommend splitting it or leaving it. It is not clutter: an approved split is a refactor, filed as its own issue and taken through the Task Flow, never done inside the audit.
 - Files nothing else names. Match basenames against tracked content in one pass rather than once per file. It is crude and it is not proof, so let it rank a candidate rather than condemn one, and stop at the ranking: going back to adjudicate each hit is the codebase audit ruled out below, and it cannot condemn anything even when it finishes. Where the hits share a directory or a prefix, report them as one row naming the pattern, which is a shape you can see without adjudicating any of them.
 
 Ignored files are not candidates. A committed rule hiding something is a documented decision, which is the whole distinction this mode rests on. Report what they come to in bytes and stop there: a directory nobody chose that has quietly become the largest thing on the disk is worth the human seeing, even when it is nobody's to remove.

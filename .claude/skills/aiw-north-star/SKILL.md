@@ -13,7 +13,9 @@ The workflow knows what the system does, because the codebase says so. It knows 
 
 ## What Goes In
 
-The goal, and nothing else.
+The goal, and one line beside it: the horizon.
+
+`Horizon: one-shot` or `Horizon: long-lived` says how long the project will be worked on. It is a direction call like the goal, so it comes from the human, and what it means for structure, tests and debt is the agent's to work out. A project with no line is treated as long-lived. The policy layer reads the line, so keep that exact form.
 
 Short is the point rather than a courtesy. The ceiling is 400 tokens, and a north-star approaching it has stopped being one. This is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal that has grown into a list of everything the project does has stopped being a goal.
 
@@ -32,7 +34,7 @@ The test: could a plausible feature request pull against this? If nothing could,
 Never write this from inference alone. The goal is why the codebase looks as it does, so reading it back out of the artifact is circular.
 
 1. **Prepare.** Read what exists and form a candidate goal. Bringing a candidate is the one part of this the agent can genuinely do; starting the human from a blank page wastes it.
-2. **Interview.** Ask what the project is trying to achieve, one question at a time. Ask for the outcome, never for a summary, because a summary of a project is its description and this is not that.
+2. **Interview.** Ask what the project is trying to achieve, one question at a time. Ask for the outcome, never for a summary, because a summary of a project is its description and this is not that. Then ask whether the project is a one-shot or will be worked on over time.
 3. **Confirm.** State the goal back in plain terms and get explicit agreement. A goal the human has not affirmed is the agent's guess wearing their authority.
 4. **Write.** Shortest form that still holds what they said.
 
