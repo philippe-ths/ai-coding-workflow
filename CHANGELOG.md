@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.32.0 - 2026-10-14
+
+A pull request body describes the change under "What changes for the user", in that user's terms, so the human can judge the effect without translating a list of files.
+
+### Added
+
+- `aiw-github`: pre-pull-request readiness confirms the body's account of the change is a section headed "What changes for the user", in that user's terms, with no separate file list ([#402]).
+
 ## 5.31.5 - 2026-10-13
 
 Failure analysis now recognises non-convergence as its trigger, so an agent the workflow sends there for it does not conclude the stop does not apply.
@@ -1357,3 +1365,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#340]: https://github.com/philippe-ths/ai-coding-workflow/issues/340
 [#341]: https://github.com/philippe-ths/ai-coding-workflow/issues/341
 [#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
+[#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
