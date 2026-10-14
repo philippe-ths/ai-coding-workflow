@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.34.0
+Version: 5.35.0
 
 ## First Principles
 
@@ -19,7 +19,7 @@ Version: 5.34.0
 6. **GitHub actions:** aiw-github for push and PR, taken without asking once the done gate has run.
 7. **Reactive:** aiw-failure-analysis if a "done" claim is contradicted.
 
-Conditional skills load alongside the above when their triggers apply: aiw-performance-profiling, aiw-security-testing, aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
+Conditional skills load alongside the above when their triggers apply: aiw-shape before planning, aiw-performance-profiling, aiw-security-testing, aiw-orchestration on the trigger stated in Resource Discipline, and aiw-prompt-smith at the done gate when the branch changed agent-facing prose, with aiw-github naming what that covers.
 
 ## Resource Discipline
 
