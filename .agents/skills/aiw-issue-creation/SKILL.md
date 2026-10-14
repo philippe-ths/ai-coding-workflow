@@ -42,7 +42,7 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 
 Give every issue you file exactly one label saying who acts on it, so the human sees which issues need them without reading each one:
 
-- `aiw:upkeep`: the project's own clutter and machinery, where the fix changes neither what the product does nor a rule an agent follows. A temporary folder nothing clears.
+- `aiw:upkeep`: the project's own clutter, machinery and structure, where the fix changes neither what the product does, an interface others rely on, nor a rule an agent follows. A temporary folder nothing clears; a growing file split without changing behaviour or what code outside the repository imports.
 - `aiw:direction`: everything else, including anything you are unsure of. An issue with no label is read as direction.
 
 (Why: the label is how the human, and anything later that reads it, finds the issues needing their taste or direction, so direction labelled as upkeep hides a decision of theirs, while upkeep labelled as direction only costs a read.)

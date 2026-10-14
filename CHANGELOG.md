@@ -6,6 +6,21 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.34.0 - 2026-10-14
+
+In a long-lived project the agent now notices, at session start, large files that are still growing, and files an upkeep issue to split each, so the accretion no single task owns gets an owner before it needs a rewrite. A project can declare its horizon in `north-star.md`; one declared one-shot is spared the note.
+
+### Added
+
+- `.ai-policy/hooks/check-file-growth.sh`: SessionStart note naming committed text files of 1,000+ lines that grew by 50+ lines over the last 50 commits, having the agent file an `aiw:upkeep` issue to split each one without changing behaviour; silent under `Horizon: one-shot`, in young repositories, and for lockfiles and changelogs. Thresholds are `FILE_GROWTH_*` in `.ai-policy/policy.env` ([#405]).
+- `aiw-north-star`: `north-star.md` carries a `Horizon: one-shot` or `Horizon: long-lived` line beside the goal, asked for in the interview; absent means long-lived ([#405]).
+- `aiw-housekeeping`: the audit includes large growing files, handled as the growth note says rather than as rows to approve ([#405]).
+
+### Changed
+
+- `aiw-issue-creation`: `aiw:upkeep` covers the project's structure too, such as a growing file split without changing behaviour, but not a change to an interface others rely on ([#405]).
+- `aiw-upkeep`: a behaviour-preserving split reaches only the file and this repository's imports of it, so updating importers across areas does not make it direction ([#405]).
+
 ## 5.33.0 - 2026-10-14
 
 A pull request now quotes the human's own words under `## Request`, beside the result, and is blocked without them, so work that passes the agent's summary of a request but misses the request is in front of the agent and the human at once.
@@ -1381,3 +1396,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
+[#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
