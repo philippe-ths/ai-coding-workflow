@@ -82,6 +82,7 @@ echo "NOTE: $N file(s) of $LINES_MIN+ lines grew by $GROWTH_MIN+ lines over the 
 printf '%s' "$HITS" | sort -nr | head -n 5 | while read -r now was path; do
   echo "  $path: $was -> $now lines"
 done
+[ "$N" -le 5 ] || echo "  ...and $((N - 5)) more."
 cat <<EOF
 Each commit adds to the file already open and no single task owns its size. Run the
 aiw-housekeeping audit to rank these with the rest of what has built up. Whether a file

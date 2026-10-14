@@ -142,10 +142,10 @@ for n in 110 120 130 140 150 160; do lines "$n" > "$R/f$n.py"; done
 git -C "$R" add -A; git -C "$R" commit -q -m many
 out="$(run_hook "$R")"
 assert_note "six hits -> note" "$out" "f160.py"
-if printf '%s' "$out" | grep -q "^NOTE: 6 file" && ! printf '%s' "$out" | grep -qF "f110.py"; then
-  PASS=$((PASS + 1)); echo "  PASS: six hits counted, smallest left unnamed"
+if printf '%s' "$out" | grep -q "^NOTE: 6 file" && ! printf '%s' "$out" | grep -qF "f110.py" && printf '%s' "$out" | grep -qF "...and 1 more."; then
+  PASS=$((PASS + 1)); echo "  PASS: six hits counted, smallest left unnamed and counted as more"
 else
-  FAIL=$((FAIL + 1)); echo "  FAIL: six hits counted, smallest left unnamed (got: $out)"
+  FAIL=$((FAIL + 1)); echo "  FAIL: six hits counted, smallest left unnamed and counted as more (got: $out)"
 fi
 
 # 15. Not a git repository -> silent, exit 0.
