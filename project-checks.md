@@ -66,7 +66,7 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 
 ### Git hooks active
 - Check: `git config core.hooksPath`
-- Normal: `.githooks`.
+- Normal: `.githooks`, or the absolute path to this repository's `.githooks`. `install-hooks.sh` writes the relative form; an absolute one points at the same hooks, so enforcement is on either way.
 - Matters: an empty result means protected-branch and validation enforcement is silently off. `./.ai-policy/scripts/install-hooks.sh` restores it.
 
 ## Background Jobs
@@ -77,6 +77,15 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Matters: a launchd agent outlives the code it calls, so a removed subsystem leaves a job firing on a timer against a path that no longer exists. Nothing in the repository reports this, because the job lives in the user's global config, not here.
 - Remedy when one is found: `launchctl bootout gui/$(id -u)/<label>` then `rm ~/Library/LaunchAgents/<label>.plist`. Read the plist's `ProgramArguments` first to confirm what it calls; if that path still exists, the job is live and should be left alone.
 - The observation tool is the one subsystem here that installs outside the repository. `./observation/uninstall-observation.sh` removes what it registered; run it before deleting this repository.
+
+## Cost of the Checks
+
+### Size of the required checks
+- Check: `./.ai-policy/scripts/report-suite-size.sh`
+- Normal: none declared. Report the figure; what to do about a large suite is the human's call.
+- Matters: a suite grown past the point where it is run without thinking has stopped earning its cost, and nobody sees that from inside one session.
+- The count uses the script's conventional defaults, since `SUITE_PATHS` is unset here, so it leaves out `scripts/check-*.sh` and `scripts/repo-validation.sh`. Say so when reporting it.
+- Runtime is not readable here: `run-validation.sh` prints it and persists nothing, and running it rewrites the validation state file. It shows at the end of any validation run.
 
 ## Expiry and Limits
 
