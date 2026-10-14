@@ -4,7 +4,8 @@ set -eu
 # PreToolUse hook for Claude Code, Codex, and VS Code Copilot.
 # Blocks opening or editing a pull request whose body carries no verification
 # justification, or whose unverified-surface section is a bare assertion, or
-# which changed agent-facing prose without recording an aiw-prompt-smith pass.
+# which changed agent-facing prose without recording an aiw-prompt-smith pass, or
+# which does not quote the human's request under a Request heading.
 # Reads tool_input from JSON on stdin.
 # Exit 2 = block, exit 0 = allow.
 #
@@ -22,7 +23,7 @@ set -eu
 # demanded an issue would fire on the normal path, and a guard that fires on
 # the normal path gets routed around.
 #
-# The three checks below are the ones a script can make without that judgement.
+# The four checks below are the ones a script can make without that judgement.
 #
 # The third exists because a rule that lived only in prose and memory was
 # skipped on three runs of pull requests (#218 to #223, #294, #302), and each
@@ -52,6 +53,10 @@ deny() {
   if [ "${3:-}" = "prose" ]; then
     echo "Invoke aiw-prompt-smith over those files, then record in the body what the pass found," >&2
     echo "even when it found nothing to change. The hook checks that it ran, not that it was good." >&2
+  elif [ "${3:-}" = "request" ]; then
+    echo "Quote the human's own words as '>' lines under a '## Request' heading: the issue's ## Request," >&2
+    echo "an issue body a person wrote, or what they said in the conversation, with every correction since." >&2
+    echo "Where no human asked, as in an upkeep run, say so there and quote the issue. See aiw-github." >&2
   else
     echo "See aiw-verification's justification step. Part 3 names what was not checked;" >&2
     echo "an empty part 3 is an argument in terms of what the change is, never a bare assertion." >&2
@@ -250,6 +255,44 @@ check_body() {
   if [ -n "$prose" ] && ! printf '%s' "$norm" | grep -qiE 'prompt[- ]?smith'; then
     named="$(printf '%s' "$prose" | tr '\n' ' ' | tr -cd '[:print:]' | sed 's/ $//')"
     deny "$source" "The branch changed agent-facing prose ($named) and the body records no aiw-prompt-smith pass." "prose"
+  fi
+
+  # 4. The body quotes the human's request under a heading of its own. Twice the
+  #    work passed every check against the agent's restatement of the request
+  #    while missing the request itself (#371), and both times the human's words
+  #    were still in the conversation: the rule to reread them existed and was
+  #    not followed. Quoted in the body, beside the result, the gap is in front
+  #    of the agent and the human at once. Presence only, as in check 3: whether
+  #    the quote is faithful is the human's to see, and it is in front of them.
+  #    The heading is "Request" alone, as a markdown heading or a bold lead-in,
+  #    so prose that merely mentions a request does not count. The section runs
+  #    to the next heading or bold lead-in, and must hold at least one quoted
+  #    line ("> ...") that is not a bare "none": a quote marker is what tells
+  #    the human's words from a summary of them or a placeholder. Fenced blocks
+  #    and HTML comments are dropped first, so a body that shows the form in
+  #    order to discuss it, or a template's unfilled prompt, does not count.
+  local req
+  req="$(printf '%s\n' "$body" | tr -d '\r' | LC_ALL=C awk '
+    /^[[:space:]]*```/ { infence = !infence; next }
+    infence { next }
+    { line = $0 }
+    incomment { if (line ~ /-->/) { sub(/^.*-->/, "", line); incomment = 0 } else next }
+    { gsub(/<!--[^>]*-->/, "", line) }
+    line ~ /<!--/ { sub(/<!--.*$/, "", line); incomment = 1 }
+    { t = tolower(line); sub(/^[[:space:]]+/, "", t); sub(/[[:space:]]+$/, "", t) }
+    t ~ /^#+[[:space:]]+request:?$/ || t ~ /^(\*\*|__)request:?(\*\*|__):?$/ { inreq = 1; found = 1; next }
+    inreq && (t ~ /^#+[[:space:]]/ || t ~ /^(\*\*|__)[^*_]+(\*\*|__)/) { inreq = 0 }
+    inreq && t ~ /^>/ { q = t; sub(/^[>[:space:]]+/, "", q); if (q != "") print q }
+    END { if (!found) print "NOHEADING" }
+  ')"
+  if [ "$req" = "NOHEADING" ]; then
+    deny "$source" "The pull request body has no '## Request' section quoting what the human asked." "request"
+  fi
+  if [ -z "$req" ]; then
+    deny "$source" "The pull request body's Request section quotes nothing: no line under it starts with '>'." "request"
+  fi
+  if ! printf '%s\n' "$req" | grep -qviE '^(none|nothing|n/?a|nil|-)[[:punct:][:space:]]*$'; then
+    deny "$source" "The pull request body's Request section quotes only a bare assertion." "request"
   fi
 }
 

@@ -71,9 +71,13 @@ CODE_REPO="$(make_repo code)"
 touch_commit "$CODE_REPO" app.py
 cd "$CODE_REPO"
 
+# Every body carries a Request section (check 4) unless its name starts with
+# "noreq", so a case written for checks 1 to 3 is blocked or allowed for its own
+# reason. The real captures below predate check 4 and are otherwise verbatim.
 body_file() {
-  local path="$TMP/$1"; shift
+  local name="$1" path="$TMP/$1"; shift
   printf '%s\n' "$@" > "$path"
+  case "$name" in noreq*) ;; *) printf '\n## Request\n\n> fix the export button\n' >> "$path" ;; esac
   echo "$path"
 }
 
@@ -330,6 +334,48 @@ assert_blocked "AGENTS.md changed against a trunk base" "$(bash_payload "gh pr c
 
 cd "$CODE_REPO"
 
+# ── Request section (check 4) ──
+
+echo "A body must quote the request under its own heading (#371):"
+JUST="Ran the suite, green. Not verified: the mobile layout, no device here."
+CMD="gh pr create --title x --body-file"
+assert_blocked "no Request heading at all" \
+  "$(bash_payload "$CMD $(body_file noreq1.md "$JUST")")"
+assert_blocked "a Request heading with nothing under it" \
+  "$(bash_payload "$CMD $(body_file noreq2.md "$JUST" '' '## Request' '' '## Verification' 'Suite green.')")"
+assert_blocked "a Request heading over a bare none" \
+  "$(bash_payload "$CMD $(body_file noreq3.md "$JUST" '' '## Request' '' 'n/a')")"
+assert_blocked "a request only mentioned in prose, never headed" \
+  "$(bash_payload "$CMD $(body_file noreq4.md "$JUST" '' 'The request was to fix the button.')")"
+assert_allowed "a bold lead-in over a quote" \
+  "$(bash_payload "$CMD $(body_file noreq5.md "$JUST" '' '**Request:**' '' '> make the button say Download CSV')")"
+assert_allowed "a Request section quoting several messages" \
+  "$(bash_payload "$CMD $(body_file noreq6.md '## Request' '' '> move it up' '> and call it Download CSV' '' "$JUST")")"
+assert_allowed "an upkeep run saying no human asked, quoting the issue" \
+  "$(bash_payload "$CMD $(body_file noreq7.md '### Request' '' 'No human asked: upkeep run on #12, which reads:' '' '> clear the tmp folder' '' "$JUST")")"
+assert_blocked "a section with the justification under it and no heading after" \
+  "$(bash_payload "$CMD $(body_file noreq9.md '## Request' '' "$JUST")")"
+assert_blocked "a bold lead-in followed straight by another lead-in" \
+  "$(bash_payload "$CMD $(body_file noreq10.md '**Request:**' '' '**Verification:** suite green. Not verified: the mobile layout, no device here.')")"
+assert_blocked "an unquoted summary under the heading" \
+  "$(bash_payload "$CMD $(body_file noreq11.md "$JUST" '' '## Request' '' 'Make the export easier to find.')")"
+assert_blocked "a template comment left unfilled" \
+  "$(bash_payload "$CMD $(body_file noreq12.md "$JUST" '' '## Request' '' '<!-- quote the human here -->')")"
+assert_blocked "a Request section only inside a code fence" \
+  "$(bash_payload "$CMD $(body_file noreq13.md "$JUST" '' '```' '## Request' '> fix it' '```')")"
+assert_blocked "only bare quotes" \
+  "$(bash_payload "$CMD $(body_file noreq14.md "$JUST" '' '## Request' '' '> none' '> n/a')")"
+assert_allowed "a quote line that starts with an issue reference" \
+  "$(bash_payload "$CMD $(body_file noreq15.md "$JUST" '' '## Request' '' '> #371 please, the checks miss what I asked')")"
+ERR="$(printf '%s' "$(bash_payload "$CMD $(body_file noreq8.md "$JUST")")" | "$HOOK" 2>&1 >/dev/null || true)"
+if printf '%s' "$ERR" | grep -q "## Request" && printf '%s' "$ERR" | grep -q "aiw-github"; then
+  PASS=$((PASS + 1)); echo "  PASS: the refusal names the heading and the skill"
+else
+  FAIL=$((FAIL + 1)); echo "  FAIL: refusal did not name the heading or the skill: $ERR"
+fi
+
+cd "$CODE_REPO"
+
 # ── MCP route ──
 
 echo "MCP route:"
@@ -340,7 +386,7 @@ mcp_payload() {
 }
 
 assert_allowed "create_pull_request with a justification" \
-  "$(mcp_payload "mcp__github__create_pull_request" "Ran the suite, green. Not verified: the mobile layout.")"
+  "$(mcp_payload "mcp__github__create_pull_request" "$(printf 'Ran the suite, green. Not verified: the mobile layout.\n\n## Request\n\n> fix the export button\n')")"
 assert_blocked "create_pull_request with no justification" \
   "$(mcp_payload "mcp__github__create_pull_request" "Fixes the typo.")"
 assert_blocked "create_pull_request under a third-party server prefix" \
@@ -349,6 +395,8 @@ assert_blocked "create_pull_request with a bare assertion" \
   "$(mcp_payload "mcp__github__create_pull_request" "Did it. Not verified: none")"
 assert_allowed "update_pull_request that does not carry a body" \
   '{"tool_name":"mcp__github__update_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1,"state":"closed"}}'
+assert_blocked "create_pull_request justified but quoting no request" \
+  "$(mcp_payload "mcp__github__create_pull_request" "Ran the suite, green. Not verified: the mobile layout.")"
 assert_blocked "update_pull_request replacing the body with an unjustified one" \
   "$(mcp_payload "mcp__github__update_pull_request" "Tidied the wording.")"
 

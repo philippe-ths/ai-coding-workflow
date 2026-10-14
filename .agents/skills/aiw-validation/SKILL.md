@@ -26,7 +26,7 @@ If the task produces nothing a human meets, say so in the plan. That sentence di
 At the done gate, before the work is presented:
 
 1. **Does it exist?** Go and find it. Committed code that would produce it is not it existing, and a passing test asserting it exists is not it existing.
-2. **Does it do what was asked?** Re-read the human's own words, not the issue. Where the two differ, the words are the request and the issue is a summary that lost something. This question is about the artifact: is the thing there, doing the job it was asked to do. Whether the implementation satisfies the requirement's intent belongs to aiw-verification's refuting pass, which uses a reviewer who did not write the change; at the Light ceremony tier, where that pass does not run, it is your own re-read, as aiw-verification says.
+2. **Does it do what was asked?** Re-read the human's own words, not an agent's restatement of them: the request as aiw-github gathers it for the pull request's `## Request` section. Where the two differ, the words are the request and the restatement is a summary that lost something. This question is about the artifact: is the thing there, doing the job it was asked to do. Whether the implementation satisfies the requirement's intent belongs to aiw-verification's refuting pass, which uses a reviewer who did not write the change; at the Light ceremony tier, where that pass does not run, it is your own re-read, as aiw-verification says.
 3. **Is it the thing the project is for?** Re-read `north-star.md` against what is about to be handed over. Task Flow step 1 already checked the request against the goal, so this catches only what drifted between the request and the result, which is its own class: a request can be granted exactly and the result still pull away from the goal.
 
 ## Meet It Where the Human Meets It
@@ -49,7 +49,7 @@ A device you do not have, a build you cannot run, an account you cannot reach. T
 
 ## What It Leaves Behind
 
-One line in the pull request body, beside the verification justification: the deliverable, how it was met, and the end impact as delivered and for which user, so the work is clear from the effect alone. "The weekly report, rendered for the week of 3 March and read against the SQL count; the team reads one page on Monday instead of running the query." That sentence is the whole record.
+One line in the pull request body, beside the verification justification: the deliverable, how it was met against the `## Request` section, and the end impact as delivered and for which user, so the work is clear from the effect alone. "The weekly report, rendered for the week of 3 March and read against the SQL count; the team reads one page on Monday instead of running the query." That sentence is the whole record.
 
 It goes there for the reason the verification justification goes there: the human decides afterwards, and a check that leaves nothing behind cannot be told apart from a check that was skipped.
 

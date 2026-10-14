@@ -77,7 +77,7 @@ It is not the end-to-end runner: that one observes behaviour, this one reads wha
 
 ### What it is given, and what is withheld
 
-Give it the requirement, meaning the issue plus the plan's scope and file list, the diff, and the evidence part 2 cites.
+Give it the requirement, meaning the human's own words as aiw-github gathers them for the pull request's `## Request` section, the issue, and the plan's scope and file list; then the diff, and the evidence part 2 cites. Label the words as the request and the rest as your reading of it, because a reviewer handed only your reading can find only work that fails your reading.
 
 Withhold the implementer's transcript, reasoning, and narrative.
 The narrative is what makes a wrong reading sound right.
@@ -88,7 +88,7 @@ A reviewer that has read why the code was written this way will accept that it i
 Ask it to find failures, not to assess quality.
 Name the three it is hunting:
 
-- Work that satisfies the words of the requirement and not its intent.
+- Work that satisfies the issue or the plan and not the human's words, or their words and not their intent.
 - Change beyond what the plan named: files the plan did not list, and work inside listed files that the plan did not call for.
 - Tests that would still pass if the code under them were wrong.
 

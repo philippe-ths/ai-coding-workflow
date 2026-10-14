@@ -275,6 +275,13 @@ D="$(fixture no-north-star)"
 rm -f "$D/north-star.md"
 expect "an absent north-star.md is not a budget failure" pass "$D" ""
 
+echo "request quote heading:"
+for s in aiw-issue-creation aiw-github aiw-verification aiw-validation; do
+  D="$(fixture "request-heading-drift-$s")"
+  for t in .claude .agents; do edit "$D/$t/skills/$s/SKILL.md" 's/## Request/## Ask/g'; done
+  expect "$s renaming the request heading is caught" fail "$D" "$s does not name"
+done
+
 echo "entry-point parity:"
 D="$(fixture entry-drift)"
 drop "$D/AGENTS.md" 'project-context.md'

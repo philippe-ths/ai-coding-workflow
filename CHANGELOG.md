@@ -6,6 +6,20 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.33.0 - 2026-10-14
+
+A pull request now quotes the human's own words under `## Request`, beside the result, and is blocked without them, so work that passes the agent's summary of a request but misses the request is in front of the agent and the human at once.
+
+### Added
+
+- `.ai-policy/hooks/check-pr-verification.sh`: blocks a pull request body with no `Request` heading, or with no `>` quote line under it other than a bare "none"; fenced blocks and HTML comments do not count ([#371]).
+- `aiw-github`: at task start, gather the human's words verbatim and add any that exist only in the conversation, and later corrections, to the issue as comments; the pull request body quotes them under `## Request` ([#371]).
+- `aiw-issue-creation`: an issue filed from the human's request quotes their words exactly under `## Request` ([#371]).
+
+### Changed
+
+- `aiw-validation`, `aiw-verification`, `aiw-planning`, `aiw-upkeep`: the request is the human's words as `aiw-github` gathers them; validation's line says how the result met the `## Request` section, the refuting pass is briefed with those words labelled as the request, and an agent-drafted issue's goal is a reading of them ([#371]).
+
 ## 5.32.0 - 2026-10-14
 
 A pull request body describes the change under "What changes for the user", in that user's terms, so the human can judge the effect without translating a list of files.
@@ -1366,3 +1380,4 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#341]: https://github.com/philippe-ths/ai-coding-workflow/issues/341
 [#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
+[#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
