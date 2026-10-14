@@ -8,14 +8,15 @@ Every `### Removed` bullet must lead with the removed path as a backticked token
 
 ## 5.35.0 - 2026-10-14
 
-The human can now shape a request with the agent before it is planned: the agent shows mockups, directions or samples of the finished result until they pick one, and the pick, with their reason in their own words, is recorded on the issue and checked against at handover. The agent offers it in one line when it cannot say what done looks like.
+The human can now shape a request with the agent before it is planned: the agent shows mockups, directions or samples of the finished result until they pick one, and the pick, with their reason in their own words, is recorded on the issue and checked against at handover. When the agent cannot say what done looks like for a request, it offers this in one line and waits for the answer before filing the issue.
 
 ### Added
 
-- `aiw-shape`: opt-in skill that shapes a request by showing things to react to rather than asking questions, keeps spikes uncommitted, ends on the human's pick and a one-line definition of done, and records the shape in a new issue's body or a `## Shape` comment on an existing one ([#408]).
+- `aiw-shape`: opt-in skill that shapes a request by showing things to react to rather than asking questions, keeps spikes in scratch space and uncommitted, ends on the human's pick and a one-line definition of done, and records the shape in a new issue's body or a `## Shape` comment on an existing one ([#408]).
 
 ### Changed
 
+- `ai-workflow.md`: Task Flow step 1 offers `aiw-shape` when done is unclear for a request the human made, and waits before task start ([#408]).
 - `aiw-github`, `aiw-planning`, `aiw-validation`: a `## Shape` on the issue is part of the request; the deliverable is what the human picked there, and validation checks the result against it ([#408]).
 
 ## 5.34.0 - 2026-10-14

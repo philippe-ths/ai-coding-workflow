@@ -25,9 +25,9 @@ Pick the move that answers what is most unclear, and make it cheap.
 - **Directions side by side.** Two or three genuinely different takes, each with what it costs, when the approach is open. Say which you would pick and why, as for any choice put to the human.
 - **A sample of done.** What the human would read or run when it is finished, such as the output, the report or the message, when the request is a behaviour rather than a screen.
 - **Smaller, as asked, bolder.** The smallest version still worth having, the one asked for, and one they may not know is possible, each with what it costs. Finding the best version of the request is part of shaping, not a detour from it.
-- **Spike.** When a direction turns on whether something is possible, try it in scratch space, or a throwaway worktree you remove when the answer is in, never committed. It is a throwaway prototype: the answer is what you keep, as "tried X, it works, or does not, because Y".
+- **Spike.** When a direction turns on whether something is possible, try it in scratch space outside the repository, never committed. It is a throwaway prototype: the answer is what you keep, as "tried X, it works, or does not, because Y".
 
-*The hard case.* "Make the status report better." Asking "better how, which metrics, what format?" puts the work back on the human. Show three one-screen sketches instead: the report trimmed to what changed, one led by a single verdict line, one as a table across weeks. They answer "the verdict one, but keep the table under it". That is a pick, and a better one than any of the three; a pick that combines or adjusts what you showed counts.
+*The hard case.* "Make the status report better." Asking "better how, which metrics, what format?" puts the work back on the human. Show three one-screen sketches instead: the report trimmed to what changed, one led by a single verdict line, one as a table across weeks, and say you would lead with the verdict, since a report is read for whether to act. They answer "the verdict one, but keep the table under it". That is a pick, and a better one than any of the three; a pick that combines or adjusts what you showed counts.
 
 ## Ending
 
