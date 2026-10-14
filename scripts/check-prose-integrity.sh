@@ -309,18 +309,19 @@ check_budget project-context.md 2000
 check_budget north-star.md 400
 
 head_ "Request quote heading:"
-# aiw-issue-creation records the human's words under one heading, and the two
-# done-gate skills that must reread those words find them by that heading. One
+# The human's words travel under one heading: aiw-issue-creation quotes them in
+# the issue, aiw-github in the pull request (whose hook requires it), and the two
+# done-gate skills that must reread them find them by that heading. One
 # rule hand-propagated across three files drifts (#260, #371), so a rename in
 # one file without the others is caught here.
 REQUEST_HEADING='`## Request`'
-for s in aiw-issue-creation aiw-verification aiw-validation; do
+for s in aiw-issue-creation aiw-github aiw-verification aiw-validation; do
   f="$CLAUDE_DIR/$s/SKILL.md"
-  [ -f "$f" ] || continue
+  [ -f "$f" ] || { bad "$s is missing, and it names the $REQUEST_HEADING heading"; continue; }
   if grep -qF -- "$REQUEST_HEADING" "$f"; then
     ok "$s names the $REQUEST_HEADING heading"
   else
-    bad "$s does not name the $REQUEST_HEADING heading the human's words are quoted under (aiw-issue-creation sets it; the done gate rereads it)"
+    bad "$s does not name the $REQUEST_HEADING heading the human's words are quoted under (the pull request hook requires it, and the done gate rereads it)"
   fi
 done
 

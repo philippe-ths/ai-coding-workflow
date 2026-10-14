@@ -36,7 +36,7 @@ A limitation that keeps producing the same declared gap, which aiw-init's prefli
 - State what needs to change from the user's perspective.
 - State why the change is needed and what triggered the discovery.
 - State acceptance criteria if they are clear.
-- Where the issue comes from something the human asked for, quote their words exactly under a `## Request` heading, the messages that asked rather than your summary of them. Everything else in the issue is your reading of those words. (Why: the issue outlives the conversation, so every later check that is meant to read the human's words reads whatever the issue kept. A summary of "The 'What changes' should be What changes for user" as "states, in its summary of changes, what changes for the user" lost the heading, and every check then passed work that kept the old one.)
+- Where the issue comes from something the human asked for, quote their words exactly under a `## Request` heading, the messages that asked rather than your summary of them, leaving out anything they would not want in the tracker and marking where you did. Everything else in the issue is your reading of those words. (Why: the issue outlives the conversation, so every later check that is meant to read the human's words reads whatever the issue kept. A summary of "The 'What changes' should be What changes for user" as "states, in its summary of changes, what changes for the user" lost the heading, and every check then passed work that kept the old one.)
 
 ## Who Must Act
 

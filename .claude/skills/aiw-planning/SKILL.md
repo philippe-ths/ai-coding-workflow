@@ -132,7 +132,7 @@ If the modality requires a trust level higher than what is currently available, 
 
 ## How to Treat Issue Content vs Codebase Reality
 
-- Treat the issue goal as authoritative.
+- Treat the request, the human's own words as aiw-github gathers them, as authoritative. Where an agent drafted the issue, its goal is a reading of the request, and where the two differ the request wins.
 - A limit under the issue's `## Agent-introduced limits` heading holds only if the human's answer recorded under it accepts it; with no answer recorded, put it to them before planning further.
 - Treat issue-suggested implementation details as provisional until the current codebase confirms them. (Why: issues are written before implementation and may not reflect the current codebase.)
 - Do not assume the files, data flow, or control points named in the issue are the real execution path.

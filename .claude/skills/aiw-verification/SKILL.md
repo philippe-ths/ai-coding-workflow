@@ -77,7 +77,7 @@ It is not the end-to-end runner: that one observes behaviour, this one reads wha
 
 ### What it is given, and what is withheld
 
-Give it the requirement, meaning the human's own words (the issue's `## Request` quote, or the messages the task came from where there is none), the issue, and the plan's scope and file list; then the diff, and the evidence part 2 cites. Label the words as the request and the rest as your reading of it, because a reviewer handed only your reading can find only work that fails your reading.
+Give it the requirement, meaning the human's own words as aiw-github gathers them for the pull request's `## Request` section, the issue, and the plan's scope and file list; then the diff, and the evidence part 2 cites. Label the words as the request and the rest as your reading of it, because a reviewer handed only your reading can find only work that fails your reading.
 
 Withhold the implementer's transcript, reasoning, and narrative.
 The narrative is what makes a wrong reading sound right.
