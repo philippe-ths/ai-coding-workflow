@@ -308,6 +308,22 @@ check_budget() { # file, token budget
 check_budget project-context.md 2000
 check_budget north-star.md 400
 
+head_ "Request quote heading:"
+# aiw-issue-creation records the human's words under one heading, and the two
+# done-gate skills that must reread those words find them by that heading. One
+# rule hand-propagated across three files drifts (#260, #371), so a rename in
+# one file without the others is caught here.
+REQUEST_HEADING='`## Request`'
+for s in aiw-issue-creation aiw-verification aiw-validation; do
+  f="$CLAUDE_DIR/$s/SKILL.md"
+  [ -f "$f" ] || continue
+  if grep -qF -- "$REQUEST_HEADING" "$f"; then
+    ok "$s names the $REQUEST_HEADING heading"
+  else
+    bad "$s does not name the $REQUEST_HEADING heading the human's words are quoted under (aiw-issue-creation sets it; the done gate rereads it)"
+  fi
+done
+
 head_ "Entry-point parity:"
 for e in "${ENTRY_POINTS[@]}"; do
   [ -f "$e" ] || { bad "$e is missing"; continue; }
