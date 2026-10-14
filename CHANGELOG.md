@@ -12,13 +12,13 @@ A pull request now quotes the human's own words under `## Request`, beside the r
 
 ### Added
 
-- `.ai-policy/hooks/check-pr-verification.sh`: blocks a pull request body with no `Request` heading, or with nothing but a bare "none" under it ([#371]).
+- `.ai-policy/hooks/check-pr-verification.sh`: blocks a pull request body with no `Request` heading, or with no `>` quote line under it other than a bare "none"; fenced blocks and HTML comments do not count ([#371]).
 - `aiw-github`: at task start, gather the human's words verbatim and add any that exist only in the conversation, and later corrections, to the issue as comments; the pull request body quotes them under `## Request` ([#371]).
 - `aiw-issue-creation`: an issue filed from the human's request quotes their words exactly under `## Request` ([#371]).
 
 ### Changed
 
-- `aiw-validation`, `aiw-verification`, `aiw-planning`: the request is the human's words as `aiw-github` gathers them; validation's line says how the result met the `## Request` section, the refuting pass is briefed with those words labelled as the request, and an agent-drafted issue's goal is a reading of them ([#371]).
+- `aiw-validation`, `aiw-verification`, `aiw-planning`, `aiw-upkeep`: the request is the human's words as `aiw-github` gathers them; validation's line says how the result met the `## Request` section, the refuting pass is briefed with those words labelled as the request, and an agent-drafted issue's goal is a reading of them ([#371]).
 
 ## 5.32.0 - 2026-10-14
 

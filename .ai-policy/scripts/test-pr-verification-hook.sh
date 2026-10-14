@@ -351,8 +351,22 @@ assert_allowed "a bold lead-in over a quote" \
   "$(bash_payload "$CMD $(body_file noreq5.md "$JUST" '' '**Request:**' '' '> make the button say Download CSV')")"
 assert_allowed "a Request section quoting several messages" \
   "$(bash_payload "$CMD $(body_file noreq6.md '## Request' '' '> move it up' '> and call it Download CSV' '' "$JUST")")"
-assert_allowed "an upkeep run saying no human asked" \
-  "$(bash_payload "$CMD $(body_file noreq7.md '### Request' '' 'No human asked: upkeep run on #12, which reads "clear the tmp folder".' '' "$JUST")")"
+assert_allowed "an upkeep run saying no human asked, quoting the issue" \
+  "$(bash_payload "$CMD $(body_file noreq7.md '### Request' '' 'No human asked: upkeep run on #12, which reads:' '' '> clear the tmp folder' '' "$JUST")")"
+assert_blocked "a section with the justification under it and no heading after" \
+  "$(bash_payload "$CMD $(body_file noreq9.md '## Request' '' "$JUST")")"
+assert_blocked "a bold lead-in followed straight by another lead-in" \
+  "$(bash_payload "$CMD $(body_file noreq10.md '**Request:**' '' '**Verification:** suite green. Not verified: the mobile layout, no device here.')")"
+assert_blocked "an unquoted summary under the heading" \
+  "$(bash_payload "$CMD $(body_file noreq11.md "$JUST" '' '## Request' '' 'Make the export easier to find.')")"
+assert_blocked "a template comment left unfilled" \
+  "$(bash_payload "$CMD $(body_file noreq12.md "$JUST" '' '## Request' '' '<!-- quote the human here -->')")"
+assert_blocked "a Request section only inside a code fence" \
+  "$(bash_payload "$CMD $(body_file noreq13.md "$JUST" '' '```' '## Request' '> fix it' '```')")"
+assert_blocked "only bare quotes" \
+  "$(bash_payload "$CMD $(body_file noreq14.md "$JUST" '' '## Request' '' '> none' '> n/a')")"
+assert_allowed "a quote line that starts with an issue reference" \
+  "$(bash_payload "$CMD $(body_file noreq15.md "$JUST" '' '## Request' '' '> #371 please, the checks miss what I asked')")"
 ERR="$(printf '%s' "$(bash_payload "$CMD $(body_file noreq8.md "$JUST")")" | "$HOOK" 2>&1 >/dev/null || true)"
 if printf '%s' "$ERR" | grep -q "## Request" && printf '%s' "$ERR" | grep -q "aiw-github"; then
   PASS=$((PASS + 1)); echo "  PASS: the refusal names the heading and the skill"
@@ -381,6 +395,8 @@ assert_blocked "create_pull_request with a bare assertion" \
   "$(mcp_payload "mcp__github__create_pull_request" "Did it. Not verified: none")"
 assert_allowed "update_pull_request that does not carry a body" \
   '{"tool_name":"mcp__github__update_pull_request","tool_input":{"owner":"x","repo":"y","pullNumber":1,"state":"closed"}}'
+assert_blocked "create_pull_request justified but quoting no request" \
+  "$(mcp_payload "mcp__github__create_pull_request" "Ran the suite, green. Not verified: the mobile layout.")"
 assert_blocked "update_pull_request replacing the body with an unjustified one" \
   "$(mcp_payload "mcp__github__update_pull_request" "Tidied the wording.")"
 

@@ -265,24 +265,34 @@ check_body() {
   #    of the agent and the human at once. Presence only, as in check 3: whether
   #    the quote is faithful is the human's to see, and it is in front of them.
   #    The heading is "Request" alone, as a markdown heading or a bold lead-in,
-  #    so prose that merely mentions a request does not count; what follows it,
-  #    up to the next heading, must hold something other than a bare "none".
+  #    so prose that merely mentions a request does not count. The section runs
+  #    to the next heading or bold lead-in, and must hold at least one quoted
+  #    line ("> ...") that is not a bare "none": a quote marker is what tells
+  #    the human's words from a summary of them or a placeholder. Fenced blocks
+  #    and HTML comments are dropped first, so a body that shows the form in
+  #    order to discuss it, or a template's unfilled prompt, does not count.
   local req
-  req="$(printf '%s\n' "$norm" | LC_ALL=C awk '
-    tolower($0) ~ /^(#+[[:space:]]*)?request:?$/ { inreq = 1; found = 1; next }
-    inreq && /^#/ { inreq = 0 }
-    inreq && $0 !~ /^[[:space:]>]*$/ { print }
+  req="$(printf '%s\n' "$body" | tr -d '\r' | LC_ALL=C awk '
+    /^[[:space:]]*```/ { infence = !infence; next }
+    infence { next }
+    { line = $0 }
+    incomment { if (line ~ /-->/) { sub(/^.*-->/, "", line); incomment = 0 } else next }
+    { gsub(/<!--[^>]*-->/, "", line) }
+    line ~ /<!--/ { sub(/<!--.*$/, "", line); incomment = 1 }
+    { t = tolower(line); sub(/^[[:space:]]+/, "", t); sub(/[[:space:]]+$/, "", t) }
+    t ~ /^#+[[:space:]]+request:?$/ || t ~ /^(\*\*|__)request:?(\*\*|__):?$/ { inreq = 1; found = 1; next }
+    inreq && (t ~ /^#+[[:space:]]/ || t ~ /^(\*\*|__)[^*_]+(\*\*|__)/) { inreq = 0 }
+    inreq && t ~ /^>/ { q = t; sub(/^[>[:space:]]+/, "", q); if (q != "") print q }
     END { if (!found) print "NOHEADING" }
   ')"
   if [ "$req" = "NOHEADING" ]; then
     deny "$source" "The pull request body has no '## Request' section quoting what the human asked." "request"
   fi
   if [ -z "$req" ]; then
-    deny "$source" "The pull request body's Request section is empty." "request"
+    deny "$source" "The pull request body's Request section quotes nothing: no line under it starts with '>'." "request"
   fi
-  if [ "$(printf '%s\n' "$req" | wc -l)" -eq 1 ] \
-     && printf '%s\n' "$req" | tr -d '>' | grep -qiE '^[[:space:]]*(none|nothing|n/?a|nil|-)[[:punct:][:space:]]*$'; then
-    deny "$source" "The pull request body's Request section is a bare assertion." "request"
+  if ! printf '%s\n' "$req" | grep -qviE '^(none|nothing|n/?a|nil|-)[[:punct:][:space:]]*$'; then
+    deny "$source" "The pull request body's Request section quotes only a bare assertion." "request"
   fi
 }
 

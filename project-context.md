@@ -15,7 +15,7 @@ Version: 2.3.0
 - The agent cannot merge or approve a pull request; hooks block both on the shell and MCP routes.
 - Opening or editing a pull request is blocked unless the body carries a verification justification and its unverified-surface section is more than a bare "none".
 - That body must also record an `aiw-prompt-smith` pass when the branch changed agent-facing prose: skills, agent files, `ai-workflow.md`, the entry points, or a file an entry point pulls in with an `@` line, which includes this file.
-- Every pull request body must carry a `Request` heading with something under it other than a bare "none".
+- Every pull request body must carry a `Request` heading with at least one `>` quote line under it that is not a bare "none".
 - The pull request hook must read the body before the command runs, so it blocks a body file path built from a shell variable and a body file the same command creates.
 - A version bump in `ai-workflow.md` needs a matching `CHANGELOG.md` entry; the pre-push hook rejects it otherwise.
 - `### Removed` bullets in `CHANGELOG.md` lead with the removed path, because the updater deletes files from them.
