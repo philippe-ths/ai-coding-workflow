@@ -39,8 +39,8 @@ If two rounds pass with nothing picked, stop making variants, because more optio
 
 The shape records three things, and who wrote each decides what it is worth:
 
-- **Their words**, quoted exactly: the reply in which they picked, and their reason if they gave one. These are the request. If they gave no reason, record none rather than writing one for them.
-- **The done line** they OK'd. You wrote it, so it is not quoted as theirs, but it is what planning and validation check the result against.
+- **Their words**, quoted exactly: the reply in which they picked, their reason if they gave one, and the reply OKing the done line. If they gave no reason, record none rather than writing one for them.
+- **The done line.** You wrote it and they OK'd it, so it stands as their latest word on what done is, over the original request where the two differ. It is what planning and validation check the result against.
 - **The mockup or example** they picked, as text. It is your reading, there to make the done line concrete. A link to a published page is an extra, since it can go private or stale.
 
 Where the build meets a case the done line does not cover, their reason settles it. (Why: a paraphrase of why they picked carries your reading instead of theirs.)
@@ -48,4 +48,4 @@ Where the build meets a case the done line does not cover, their reason settles 
 - **New request:** finish by filing the issue with aiw-issue-creation, the shape under a `## Shape` heading in its body.
 - **Existing issue:** add the shape as a comment opening with a `## Shape` heading, because rewriting the body is the human's. A later shape replaces an earlier one.
 
-Planning then starts from the shape as part of the request.
+Planning then starts from the done line.

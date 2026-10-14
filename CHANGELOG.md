@@ -17,7 +17,7 @@ The human can now shape a request with the agent before it is planned: the agent
 ### Changed
 
 - `ai-workflow.md`: Task Flow step 1 offers `aiw-shape` when done is unclear for a request the human made, and waits before task start ([#408]).
-- `aiw-github`, `aiw-planning`, `aiw-validation`: a `## Shape` on the issue is part of the request; the deliverable is what the human picked there, and validation checks the result against it ([#408]).
+- `aiw-github`, `aiw-planning`, `aiw-validation`: the done line the human OK'd in a `## Shape` on the issue, with their quoted pick and reason, joins the request; planning takes it as the deliverable and validation checks the result against it ([#408]).
 
 ## 5.34.0 - 2026-10-14
 
