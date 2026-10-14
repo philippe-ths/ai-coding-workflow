@@ -5,7 +5,7 @@ description: "Structured pause and audit for when a 'done' claim is contradicted
 
 # Failure Analysis
 
-Read this file the moment a "done" claim is contradicted, by anyone, including yourself. Read it before any further code change, any retry request, and any "let me try X" suggestion.
+Read this file the moment a "done" claim is contradicted, by anyone, including yourself, or your attempts stop converging. Read it before any further code change, any retry request, and any "let me try X" suggestion.
 
 ## Why This Skill Exists
 
@@ -30,7 +30,7 @@ So the trigger also fires on the agent's own signals. Any of these is a contradi
 - A second pull request, branch, or commit is opening against an issue you already closed or claimed done.
 - You found the defect yourself, before anyone reported it, while the first fix was still in flight.
 
-Inside an implementation loop nothing is claimed done until its check passes and it is committed, so the one fix a failed loop gets, and returning to the last commit, are not among these.
+Inside an implementation loop nothing is claimed done until its check passes and it is committed, so the one fix a failed loop gets, returning to the last commit, and the smaller retry from there are not among these, whatever that one fix reopened. Beyond that allowance, non-convergence is a trigger even though nothing was declared done: a smaller retry that fails again, or successive loops that repair one surface while reopening another or repeat an approach without new evidence. A reopened surface that an earlier committed loop's check had passed is a contradicted "done" claim in its own right, and is audited as one. Otherwise what non-convergence contradicts is the plan, not a sign-off: describe the contradiction against the plan, leave the verification, validation, and testing audits, which examine a sign-off that has not happened, and run the rest of this skill as written.
 
 A second attempt framed as a fresh fix is the most common way the audit gets skipped. The framing is what does it: a new issue, a new branch, and a new plan make attempt two look like task one, and nothing in the new task's context remembers that something already failed here. Notice the framing and treat it as the trigger. Catching it yourself is the cheaper moment, not a confession.
 
@@ -153,11 +153,12 @@ Temporary diagnostics added during the audit (additional logging, probes, traces
 
 If repeated fixes under different hypotheses have not resolved the contradiction, that is itself evidence — not that the next hypothesis will be the one, but that the approach is wrong. State this clearly when it happens.
 
-Three signals that the approach is wrong:
+Four signals that the approach is wrong:
 
 - Fixes change the symptom without resolving it.
 - New fixes break things that previously worked.
 - Each hypothesis sounds plausible until tested, then fails the same way.
+- Attempts repeat an approach without new evidence.
 
 When the convergence check fires, escalate to plan-level flaw detection below.
 
@@ -180,7 +181,7 @@ Do not signal a flawed approach based on difficulty alone. (Why: difficulty is n
 This skill's job is done when:
 
 - The contradiction has been described.
-- The three-skill audit has produced specific answers.
+- The audits that apply have produced specific answers.
 - Assumptions have been classified.
 - A single leading hypothesis is named with supporting evidence.
 - A concrete next step is identified.

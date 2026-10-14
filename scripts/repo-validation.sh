@@ -14,7 +14,8 @@ while IFS= read -r f; do shell_targets+=("$f"); done < <(
   find ./observation ./upkeep -name '*.sh' -type f 2>/dev/null
 )
 if [ "${#shell_targets[@]}" -gt 0 ]; then
-  bash -n "${shell_targets[@]}"
+  # One bash -n per file: given several, bash checks only the first.
+  for f in "${shell_targets[@]}"; do bash -n "$f"; done
 fi
 
 # --- python: byte-compile the observation tooling ---

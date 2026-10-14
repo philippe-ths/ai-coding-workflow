@@ -128,6 +128,49 @@ fi
 R="$SANDBOX/exitcode"; init_repo "$R"; write_exclude "$R" 16
 assert_exit_zero "reminder path -> exit 0" "$R"
 
+# 11. A tool-managed block (claude-code-runtime) is not a decision to hide anything.
+write_managed() {
+  local d="$1" i
+  printf '# claude-code-runtime\n' >> "$d/.git/info/exclude"
+  i=1
+  while [ "$i" -le 10 ]; do echo "**/.claude/runtime-$i" >> "$d/.git/info/exclude"; i=$((i + 1)); done
+}
+R="$SANDBOX/managed-only"; init_repo "$R"; write_exclude "$R" 0; write_managed "$R"
+assert_silent "managed block alone, 10 lines over threshold 5 -> silent" "$(run_hook "$R" 5)"
+
+# 12. Real layout: header, a user entry, then the managed block to EOF -> still silent.
+R="$SANDBOX/managed-user-before"; init_repo "$R"; write_exclude "$R" 0
+echo ".DS_Store" >> "$R/.git/info/exclude"; write_managed "$R"
+assert_silent "one user entry before block -> silent" "$(run_hook "$R" 5)"
+
+# 13. User entries before the block still count.
+R="$SANDBOX/managed-before"; init_repo "$R"; write_exclude "$R" 5; write_managed "$R"
+assert_reminder "5 user entries before block -> reminder" "$(run_hook "$R" 5)"
+
+# 14. User entries after a blank line following the block still count.
+R="$SANDBOX/managed-after"; init_repo "$R"; write_exclude "$R" 0; write_managed "$R"
+printf '\n' >> "$R/.git/info/exclude"
+for i in 1 2 3 4 5; do echo "after-$i.md" >> "$R/.git/info/exclude"; done
+assert_reminder "5 user entries after block -> reminder" "$(run_hook "$R" 5)"
+
+# 15. A comment line ends the block; entries after it count.
+R="$SANDBOX/managed-comment"; init_repo "$R"; write_exclude "$R" 0; write_managed "$R"
+printf '# mine\n' >> "$R/.git/info/exclude"
+for i in 1 2 3 4 5; do echo "mine-$i.md" >> "$R/.git/info/exclude"; done
+assert_reminder "comment line ends block; 5 entries after -> reminder" "$(run_hook "$R" 5)"
+
+# 16. An unknown marker is not a managed block.
+R="$SANDBOX/unknown-marker"; init_repo "$R"; write_exclude "$R" 0
+printf '# some-other-tool\n' >> "$R/.git/info/exclude"
+for i in 1 2 3 4 5; do echo "x-$i" >> "$R/.git/info/exclude"; done
+assert_reminder "unknown marker block still counts -> reminder" "$(run_hook "$R" 5)"
+
+# 17. Entries a person appends straight after the block, with no separator, still count:
+#     the block runs to EOF, so only the tool's own prefix is exempt inside it.
+R="$SANDBOX/managed-appended"; init_repo "$R"; write_exclude "$R" 0; write_managed "$R"
+for i in 1 2 3 4 5; do echo "/.claude/mine-$i.md" >> "$R/.git/info/exclude"; done
+assert_reminder "5 entries appended inside block -> reminder" "$(run_hook "$R" 5)"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed."
 [ "$FAIL" -eq 0 ]

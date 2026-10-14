@@ -6,6 +6,46 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.31.5 - 2026-10-13
+
+Failure analysis now recognises non-convergence as its trigger, so an agent the workflow sends there for it does not conclude the stop does not apply.
+
+### Fixed
+
+- `aiw-failure-analysis`: non-convergence (attempts that repair one surface while reopening another, or repeat an approach without new evidence) beyond the one fix and smaller retry a failed loop gets is a trigger though nothing was declared done; the audit is run against the plan, skipping the audits that examine a sign-off ([#251]).
+
+## 5.31.4 - 2026-10-13
+
+An upkeep run that finishes part of an issue and leaves the rest to the human no longer leaves that rest for the next unattended run.
+
+### Fixed
+
+- `aiw-upkeep`: a run that leaves part of an issue to the human, whether it stopped or finished the rest, swaps `aiw:upkeep` for `aiw:direction` and comments what remains and where the work is; a pull request that does not complete its issue refers to it without a closing keyword. `aiw-github`: post-merge cleanup closes the issue only if the pull request completed it ([#341]).
+
+## 5.31.3 - 2026-10-13
+
+A ceremony judge that did not act no longer reads as having answered, and its run log keeps the probabilities behind each answer.
+
+### Fixed
+
+- `.ai-policy/jev/ask.py`: when `act` is false, `answer` is null and the likeliest level is reported as `lean`; each run log row records `lean` and the per-level `probabilities`. `aiw-planning` reports a judge that did not act as no answer, with its lean and confidence ([#340]).
+
+## 5.31.2 - 2026-10-13
+
+The session-start clutter note no longer fires on every session where Claude Code runs.
+
+### Fixed
+
+- `.ai-policy/hooks/check-hidden-clutter.sh`: entries in a tool-managed block of `.git/info/exclude`, headed by its marker comment (`# claude-code-runtime`), no longer count toward the threshold when they carry the tool's own `**/.claude/` prefix; entries a person added, including ones appended straight after the block, still do ([#364]).
+
+## 5.31.1 - 2026-10-13
+
+Validation now syntax-checks every policy-layer script; before, a syntax error in any script but the first passed.
+
+### Fixed
+
+- `.ai-policy/scripts/project-validation.sh`: runs `bash -n` once per file across `.ai-policy/scripts`, `.ai-policy/hooks` and `.githooks`, naming each file that fails; one call over all of them checked only the first ([#391]).
+
 ## 5.31.0 - 2026-10-13
 
 The agent works in small loops: one change, the check that covers it, a commit. A loop that fails returns to the last commit instead of being patched on top of. Commits are checkpoints, so a fresh install no longer requires a validation pass to commit; the full checks run at the start of a task and before push, which still requires a pass.
@@ -1312,3 +1352,8 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#384]: https://github.com/philippe-ths/ai-coding-workflow/issues/384
 [#390]: https://github.com/philippe-ths/ai-coding-workflow/issues/390
 [#385]: https://github.com/philippe-ths/ai-coding-workflow/issues/385
+[#391]: https://github.com/philippe-ths/ai-coding-workflow/issues/391
+[#364]: https://github.com/philippe-ths/ai-coding-workflow/issues/364
+[#340]: https://github.com/philippe-ths/ai-coding-workflow/issues/340
+[#341]: https://github.com/philippe-ths/ai-coding-workflow/issues/341
+[#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
