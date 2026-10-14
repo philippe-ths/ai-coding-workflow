@@ -15,7 +15,7 @@ The workflow knows what the system does, because the codebase says so. It knows 
 
 The goal, and one line beside it: the horizon.
 
-`Horizon: one-shot` or `Horizon: long-lived` says how long the project will be worked on. It is a direction call like the goal, so it comes from the human, and what it means for structure, tests and debt is the agent's to work out. A project with no line is treated as long-lived. The policy layer reads the line, so keep that exact form.
+`Horizon: one-shot` or `Horizon: long-lived` says how long the project will be worked on. It is a direction call like the goal, so it comes from the human. A one-shot project is spared the session-start note on large files still growing; it is never a reason to verify less. A project with no line is treated as long-lived. The policy layer reads the line, so keep that exact form.
 
 Short is the point rather than a courtesy. The ceiling is 400 tokens, and a north-star approaching it has stopped being one. This is read at the start of every task, so anything in it that does not change a decision is taken from the work. A goal that has grown into a list of everything the project does has stopped being a goal.
 
@@ -52,7 +52,7 @@ Never widen the goal to accommodate the request in front of you. A goal stretche
 
 ## Updating
 
-The goal changes rarely, and when it does it is because the project became something else. That is worth recording plainly rather than smoothing over.
+The goal changes rarely, and when it does it is because the project became something else. That is worth recording plainly rather than smoothing over. A one-shot project still being worked on weeks later has become something else: say so, and ask whether the horizon moved.
 
 ## Anti-Patterns
 
