@@ -58,14 +58,17 @@ for s in $c_list; do
     NR==1 && $0 != "---" { print "!"; exit }
     /^---$/ { n++; if (n==2) exit; next }
     n==1 && /^name:/ && !gotn { sub(/^name:[[:space:]]*/,""); print "N" $0; gotn=1; next }
-    n==1 && /^description:/ && !gotd { sub(/^description:[[:space:]]*/,""); print "D" $0; gotd=1; next }
+    n==1 && /^description:/ && !gotd { sub(/^description:[[:space:]]*/,""); print "D" $0; gotd=1; indesc=1; next }
+    n==1 && indesc && /^[[:space:]]+[^[:space:]]/ { print "C"; indesc=0; next }
+    n==1 && /^[^[:space:]]/ { indesc=0 }
   ' "$f")"
-  name=""; desc=""; nofm=0
+  name=""; desc=""; nofm=0; wrapped=0
   while IFS= read -r line; do
     case "$line" in
       "!") nofm=1 ;;
       N*)  name="${line#N}" ;;
       D*)  desc="${line#D}" ;;
+      C)   wrapped=1 ;;
     esac
   done <<< "$info"
   [ "$nofm" -eq 1 ] && { bad "$s: no YAML frontmatter opening"; continue; }
@@ -82,11 +85,15 @@ for s in $c_list; do
   # Every description loads into every session of every target, and older Codex
   # versions refused a skill whose description passed 1024 characters (#152).
   # Bytes, not characters, so the count is the same under any locale. Only an
-  # inline description can be measured from its one line, so a block scalar fails.
+  # inline description can be measured from its one line, so a block scalar fails,
+  # and so does a plain or quoted one wrapped onto indented lines (#377).
   case "$desc" in
     [\>\|]*) bad "$s: description is a YAML block scalar; write it on one line so its size can be checked" ;;
-    *) [ "$(printf '%s' "$desc" | wc -c)" -le "$DESC_MAX" ] \
-         || bad "$s: description is over $DESC_MAX bytes (it loads every session; say when to load the skill, and leave what it owns to the body)" ;;
+    *) if [ "$wrapped" -eq 1 ]; then
+         bad "$s: description continues past its first line; write it on one line so its size can be checked"
+       elif [ "$(printf '%s' "$desc" | wc -c)" -gt "$DESC_MAX" ]; then
+         bad "$s: description is over $DESC_MAX bytes (it loads every session; say when to load the skill, and leave what it owns to the body)"
+       fi ;;
   esac
   [ "$name" = "$s" ] && [ -n "$desc" ] && ok "$s: name matches directory, description present"
 done
