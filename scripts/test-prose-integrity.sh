@@ -132,6 +132,22 @@ for t in .claude .agents; do
 done
 expect "a block-scalar description is caught" fail "$D" "block scalar"
 
+# A plain or quoted scalar may wrap onto indented lines; the one-line read
+# would measure only the first (#377).
+D="$(fixture wrapped-plain-desc)"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-init/SKILL.md" "s/^description:.*\$/description: short first line\\
+  $long/"
+done
+expect "a plain description wrapped past its first line is caught" fail "$D" "past its first line"
+
+D="$(fixture wrapped-quoted-desc)"
+for t in .claude .agents; do
+  edit "$D/$t/skills/aiw-init/SKILL.md" "s/^description:.*\$/description: \"short first line\\
+  $long\"/"
+done
+expect "a quoted description wrapped past its first line is caught" fail "$D" "past its first line"
+
 echo "documented skill set:"
 D="$(fixture undocumented)"
 for t in .claude .agents; do
