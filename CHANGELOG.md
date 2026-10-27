@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.35.2 - 2026-10-27
+
+The agent's first reply now answers the human instead of opening with a line saying it has read the workflow files.
+
+### Changed
+
+- `CLAUDE.md`, `AGENTS.md`, `.github/copilot-instructions.md`: dropped the instruction to confirm having read `ai-workflow.md` and `project-context.md`. Agents read it as an instruction to tell the human, so a field review found the confirmation in replies across target repos. A headless probe showed it in 4 of 4 runs before the change and 0 of 4 after, and Codex still read both files. Claude Code loads them through the `@` lines and the other entry points still say to read them first ([#416]).
+
 ## 5.35.1 - 2026-10-27
 
 The `## Request` section of a pull request now reads on its own: each quoted reply sits beside the question or issue it answered, so the human can compare what they asked with what changed without going back to the conversation.
@@ -1419,4 +1427,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
+[#416]: https://github.com/philippe-ths/ai-coding-workflow/issues/416
 [#408]: https://github.com/philippe-ths/ai-coding-workflow/issues/408
