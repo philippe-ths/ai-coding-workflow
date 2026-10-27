@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.36.0 - 2026-10-27
+
+When the human says delivered work is wrong, the agent is now asked, on that message, whether it contradicts a "done" claim, and sent to `aiw-failure-analysis` before any fix when it does.
+
+### Added
+
+- `.ai-policy/hooks/ask-contradiction.sh`: a `UserPromptSubmit` hook for Claude Code and Codex that adds a short note to every human message: if it says something delivered or claimed is wrong, still broken, untested or not what was asked, load `aiw-failure-analysis` before any other step; otherwise carry on without mentioning it. A field review of 5.35.0 found 32 such messages in 608, and the skill loaded after 1 of them. Not registered for VS Code Copilot ([#370]).
+
 ## 5.35.3 - 2026-10-27
 
 `aiw-github` now says how to pass a pull request body file so the hook can read it on the first try.
@@ -1433,6 +1441,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#251]: https://github.com/philippe-ths/ai-coding-workflow/issues/251
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
+[#370]: https://github.com/philippe-ths/ai-coding-workflow/issues/370
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415
