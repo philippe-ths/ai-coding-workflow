@@ -8,11 +8,11 @@ Every `### Removed` bullet must lead with the removed path as a backticked token
 
 ## 5.35.3 - 2026-10-27
 
-Agents open a pull request without first being blocked over how they passed the body file.
+`aiw-github` now says how to pass a pull request body file so the hook can read it on the first try.
 
 ### Changed
 
-- `aiw-github`: the body file must exist before the command that opens the pull request runs, and be given as a literal path, because the hook reads it before the command runs. A field review counted 28 blocks over these two mechanics across target repos ([#415]).
+- `aiw-github`: write the body file outside the working tree with a file-writing tool, in a call of its own, and pass its literal path, because the hook reads it before the command runs. A field review of 5.35.0 counted 28 blocks over these two mechanics across target repos ([#415]).
 
 ## 5.35.2 - 2026-10-27
 
