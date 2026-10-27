@@ -192,6 +192,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/ask-contradiction.sh\""
+          }
+        ]
+      }
     ]
   }
 }
