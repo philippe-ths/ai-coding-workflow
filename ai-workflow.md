@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.35.3
+Version: 5.36.0
 
 ## First Principles
 
