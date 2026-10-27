@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.35.1 - 2026-10-27
+
+The `## Request` section of a pull request now reads on its own: each quoted reply sits beside the question or issue it answered, so the human can compare what they asked with what changed without going back to the conversation.
+
+### Changed
+
+- `aiw-github`, `aiw-issue-creation`: a quoted reply or pointer ("yes", "a) (Recommended)", "let's do #371") carries what it answered, written unquoted beside it, and the pull request quotes only words about its own task ([#413]).
+
 ## 5.35.0 - 2026-10-14
 
 The human can now shape a request with the agent before it is planned: the agent shows mockups, directions or samples of the finished result until they pick one, and the pick, with their reason in their own words, is recorded on the issue and checked against at handover. When the agent cannot say what done looks like for a request, it offers this in one line and waits for the answer before filing the issue.
@@ -1410,4 +1418,5 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
+[#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#408]: https://github.com/philippe-ths/ai-coding-workflow/issues/408
