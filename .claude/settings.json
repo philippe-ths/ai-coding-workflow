@@ -115,6 +115,14 @@
           }
         ],
         "matcher": "startup|clear"
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/load-preferences.sh\""
+          }
+        ]
       }
     ],
     "PreToolUse": [
