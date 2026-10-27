@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.35.3 - 2026-10-27
+
+`aiw-github` now says how to pass a pull request body file so the hook can read it on the first try.
+
+### Changed
+
+- `aiw-github`: write the body file outside the working tree with a file-writing tool, in a call of its own, and pass its literal path, because the hook reads it before the command runs. A field review of 5.35.0 counted 28 blocks over these two mechanics across target repos ([#415]).
+
 ## 5.35.2 - 2026-10-27
 
 The agent's first reply now answers the human instead of opening with a line saying it has read the workflow files.
@@ -1427,5 +1435,6 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
+[#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415
 [#416]: https://github.com/philippe-ths/ai-coding-workflow/issues/416
 [#408]: https://github.com/philippe-ths/ai-coding-workflow/issues/408
