@@ -12,7 +12,7 @@ When the human says delivered work is wrong, the agent is now asked, on that mes
 
 ### Added
 
-- `.ai-policy/hooks/ask-contradiction.sh`: a `UserPromptSubmit` hook for Claude Code and Codex that adds a short note to every human message: if it says something delivered or claimed is wrong, still broken, untested or not what was asked, load `aiw-failure-analysis` before any other step; otherwise carry on without mentioning it. A field review of 5.35.0 found 32 such messages in 608, and the skill loaded after 1 of them. Not registered for VS Code Copilot ([#370]).
+- `.ai-policy/hooks/ask-contradiction.sh`: a `UserPromptSubmit` hook for Claude Code and Codex that adds a short note to every human message: if it says delivered work, or a result the agent said was done, is wrong, still broken, unchecked or not what was asked, load `aiw-failure-analysis` before any other step; otherwise carry on without mentioning it. A field review of 5.35.0 labelled 32 of 608 human messages as such contradictions, and the skill loaded after 1 of them. Not registered for VS Code Copilot, where whether a prompt hook's added context reaches the agent is unverified ([#370]).
 
 ## 5.35.3 - 2026-10-27
 

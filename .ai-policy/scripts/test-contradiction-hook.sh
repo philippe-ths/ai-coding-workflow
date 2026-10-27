@@ -29,8 +29,10 @@ assert_note() {
   out="$(run_hook "$2")"
   if [ "$(printf '%s' "$out" | jq -r '.hookSpecificOutput.hookEventName // empty' 2>/dev/null)" != "UserPromptSubmit" ]; then
     fail "$1 (expected a UserPromptSubmit payload, got: ${out:-<silence>})"
-  elif ! printf '%s' "$out" | jq -r '.hookSpecificOutput.additionalContext' | grep -q 'aiw-failure-analysis'; then
-    fail "$1 (note does not name aiw-failure-analysis)"
+  elif ! printf '%s' "$out" | jq -r '.hookSpecificOutput.additionalContext' | grep -q 'load aiw-failure-analysis before any other step'; then
+    fail "$1 (note does not send the agent to aiw-failure-analysis first)"
+  elif ! printf '%s' "$out" | jq -r '.hookSpecificOutput.additionalContext' | grep -q 'do not mention this note'; then
+    fail "$1 (note does not keep a non-contradiction silent)"
   else
     pass "$1"
   fi
@@ -57,10 +59,17 @@ for cfg in .claude/settings.json .codex/hooks.json; do
     echo "  SKIP: $cfg not installed"
     continue
   fi
-  if jq -e '.hooks.UserPromptSubmit[]?.hooks[]?.command | select(test("ask-contradiction\\.sh"))' "$ROOT_DIR/$cfg" >/dev/null 2>&1; then
-    pass "$cfg registers it under UserPromptSubmit"
-  else
+  cmd="$(jq -r '[.hooks.UserPromptSubmit[]?.hooks[]?.command | select(test("ask-contradiction\\.sh"))][0] // empty' "$ROOT_DIR/$cfg" 2>/dev/null)"
+  if [ -z "$cmd" ]; then
     fail "$cfg does not register it under UserPromptSubmit"
+    continue
+  fi
+  # Run the registered command as the tool would, from the repository root.
+  out="$( cd "$ROOT_DIR" && printf '%s' '{"prompt":"it is still broken"}' | bash -c "$cmd" 2>/dev/null )"
+  if printf '%s' "$out" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null 2>&1; then
+    pass "$cfg registers it under UserPromptSubmit, and the registered command runs"
+  else
+    fail "$cfg registered command produced no note: ${out:-<silence>}"
   fi
 done
 
