@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.37.0 - 2026-10-27
+
+A working preference the human states once now holds in their later sessions and in every repository using the workflow, kept in one file they can read and edit.
+
+### Added
+
+- `.ai-policy/hooks/load-preferences.sh`: a `SessionStart` hook for Claude Code and Codex that loads `~/.aiw/preferences.md` into every session, compaction included, and is silent when the file is absent or empty. Not registered for VS Code Copilot, where no session-start hook is registered ([#419]).
+
+### Changed
+
+- `ai-workflow.md`: a working preference the human states is written to `~/.aiw/preferences.md` before the agent says it will follow it. A field review of 5.35.0 found the same preference restated in two repositories, and one promised "from now on" broken six days later with nothing written ([#419]).
+
 ## 5.36.0 - 2026-10-27
 
 When the human says delivered work is wrong, the agent is now asked, on that message, whether it contradicts a "done" claim, and sent to `aiw-failure-analysis` before any fix when it does.
@@ -1442,6 +1454,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#402]: https://github.com/philippe-ths/ai-coding-workflow/issues/402
 [#371]: https://github.com/philippe-ths/ai-coding-workflow/issues/371
 [#370]: https://github.com/philippe-ths/ai-coding-workflow/issues/370
+[#419]: https://github.com/philippe-ths/ai-coding-workflow/issues/419
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415

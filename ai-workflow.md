@@ -1,6 +1,6 @@
 # AI Workflow
 
-Version: 5.36.0
+Version: 5.37.0
 
 ## First Principles
 
@@ -37,6 +37,7 @@ Protect your context window and the human's quota, but never by doing less than 
 - ALWAYS treat non-convergence as evidence: when successive attempts repair one surface while reopening another, or repeat an approach without new evidence, stop implementation and invoke aiw-failure-analysis.
 - ALWAYS say when a reading is uncertain, and take the one a careful colleague would rather than stopping; stop only when no reading is safe to act on, or a wrong one would mean redoing the work rather than adjusting it.
 - ALWAYS resolve or track what you find outside the task: fix it when it is smaller than the sentence describing it, file it when it is not, and tell the human only what changes a decision of theirs.
+- ALWAYS write a working preference the human states, how they want you to work rather than what this task needs, to `~/.aiw/preferences.md` before saying you will follow it, editing the entry it changes rather than adding a second. That file loads in every session in every repository, so an entry that holds in one repository names it. A "from now on" with nothing written is a promise the next session cannot keep.
 
 ### Never Do
 
