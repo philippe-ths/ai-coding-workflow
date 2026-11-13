@@ -12,6 +12,8 @@ weekly use at or below its even pace (100/7 % per elapsed day of the weekly wind
 and room left in the 5-hour window. The task-level limit (Light and Standard only)
 is not checked here: aiw-upkeep owns it and escalates anything wider.
 
+A project whose path is a line of `excluded-projects` in the state dir is never picked.
+
 Overrides, for testing: AIW_UPKEEP_HOME (state dir), AIW_UPKEEP_PROJECTS (transcripts
 dir), AIW_UPKEEP_NOW (epoch seconds).
 """
@@ -32,6 +34,7 @@ QUOTA = STATE / "quota.json"
 LOG = STATE / "runs.jsonl"
 LOCK = STATE / "run.lock"
 PENDING = STATE / "work-mode-pending.json"
+EXCLUDED = STATE / "excluded-projects"
 
 RECENT_DAYS = 7
 WEEKLY_PACE_PER_DAY = 100 / 7
@@ -154,6 +157,11 @@ def gh_json(repo, args):
 
 def assess(repo, t):
     """Score one repo by the issues aiw-upkeep would actually pick, or say why it is skipped."""
+    try:
+        if repo in EXCLUDED.read_text().split("\n"):
+            return {"skip": "excluded by the human"}
+    except OSError:
+        pass
     if not (Path(repo) / "ai-workflow.md").is_file():
         return {"skip": "workflow not installed"}
     parked = in_work_mode(repo)

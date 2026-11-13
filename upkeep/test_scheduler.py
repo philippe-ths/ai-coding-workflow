@@ -140,6 +140,25 @@ class StopReasons(unittest.TestCase):
         self.assertEqual(rec["stopped"], "could not read GitHub for 1 project(s)")
         self.assertNotIn("findings", rec)
 
+    def test_an_excluded_project_is_skipped_before_github_is_read(self):
+        repo, other = tempfile.mkdtemp(), tempfile.mkdtemp()
+        for r in (repo, other):
+            os.makedirs(os.path.join(r, ".claude", "skills", "aiw-upkeep"))
+            open(os.path.join(r, "ai-workflow.md"), "w").close()
+            open(os.path.join(r, ".claude", "skills", "aiw-upkeep", "SKILL.md"), "w").close()
+        scheduler.EXCLUDED.write_text(f"/elsewhere\n{repo}\n")
+        def offline(*a, **k):
+            raise RuntimeError("gh read")
+        real = scheduler.sh
+        scheduler.sh = offline
+        try:
+            got, kept = scheduler.assess(repo, T), scheduler.assess(other, T)
+        finally:
+            scheduler.sh = real
+            scheduler.EXCLUDED.unlink()
+        self.assertEqual(got, {"skip": "excluded by the human"})
+        self.assertIn("gh read", kept["skip"])
+
     def test_a_multi_line_gh_error_is_logged_on_one_line(self):
         repo = tempfile.mkdtemp()
         os.makedirs(os.path.join(repo, ".claude", "skills", "aiw-upkeep"))
