@@ -76,7 +76,12 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - Normal: no entries, unless the job is one you installed deliberately and its status column reads `0`.
 - Matters: a launchd agent outlives the code it calls, so a removed subsystem leaves a job firing on a timer against a path that no longer exists. Nothing in the repository reports this, because the job lives in the user's global config, not here.
 - Remedy when one is found: `launchctl bootout gui/$(id -u)/<label>` then `rm ~/Library/LaunchAgents/<label>.plist`. Read the plist's `ProgramArguments` first to confirm what it calls; if that path still exists, the job is live and should be left alone.
-- The observation tool is the one subsystem here that installs outside the repository. `./observation/uninstall-observation.sh` removes what it registered; run it before deleting this repository.
+- The observation tool and the upkeep scheduler install outside the repository. `./observation/uninstall-observation.sh` and `./upkeep/uninstall-upkeep.sh` remove what each registered; run them before deleting this repository.
+
+### Upkeep scheduler
+- Check: `launchctl print gui/$(id -u)/com.aiw.upkeep | grep 'last exit code'`, and `diff -q upkeep/scheduler.py ~/.claude/aiw-upkeep/scheduler.py`
+- Normal: `com.aiw.upkeep` is the one deliberate entry the job check above finds; last exit code `0`; the two scheduler files identical.
+- Matters: `install-upkeep.sh` copies the scheduler rather than linking it, so the copy that runs nightly drifts from the repository in either direction. A repository change never reaches the job until a reinstall, and an edit made to the installed copy is lost at the next one.
 
 ## Cost of the Checks
 
