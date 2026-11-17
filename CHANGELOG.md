@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.37.1 - 2026-11-17
+
+A preference the agent records now reads as a general instruction, not as the moment that prompted it.
+
+### Changed
+
+- `ai-workflow.md`: a recorded working preference is written with `aiw-prompt-smith`, as the principle, worded to apply beyond the case that prompted it, since every later session reads it as an instruction. An entry written as "When Phil asks for a new method or system (e.g. pricing)", with the human's quoted words, was read as a pricing rule ([#430]).
+
 ## 5.37.0 - 2026-10-27
 
 A working preference the human states once now holds in their later sessions and in every repository using the workflow, kept in one file they can read and edit.
@@ -1456,6 +1464,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#370]: https://github.com/philippe-ths/ai-coding-workflow/issues/370
 [#419]: https://github.com/philippe-ths/ai-coding-workflow/issues/419
 [#424]: https://github.com/philippe-ths/ai-coding-workflow/issues/424
+[#430]: https://github.com/philippe-ths/ai-coding-workflow/issues/430
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415
