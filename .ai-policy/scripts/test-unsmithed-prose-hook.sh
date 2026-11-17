@@ -32,6 +32,13 @@ HUMAN='{"type":"user","message":{"role":"user","content":"please update the rule
 SLASH='{"type":"user","message":{"role":"user","content":"<command-name>/aiw-prompt-smith</command-name>"}}'
 COMPACT='{"type":"user","isCompactSummary":true,"message":{"role":"user","content":"This session is being continued from a previous conversation."}}'
 QUEUED='{"type":"attachment","attachment":{"type":"queued_command","prompt":"what are you doing?"}}'
+TYPED='{"type":"user","origin":{"kind":"human"},"promptSource":"typed","message":{"role":"user","content":"carry on"}}'
+NOTIFY='{"type":"user","origin":{"kind":"task-notification"},"promptSource":"system","message":{"role":"user","content":"<task-notification>done</task-notification>"}}'
+CONTINUE='{"type":"user","origin":{"kind":"auto-continuation"},"promptSource":"system","message":{"role":"user","content":"continue"}}'
+HEADLESS='{"type":"user","promptSource":"sdk","message":{"role":"user","content":"fix the spelling"}}'
+QUEUED_HUMAN='{"type":"attachment","attachment":{"type":"queued_command","origin":{"kind":"human"},"prompt":"one more thing"}}'
+QUEUED_NOTIFY='{"type":"attachment","attachment":{"type":"queued_command","origin":{"kind":"task-notification"},"prompt":"<task-notification>done</task-notification>"}}'
+QUEUED_PEER='{"type":"attachment","attachment":{"type":"queued_command","origin":{"kind":"peer"},"prompt":"<agent-message>report</agent-message>"}}'
 SKILL='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"aiw-prompt-smith"}}]}}'
 OTHER_SKILL='{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Skill","input":{"skill":"aiw-github"}}]}}'
 SKILL_BODY='{"type":"user","isMeta":true,"message":{"content":[{"type":"text","text":"Base directory for this skill: .../aiw-prompt-smith"}]}}'
@@ -68,6 +75,20 @@ T="$(transcript "$HUMAN" "$SKILL" "$COMPACT")"
 expect 2 "a compaction summary after the load blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
 T="$(transcript "$HUMAN" "$SKILL" "$QUEUED")"
 expect 2 "a message sent mid-turn after the load blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$TYPED")"
+expect 2 "a typed message marked as from the human after the load blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$NOTIFY")"
+expect 0 "a background-task notification after the load is not the human speaking" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$CONTINUE")"
+expect 0 "an automatic continuation after the load is not the human speaking" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$SKILL" "$HEADLESS")"
+expect 2 "a headless run's prompt after the load blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$QUEUED_HUMAN")"
+expect 2 "a mid-turn message marked as from the human after the load blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$QUEUED_NOTIFY")"
+expect 0 "a notification queued mid-turn after the load is not the human speaking" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
+T="$(transcript "$HUMAN" "$SKILL" "$QUEUED_PEER")"
+expect 0 "another agent's message queued mid-turn after the load is not the human speaking" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
 T="$(transcript "$HUMAN" "$OTHER_SKILL")"
 expect 2 "loading a different skill blocks" "$(hook "$T" Write "$(write_to "$REPO/CLAUDE.md")")"
 T="$(transcript "$HUMAN" "$MENTION")"

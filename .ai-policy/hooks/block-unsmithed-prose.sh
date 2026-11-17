@@ -177,9 +177,10 @@ verdict="$(reverse "$TRANSCRIPT" 2>/dev/null | jq -nrR '
             or (.name == "Read" and ((.input.file_path // "") | endswith("aiw-prompt-smith/SKILL.md"))))))
     or (.type == "response_item" and (.payload.type // "" | test("call$")) and (.payload | loads));
   def human:
-    (.type == "user" and .isMeta != true
+    (.type == "user" and .isMeta != true and ((.origin.kind // "human") == "human")
        and ((.message.content | type) == "string" or all(.message.content[]?; .type != "tool_result")))
-    or (.type == "attachment" and .attachment.type == "queued_command")
+    or (.type == "attachment" and .attachment.type == "queued_command"
+          and ((.attachment.origin.kind // "human") == "human"))
     or (.type == "event_msg" and .payload.type == "user_message");
   first(inputs | fromjson? | objects
         | if skill_load then "pass"
