@@ -6,6 +6,18 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.38.0 - 2026-11-17
+
+A file later agents read as instructions can no longer be written until the agent has loaded `aiw-prompt-smith` since the human last spoke, so a recorded preference or rule is written as a general instruction rather than as the incident that prompted it.
+
+### Added
+
+- `.ai-policy/hooks/block-unsmithed-prose.sh`: a `PreToolUse` hook for Claude Code (file tools and Bash) and Codex (Bash) that blocks a write to agent-read prose unless the session transcript shows `aiw-prompt-smith` loaded since the human's last message or the last compaction. It covers the skill and agent directories, entry points and their `@` includes, `project-context.md`, `project-checks.md`, `north-star.md`, any `CLAUDE.md`, `AGENTS.md` or `SKILL.md`, and outside the repository `~/.aiw/`, user-level skills, agents and commands, and Claude memory. Shell writes are matched on the command string. Not registered for VS Code Copilot. A preference written as "When Phil asks for a new method or system (e.g. pricing)", with the human's quoted words, was read as a pricing rule, and the agent had not loaded the skill whose description covered the file ([#430]).
+
+### Changed
+
+- `.ai-policy/hooks/lib-agent-read-paths.sh`: the `@` include resolver moves out of `check-pr-verification.sh` so both hooks find agent-facing prose the same way ([#430]).
+
 ## 5.37.0 - 2026-10-27
 
 A working preference the human states once now holds in their later sessions and in every repository using the workflow, kept in one file they can read and edit.
@@ -1456,6 +1468,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#370]: https://github.com/philippe-ths/ai-coding-workflow/issues/370
 [#419]: https://github.com/philippe-ths/ai-coding-workflow/issues/419
 [#424]: https://github.com/philippe-ths/ai-coding-workflow/issues/424
+[#430]: https://github.com/philippe-ths/ai-coding-workflow/issues/430
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415
