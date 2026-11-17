@@ -12,7 +12,7 @@ A preference the agent records now reads as a general instruction, not as the mo
 
 ### Changed
 
-- `ai-workflow.md`: a recorded working preference is written with `aiw-prompt-smith`, as the principle, worded to apply beyond the case that prompted it, since every later session reads it as an instruction. An entry written as "When Phil asks for a new method or system (e.g. pricing)", with the human's quoted words, was read as a pricing rule ([#430]).
+- `ai-workflow.md`: a recorded working preference is written with `aiw-prompt-smith`, as the principle behind what the human said, worded to apply beyond the case that prompted it, since every later session reads it as an instruction. An entry written as "When Phil asks for a new method or system (e.g. pricing)", with the human's quoted words, was read as a pricing rule ([#430]).
 
 ## 5.37.0 - 2026-10-27
 
