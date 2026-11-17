@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 2.4.0
+Version: 2.5.0
 
 ## Product Summary
 - This repository is a project-agnostic AI coding workflow: rules, skills, and a policy layer that an installer copies into a target repository for Claude Code, Codex, or VS Code Copilot.
@@ -16,6 +16,7 @@ Version: 2.4.0
 - The agent cannot merge or approve a pull request; hooks block both on the shell and MCP routes.
 - Opening or editing a pull request is blocked unless the body carries a verification justification and its unverified-surface section is more than a bare "none".
 - That body must also record an `aiw-prompt-smith` pass when the branch changed agent-facing prose: skills, agent files, `ai-workflow.md`, the entry points, or a file an entry point pulls in with an `@` line, which includes this file.
+- A write to a file later agents read as instructions, in or outside this repository, is blocked until `aiw-prompt-smith` has been loaded since the human's last message.
 - Every pull request body must carry a `Request` heading with at least one `>` quote line under it that is not a bare "none".
 - The pull request hook must read the body before the command runs, so it blocks a body file path built from a shell variable and a body file the same command creates.
 - A version bump in `ai-workflow.md` needs a matching `CHANGELOG.md` entry; the pre-push hook rejects it otherwise.

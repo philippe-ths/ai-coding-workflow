@@ -166,6 +166,10 @@
           {
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/remind-context-management.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-unsmithed-prose.sh\""
           }
         ]
       },
@@ -197,6 +201,10 @@
           {
             "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/remind-context-management.sh\""
+          },
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.ai-policy/hooks/block-unsmithed-prose.sh\""
           }
         ]
       }
