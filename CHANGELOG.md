@@ -12,7 +12,7 @@ A background task finishing no longer counts as the human speaking, so a write t
 
 ### Fixed
 
-- `.ai-policy/hooks/block-unsmithed-prose.sh`: transcript lines Claude Code writes on the system's behalf, marked by a non-human `origin.kind` such as a task notification or an automatic continuation, no longer reset the window a skill load counts in ([#433]).
+- `.ai-policy/hooks/block-unsmithed-prose.sh`: transcript lines Claude Code writes on the system's behalf, marked by a non-human `origin.kind` such as a task notification, another agent's message or an automatic continuation, whether they arrive between turns or mid-turn, no longer reset the window a skill load counts in ([#433]).
 
 ## 5.38.0 - 2026-11-17
 
