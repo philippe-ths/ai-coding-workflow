@@ -21,9 +21,10 @@
 # text did not survive it. A sub-agent is judged by its own transcript.
 #
 # The shell route matches the command string, as the other hooks here do: a
-# redirect, tee, sed -i or perl -i, or the destination of cp, mv or install,
-# naming one of these files. A command can be written so it is missed, and a
-# heredoc that merely mentions one after a ">" is caught; loading the skill is
+# redirect, tee, sed -i or perl -i, the destination of cp, mv or install, or a
+# quoted string in inline interpreter code that writes files, naming one of
+# these files. A command can be written so it is missed, and one that merely
+# mentions such a file where a write could be is caught; loading the skill is
 # the cost of the second.
 #
 # When the evidence cannot be read (no jq, no transcript), it allows: a check
@@ -80,7 +81,7 @@ agent_read() {
     *.instructions.md|*.prompt.md|*.agent.md) return 0 ;;
   esac
   case "$p" in
-    "$HOME"/.aiw/*|"$HOME"/.claude/projects/*/memory/*) return 0 ;;
+    "$HOME"/.aiw/*.md|"$HOME"/.claude/projects/*/memory/*.md) return 0 ;;
     "$HOME"/.claude/skills/*|"$HOME"/.claude/agents/*|"$HOME"/.claude/commands/*) return 0 ;;
     "$HOME"/.codex/skills/*|"$HOME"/.agents/skills/*|"$HOME"/.codex/prompts/*) return 0 ;;
   esac
@@ -102,20 +103,44 @@ agent_read() {
   prose_includes "$root" HEAD 2>/dev/null | grep -qxF -- "$rel"
 }
 
-# Candidate written paths from a shell command, one per line.
+# Candidate written paths from a shell command, one per line. A relative path
+# is taken from the directory the last `cd` in the command moved to.
 shell_targets() {
+  local interp="no" base="" seg out c
+  # Inline code in an interpreter that writes files: every quoted string in the
+  # command is a candidate, since the code names its target as a string. Agents
+  # edit these files this way about as often as with sed.
+  if printf '%s' "$1" | grep -Eq '(^|[^[:alnum:]_])(python3?|node|ruby|perl|php)([[:space:]]|$)' \
+    && printf '%s' "$1" | grep -Eq "open\([^)]*['\"][wa]|write_text|\.write(lines)?\(|json\.dump|(write|append)File|File\.write"; then
+    interp="yes"
+  fi
   printf '%s\n' "$1" | awk '{ gsub(/&&|\|\||;|\|/, "\n"); print }' | while IFS= read -r seg; do
-    printf '%s\n' "$seg" | grep -oE '[0-9&]?>>?[[:space:]]*[^[:space:]<>&|;]+' | sed -E 's/^[0-9&]?>>?[[:space:]]*//'
-    case " $seg " in
-      *" tee "*) printf '%s\n' "${seg#*tee }" | tr ' ' '\n' | grep -v '^-' ;;
-    esac
-    if printf '%s' "$seg" | grep -Eq '(^|[[:space:]])(sed|perl)[[:space:]]+(-[^[:space:]]*[[:space:]]+)*-[[:alnum:]]*i'; then
-      printf '%s\n' "$seg" | tr ' ' '\n' | grep -v '^-'
+    if printf '%s' "$seg" | grep -Eq '^[[:space:]]*cd[[:space:]]+[^[:space:]]'; then
+      base="$(printf '%s' "$seg" | sed -E "s/^[[:space:]]*cd[[:space:]]+//; s/^[\"']//; s/[\"'][[:space:]]*\$//; s/[[:space:]]+\$//")"
+      continue
     fi
-    if printf '%s' "$seg" | grep -Eq '^[[:space:]]*(sudo[[:space:]]+)?(cp|mv|install)[[:space:]]'; then
-      printf '%s\n' "$seg" | awk '{ print $NF }'
-    fi
-  done | sed -E "s/^[\"']+//; s/[\"')]+\$//" | grep -v '^$'
+    out="$(
+      printf '%s\n' "$seg" | grep -oE '[0-9&]?>>?[[:space:]]*[^[:space:]<>&|;]+' | sed -E 's/^[0-9&]?>>?[[:space:]]*//'
+      case " $seg " in
+        *" tee "*) printf '%s\n' "${seg#*tee }" | tr ' ' '\n' | grep -v '^-' ;;
+      esac
+      if printf '%s' "$seg" | grep -Eq '(^|[[:space:]])(sed|perl)[[:space:]]+(-[^[:space:]]*[[:space:]]+)*-[[:alnum:]]*i'; then
+        printf '%s\n' "$seg" | tr ' ' '\n' | grep -v '^-'
+      fi
+      if printf '%s' "$seg" | grep -Eq '^[[:space:]]*(sudo[[:space:]]+)?(cp|mv|install)[[:space:]]'; then
+        printf '%s\n' "$seg" | awk '{ print $NF }'
+      fi
+      if [ "$interp" = "yes" ]; then
+        printf '%s\n' "$seg" | grep -oE "\"[^\"]+\"|'[^']+'"
+      fi
+    )"
+    printf '%s\n' "$out" | sed -E "s/^[\"']+//; s/[\"')]+\$//" | grep -v '^$' | while IFS= read -r c; do
+      case "$c" in
+        /*|"~"*|"\$HOME"*) printf '%s\n' "$c" ;;
+        *) printf '%s\n' "${base:+$base/}$c" ;;
+      esac
+    done
+  done
 }
 
 hits=""

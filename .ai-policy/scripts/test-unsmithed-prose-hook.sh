@@ -109,6 +109,15 @@ expect 2 "sed -i is checked" "$(hook "$T" Bash "$(shell "sed -i '' 's/a/b/' docs
 expect 2 "the destination of cp is checked" "$(hook "$T" Bash "$(shell "cp /tmp/x.md CLAUDE.md")")"
 expect 0 "the source of cp is not" "$(hook "$T" Bash "$(shell "cp CLAUDE.md /tmp/x.md")")"
 expect 0 "reading an agent-read file is not" "$(hook "$T" Bash "$(shell "grep -n rule CLAUDE.md docs/rules.md")")"
+expect 2 "inline python that writes the file is checked" "$(hook "$T" Bash "$(shell "python3 - <<'EOF'
+p='docs/rules.md'; s=open(p).read()
+open(p,'w').write(s.replace('a','b'))
+EOF")")"
+expect 2 "a relative path follows the command's cd" "$(hook "$T" Bash "$(shell "cd $FAKE_HOME/.aiw && python3 - <<'EOF'
+p='preferences.md'; s=open(p).read(); open(p,'w').write(s)
+EOF")")"
+expect 2 "the destination after a cd is checked" "$(hook "$T" Bash "$(shell "cd docs && printf x > rules.md")")"
+expect 0 "inline python that only reads the file is not" "$(hook "$T" Bash "$(shell "python3 -c 'print(open(\"CLAUDE.md\").read())'")")"
 
 echo "block-unsmithed-prose hook, registration:"
 if jq -e '.hooks.PreToolUse[] | select(.matcher == "Write|Edit|MultiEdit|NotebookEdit") | .hooks[] | select(.command | contains("block-unsmithed-prose.sh"))' "$ROOT_DIR/.claude/settings.json" >/dev/null \
