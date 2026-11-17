@@ -6,6 +6,14 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.38.1 - 2026-11-17
+
+A background task finishing no longer counts as the human speaking, so a write to agent-read prose is not blocked again when `aiw-prompt-smith` was already loaded for the human's last message.
+
+### Fixed
+
+- `.ai-policy/hooks/block-unsmithed-prose.sh`: transcript lines Claude Code writes on the system's behalf, marked by a non-human `origin.kind` such as a task notification or an automatic continuation, no longer reset the window a skill load counts in ([#433]).
+
 ## 5.38.0 - 2026-11-17
 
 A file later agents read as instructions can no longer be written until the agent has loaded `aiw-prompt-smith` since the human last spoke, so a recorded preference or rule is written as a general instruction rather than as the incident that prompted it.
@@ -1469,6 +1477,7 @@ Major redesign of the workflow structure. The 14-step numbered workflow plus ref
 [#419]: https://github.com/philippe-ths/ai-coding-workflow/issues/419
 [#424]: https://github.com/philippe-ths/ai-coding-workflow/issues/424
 [#430]: https://github.com/philippe-ths/ai-coding-workflow/issues/430
+[#433]: https://github.com/philippe-ths/ai-coding-workflow/issues/433
 [#405]: https://github.com/philippe-ths/ai-coding-workflow/issues/405
 [#413]: https://github.com/philippe-ths/ai-coding-workflow/issues/413
 [#415]: https://github.com/philippe-ths/ai-coding-workflow/issues/415
