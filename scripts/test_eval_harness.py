@@ -197,6 +197,8 @@ e.write()
 code, out = e.gate("pilot", "--approved-runs", "4")
 check("changed eval refused", code, 1)
 check_in("says why", "changed after freeze", out)
+e.gate("freeze")
+check("freezing again before any run is still version 1", e.state()["version"], 1)
 
 # --- changing the eval after results exist is a new version, said in the report ---
 e = Eval(cases(("bad", "bad")))

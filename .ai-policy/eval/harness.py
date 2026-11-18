@@ -156,12 +156,14 @@ def negatives(spec):
 def gate_freeze(d, args):
     spec, digest = load_spec(d)
     state = load_state(d)
-    version = state.get("version", 0) + 1
+    # The version counts evals whose results were seen, so freezing again before any run keeps it.
+    version = state.get("version", 1)
     if os.path.isdir(os.path.join(d, "runs")) and state.get("hash") != digest:
         if not args.new_version:
             raise Refused("runs exist for an earlier eval.json. Changing the eval after seeing results "
                           "is a new eval: pass --new-version to archive them and say so in the report")
-        shutil.move(os.path.join(d, "runs"), os.path.join(d, f"runs.v{version - 1}"))
+        shutil.move(os.path.join(d, "runs"), os.path.join(d, f"runs.v{version}"))
+        version += 1
     problems = []
 
     def need(cond, msg):
