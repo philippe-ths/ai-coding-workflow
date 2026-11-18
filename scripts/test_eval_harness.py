@@ -107,7 +107,7 @@ class Eval:
 
     def pilot_runs(self):
         kinds = [c["kind"] for c in self.spec["cases"]]
-        return min(4, kinds.count("target")) + kinds.count("negative")
+        return min(4, kinds.count("target")) + kinds.count("negative") + 2
 
     def to_verdict(self):
         """Every gate in order, approving each spend, until one ends the eval."""
@@ -143,15 +143,25 @@ check("still open", harness.settled(3, 0, 9, 0.05), None)
 # --- a planted effect is caught ---
 e = Eval(cases(("bad", "good")))
 report = e.to_verdict()
+
+# --- the pilot prints what the models wrote, the new arm's first cases included ---
+p = Eval(cases(("bad", "good")))
+for g in ("freeze", "context", "scorer"):
+    p.gate(g)
+p.review()
+code, out = p.gate("pilot", "--approved-runs", "9")
+check_in("pilot prints an old output", "c3 (old arm): does not show it\n    BAD", out)
+check_in("pilot prints a new output", "c3 (new arm): shows the behaviour\n    GOOD", out)
+check("the new arm's pilot outputs are not counted", harness.tally(p.dir, p.spec)["pairs"], 0)
 check("planted effect verdict", report["verdict"], harness.WORKS)
-check("planted effect stops once settled", e.runs() < 7 + 2 * 15, True)
+check("planted effect stops once settled", e.runs() < 9 + 2 * 15, True)
 
 # --- old against old shows no effect, and stops once it cannot pass ---
 e = Eval(cases(("bad", "bad")))
 report = e.to_verdict()
 check("old against old verdict", report["verdict"], harness.FAILS)
 check("old against old flips", report["tally"]["new_wins"] + report["tally"]["old_wins"], 0)
-check("old against old stops early", e.runs() < 7 + 2 * 15, True)
+check("old against old stops early", e.runs() < 9 + 2 * 15, True)
 check("same arm twice is reported", report["tally"]["same_arm_cases"] > 0, True)
 
 # --- a change that makes things worse does not pass ---
@@ -163,7 +173,7 @@ check("worse flips go toward old", report["tally"]["old_wins"] > 0, True)
 e = Eval(cases(("good", "good")))
 report = e.to_verdict()
 check("ceiling verdict", report["verdict"], harness.UNTESTABLE)
-check("ceiling spends only the pilot", e.runs(), 7)
+check("ceiling spends only the pilot", e.runs(), 9)
 check_in("ceiling reason", "nothing for the new arm to fix", report["reason"])
 
 # --- a new arm that fires where it should not ---
@@ -176,7 +186,7 @@ e = Eval(cases(("bad", "good"), negative=("good", "good")))
 report = e.to_verdict()
 check("broken negative verdict", report["verdict"], harness.UNTESTABLE)
 check_in("broken negative named", "c0", report["reason"])
-check("broken negative spends only the pilot", e.runs(), 7)
+check("broken negative spends only the pilot", e.runs(), 9)
 
 # --- a scorer that passes everything is caught before any run ---
 e = Eval(cases(("bad", "good")), scorer=BROKEN_SCORER)
@@ -186,7 +196,7 @@ check("broken scorer spends nothing", e.runs(), 0)
 
 # --- gates cannot be skipped or reordered ---
 e = Eval(cases(("bad", "good")))
-code, out = e.gate("pilot", "--approved-runs", "7")
+code, out = e.gate("pilot", "--approved-runs", "9")
 check("pilot before freeze refused", code, 1)
 e.gate("freeze")
 code, out = e.gate("scorer")
@@ -194,19 +204,19 @@ check("scorer before context refused", code, 1)
 check_in("names the missing gate", "needs the context gate", out)
 e.gate("context")
 e.gate("scorer")
-code, out = e.gate("pilot", "--approved-runs", "7")
+code, out = e.gate("pilot", "--approved-runs", "9")
 check("pilot without a design review refused", code, 1)
 check_in("asks for the review", "design review", out)
 e.review()
 code, out = e.gate("pilot")
 check("pilot without the approved count refused", code, 1)
-check_in("states the spend", "up to 7 runs", out)
+check_in("states the spend", "up to 9 runs", out)
 check("nothing ran while refused", e.runs(), 0)
 
 # --- changing the eval after freeze voids the gates ---
 e.spec["bar"]["alpha"] = 0.2
 e.write()
-code, out = e.gate("pilot", "--approved-runs", "7")
+code, out = e.gate("pilot", "--approved-runs", "9")
 check("changed eval refused", code, 1)
 check_in("says why", "changed after freeze", out)
 e.gate("freeze")

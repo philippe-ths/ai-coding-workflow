@@ -11,6 +11,7 @@ the one before it has passed for the same `eval.json`:
   context   check no instruction file leaks into a run from the directories above it
   scorer    measure the scorer on known answers, both ways
   pilot     run the old arm on a few cases: is there anything for the new arm to fix?
+            Prints every output it made, the new arm's first two included, to be read
   run       run both arms on every case, stopping once the result is settled
   rule      record the human's pass or fail on an output the judges split on
   report    write report.md and report.json
@@ -48,6 +49,8 @@ GATES = ["freeze", "context", "scorer", "pilot", "run"]
 WORKS, FAILS, UNTESTABLE = "works", "does not work", "cannot be tested this way"
 MIN_KNOWN = 5
 MAX_ERROR_SHARE = 0.1
+REHEARSAL_CASES = 2  # target cases the pilot also runs on the new arm, to be read, never counted
+PILOT_PRINT_CHARS = 400
 MAX_RULINGS = 5  # the most outputs the human is ever asked to rule on
 # Files an agent reads as instructions. One above a run directory reaches every run.
 INSTRUCTION_FILES = [
@@ -439,9 +442,21 @@ def gate_pilot(d, args):
         raise Refused(f"no design review of this eval: a fresh agent attacks the design before any spend, and its "
                       f"findings go in {review} naming the frozen hash {state['hash']}")
     sample = targets(spec)[:spec.get("pilot_cases", 8)]
-    approve(args, len(sample) + len(negatives(spec)), spec, "pilot (old arm only)")
+    rehearsal = sample[:REHEARSAL_CASES]
+    approve(args, len(sample) + len(negatives(spec)) + len(rehearsal), spec,
+            "pilot (old arm, plus the new arm on its first cases)")
     root = state["gates"]["context"]["work_root"]
     metas = run_many(d, spec, "pilot", [(c, "old") for c in sample + negatives(spec)], root, args.jobs)
+    # The first real outputs, printed to be read before the full spend: a design flaw shows in
+    # what a model actually wrote, not in the design. The new arm's are seen here and never counted.
+    for m in metas + run_many(d, spec, "pilot", [(c, "new") for c in rehearsal], root, args.jobs):
+        try:
+            with open(os.path.join(d, "runs", "pilot", m["case"], m["arm"], "output.txt")) as f:
+                text = " ".join(f.read().split())[:PILOT_PRINT_CHARS]
+        except OSError:
+            text = ""
+        shows = {"pass": "shows the behaviour", "fail": "does not show it"}.get(m.get("shows"), f"error: {m['error']}")
+        print(f"--- {m['case']} ({m['arm']} arm): {shows}{', judges split' if m.get('split') else ''}\n    {text}")
     if sum(1 for m in metas if m["error"]) > len(metas) * MAX_ERROR_SHARE:
         end(d, state, UNTESTABLE, f"{sum(1 for m in metas if m['error'])} of {len(metas)} pilot runs errored; see runs/pilot")
         return
