@@ -12,6 +12,7 @@ the one before it has passed for the same `eval.json`:
   scorer    measure the scorer on known answers, both ways
   pilot     run the old arm on a few cases: is there anything for the new arm to fix?
   run       run both arms on every case, stopping once the result is settled
+  rule      record the human's pass or fail on an output the judges split on
   report    write report.md and report.json
 
 Every eval ends in one of three verdicts: "works", "does not work", or "cannot be
@@ -43,6 +44,7 @@ GATES = ["freeze", "context", "scorer", "pilot", "run"]
 WORKS, FAILS, UNTESTABLE = "works", "does not work", "cannot be tested this way"
 MIN_KNOWN = 5
 MAX_ERROR_SHARE = 0.1
+MAX_RULINGS = 5  # the most outputs the human is ever asked to rule on
 # Files an agent reads as instructions. One above a run directory reaches every run.
 INSTRUCTION_FILES = [
     "CLAUDE.md", "AGENTS.md", "GEMINI.md", "ai-workflow.md", ".claude", ".agents",
@@ -324,7 +326,7 @@ def run_arm(d, spec, phase, case, arm, root):
         shutil.rmtree(workdir, ignore_errors=True)
     meta["seconds"] = round((datetime.datetime.now() - started).total_seconds(), 1)
     if not meta["error"]:
-        meta["score"] = score(d, spec, os.path.join(out_dir, "output.txt"), case)
+        meta["score"], meta["split"] = score(d, spec, os.path.join(out_dir, "output.txt"), case)
         if meta["score"] not in ("pass", "fail"):
             meta["error"] = f"scorer gave no verdict: {meta['score']}"
     save_json(meta_path, meta)
@@ -332,7 +334,11 @@ def run_arm(d, spec, phase, case, arm, root):
 
 
 def score(d, spec, output_file, case):
-    """Ask the scorer for pass or fail. It sees a copy under a random name, never the arm."""
+    """Ask the scorer for pass or fail. It sees a copy under a random name, never the arm.
+
+    The scorer prints pass or fail as its last line. A panel of judges that did not
+    all agree prints a line reading SPLIT before it. Returns (verdict, split).
+    """
     blind = tempfile.mkdtemp(prefix="aiw-eval-score-")
     try:
         copy = os.path.join(blind, uuid.uuid4().hex + ".txt")
@@ -342,11 +348,12 @@ def score(d, spec, output_file, case):
             json.dump(case, f)
         done = subprocess.run(fill(spec["scorer"]["cmd"], output_file=copy, case_file=case_file, eval_dir=d),
                               capture_output=True, text=True, timeout=spec.get("scorer_timeout_s", 300))
-        lines = done.stdout.strip().splitlines()
-        last = lines[-1].strip().lower() if lines else ""
-        return last if last in ("pass", "fail") else f"error: {(done.stderr or done.stdout)[-200:]}"
+        lines = [line.strip().lower() for line in done.stdout.strip().splitlines()]
+        if not lines or lines[-1] not in ("pass", "fail"):
+            return f"error: {(done.stderr or done.stdout)[-200:]}", False
+        return lines[-1], "split" in lines
     except (subprocess.SubprocessError, OSError) as e:
-        return f"error: {type(e).__name__}"
+        return f"error: {type(e).__name__}", False
     finally:
         shutil.rmtree(blind, ignore_errors=True)
 
@@ -369,9 +376,11 @@ def gate_scorer(d, args):
     spec, state = require(d, "scorer")
     by_id = {c["id"]: c for c in spec["cases"]}
     tally = {"pass": [0, 0], "fail": [0, 0]}  # right answer -> [scored right, total]
-    misses = []
+    misses, splits = [], 0
     for k in spec["known"]:
-        got = score(d, spec, os.path.join(d, k["file"]), by_id.get(k.get("case"), {"id": k.get("case"), "kind": "target"}))
+        got, split = score(d, spec, os.path.join(d, k["file"]),
+                           by_id.get(k.get("case"), {"id": k.get("case"), "kind": "target"}))
+        splits += split
         tally[k["verdict"]][1] += 1
         if got == k["verdict"]:
             tally[k["verdict"]][0] += 1
@@ -380,7 +389,8 @@ def gate_scorer(d, args):
     caught = tally["fail"][0] / tally["fail"][1]
     passed_rate = tally["pass"][0] / tally["pass"][1]
     record = {"fails_caught": f"{tally['fail'][0]}/{tally['fail'][1]}",
-              "passes_passed": f"{tally['pass'][0]}/{tally['pass'][1]}", "misses": misses}
+              "passes_passed": f"{tally['pass'][0]}/{tally['pass'][1]}", "misses": misses,
+              "judges_split_on": splits}
     print(f"scorer on known answers: fails caught {record['fails_caught']}, passes passed {record['passes_passed']}")
     for m in misses:
         print(f"  {m}")
@@ -446,17 +456,67 @@ def gate_run(d, args):
             break
         if done >= len(negatives(spec)) and settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]):
             break
-    t = tally(d, spec)
     passed(d, state, "run", cases_run=done, cases_total=len(order))
+    conclude(d, spec, state)
+
+
+def verdict_of(t, bar):
     if t["errors"] > MAX_ERROR_SHARE * max(1, t["pairs"] + t["errors"]):
-        end(d, state, UNTESTABLE, f"{t['errors']} of {t['pairs'] + t['errors']} case pairs errored; see runs/main")
-    elif t["neg_new_fails"] > bar["negatives_max_new_fails"]:
-        end(d, state, FAILS, f"the new arm failed {t['neg_new_fails']} negative cases, more than the "
-            f"{bar['negatives_max_new_fails']} the bar allows: it fires where it should not")
+        return UNTESTABLE, f"{t['errors']} of {t['pairs'] + t['errors']} case pairs errored; see runs/main"
+    if t["neg_new_fails"] > bar["negatives_max_new_fails"]:
+        return FAILS, (f"the new arm failed {t['neg_new_fails']} negative cases, more than the "
+                       f"{bar['negatives_max_new_fails']} the bar allows: it fires where it should not")
+    verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]) or FAILS
+    return verdict, (f"flips toward new {t['new_wins']}, toward old {t['old_wins']}, "
+                     f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}")
+
+
+def conclude(d, spec, state):
+    """End the eval, unless outputs the judges split on could change the verdict.
+
+    Each such output is scored both ways. If the verdict is the same either way, the
+    splits do not matter and nobody is asked. Otherwise the human rules on them,
+    blind to the arm, up to MAX_RULINGS; more than that means the rule is too loose
+    to judge.
+    """
+    bar = spec["bar"]
+    rulings = state.setdefault("rulings", {})
+    low = verdict_of(tally(d, spec, rulings, "against new"), bar)
+    high = verdict_of(tally(d, spec, rulings, "for new"), bar)
+    if low[0] == high[0]:
+        end(d, state, *verdict_of(tally(d, spec, rulings), bar))
+        return
+    open_splits = sorted((hashlib.sha256(f"{state['hash']}{c['id']}{arm}".encode()).hexdigest()[:6], c["id"], arm)
+                         for c in spec["cases"] for arm in ("old", "new")
+                         if (read_meta(d, "main", c, arm) or {}).get("split") and f"{c['id']}/{arm}" not in rulings)
+    if len(open_splits) > MAX_RULINGS:
+        end(d, state, UNTESTABLE, f"the judges split on {len(open_splits)} outputs and the verdict turns on them: "
+            f"the rule is too loose to judge, so tighten what is counted and run a new version")
+        return
+    state["awaiting"] = {sid: f"{case_id}/{arm}" for sid, case_id, arm in open_splits}
+    for sid, case_id, arm in open_splits:
+        os.makedirs(os.path.join(d, "splits"), exist_ok=True)
+        shutil.copyfile(os.path.join(d, "runs", "main", case_id, arm, "output.txt"),
+                        os.path.join(d, "splits", f"{sid}.txt"))
+    save_json(os.path.join(d, "state.json"), state)
+    print(f"RULING NEEDED: the judges split on {len(open_splits)} outputs and the verdict turns on them. "
+          f"The human reads each file in {os.path.join(d, 'splits')} and rules: "
+          f"harness.py rule --dir {d} --id <name> --verdict pass|fail")
+
+
+def gate_rule(d, args):
+    spec, digest = load_spec(d)
+    state = load_state(d)
+    if state.get("hash") != digest or args.id not in state.get("awaiting", {}):
+        raise Refused(f"no ruling is awaited on {args.id!r} for this eval")
+    if args.verdict not in ("pass", "fail"):
+        raise Refused("--verdict must be pass or fail")
+    state["rulings"][state["awaiting"].pop(args.id)] = args.verdict
+    save_json(os.path.join(d, "state.json"), state)
+    if state["awaiting"]:
+        print(f"ruled; {len(state['awaiting'])} still awaited: {', '.join(sorted(state['awaiting']))}")
     else:
-        verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]) or FAILS
-        end(d, state, verdict, f"flips toward new {t['new_wins']}, toward old {t['old_wins']}, "
-            f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}")
+        conclude(d, spec, state)
 
 
 def read_meta(d, phase, case, arm):
@@ -467,11 +527,26 @@ def read_meta(d, phase, case, arm):
         return None
 
 
-def tally(d, spec):
-    """Count the saved main-phase pairs. Only cases one arm passed and the other failed are flips."""
+def tally(d, spec, rulings=None, stress=None):
+    """Count the saved main-phase pairs. Only cases one arm passed and the other failed are flips.
+
+    A human ruling replaces the judges' score. With `stress`, every output the judges
+    split on and nobody ruled on is scored as badly ("against new") or as well
+    ("for new") for the new arm as it could be.
+    """
+    rulings = rulings or {}
+
+    def scored(meta, case, arm):
+        key = f"{case['id']}/{arm}"
+        if key in rulings:
+            return rulings[key]
+        if stress and meta.get("split"):
+            return "pass" if (arm == "new") == (stress == "for new") else "fail"
+        return meta["score"]
+
     t = {"new_wins": 0, "old_wins": 0, "both_pass": 0, "both_fail": 0, "errors": 0, "pairs": 0,
          "neg_new_fails": 0, "neg_old_fails": 0, "flips": [], "targets_left": 0,
-         "same_arm_cases": 0, "same_arm_flips": 0}
+         "same_arm_cases": 0, "same_arm_flips": 0, "splits": 0}
     for c in spec["cases"]:
         old, new = read_meta(d, "main", c, "old"), read_meta(d, "main", c, "new")
         if not old or not new:
@@ -481,11 +556,12 @@ def tally(d, spec):
             t["errors"] += 1
             continue
         t["pairs"] += 1
+        t["splits"] += bool(old.get("split")) + bool(new.get("split"))
+        pair = (scored(old, c, "old"), scored(new, c, "new"))
         if c["kind"] == "negative":
-            t["neg_new_fails"] += new["score"] == "fail"
-            t["neg_old_fails"] += old["score"] == "fail"
+            t["neg_new_fails"] += pair[1] == "fail"
+            t["neg_old_fails"] += pair[0] == "fail"
             continue
-        pair = (old["score"], new["score"])
         key = {("fail", "pass"): "new_wins", ("pass", "fail"): "old_wins",
                ("pass", "pass"): "both_pass", ("fail", "fail"): "both_fail"}[pair]
         t[key] += 1
@@ -507,8 +583,9 @@ def gate_report(d, args):
     if state.get("hash") != digest:
         raise Refused("eval.json changed after freeze; this report would describe a different eval")
     if not state.get("verdict"):
-        raise Refused("no verdict yet: the gates have not finished")
-    t = tally(d, spec)
+        raise Refused("no verdict yet: the gates have not finished"
+                      + (f", and rulings are awaited on {', '.join(sorted(state['awaiting']))}" if state.get("awaiting") else ""))
+    t = tally(d, spec, state.get("rulings"))
     redactions = 0
     for root, _, files in os.walk(os.path.join(d, "runs")):
         if "meta.json" in files:
@@ -518,7 +595,7 @@ def gate_report(d, args):
               "eval_version": state.get("version"), "claim": spec["claim"], "counted": spec["counted"],
               "bar": spec["bar"], "gates": state.get("gates"), "tally": t,
               "sign_test_p": sign_test(t["new_wins"], t["old_wins"]), "cannot_show": spec["cannot_show"],
-              "redactions": redactions, "arms": spec["arms"], "written": now()}
+              "redactions": redactions, "arms": spec["arms"], "rulings": state.get("rulings", {}), "written": now()}
     save_json(os.path.join(d, "report.json"), report)
     lines = [f"# Eval report: {state['verdict']}", "", state.get("reason", ""), "",
              f"- Claim: {spec['claim']}", f"- Counted: {spec['counted']}",
@@ -534,6 +611,7 @@ def gate_report(d, args):
                   f"{t['both_pass']} both passed, {t['both_fail']} both failed",
                   f"- Negative cases failed: new {t['neg_new_fails']}, old {t['neg_old_fails']}",
                   f"- Same arm twice (pilot and run, old arm): {t['same_arm_flips']} of {t['same_arm_cases']} cases changed score",
+                  f"- Outputs the judges split on: {t['splits']}; ruled on by the human: {len(state.get('rulings', {}))}",
                   f"- Pairs dropped for errors: {t['errors']}", ""]
         lines += ["## Flips", ""] + [f"- {f['case']}: toward {f['toward']}" for f in t["flips"]] + [""]
     lines += ["## Gates", ""]
@@ -549,11 +627,13 @@ def gate_report(d, args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("gate", choices=GATES + ["report"])
+    parser.add_argument("gate", choices=GATES + ["rule", "report"])
     parser.add_argument("--dir", required=True, help="the eval directory holding eval.json")
     parser.add_argument("--work-root", help="where run directories are made (default: the system temp directory)")
     parser.add_argument("--approved-runs", type=int, help="the run count the human agreed to")
     parser.add_argument("--jobs", type=int, default=4)
+    parser.add_argument("--id", help="rule: the name of the split output")
+    parser.add_argument("--verdict", help="rule: pass or fail")
     parser.add_argument("--new-version", action="store_true", help="freeze a changed eval after results exist")
     args = parser.parse_args(argv)
     d = os.path.realpath(args.dir)

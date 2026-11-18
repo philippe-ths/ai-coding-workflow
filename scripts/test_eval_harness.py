@@ -281,6 +281,41 @@ with open(seen) as f:
     paths = [line.split()[1] for line in f]
 check("scorer paths name no arm", any("/old/" in p or "/new/" in p for p in paths), False)
 
+# --- outputs the judges split on reach the human only when the verdict turns on them ---
+# This scorer stands in for a panel: on MAYBE it reports a split, with the majority saying pass.
+SPLIT_SCORER = """import sys
+text = open(sys.argv[1]).read()
+if "MAYBE" in text:
+    print("SPLIT")
+print("pass" if "GOOD" in text or "MAYBE" in text else "fail")
+"""
+e = Eval(cases(("bad", "good")) + [("target", "bad", "maybe")], scorer=SPLIT_SCORER)
+report = e.to_verdict()
+check("a split that cannot change the verdict asks nobody", report["verdict"], harness.WORKS)
+check("no ruling awaited", e.state().get("awaiting"), None)
+
+for ruling, want in (("pass", harness.WORKS), ("fail", harness.FAILS)):
+    e = Eval(cases(("bad", "good"), n_target=5) + [("target", "bad", "maybe")] + [("target", "bad", "bad")] * 2,
+             scorer=SPLIT_SCORER)
+    report = e.to_verdict()
+    check("a split the verdict turns on gives no verdict yet", report["verdict"], None)
+    awaited = e.state()["awaiting"]
+    check("one output awaits a ruling", len(awaited), 1)
+    sid = next(iter(awaited))
+    check("the file shown to the human names no arm", sorted(os.listdir(os.path.join(e.dir, "splits"))), [f"{sid}.txt"])
+    code, out = e.gate("report")
+    check("no report before the ruling", code, 1)
+    e.gate("rule", "--id", sid, "--verdict", ruling)
+    e.gate("report")
+    with open(os.path.join(e.dir, "report.json")) as f:
+        report = json.load(f)
+    check(f"ruled {ruling}", report["verdict"], want)
+
+e = Eval(cases(("bad", "maybe"), n_target=8), scorer=SPLIT_SCORER)
+report = e.to_verdict()
+check("too many decisive splits", report["verdict"], harness.UNTESTABLE)
+check_in("says the rule is too loose", "too loose to judge", report["reason"])
+
 if failures:
     print("eval harness test: FAILED")
     for failure in failures:
