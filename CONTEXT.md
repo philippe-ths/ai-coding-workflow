@@ -54,4 +54,4 @@ _Avoid_: ruleset version, release.
 
 ## Flagged ambiguities
 
-- **"Evaluation"** is retired. It previously named the whole statistical apparatus (pass^k, McNemar, the n=20 gate, the `aiw-evaluation` skill), all of which have been deleted. The replacement is **Observation** (descriptive, human-judged). Do not reuse "evaluation" for the new system; it implies a verdict the new system deliberately does not produce.
+- **"Evaluation"** is retired. It previously named the whole statistical apparatus (pass^k, McNemar, the n=20 gate, the `aiw-evaluation` skill), all of which have been deleted. The replacement is **Observation** (descriptive, human-judged). Do not reuse "evaluation" for the new system; it implies a verdict the new system deliberately does not produce. An **eval**, as `aiw-eval` runs one, is a different thing and outside this context: a controlled test of one change, old against new, which does return a verdict (`docs/adr/0003-controlled-evals-of-one-change.md`).

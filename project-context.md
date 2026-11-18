@@ -1,6 +1,6 @@
 # Project Context
 
-Version: 2.5.0
+Version: 2.6.0
 
 ## Product Summary
 - This repository is a project-agnostic AI coding workflow: rules, skills, and a policy layer that an installer copies into a target repository for Claude Code, Codex, or VS Code Copilot.
@@ -35,14 +35,15 @@ Version: 2.5.0
 - `observation/uninstall-observation.sh` and `upkeep/uninstall-upkeep.sh` each reverse what their install script adds outside this repository, keeping recorded data unless told otherwise.
 
 ## Build and Validate
-- `./.ai-policy/scripts/run-validation.sh` runs validation and records the result the commit and push gate reads; it takes about four minutes.
+- `./.ai-policy/scripts/run-validation.sh` runs validation and records the result the commit and push gate reads; it takes about seven minutes.
 - Validation runs `bash -n` on the policy layer, every executable `.ai-policy/scripts/test-*.sh` (found by glob, so a test without the executable bit never runs), then `scripts/repo-validation.sh`.
 - `scripts/repo-validation.sh` lists its checks by name and skips any that is not executable, so a new factory test under `scripts/` runs only once it is added there and made executable.
 - `scripts/check-prose-integrity.sh` enforces the prose constraints above, and also that every skill listing the done gate names the same members as `ai-workflow.md` and that a skill claiming a Task Flow step number matches it.
 - It is structural only: it cannot tell whether two passages contradict.
-- Shipped hooks and policy scripts use only `bash`, `git`, and `jq`, since a target may have no `python3`; `python3` is needed by `observation/`, `.ai-policy/jev/`, and this repository's validation.
+- Shipped hooks and policy scripts use only `bash`, `git`, and `jq`, since a target may have no `python3`; `python3` is needed by `observation/`, `.ai-policy/jev/`, `.ai-policy/eval/`, and this repository's validation.
 - `core.hooksPath` must be `.githooks`, set by `./.ai-policy/scripts/install-hooks.sh`.
 - `.ai-policy/jev/ask.py` needs a TypeSafe key and exits 3 when the key or service is unavailable.
+- A real run of `.ai-policy/eval/harness.py` spends model quota and sends outputs to the judges' providers, so it is never part of validation; its test uses arms and judges with fixed answers.
 - `make classify` prints the product and factory boundary.
 - `scripts/probe-loop-rule.sh` A/B-tests the small-loop rule with headless agents and spends model quota, so it is never part of validation; re-run it when that rule, or one beside it, changes.
 - Nothing tests documentation meaning, the dashboard's rendering, or the scripts under `field-notes/`.

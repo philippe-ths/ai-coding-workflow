@@ -69,6 +69,13 @@ as a local path instead.
   entries. A file is deleted from the target only if it was dropped from the
   product between the installed and current versions; local additions are kept.
 - The installer copies only product files; factory files are never installed.
+- **Evals.** `aiw-eval` runs old against new through
+  `.ai-policy/eval/harness.py`, which needs `python3`. Its judge panel calls
+  the `claude` and `codex` command-line tools and Jev, each as the human is
+  signed in on that machine, so judged outputs go to Anthropic, OpenAI and
+  TypeSafe; `.ai-policy/eval/panel.json` names the judges and can be changed.
+  A real eval spends model quota: the agent states the runs and cost and waits
+  for the human's yes. Without `python3` the agent says the eval cannot run.
 - **Jev judge.** `aiw-planning` asks TypeSafe's Jev for each task's ceremony
   tier through `.ai-policy/jev/ask.py`. It is live when a key is in
   `TYPESAFE_API_KEY` or `~/.typesafe_key`; the key is per machine, so one covers

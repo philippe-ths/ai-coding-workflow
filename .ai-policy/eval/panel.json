@@ -1,0 +1,18 @@
+[
+  {
+    "name": "claude",
+    "provider": "Anthropic",
+    "cmd": ["claude", "-p", "--model", "haiku", "--tools", "", "--setting-sources", "", "--strict-mcp-config", "--no-session-persistence"]
+  },
+  {
+    "name": "codex",
+    "provider": "OpenAI",
+    "cmd": ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--disable", "hooks", "-s", "read-only", "-"],
+    "still_loads": "~/.codex/AGENTS.md"
+  },
+  {
+    "name": "jev",
+    "provider": "TypeSafe",
+    "cmd": ["python3", "{here}/jev_vote.py"]
+  }
+]
