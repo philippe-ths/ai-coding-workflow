@@ -167,6 +167,9 @@ def gate_freeze(d, args):
             raise Refused("runs exist for an earlier eval.json. Changing the eval after seeing results "
                           "is a new eval: pass --new-version to archive them and say so in the report")
         shutil.move(os.path.join(d, "runs"), os.path.join(d, f"runs.v{version}"))
+        for stale in ("report.md", "report.json", "splits"):  # they describe the archived version
+            if os.path.exists(os.path.join(d, stale)):
+                shutil.move(os.path.join(d, stale), os.path.join(d, f"runs.v{version}", stale))
         version += 1
     problems = []
 
@@ -479,10 +482,16 @@ def gate_run(d, args):
         chunk = order[done:done + batch]
         run_many(d, spec, "main", [(c, arm) for c in chunk for arm in ("old", "new")], root, args.jobs)
         done += len(chunk)
-        t = tally(d, spec)
-        if t["neg_regressions"] > bar["negatives_max_regressions"]:
-            break
-        if done >= len(negatives(spec)) and settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]):
+        if done < len(negatives(spec)):
+            continue
+        # Stop once no remaining case can change the verdict, however the outputs the judges
+        # split on are scored. Running a case is cheaper than asking the human to rule.
+        ends = []
+        for stress in ("against new", "for new"):
+            t = tally(d, spec, state.get("rulings"), stress)
+            over = t["neg_regressions"] > bar["negatives_max_regressions"]
+            ends.append(FAILS if over else settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]))
+        if ends[0] and ends[0] == ends[1]:
             break
     passed(d, state, "run", cases_run=done, cases_total=len(order))
     conclude(d, spec, state)
@@ -512,6 +521,7 @@ def conclude(d, spec, state):
     low = verdict_of(tally(d, spec, rulings, "against new"), bar)
     high = verdict_of(tally(d, spec, rulings, "for new"), bar)
     if low[0] == high[0]:
+        state.pop("awaiting", None)
         end(d, state, *verdict_of(tally(d, spec, rulings), bar))
         return
     open_splits = sorted((hashlib.sha256(f"{state['hash']}{c['id']}{arm}".encode()).hexdigest()[:6], c["id"], arm)

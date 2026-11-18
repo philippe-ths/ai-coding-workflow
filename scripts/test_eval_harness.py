@@ -221,6 +221,8 @@ code, out = e.gate("freeze")
 check("refreeze after results refused", code, 1)
 code, out = e.gate("freeze", "--new-version")
 check("refreeze as a new version", code, 0)
+check("the old report is archived with its runs", (os.path.exists(os.path.join(e.dir, "report.md")),
+      os.path.exists(os.path.join(e.dir, "runs.v1", "report.md"))), (False, True))
 check("version counted", e.state()["version"], 2)
 
 # --- an eval that is not fully stated cannot be frozen ---
@@ -342,6 +344,14 @@ for ruling, want in (("pass", harness.WORKS), ("fail", harness.FAILS)):
         report = json.load(f)
     check(f"ruled {ruling}", report["verdict"], want)
 
+# Two early splits leave the verdict open when the run could stop on the majority score alone.
+# The run goes on to the last case instead, which settles it without asking anyone.
+e = Eval(cases(("bad", "maybe"), n_target=2) + [("target", "bad", "good")] * 8, scorer=SPLIT_SCORER)
+report = e.to_verdict()
+check("remaining cases are run before the human is asked", report["verdict"], harness.WORKS)
+check("no ruling awaited after running on", e.state().get("awaiting"), None)
+check("every case was run", e.state()["gates"]["run"]["cases_run"], 13)
+
 e = Eval(cases(("bad", "maybe"), n_target=8), scorer=SPLIT_SCORER)
 report = e.to_verdict()
 check("too many decisive splits", report["verdict"], harness.UNTESTABLE)
@@ -404,6 +414,18 @@ FLAKY = (f"import os, sys\nsys.stdin.read()\nflag = {os.path.join(tmp, 'tried')!
 code, out, row = judge("GOOD", [FLAKY, STRICT, STRICT])
 check("a judge turned away is tried again", [v["vote"] for v in row["votes"]], ["pass"] * 3)
 check_in("a judge is shown the rule", "the output says GOOD", saw)
+
+# --- a judge too unsure to vote abstains: no vote, no split, no second try ---
+ABSTAINER = (f"import sys\nsys.stdin.read()\nopen({os.path.join(tmp, 'abstained')!r}, 'a').write('x')\n"
+             "print('ABSTAIN')\n")
+code, out, row = judge("GOOD", [ABSTAINER, STRICT, STRICT])
+check("an abstention is not a split", out, ["pass"])
+with open(os.path.join(tmp, "abstained")) as f:
+    check("an abstaining judge is asked once", f.read(), "x")
+sys.path.insert(0, os.path.dirname(HARNESS))
+import jev_vote  # noqa: E402
+check("Jev votes when sure", jev_vote.vote_from({"lean": "pass", "probabilities": {"pass": 0.9, "fail": 0.1}}).split()[-1], "PASS")
+check("Jev abstains near a coin toss", jev_vote.vote_from({"lean": "pass", "probabilities": {"pass": 0.52, "fail": 0.48}}).split()[-1], "ABSTAIN")
 
 # --- the Jev seat refuses a prompt it cannot split into rule and output (no network touched) ---
 done = subprocess.run([sys.executable, os.path.join(os.path.dirname(HARNESS), "jev_vote.py")],

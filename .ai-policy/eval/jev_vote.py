@@ -1,9 +1,10 @@
 """Let Jev sit on the judge panel: read the panel's prompt on stdin, print PASS or FAIL.
 
 Jev takes a state and a fixed question, not a free prompt, so this passes it only
-the rule and the output from the prompt and asks the `eval-judge` question. When
-Jev is unsure its likeliest level is still its vote; the panel's majority and the
-split flag are what absorb an unsure judge.
+the rule and the output from the prompt and asks the `eval-judge` question. Jev
+answers with a probability for each level. Below SURE its likeliest level is close
+to a coin toss, and a coin toss on a panel of three manufactures a split, so it
+abstains and leaves the verdict to the other judges.
 
 Exit codes: 0 a vote was printed, 3 Jev is unavailable (no key, network), 2 the
 prompt held no rule and output.
@@ -15,6 +16,7 @@ import re
 import subprocess
 import sys
 
+SURE = 0.75  # the probability Jev must give its likeliest level before that level is a vote
 ASK = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "jev", "ask.py")
 
 
@@ -31,10 +33,15 @@ def main():
         print(f"jev_vote: {done.stdout.strip() or done.stderr.strip()}", file=sys.stderr)
         return done.returncode
     answer = json.loads(done.stdout)
-    vote = answer.get("answer") or answer.get("lean")
-    print(f"Jev: {json.dumps(answer.get('probabilities'))}, confidence {answer.get('confidence')}")
-    print(vote.upper())
+    print(vote_from(answer))
     return 0
+
+
+def vote_from(answer):
+    probabilities = answer.get("probabilities") or {}
+    vote = answer.get("answer") or answer.get("lean")
+    sure = probabilities.get(vote, 0) >= SURE
+    return f"Jev: {json.dumps(probabilities)}\n{vote.upper() if sure else 'ABSTAIN'}"
 
 
 if __name__ == "__main__":

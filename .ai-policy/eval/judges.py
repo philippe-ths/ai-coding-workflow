@@ -11,6 +11,8 @@ output is judged against the same rule. Where a
 judge's own tool loads a file from the home directory that no option shuts out,
 the panel names it as `still_loads` and each log row records it.
 
+A judge that ends with a line reading ABSTAIN casts no vote and is not retried.
+
 Prints the majority verdict, pass or fail, as the last line, with a line reading
 SPLIT before it when the judges did not all agree. A tie counts as fail. Appends
 one row per call to the log: every judge's vote, reasoning and time.
@@ -53,6 +55,9 @@ def ask(judge, message, timeout):
             lines = [re.sub(r"[^A-Za-z]", "", line).upper() for line in answer.splitlines() if line.strip()]
             vote = lines[-1].lower() if lines and lines[-1] in ("PASS", "FAIL") else None
             problem = None if vote else f"no PASS or FAIL line (exit {done.returncode}): {done.stderr[-200:]}"
+            if lines and lines[-1] == "ABSTAIN":
+                problem = "abstained: too unsure to vote"
+                break
         except (subprocess.SubprocessError, OSError) as e:
             problem = f"{type(e).__name__}: {str(e)[-200:]}"
         if vote:
