@@ -6,6 +6,22 @@ The canonical version is the `Version:` header in `ai-workflow.md`. Every bump o
 
 Every `### Removed` bullet must lead with the removed path as a backticked token (`` - `path/to/thing` — explanation``), one removed path per bullet. The update path reads these to know which installed files to delete from a target repo, so the format must stay machine-extractable. `scripts/check-changelog-removals.sh` enforces this (factory-only validation; it is not shipped to target repos).
 
+## 5.39.0 - 2026-11-18
+
+A change whose effect runs through a model can now be tested by the workflow itself: old against new on varied cases, against a bar set first, ending in works, does not work, or cannot be tested this way, without the human judging outputs.
+
+### Added
+
+- `.claude/skills/aiw-eval/SKILL.md` and its `.agents/skills/` copy: when an eval is worth running, what to count, and where an agent designing its own eval goes wrong ([#435]).
+- `.ai-policy/eval/harness.py`: gates that cannot be skipped or reordered (freeze, context, scorer, pilot, run, report). The eval is locked before any run and a change to it voids every gate; the scorer is measured on known answers before use; the pilot stops an eval the old version already passes, and prints the first real outputs to be read; the run stops once no remaining case can change the verdict; private details are replaced before an output is saved. Needs `python3`.
+- `.ai-policy/eval/judges.py`, `panel.json`, `judge-prompt.md`, `jev_vote.py` and `.ai-policy/jev/questions/eval-judge.json`: a panel of judges from three providers (Claude, Codex, Jev), each given the rule and the output and nothing else. An output the judges split on reaches the human only when the verdict turns on it, at most five, without the arm named.
+
+### Changed
+
+- `ai-workflow.md`: `aiw-eval` joins the conditional skills, loaded when the effect of a change runs through a model.
+
+[#435]: https://github.com/philippe-ths/ai-coding-workflow/issues/435
+
 ## 5.38.1 - 2026-11-17
 
 A background task finishing no longer counts as the human speaking, so a write to agent-read prose is not blocked again when `aiw-prompt-smith` was already loaded for the human's last message.
