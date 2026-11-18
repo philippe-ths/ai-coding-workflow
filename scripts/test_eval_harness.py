@@ -125,7 +125,8 @@ class Eval:
             return {"verdict": None}
 
 
-def cases(target, n_target=12, negative=("good", "good"), n_negative=3):
+def cases(target, n_target=12, negative=("bad", "bad"), n_negative=3):
+    """GOOD is the counted behaviour. On a negative case it should be absent, so BAD is right there."""
     return [("negative", *negative)] * n_negative + [("target", *target)] * n_target
 
 
@@ -166,12 +167,12 @@ check("ceiling spends only the pilot", e.runs(), 7)
 check_in("ceiling reason", "nothing for the new arm to fix", report["reason"])
 
 # --- a new arm that fires where it should not ---
-report = Eval(cases(("bad", "good"), negative=("good", "bad"))).to_verdict()
+report = Eval(cases(("bad", "good"), negative=("bad", "good"))).to_verdict()
 check("over-fire verdict", report["verdict"], harness.FAILS)
 check_in("over-fire reason", "fires where it should not", report["reason"])
 
-# --- a negative case the old arm fails is a broken case, caught in the pilot ---
-e = Eval(cases(("bad", "good"), negative=("bad", "bad")))
+# --- a negative case where the old arm already shows the behaviour is broken, caught in the pilot ---
+e = Eval(cases(("bad", "good"), negative=("good", "good")))
 report = e.to_verdict()
 check("broken negative verdict", report["verdict"], harness.UNTESTABLE)
 check_in("broken negative named", "c0", report["reason"])
@@ -234,6 +235,11 @@ for label, change, message in (
     check_in(f"{label} named", message, out)
 code, out = Eval(cases(("bad", "good"), n_target=5)).gate("freeze")
 check_in("too few cases to ever pass", "can never reach", out)
+e = Eval(cases(("bad", "good")))
+e.spec["cases"][0]["rule"] = "a second rule"
+e.write()
+code, out = e.gate("freeze")
+check_in("a case with its own rule", "counts one thing", out)
 code, out = Eval(cases(("bad", "good"), n_negative=0)).gate("freeze")
 check_in("no negative case", "no negative case", out)
 
@@ -272,7 +278,7 @@ e.gate("run", "--approved-runs", str(2 * len(e.spec["cases"])))
 check("resumed without rerunning", e.runs(), ran)
 
 # --- private details are replaced before an output is saved ---
-e = Eval([("negative", "good", "good")] * 3 + [("target", "bad", "good")] * 12, private_patterns=["sekrit-\\d+"])
+e = Eval(cases(("bad", "good")), private_patterns=["sekrit-\\d+"])
 e.spec["cases"][3]["input"] = json.dumps({"old": "bad", "new": "good", "extra": f"sekrit-42 {e.home}/notes"})
 e.write()
 report = e.to_verdict()
@@ -387,7 +393,7 @@ check("two answers are enough", out, ["pass"])
 code, out, row = judge("GOOD", [STRICT, SILENT, SILENT])
 check("one answer is no verdict", (code, out), (1, []))
 code, out, row = judge("x", [BY_RULE] * 3, case={"id": "neg1", "rule": "special-rule: says nothing"})
-check("a case's own rule replaces the rule file", out, ["pass"])
+check("every output is judged against the one rule", out, ["fail"])
 judge("GOOD", [RECORDER, STRICT, STRICT], case={"id": "case-zebra", "kind": "target"})
 with open(os.path.join(tmp, "saw.txt")) as f:
     saw = f.read()

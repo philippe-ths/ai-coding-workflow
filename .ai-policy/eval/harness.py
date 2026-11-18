@@ -15,6 +15,10 @@ the one before it has passed for the same `eval.json`:
   rule      record the human's pass or fail on an output the judges split on
   report    write report.md and report.json
 
+The scorer answers one question of every output: does it show the counted
+behaviour? A target case passes when it does; a negative case, where the change
+should not fire, passes when it does not.
+
 Every eval ends in one of three verdicts: "works", "does not work", or "cannot be
 tested this way". The last comes from context, scorer or pilot, before the full
 spend. Changing `eval.json` after freeze voids every gate.
@@ -187,6 +191,9 @@ def gate_freeze(d, args):
     need(len(set(ids)) == len(ids) and all(ids), "every case needs a unique `id`")
     need(all(c.get("kind") in ("target", "negative") and c.get("input") for c in cases),
          "every case needs `kind` (target or negative) and `input`")
+    need(not any("rule" in c for c in cases),
+         "a case carries its own `rule`: an eval counts one thing, and a negative case passes when the "
+         "scorer says that one thing is absent")
     known = spec.get("known") or []
     for verdict in ("pass", "fail"):
         need(sum(1 for k in known if k.get("verdict") == verdict) >= MIN_KNOWN,
@@ -332,15 +339,23 @@ def run_arm(d, spec, phase, case, arm, root):
         shutil.rmtree(workdir, ignore_errors=True)
     meta["seconds"] = round((datetime.datetime.now() - started).total_seconds(), 1)
     if not meta["error"]:
-        meta["score"], meta["split"] = score(d, spec, os.path.join(out_dir, "output.txt"), case)
-        if meta["score"] not in ("pass", "fail"):
-            meta["error"] = f"scorer gave no verdict: {meta['score']}"
+        meta["shows"], meta["split"] = score(d, spec, os.path.join(out_dir, "output.txt"), case)
+        if meta["shows"] not in ("pass", "fail"):
+            meta["error"] = f"scorer gave no verdict: {meta['shows']}"
+        else:
+            # One rule for every case. On a negative case the counted behaviour should be
+            # absent, so the run passes when the scorer says the output does not show it.
+            flip = {"pass": "fail", "fail": "pass"}
+            meta["score"] = flip[meta["shows"]] if case["kind"] == "negative" else meta["shows"]
     save_json(meta_path, meta)
     return meta
 
 
 def score(d, spec, output_file, case):
-    """Ask the scorer for pass or fail. It sees a copy under a random name, never the arm.
+    """Ask the scorer whether an output shows the counted behaviour: pass if it does.
+
+    It sees a copy under a random name, never the arm, and is asked the same
+    question of every output, whatever kind of case produced it.
 
     The scorer prints pass or fail as its last line. A panel of judges that did not
     all agree prints a line reading SPLIT before it. Returns (verdict, split).
@@ -380,12 +395,10 @@ def approve(args, planned, spec, what):
 
 def gate_scorer(d, args):
     spec, state = require(d, "scorer")
-    by_id = {c["id"]: c for c in spec["cases"]}
     tally = {"pass": [0, 0], "fail": [0, 0]}  # right answer -> [scored right, total]
     misses, splits = [], 0
     for k in spec["known"]:
-        got, split = score(d, spec, os.path.join(d, k["file"]),
-                           by_id.get(k.get("case"), {"id": k.get("case"), "kind": "target"}))
+        got, split = score(d, spec, os.path.join(d, k["file"]), {"id": None, "kind": "target"})
         splits += split
         tally[k["verdict"]][1] += 1
         if got == k["verdict"]:
@@ -429,11 +442,11 @@ def gate_pilot(d, args):
     if sum(1 for m in metas if m["error"]) > len(metas) * MAX_ERROR_SHARE:
         end(d, state, UNTESTABLE, f"{sum(1 for m in metas if m['error'])} of {len(metas)} pilot runs errored; see runs/pilot")
         return
-    # The old arm lacks the change, so it cannot fire: a negative case it fails is a bad case or rule.
+    # The old arm lacks the change: a negative case where it already shows the behaviour is a bad case.
     broken = [m["case"] for m in metas[len(sample):] if not m["error"] and m["score"] == "fail"]
     if broken:
-        end(d, state, UNTESTABLE, f"the old arm fails negative cases {', '.join(broken)}, where the change is absent: "
-            f"those cases or their rule mark something other than the change firing, so fix them in a new version")
+        end(d, state, UNTESTABLE, f"the old arm already shows the counted behaviour on negative cases {', '.join(broken)}, "
+            f"with the change absent: those cases cannot show the change misfiring, so replace them in a new version")
         return
     scored = [m for m in metas[:len(sample)] if not m["error"]]
     if not scored:

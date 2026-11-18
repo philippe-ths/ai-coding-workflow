@@ -6,11 +6,10 @@ Usage, as the `scorer.cmd` of an eval:
 
 Each judge in the panel is a command that reads the prompt on stdin and answers on
 stdout. It gets judge-prompt.md, the rule and the output, and nothing else: not
-the case, not which arm wrote the output, not what the other judges said. Where a
+the case, not which arm wrote the output, not what the other judges said. Every
+output is judged against the same rule. Where a
 judge's own tool loads a file from the home directory that no option shuts out,
-the panel names it as `still_loads` and each log row records it. A case
-that carries its own `rule` (a negative case usually does) is judged against that
-instead of the rule file.
+the panel names it as `still_loads` and each log row records it.
 
 Prints the majority verdict, pass or fail, as the last line, with a line reading
 SPLIT before it when the judges did not all agree. A tie counts as fail. Appends
@@ -85,10 +84,8 @@ def main(argv=None):
         if args.case_file:
             with open(args.case_file) as f:
                 case = json.load(f)
-        rule = case.get("rule")
-        if not rule:
-            with open(args.rule_file) as f:
-                rule = f.read()
+        with open(args.rule_file) as f:
+            rule = f.read()
     except (OSError, ValueError) as e:
         print(f"judges: {e}", file=sys.stderr)
         return 2
