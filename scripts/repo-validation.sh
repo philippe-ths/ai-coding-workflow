@@ -84,6 +84,12 @@ if command -v python3 >/dev/null 2>&1; then
   python3 ./scripts/test_jev_ask.py
 fi
 
+# --- eval harness: gates, verdicts and the sign test, against arms with fixed answers ---
+# No existence guard, for the same reason.
+if command -v python3 >/dev/null 2>&1; then
+  python3 ./scripts/test_eval_harness.py
+fi
+
 # --- the checked-in transcript fixtures must be valid JSONL ---
 if command -v python3 >/dev/null 2>&1 && [ -d ./observation/fixtures ]; then
   python3 - <<'PY'

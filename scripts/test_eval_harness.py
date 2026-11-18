@@ -1,0 +1,289 @@
+"""Offline test for the eval harness.
+
+Run directly: `python3 scripts/test_eval_harness.py` (exits non-zero on failure).
+Also invoked by scripts/repo-validation.sh. Calls no model: the arms and the
+scorer are small scripts whose answers are fixed per case, so every expected
+verdict here is known in advance. All inputs are test setup, not ground truth.
+"""
+
+import json
+import os
+import subprocess
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+HARNESS = os.path.join(HERE, "..", ".ai-policy", "eval", "harness.py")
+sys.path.insert(0, os.path.dirname(HARNESS))
+import harness  # noqa: E402
+
+failures = []
+
+
+def check(name, got, want):
+    if got != want:
+        failures.append(f"{name}: got {got!r}, want {want!r}")
+
+
+def check_in(name, needle, haystack):
+    if needle not in haystack:
+        failures.append(f"{name}: {needle!r} not in output:\n{haystack}")
+
+
+# An arm prints GOOD or BAD as the case says for that arm, and logs that it ran.
+FAKE_ARM = """import json, sys
+arm, input_file, counter = sys.argv[1:4]
+case = json.load(open(input_file))
+open(counter, "a").write(arm + "\\n")
+print(case[arm].upper(), case.get("extra", ""))
+"""
+FAKE_SCORER = """import sys
+print("pass" if "GOOD" in open(sys.argv[1]).read() else "fail")
+"""
+BROKEN_SCORER = 'print("pass")\n'
+
+
+class Eval:
+    """An eval directory with fake arms, under a home directory holding no instruction files."""
+
+    def __init__(self, cases, scorer=FAKE_SCORER, **overrides):
+        self.tmp = tempfile.mkdtemp(prefix="aiw-eval-test-")
+        self.dir = os.path.join(self.tmp, "eval")
+        self.home = os.path.join(self.tmp, "home")
+        self.work = os.path.join(self.tmp, "work")
+        self.counter = os.path.join(self.tmp, "ran.txt")
+        for path in (self.dir, self.home, self.work, os.path.join(self.dir, "known")):
+            os.makedirs(path)
+        for name, body in (("arm.py", FAKE_ARM), ("scorer.py", scorer)):
+            with open(os.path.join(self.tmp, name), "w") as f:
+                f.write(body)
+        known = []
+        for i in range(5):
+            for verdict, text in (("pass", "GOOD"), ("fail", "BAD")):
+                rel = f"known/{verdict}-{i}.txt"
+                with open(os.path.join(self.dir, rel), "w") as f:
+                    f.write(text)
+                known.append({"file": rel, "verdict": verdict})
+        arm = [sys.executable, os.path.join(self.tmp, "arm.py")]
+        self.spec = {
+            "claim": "the new arm does the thing", "counted": "outputs that say GOOD",
+            "human_confirmation": "yes, count that", "pass_example": "GOOD", "fail_example": "BAD",
+            "cannot_show": ["anything about a real model"],
+            "bar": {"alpha": 0.05, "negatives_max_new_fails": 0},
+            "arms": {"old": {"run": arm + ["old", "{input_file}", self.counter]},
+                     "new": {"run": arm + ["new", "{input_file}", self.counter]}},
+            "cases": [{"id": f"c{i}", "kind": kind, "input": json.dumps({"old": old, "new": new})}
+                      for i, (kind, old, new) in enumerate(cases)],
+            "scorer": {"cmd": [sys.executable, os.path.join(self.tmp, "scorer.py"), "{output_file}"]},
+            "scorer_bar": {"fails_caught": 0.9, "passes_passed": 0.9},
+            "known": known, "pilot_cases": 4, "est_cost_per_run_usd": 0.0,
+        }
+        self.spec.update(overrides)
+        self.write()
+
+    def write(self):
+        with open(os.path.join(self.dir, "eval.json"), "w") as f:
+            json.dump(self.spec, f)
+
+    def gate(self, name, *options):
+        done = subprocess.run([sys.executable, HARNESS, name, "--dir", self.dir, "--work-root", self.work, *options],
+                              capture_output=True, text=True, env=dict(os.environ, HOME=self.home))
+        return done.returncode, done.stdout + done.stderr
+
+    def state(self):
+        with open(os.path.join(self.dir, "state.json")) as f:
+            return json.load(f)
+
+    def review(self):
+        with open(os.path.join(self.dir, "design-review.md"), "w") as f:
+            f.write(f"Reviewed eval {self.state()['hash']}: no findings.\n")
+
+    def runs(self):
+        try:
+            with open(self.counter) as f:
+                return len(f.read().split())
+        except OSError:
+            return 0
+
+    def to_verdict(self):
+        """Every gate in order, approving each spend, until one ends the eval."""
+        self.gate("freeze")
+        self.gate("context")
+        self.gate("scorer")
+        self.review()
+        self.gate("pilot", "--approved-runs", str(min(4, sum(c["kind"] == "target" for c in self.spec["cases"]))))
+        self.gate("run", "--approved-runs", str(2 * len(self.spec["cases"])))
+        self.gate("report")
+        try:
+            with open(os.path.join(self.dir, "report.json")) as f:
+                return json.load(f)
+        except OSError:
+            return {"verdict": None}
+
+
+def cases(target, n_target=12, negative=("good", "good"), n_negative=3):
+    return [("negative", *negative)] * n_negative + [("target", *target)] * n_target
+
+
+# --- the sign test, against values worked by hand in the standard way ---
+check("six flips one way", harness.sign_test(6, 0), 2 * 0.5 ** 6)
+check("five flips one way is not under 0.05", harness.sign_test(5, 0), 0.0625)
+check("an even split is all luck", harness.sign_test(5, 5), 1.0)
+check("46 against 37 is inside luck", round(harness.sign_test(46, 37), 2), 0.38)
+check("flips needed at 0.05", harness.min_flips(0.05), 6)
+check("settled early once new cannot lose", harness.settled(9, 0, 1, 0.05), harness.WORKS)
+check("settled early once new cannot win", harness.settled(0, 0, 5, 0.05), harness.FAILS)
+check("still open", harness.settled(3, 0, 9, 0.05), None)
+
+# --- a planted effect is caught ---
+e = Eval(cases(("bad", "good")))
+report = e.to_verdict()
+check("planted effect verdict", report["verdict"], harness.WORKS)
+check("planted effect stops once settled", e.runs() < 4 + 2 * 15, True)
+
+# --- old against old shows no effect, and stops once it cannot pass ---
+e = Eval(cases(("bad", "bad")))
+report = e.to_verdict()
+check("old against old verdict", report["verdict"], harness.FAILS)
+check("old against old flips", report["tally"]["new_wins"] + report["tally"]["old_wins"], 0)
+check("old against old stops early", e.runs() < 4 + 2 * 15, True)
+check("same arm twice is reported", report["tally"]["same_arm_cases"] > 0, True)
+
+# --- a change that makes things worse does not pass ---
+report = Eval(cases(("bad", "bad"), n_target=6) + [("target", "good", "bad")] * 6).to_verdict()
+check("worse verdict", report["verdict"], harness.FAILS)
+check("worse flips go toward old", report["tally"]["old_wins"] > 0, True)
+
+# --- nothing for the new arm to fix: stops before the full run ---
+e = Eval(cases(("good", "good")))
+report = e.to_verdict()
+check("ceiling verdict", report["verdict"], harness.UNTESTABLE)
+check("ceiling spends only the pilot", e.runs(), 4)
+check_in("ceiling reason", "nothing for the new arm to fix", report["reason"])
+
+# --- a new arm that fires where it should not ---
+report = Eval(cases(("bad", "good"), negative=("good", "bad"))).to_verdict()
+check("over-fire verdict", report["verdict"], harness.FAILS)
+check_in("over-fire reason", "fires where it should not", report["reason"])
+
+# --- a scorer that passes everything is caught before any run ---
+e = Eval(cases(("bad", "good")), scorer=BROKEN_SCORER)
+report = e.to_verdict()
+check("broken scorer verdict", report["verdict"], harness.UNTESTABLE)
+check("broken scorer spends nothing", e.runs(), 0)
+
+# --- gates cannot be skipped or reordered ---
+e = Eval(cases(("bad", "good")))
+code, out = e.gate("pilot", "--approved-runs", "4")
+check("pilot before freeze refused", code, 1)
+e.gate("freeze")
+code, out = e.gate("scorer")
+check("scorer before context refused", code, 1)
+check_in("names the missing gate", "needs the context gate", out)
+e.gate("context")
+e.gate("scorer")
+code, out = e.gate("pilot", "--approved-runs", "4")
+check("pilot without a design review refused", code, 1)
+check_in("asks for the review", "design review", out)
+e.review()
+code, out = e.gate("pilot")
+check("pilot without the approved count refused", code, 1)
+check_in("states the spend", "up to 4 runs", out)
+check("nothing ran while refused", e.runs(), 0)
+
+# --- changing the eval after freeze voids the gates ---
+e.spec["bar"]["alpha"] = 0.2
+e.write()
+code, out = e.gate("pilot", "--approved-runs", "4")
+check("changed eval refused", code, 1)
+check_in("says why", "changed after freeze", out)
+
+# --- changing the eval after results exist is a new version, said in the report ---
+e = Eval(cases(("bad", "bad")))
+e.to_verdict()
+e.spec["bar"]["alpha"] = 0.2
+e.write()
+code, out = e.gate("freeze")
+check("refreeze after results refused", code, 1)
+code, out = e.gate("freeze", "--new-version")
+check("refreeze as a new version", code, 0)
+check("version counted", e.state()["version"], 2)
+
+# --- an eval that is not fully stated cannot be frozen ---
+for label, change, message in (
+    ("no bar", {"bar": {}}, "bar.alpha"),
+    ("no human confirmation", {"human_confirmation": ""}, "human_confirmation"),
+    ("no known answers", {"known": []}, "known"),
+    ("nothing it cannot show", {"cannot_show": []}, "cannot_show"),
+):
+    code, out = Eval(cases(("bad", "good")), **change).gate("freeze")
+    check(f"{label} refused", code, 1)
+    check_in(f"{label} named", message, out)
+code, out = Eval(cases(("bad", "good"), n_target=5)).gate("freeze")
+check_in("too few cases to ever pass", "can never reach", out)
+code, out = Eval(cases(("bad", "good"), n_negative=0)).gate("freeze")
+check_in("no negative case", "no negative case", out)
+
+# --- instruction files above the run directory end the eval before any spend ---
+e = Eval(cases(("bad", "good")))
+with open(os.path.join(e.tmp, "CLAUDE.md"), "w") as f:
+    f.write("be good\n")
+e.gate("freeze")
+e.gate("context")
+check("leak verdict", e.state().get("verdict"), harness.UNTESTABLE)
+
+# --- instruction files in the home directory must be accounted for ---
+e = Eval(cases(("bad", "good")))
+os.makedirs(os.path.join(e.home, ".claude"))
+with open(os.path.join(e.home, ".claude", "CLAUDE.md"), "w") as f:
+    f.write("be good\n")
+e.gate("freeze")
+code, out = e.gate("context")
+check("home instructions refused", code, 1)
+check_in("names the home file", ".claude/CLAUDE.md", out)
+e.spec["home_instructions_excluded_by"] = "the arm passes --setting-sources project"
+e.write()
+e.gate("freeze")
+code, out = e.gate("context")
+check("home instructions accounted for", code, 0)
+
+# --- a finished run is never repeated ---
+e = Eval(cases(("bad", "good")))
+e.to_verdict()
+ran = e.runs()
+state = e.state()
+del state["verdict"], state["gates"]["run"]
+with open(os.path.join(e.dir, "state.json"), "w") as f:
+    json.dump(state, f)
+e.gate("run", "--approved-runs", str(2 * len(e.spec["cases"])))
+check("resumed without rerunning", e.runs(), ran)
+
+# --- private details are replaced before an output is saved ---
+e = Eval([("negative", "good", "good")] * 3 + [("target", "bad", "good")] * 12, private_patterns=["sekrit-\\d+"])
+e.spec["cases"][3]["input"] = json.dumps({"old": "bad", "new": "good", "extra": f"sekrit-42 {e.home}/notes"})
+e.write()
+report = e.to_verdict()
+with open(os.path.join(e.dir, "runs", "main", "c3", "new", "output.txt")) as f:
+    saved = f.read()
+check_in("pattern replaced", "[private]", saved)
+check("pattern gone", "sekrit-42" in saved, False)
+check("home path gone", e.home in saved, False)
+check("replacements counted", report["redactions"] > 0, True)
+
+# --- the scorer never learns which arm wrote an output ---
+e = Eval(cases(("bad", "good")), scorer="import sys\nopen(sys.argv[2], 'a').write(' '.join(sys.argv) + '\\n')\n"
+         "print('pass' if 'GOOD' in open(sys.argv[1]).read() else 'fail')\n")
+seen = os.path.join(e.tmp, "scorer-saw.txt")
+e.spec["scorer"]["cmd"].append(seen)
+e.write()
+e.to_verdict()
+with open(seen) as f:
+    paths = [line.split()[1] for line in f]
+check("scorer paths name no arm", any("/old/" in p or "/new/" in p for p in paths), False)
+
+if failures:
+    print("eval harness test: FAILED")
+    for failure in failures:
+        print(f"  - {failure}")
+    sys.exit(1)
+print("eval harness test: OK")
