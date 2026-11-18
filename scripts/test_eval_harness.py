@@ -54,7 +54,7 @@ class Eval:
         self.dir = os.path.join(self.tmp, "eval")
         self.home = os.path.join(self.tmp, "home")
         self.work = os.path.join(self.tmp, "work")
-        self.counter = os.path.join(self.tmp, "ran.txt")
+        self.counter = os.path.join(self.tmp, "ran.log")
         for path in (self.dir, self.home, self.work, os.path.join(self.dir, "known")):
             os.makedirs(path)
         for name, body in (("arm.py", FAKE_ARM), ("scorer.py", scorer)):
@@ -275,6 +275,75 @@ for c in e.spec["cases"]:
     c["input"] = json.dumps(dict(json.loads(c["input"]), fresh=True))
 e.write()
 check("tuned arm on fresh cases accepted", e.gate("freeze", "--new-version")[0], 0)
+check("and the new version runs to a verdict", e.to_verdict()["verdict"], harness.FAILS)
+# Two hops do not launder a tuned arm: cases any earlier version ran stay seen.
+e = Eval(cases(("bad", "bad")))
+e.to_verdict()
+first = [c["input"] for c in e.spec["cases"]]
+for c in e.spec["cases"]:
+    c["input"] = json.dumps(dict(json.loads(c["input"]), other=True))
+e.write()
+e.gate("freeze", "--new-version")
+e.to_verdict()
+e.spec["arms"]["new"]["run"].append("tuned")
+for c, original in zip(e.spec["cases"], first):
+    c["input"] = original
+e.write()
+check("a tuned arm back on the first version's cases", e.gate("freeze", "--new-version")[0], 1)
+# A prompt file the new arm's command names is part of the arm.
+e = Eval(cases(("bad", "bad")))
+with open(os.path.join(e.dir, "prompt.txt"), "w") as f:
+    f.write("first wording")
+e.spec["arms"]["new"]["run"].append(os.path.join(e.dir, "prompt.txt"))
+e.write()
+e.to_verdict()
+with open(os.path.join(e.dir, "prompt.txt"), "w") as f:
+    f.write("second wording")
+check("a rewritten prompt file is a changed arm", e.gate("freeze", "--new-version")[0], 1)
+
+# --- a verdict that measured nothing does not cost a version ---
+e = Eval(cases(("bad", "good")))
+leak = os.path.join(e.tmp, "AGENTS" + ".md")
+with open(leak, "w") as f:
+    f.write("be good\n")
+e.gate("freeze")
+e.gate("context")
+os.remove(leak)
+check("refreeze after a context verdict", (e.gate("freeze")[0], e.state()["version"], e.state().get("verdict")), (0, 1, None))
+
+# --- a change that makes things worse is said so, even where the old arm fails too little to show a gain ---
+# Five cases the old arm fails, placed so the pilot's even sample meets two of them and lets the run start.
+harmed = [("target", "bad", "bad") if i in (0, 1, 2, 5, 6) else ("target", "good", "bad") for i in range(20)]
+report = Eval(cases(("bad", "bad"), n_target=0) + harmed).to_verdict()
+check("harm verdict", report["verdict"], harness.FAILS)
+check_in("harm reason", "The change broke", report["reason"])
+# With every case run, harm is reported as harm even where the old arm fails too few cases to show a gain.
+t = {"new_wins": 0, "old_wins": 15, "both_fail": 5, "both_pass": 0, "targets_left": 0, "errors": 0, "cases": 23,
+     "neg_regressions": 0}
+check("harm outranks too little headroom", harness.verdict_of(t, {"alpha": 0.05, "negatives_max_regressions": 0}, 6)[0],
+      harness.FAILS)
+
+# --- errors in the main run are retried when the run is started again ---
+e = Eval(cases(("bad", "good"), n_target=6) + [("target", "bad", "flaky")] * 4)
+report = e.to_verdict()
+check("main run ended on errors", (report["verdict"], "Run run again" in report["reason"]), (harness.UNTESTABLE, True))
+open(e.counter + ".mended", "w").close()
+e.gate("run", "--approved-runs", str(2 * len(e.spec["cases"])))
+check("main run retried once the fault passed: no pair left errored", harness.tally(e.dir, e.spec)["errors"], 0)
+check("and it reached a verdict on the counts", e.state()["verdict"], harness.WORKS)
+
+# --- the lock reaches a helper inside a shell string and the judge panel's own files ---
+e = Eval(cases(("bad", "good")))
+e.spec["scorer"]["cmd"] = ["sh", "-c", f"{sys.executable} {os.path.join(e.tmp, 'scorer.py')} \"$1\"", "sh", "{output_file}"]
+e.write()
+e.gate("freeze")
+check("a script inside a shell string is locked", os.path.join(os.path.realpath(e.tmp), "scorer.py") in e.state()["locked"], True)
+check("the judge prompt is locked", any(p.endswith("judge-prompt.md") for p in e.state()["locked"]), True)
+os.makedirs(os.path.join(e.dir, "known", "splits"))
+with open(os.path.join(e.dir, "known", "splits", "x.txt"), "w") as f:
+    f.write("GOOD")
+e.gate("freeze")
+check("a folder named splits below the top is still locked", any(p.endswith("known/splits/x.txt") for p in e.state()["locked"]), True)
 
 # --- changing the eval after results exist is a new version, said in the report ---
 e = Eval(cases(("bad", "bad")))

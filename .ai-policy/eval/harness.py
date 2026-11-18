@@ -27,7 +27,9 @@ no cost, by the scorer gate for a few scorer calls, by the pilot for a handful o
 runs. Two causes can only show in the full run: too many runs erroring, and the
 judges splitting on more outputs than the human will be asked about.
 
-Freeze locks eval.json and every file the eval uses. Changing one afterwards voids
+Freeze locks eval.json, the files in the eval directory, the files the commands
+name, and the harness itself. A file a command writes to must end .log or .jsonl,
+which are left out. Changing one afterwards voids
 every gate, and freezing again once any gate has measured something is a new
 version, which the report states. A new arm changed after its results were seen is
 refused until it is given cases it has not been run on.
@@ -38,7 +40,8 @@ the output; `setup`, if given, runs there first. Commands may use {input_file},
 {case_file} and {eval_dir}. `text_under_test` lists files holding the changed
 text, so freeze can show which cases share its distinctive words.
 
-`pilot` and `run` print how many runs they will make and what that costs, and need
+`pilot` and `run` print how many runs they will make, what that costs, and how long
+it takes (from `est_seconds_per_run`, then from the pilot's own timings), and need
 `--approved-runs N` to match, so the number is said before it is spent.
 
 Exit codes: 0 the gate passed or a verdict was written, 1 the gate refused or
@@ -118,14 +121,25 @@ OWN_DIRS = ("splits", "__pycache__")
 OWN_SUFFIXES = (".jsonl", ".log", ".tmp")
 
 
+def files_named(cmd, d):
+    """Existing files a command names, as a whole argument or as a word inside a shell string."""
+    found = set()
+    for part in cmd if isinstance(cmd, list) else []:
+        text = str(part).replace("{eval_dir}", d)
+        for word in [text] + re.split(r"[\s'\"=<>|;&]+", text):
+            if word and os.path.isfile(word) and not word.endswith(OWN_SUFFIXES):
+                found.add(os.path.realpath(word))
+    return found
+
+
 def load_spec(d, freezing=False):
     """The eval and the hash that locks it.
 
     The hash covers eval.json, every other file the eval directory holds at freeze
     (the rule, the known answers, a prompt an arm reads), and any file a command
     names, such as a scorer script kept elsewhere. Changing any of them after freeze
-    voids the gates. Files that appear later, such as a log a command writes, are
-    outside the lock.
+    voids the gates. Files that appear later are outside the lock, and so is any
+    file ending .jsonl, .log or .tmp: a file a command writes to must be named so.
     """
     path = os.path.join(d, "eval.json")
     try:
@@ -134,19 +148,24 @@ def load_spec(d, freezing=False):
         spec = json.loads(raw)
     except (OSError, ValueError) as e:
         raise Refused(f"cannot read {path}: {e}")
-    locked = set() if freezing else None
-    for root, dirs, files in os.walk(d) if freezing else []:
-        dirs[:] = [x for x in dirs if x not in OWN_DIRS and not (root == d and x.startswith("runs"))]
-        locked |= {os.path.join(root, f) for f in files
-                   if not (root == d and f in OWN_FILES) and not f.endswith(OWN_SUFFIXES)}
-    commands = [(spec.get("scorer") or {}).get("cmd")]
-    commands += [arm.get(k) for arm in (spec.get("arms") or {}).values() if isinstance(arm, dict) for k in ("setup", "run")]
-    for cmd in commands if freezing else []:
-        for part in cmd if isinstance(cmd, list) else []:
-            named = str(part).replace("{eval_dir}", d)
-            if os.path.isfile(named):
-                locked.add(os.path.realpath(named))
-    if locked is None:
+    if freezing:
+        locked = set()
+        for root, dirs, files in os.walk(d):
+            if root == d:
+                dirs[:] = [x for x in dirs if x not in OWN_DIRS and not x.startswith("runs")]
+            locked |= {os.path.join(root, f) for f in files
+                       if not (root == d and f in OWN_FILES) and not f.endswith(OWN_SUFFIXES)}
+        commands = [(spec.get("scorer") or {}).get("cmd")]
+        commands += [arm.get(k) for arm in (spec.get("arms") or {}).values() if isinstance(arm, dict)
+                     for k in ("setup", "run")]
+        for cmd in commands:
+            locked |= files_named(cmd, d)
+        locked |= {os.path.realpath(os.path.join(d, t)) for t in spec.get("text_under_test") or []
+                   if os.path.isfile(os.path.join(d, t))}
+        # The harness and what ships beside it: the judge panel, its prompt, the Jev seat.
+        here = os.path.dirname(os.path.abspath(__file__))
+        locked |= {os.path.join(here, f) for f in os.listdir(here) if f.endswith((".py", ".json", ".md"))}
+    else:
         locked = load_state(d).get("locked", [path])
     digest = hashlib.sha256()
     for name in sorted(locked):
@@ -251,6 +270,7 @@ SKELETON = {
     "version_cmds": [],
     "pilot_cases": 4,
     "est_cost_per_run_usd": 0.0,
+    "est_seconds_per_run": 60,
 }
 
 
@@ -272,13 +292,16 @@ def gate_freeze(d, args):
     # A result is anything a gate measured: the scorer on known answers counts, and so does a verdict.
     version = state.get("version", 1)
     archiving = False
+    seen_inputs = state.get("seen_inputs", [])  # every case any earlier version of this eval ran
     seen = [x for x in ("scorer", "pilot", "run") if x in state.get("gates", {}) or x in state]
-    if seen or state.get("verdict") or os.path.isdir(os.path.join(d, "runs")):
+    if seen or os.path.isdir(os.path.join(d, "runs")):
         if not args.new_version:
             raise Refused("this eval already has results. Freezing again after seeing them, changed or not, "
                           "is a new eval: pass --new-version to archive them and say so in the report")
-        tuned = sorted(set(state.get("case_inputs", [])) & set(case_digests(spec)))
-        if state.get("new_arm") != arm_digest(d, spec) and tuned and os.path.isdir(os.path.join(d, "runs")):
+        if os.path.isdir(os.path.join(d, "runs")):
+            seen_inputs = sorted(set(seen_inputs) | set(state.get("case_inputs", [])))
+        tuned = sorted(set(seen_inputs) & set(case_digests(spec)))
+        if arm_changed(state.get("new_arm"), arm_digest(d, spec)) and tuned:
             raise Refused(f"the new arm changed after results on {len(tuned)} of these cases were seen. A change "
                           f"tuned on a case is not scored on it: give the changed arm cases it has not been run on")
         archiving = True
@@ -312,7 +335,9 @@ def gate_freeze(d, args):
             re.compile(pattern)
         except re.error as e:
             need(False, f"`private_patterns` entry {pattern!r} is not a regular expression: {e}")
-    need(isinstance(spec.get("est_cost_per_run_usd"), (int, float)), "`est_cost_per_run_usd` must be set")
+    need(number(spec.get("est_cost_per_run_usd"), 0, 10 ** 6), "`est_cost_per_run_usd` must be set, zero or more")
+    need(number(spec.get("pilot_cases", 8), 1, 10 ** 6) and isinstance(spec.get("pilot_cases", 8), int),
+         "`pilot_cases` must be a whole number")
     need(spec.get("text_under_test") or str(spec.get("no_text_under_test_because", "")).strip(),
          "`text_under_test` must list the files holding the changed text, so cases can be checked against it, "
          "or `no_text_under_test_because` must say why there is none")
@@ -355,7 +380,8 @@ def gate_freeze(d, args):
         version += 1
     state = {"hash": digest, "version": version, "frozen_at": now(), "gates": {},
              "min_flips": need_flips, "shared_with_text_under_test": shared,
-             "new_arm": arm_digest(d, spec), "case_inputs": case_digests(spec), "locked": spec["_locked"],
+             "new_arm": arm_digest(d, spec), "case_inputs": case_digests(spec), "seen_inputs": seen_inputs,
+             "locked": spec["_locked"],
              "versions": versions(spec)}
     passed(d, state, "freeze")
     print(f"frozen {digest} (version {version}): {len(targets(spec))} target and {len(negatives(spec))} "
@@ -382,15 +408,29 @@ def case_digests(spec):
 
 
 def arm_digest(d, spec):
-    """A hash of the new arm: its commands and the text under test."""
-    h = hashlib.sha256(json.dumps((spec.get("arms") or {}).get("new"), sort_keys=True).encode())
-    for path in spec.get("text_under_test") or []:
+    """The new arm as {name: hash}: its commands, each file they name, and the text under test."""
+    arm = (spec.get("arms") or {}).get("new") or {}
+    found = {"(commands)": hashlib.sha256(json.dumps(arm, sort_keys=True).encode()).hexdigest()[:12]}
+    named = set()
+    for k in ("setup", "run"):
+        named |= files_named(arm.get(k), d)
+    named |= {os.path.join(d, t) for t in spec.get("text_under_test") or []}
+    for path in sorted(named):
         try:
-            with open(os.path.join(d, path), "rb") as f:
-                h.update(f.read())
+            with open(path, "rb") as f:
+                found[path] = hashlib.sha256(f.read()).hexdigest()[:12]
         except OSError:
             pass
-    return h.hexdigest()[:12]
+    return found
+
+
+def arm_changed(before, after):
+    """Whether the new arm differs from the one frozen earlier.
+
+    Only what the earlier arm consisted of is compared, so a log a command has
+    written since, which the command also names, is not mistaken for a change.
+    """
+    return any(after.get(name) != digest for name, digest in (before or {}).items())
 
 
 def answer_key_overlap(d, spec):
@@ -435,7 +475,8 @@ def gate_context(d, args):
                       "commands shut them out, then freeze again.")
     arms = spec["arms"]
     differ = sorted(k for k in set(arms["old"]) | set(arms["new"]) if arms["old"].get(k) != arms["new"].get(k))
-    passed(d, state, "context", work_root=root, arms_differ_in=differ, home_instructions=globals_found)
+    passed(d, state, "context", work_root=root, arms_differ_in=differ,
+           home_instructions=[redact(g, spec)[0] for g in globals_found])
     print(f"nothing leaks from above {root}; the arms differ in: {', '.join(differ) or 'nothing'}")
 
 
@@ -485,12 +526,14 @@ def redact(text, spec):
     """Replace the human's private details. Returns the text, how many were replaced,
     and how many of those said who the human is."""
     count = identity = 0
-    patterns = [(re.escape(os.path.expanduser("~")), "~")] + [(p, "[private]") for p in spec.get("private_patterns", [])]
-    for i, (pattern, repl) in enumerate(identity_patterns() + patterns):
+    text, count = re.subn(re.escape(os.path.expanduser("~")), "~", text)
+    for pattern, repl in identity_patterns():
         text, n = re.subn(pattern, repl, text)
+        identity += n
+    for pattern in spec.get("private_patterns", []):
+        text, n = re.subn(pattern, "[private]", text)
         count += n
-        identity += n if i < len(identity_patterns()) else 0
-    return text, count, identity
+    return text, count + identity, identity
 
 
 def run_arm(d, spec, phase, case, arm, root):
@@ -597,6 +640,12 @@ def approve(args, planned, spec, what, seconds_per_run=None):
 
 # --- scorer -------------------------------------------------------------------
 
+def judge_log(d, spec):
+    """Where the judge panel logs its votes, read from the scorer command; None for any other scorer."""
+    cmd = fill(spec["scorer"]["cmd"], eval_dir=d)
+    return cmd[cmd.index("--log") + 1] if "--log" in cmd[:-1] else None
+
+
 def judge_rates(d, spec, since):
     """Each judge's own record on the known answers, from the rows the panel logged since `since`.
 
@@ -609,10 +658,10 @@ def judge_rates(d, spec, since):
             right[hashlib.sha256(redact(f.read(), spec)[0].encode()).hexdigest()[:12]] = k["verdict"]
     rates = {}
     try:
-        with open(os.path.join(d, "judges.jsonl")) as f:
+        with open(judge_log(d, spec)) as f:
             f.seek(since)
             rows = [json.loads(line) for line in f if line.strip()]
-    except (OSError, ValueError):
+    except (OSError, ValueError, TypeError):
         return rates
     for row in rows:
         verdict = right.get(row.get("output_sha"))
@@ -628,8 +677,8 @@ def gate_scorer(d, args):
     spec, state = require(d, "scorer")
     tally = {"pass": [0, 0], "fail": [0, 0]}  # right answer -> [scored right, total]
     misses, splits = [], 0
-    log = os.path.join(d, "judges.jsonl")
-    since = os.path.getsize(log) if os.path.exists(log) else 0
+    log = judge_log(d, spec)
+    since = os.path.getsize(log) if log and os.path.exists(log) else 0
     for k in spec["known"]:
         got, split = score(d, spec, os.path.join(d, k["file"]), {"id": None, "kind": "target"})
         splits += split
@@ -653,11 +702,18 @@ def gate_scorer(d, args):
             f"passes passed {record['passes_passed']}), so its scores would mean nothing")
         return
     record["judges"] = {}
-    for judge, r in sorted(judge_rates(d, spec, since).items()):
+    rates = judge_rates(d, spec, since)
+    if log and not rates:
+        state["scorer"] = record
+        end(d, state, UNTESTABLE, f"the scorer logs judge votes to {log}, but none were found for the known answers, "
+            f"so no judge could be measured alone")
+        return
+    for judge, r in sorted(rates.items()):
         record["judges"][judge] = f"fails caught {r['fail'][0]}/{r['fail'][1]}, passes passed {r['pass'][0]}/{r['pass'][1]}"
         print(f"  judge {judge}: {record['judges'][judge]}")
-        for side, need_rate in (("fail", bar["fails_caught"]), ("pass", bar["passes_passed"])):
-            if r[side][1] >= MIN_KNOWN and r[side][0] / r[side][1] < need_rate:
+        # Alone, a judge is held to the floor, not the panel's bar: the panel exists because single judges err.
+        for side in ("fail", "pass"):
+            if r[side][1] >= MIN_KNOWN and r[side][0] / r[side][1] < MIN_SCORER_BAR:
                 state["scorer"] = record
                 end(d, state, UNTESTABLE, f"judge {judge} missed the bar alone ({record['judges'][judge]}). The other "
                     f"judges outvote it on known answers, but on a real output it would split the panel or "
@@ -750,6 +806,8 @@ def gate_run(d, args):
             seconds_per_run=sum(timed) / len(timed) if timed else None)
     root = state["gates"]["context"]["work_root"]
     batch = max(1, args.jobs // 2)
+    errored = [(c, arm) for c in order for arm in ("old", "new") if (read_meta(d, "main", c, arm) or {}).get("error")]
+    run_many(d, spec, "main", errored, root, args.jobs)  # a run that errored last time is tried again first
     done = 0
     while done < len(order):
         chunk = order[done:done + batch]
@@ -774,6 +832,10 @@ def verdict_of(t, bar, needed):
     if t["neg_regressions"] > bar["negatives_max_regressions"]:
         return FAILS, (f"the new arm failed {t['neg_regressions']} negative cases the old arm passed, more than "
                        f"the {bar['negatives_max_regressions']} the bar allows: it fires where it should not")
+    if t["old_wins"] > t["new_wins"] and sign_test(t["new_wins"], t["old_wins"] ) < bar["alpha"] \
+            and settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]) == FAILS:
+        return FAILS, (f"the change made things worse: {t['old_wins']} cases flipped toward old and "
+                       f"{t['new_wins']} toward new, sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f}")
     old_failed = t["new_wins"] + t["both_fail"]
     if old_failed + t["targets_left"] < needed:
         # The pilot's sample suggested otherwise, and it was wrong: saying "does not work" here
@@ -783,8 +845,10 @@ def verdict_of(t, bar, needed):
     verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"])
     if not verdict:
         return None, None
+    broke = (f". The change broke {t['old_wins']} cases the old arm passed"
+             if verdict == FAILS and t["old_wins"] > t["new_wins"] else "")
     return verdict, (f"flips toward new {t['new_wins']}, toward old {t['old_wins']}, "
-                     f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}")
+                     f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}{broke}")
 
 
 def conclude(d, spec, state):
@@ -933,7 +997,7 @@ def gate_report(d, args):
               "rulings": state.get("rulings", {}), "split_outputs": split_outputs,
               "versions": state.get("versions"), "shared_with_text_under_test": state.get("shared_with_text_under_test"),
               "human_confirmation": spec["human_confirmation"], "written": now()}
-    save_json(os.path.join(d, "report.json"), report)
+    save_json(os.path.join(d, "report.json"), json.loads(redact(json.dumps(report), spec)[0]))
     lines = [f"# Eval report: {state['verdict']}", "", state.get("reason", ""), "",
              f"- Claim: {spec['claim']}", f"- Counted: {spec['counted']}",
              f"- Bar, set before the run: sign test under {spec['bar']['alpha']} on the flips; at most "
