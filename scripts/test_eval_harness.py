@@ -369,6 +369,15 @@ with open(os.path.join(tmp, "saw.txt")) as f:
 check("a judge is not shown the case", "case-zebra" in saw, False)
 check_in("a judge is shown the rule", "the output says GOOD", saw)
 
+# --- the Jev seat refuses a prompt it cannot split into rule and output (no network touched) ---
+done = subprocess.run([sys.executable, os.path.join(os.path.dirname(HARNESS), "jev_vote.py")],
+                      input="no tags here", capture_output=True, text=True)
+check("jev seat without rule and output", done.returncode, 2)
+
+# --- the shipped panel names judges from three different providers ---
+with open(os.path.join(os.path.dirname(HARNESS), "panel.json")) as f:
+    check("three providers", len({j["provider"] for j in json.load(f)}), 3)
+
 if failures:
     print("eval harness test: FAILED")
     for failure in failures:

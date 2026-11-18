@@ -6,7 +6,9 @@ Usage, as the `scorer.cmd` of an eval:
 
 Each judge in the panel is a command that reads the prompt on stdin and answers on
 stdout. It gets judge-prompt.md, the rule and the output, and nothing else: not
-the case, not which arm wrote the output, not what the other judges said. A case
+the case, not which arm wrote the output, not what the other judges said. Where a
+judge's own tool loads a file from the home directory that no option shuts out,
+the panel names it as `still_loads` and each log row records it. A case
 that carries its own `rule` (a negative case usually does) is judged against that
 instead of the rule file.
 
@@ -39,7 +41,8 @@ def ask(judge, message, timeout):
     try:
         # An empty directory, so the judge's own tool finds no project files to load.
         with tempfile.TemporaryDirectory(prefix="aiw-eval-judge-") as cwd:
-            done = subprocess.run(judge["cmd"], input=message, capture_output=True, text=True,
+            cmd = [part.replace("{here}", HERE) for part in judge["cmd"]]
+            done = subprocess.run(cmd, input=message, capture_output=True, text=True,
                                   errors="replace", cwd=cwd, timeout=timeout)
         answer = done.stdout.strip()
         lines = [re.sub(r"[^A-Za-z]", "", line).upper() for line in answer.splitlines() if line.strip()]
@@ -47,7 +50,11 @@ def ask(judge, message, timeout):
         problem = None if vote else f"no PASS or FAIL line (exit {done.returncode}): {done.stderr[-200:]}"
     except (subprocess.SubprocessError, OSError) as e:
         answer, vote, problem = "", None, f"{type(e).__name__}: {str(e)[-200:]}"
+    # A file the judge's own tool loads whatever we pass it: recorded, since it is not sealed out.
+    loads = judge.get("still_loads")
+    loaded = loads if loads and os.path.exists(os.path.expanduser(loads)) else None
     return {"judge": judge["name"], "provider": judge.get("provider"), "vote": vote, "answer": answer,
+            "still_loaded": loaded,
             "problem": problem, "seconds": round(time.time() - started, 1)}
 
 

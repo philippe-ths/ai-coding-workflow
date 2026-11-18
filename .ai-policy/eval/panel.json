@@ -7,11 +7,12 @@
   {
     "name": "codex",
     "provider": "OpenAI",
-    "cmd": ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "-s", "read-only", "-c", "project_doc_max_bytes=0", "-"]
+    "cmd": ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--disable", "hooks", "-s", "read-only", "-"],
+    "still_loads": "~/.codex/AGENTS.md"
   },
   {
-    "name": "gemini",
-    "provider": "Google",
-    "cmd": ["gemini", "-p", ""]
+    "name": "jev",
+    "provider": "TypeSafe",
+    "cmd": ["python3", "{here}/jev_vote.py"]
   }
 ]
