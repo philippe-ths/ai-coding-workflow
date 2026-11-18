@@ -166,16 +166,17 @@ def load_spec(d, freezing=False):
         here = os.path.dirname(os.path.abspath(__file__))
         locked |= {os.path.join(here, f) for f in os.listdir(here) if f.endswith((".py", ".json", ".md"))}
     else:
-        locked = load_state(d).get("locked", [path])
-    digest = hashlib.sha256()
+        locked = list(load_state(d).get("locked") or [path])
+    digest, each = hashlib.sha256(), {}
     for name in sorted(locked):
         try:
             with open(name, "rb") as f:
                 content = f.read()
         except OSError:
             content = b"(missing)"
+        each[name] = hashlib.sha256(content).hexdigest()[:12]
         digest.update(os.path.relpath(name, d).encode() + b"\0" + content + b"\0")
-    spec["_locked"] = sorted(locked)
+    spec["_locked"] = each
     return spec, digest.hexdigest()[:12]
 
 
@@ -200,8 +201,11 @@ def require(d, gate):
     spec, digest = load_spec(d)
     state = load_state(d)
     if state.get("hash") != digest:
-        raise Refused("the eval is not frozen, or eval.json or a file it uses changed after freeze: "
-                      "freeze again (this voids every gate)")
+        changed = [name for name, was in (state.get("locked") or {}).items() if spec["_locked"].get(name) != was]
+        raise Refused("the eval is not frozen, or a file it uses changed after freeze"
+                      + (f" ({', '.join(os.path.relpath(c, d) for c in changed)})" if changed else "")
+                      + ": freeze again, which voids every gate. A file a command writes to must end .log or "
+                        ".jsonl to stay outside the lock")
     if state.get("verdict") and state.get("ended_on_errors") == gate:
         # Errors are usually passing faults: running the gate again retries the runs that errored.
         del state["verdict"], state["reason"], state["ended_on_errors"]
@@ -643,7 +647,8 @@ def approve(args, planned, spec, what, seconds_per_run=None):
 def judge_log(d, spec):
     """Where the judge panel logs its votes, read from the scorer command; None for any other scorer."""
     cmd = fill(spec["scorer"]["cmd"], eval_dir=d)
-    return cmd[cmd.index("--log") + 1] if "--log" in cmd[:-1] else None
+    panel = any(os.path.basename(part) == "judges.py" for part in cmd)
+    return cmd[cmd.index("--log") + 1] if panel and "--log" in cmd[:-1] else None
 
 
 def judge_rates(d, spec, since):
@@ -673,8 +678,26 @@ def judge_rates(d, spec, since):
     return rates
 
 
+def need_review(d, state):
+    """Refuse until design-review.md names the frozen eval.
+
+    Asked for before the scorer gate, the first to measure anything, so that fixing
+    what the review finds is still the same version.
+    """
+    review = os.path.join(d, "design-review.md")
+    try:
+        with open(review) as f:
+            reviewed = state["hash"] in f.read()
+    except OSError:
+        reviewed = False
+    if not reviewed:
+        raise Refused(f"no design review of this eval: a fresh agent attacks the design before anything is measured, "
+                      f"and its findings go in {review} naming the frozen hash {state['hash']}")
+
+
 def gate_scorer(d, args):
     spec, state = require(d, "scorer")
+    need_review(d, state)
     tally = {"pass": [0, 0], "fail": [0, 0]}  # right answer -> [scored right, total]
     misses, splits = [], 0
     log = judge_log(d, spec)
@@ -726,15 +749,7 @@ def gate_scorer(d, args):
 
 def gate_pilot(d, args):
     spec, state = require(d, "pilot")
-    review = os.path.join(d, "design-review.md")
-    try:
-        with open(review) as f:
-            reviewed = state["hash"] in f.read()
-    except OSError:
-        reviewed = False
-    if not reviewed:
-        raise Refused(f"no design review of this eval: a fresh agent attacks the design before any spend, and its "
-                      f"findings go in {review} naming the frozen hash {state['hash']}")
+    need_review(d, state)
     sample = pilot_sample(spec)
     rehearsal = sample[:REHEARSAL_CASES]
     approve(args, len(sample) + len(negatives(spec)) + len(rehearsal), spec,
@@ -837,7 +852,7 @@ def verdict_of(t, bar, needed):
         return FAILS, (f"the change made things worse: {t['old_wins']} cases flipped toward old and "
                        f"{t['new_wins']} toward new, sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f}")
     old_failed = t["new_wins"] + t["both_fail"]
-    if old_failed + t["targets_left"] < needed:
+    if old_failed + t["targets_left"] < needed and t["old_wins"] <= t["new_wins"]:
         # The pilot's sample suggested otherwise, and it was wrong: saying "does not work" here
         # would blame the change for a test that could not have shown it working.
         return UNTESTABLE, (f"the old arm failed only {old_failed} target cases and {needed} flips are needed, "

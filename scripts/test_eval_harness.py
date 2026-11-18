@@ -83,6 +83,7 @@ class Eval:
             "no_text_under_test_because": "the arms are scripts with fixed answers",
         }
         self.spec.update(overrides)
+        self.auto_review = True  # record a design review just before the scorer gate asks for one
         self.write()
 
     def write(self):
@@ -90,6 +91,8 @@ class Eval:
             json.dump(self.spec, f)
 
     def gate(self, name, *options):
+        if name == "scorer" and self.auto_review:
+            self.review()
         done = subprocess.run([sys.executable, HARNESS, name, "--dir", self.dir, "--work-root", self.work, *options],
                               capture_output=True, text=True, env=dict(os.environ, HOME=self.home))
         return done.returncode, done.stdout + done.stderr
@@ -118,7 +121,6 @@ class Eval:
         self.gate("freeze")
         self.gate("context")
         self.gate("scorer")
-        self.review()
         self.gate("pilot", "--approved-runs", str(self.pilot_runs()))
         self.run_out = self.gate("run", "--approved-runs", str(2 * len(self.spec["cases"])))[1]
         self.gate("report")
@@ -152,7 +154,6 @@ report = e.to_verdict()
 p = Eval(cases(("bad", "good")))
 for g in ("freeze", "context", "scorer"):
     p.gate(g)
-p.review()
 code, out = p.gate("pilot", "--approved-runs", "9")
 check_in("pilot prints an old output", "c3 (old arm): does not show it\n    BAD", out)
 check_in("pilot prints a new output", "c3 (new arm): shows the behaviour\n    GOOD", out)
@@ -203,15 +204,16 @@ e = Eval(cases(("bad", "good")))
 code, out = e.gate("pilot", "--approved-runs", "9")
 check("pilot before freeze refused", code, 1)
 e.gate("freeze")
+e.auto_review = False
 code, out = e.gate("scorer")
 check("scorer before context refused", code, 1)
 check_in("names the missing gate", "needs the context gate", out)
 e.gate("context")
-e.gate("scorer")
-code, out = e.gate("pilot", "--approved-runs", "9")
-check("pilot without a design review refused", code, 1)
+code, out = e.gate("scorer")
+check("scorer gate without a design review refused", code, 1)
 check_in("asks for the review", "design review", out)
-e.review()
+e.auto_review = True
+e.gate("scorer")
 code, out = e.gate("pilot")
 check("pilot without the approved count refused", code, 1)
 check_in("states the spend", "up to 9 runs", out)
@@ -244,10 +246,10 @@ for label, tamper in (
         f.write("the output says GOOD")
     for g in ("freeze", "context", "scorer"):
         e.gate(g)
-    e.review()
     tamper(e)
     code, out = e.gate("pilot", "--approved-runs", str(e.pilot_runs()))
     check(f"changing {label} after freeze voids the gates", (code, e.runs()), (1, 0))
+check_in("the refusal names the file that changed", "scorer.py", out)
 
 # --- a verdict cannot be wiped by freezing the same eval again ---
 e = Eval(cases(("bad", "good")))
@@ -320,6 +322,11 @@ check_in("harm reason", "The change broke", report["reason"])
 # With every case run, harm is reported as harm even where the old arm fails too few cases to show a gain.
 t = {"new_wins": 0, "old_wins": 15, "both_fail": 5, "both_pass": 0, "targets_left": 0, "errors": 0, "cases": 23,
      "neg_regressions": 0}
+check("more broken than fixed is 'does not work' even short of significance",
+      harness.verdict_of(dict(t, new_wins=3, old_wins=6, both_fail=0), {"alpha": 0.05, "negatives_max_regressions": 0}, 6)[0],
+      harness.FAILS)
+check("a code scorer with its own --log is not read as the judge panel",
+      harness.judge_log("/e", {"scorer": {"cmd": ["python3", "score.py", "--log", "/e/score.log"]}}), None)
 check("harm outranks too little headroom", harness.verdict_of(t, {"alpha": 0.05, "negatives_max_regressions": 0}, 6)[0],
       harness.FAILS)
 
