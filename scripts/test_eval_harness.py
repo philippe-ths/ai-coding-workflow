@@ -32,10 +32,13 @@ def check_in(name, needle, haystack):
 
 # An arm prints GOOD or BAD as the case says for that arm, and logs that it ran.
 FAKE_ARM = """import json, sys
+import os
 arm, input_file, counter = sys.argv[1:4]
 case = json.load(open(input_file))
 open(counter, "a").write(arm + "\\n")
-print(case[arm].upper(), case.get("extra", ""))
+if case[arm] == "crash" or (case[arm] == "flaky" and not os.path.exists(counter + ".mended")):
+    sys.exit("the model is busy")
+print("BAD" if case[arm] == "flaky" else case[arm].upper(), case.get("extra", ""))
 """
 FAKE_SCORER = """import sys
 print("pass" if "GOOD" in open(sys.argv[1]).read() else "fail")
@@ -72,7 +75,7 @@ class Eval:
             "bar": {"alpha": 0.05, "negatives_max_regressions": 0},
             "arms": {"old": {"run": arm + ["old", "{input_file}", self.counter]},
                      "new": {"run": arm + ["new", "{input_file}", self.counter]}},
-            "cases": [{"id": f"c{i}", "kind": kind, "input": json.dumps({"old": old, "new": new})}
+            "cases": [{"id": f"c{i}", "kind": kind, "input": json.dumps({"old": old, "new": new, "n": i})}
                       for i, (kind, old, new) in enumerate(cases)],
             "scorer": {"cmd": [sys.executable, os.path.join(self.tmp, "scorer.py"), "{output_file}"]},
             "scorer_bar": {"fails_caught": 0.9, "passes_passed": 0.9},
@@ -116,7 +119,7 @@ class Eval:
         self.gate("scorer")
         self.review()
         self.gate("pilot", "--approved-runs", str(self.pilot_runs()))
-        self.gate("run", "--approved-runs", str(2 * len(self.spec["cases"])))
+        self.run_out = self.gate("run", "--approved-runs", str(2 * len(self.spec["cases"])))[1]
         self.gate("report")
         try:
             with open(os.path.join(self.dir, "report.json")) as f:
@@ -225,7 +228,7 @@ check("freezing again before any run is still version 1", e.state()["version"], 
 # --- changing the eval after results exist is a new version, said in the report ---
 e = Eval(cases(("bad", "bad")))
 e.to_verdict()
-e.spec["bar"]["alpha"] = 0.2
+e.spec["bar"]["alpha"] = 0.1
 e.write()
 code, out = e.gate("freeze")
 check("refreeze after results refused", code, 1)
@@ -377,6 +380,64 @@ e = Eval(cases(("bad", "maybe"), n_target=8), scorer=SPLIT_SCORER)
 report = e.to_verdict()
 check("too many decisive splits", report["verdict"], harness.UNTESTABLE)
 check_in("says the rule is too loose", "too loose to judge", report["reason"])
+
+# --- a human ruling on a negative case answers the judges' question, not the reverse ---
+# MEH stands for an output that does not show the behaviour and that the judges split on.
+MEH_SCORER = """import sys
+text = open(sys.argv[1]).read()
+if "MEH" in text:
+    print("SPLIT")
+print("pass" if "GOOD" in text else "fail")
+"""
+for ruling, want in (("fail", harness.WORKS), ("pass", harness.FAILS)):
+    e = Eval([("negative", "bad", "meh")] + cases(("bad", "good"), n_target=6, n_negative=2), scorer=MEH_SCORER)
+    e.to_verdict()
+    sid = next(iter(e.state()["awaiting"]))
+    code, out = e.gate("rule", "--id", sid, "--verdict", ruling)
+    check(f"negative case ruled '{ruling}' (does it show the behaviour?)", e.state()["verdict"], want)
+check_in("the ruling request says what pass means", "pass = it shows it", e.run_out)
+check_in("the ruling request asks the counted question", e.spec["counted"], e.run_out)
+
+# --- a few errored pairs do not end a run that the rest of the cases would settle ---
+e = Eval(cases(("bad", "good"), n_target=0) + [("target", "bad", "crash")] * 3 + [("target", "bad", "good")] * 28)
+report = e.to_verdict()
+check("errors under a tenth of all cases", report["verdict"], harness.WORKS)
+check("errored pairs are counted", report["tally"]["errors"], 3)
+
+# --- an eval ended by errors is retried by running the gate again ---
+e = Eval(cases(("flaky", "good")))
+report = e.to_verdict()
+check("pilot ended on errors", report["verdict"], harness.UNTESTABLE)
+check_in("says how to retry", "Run pilot again", report["reason"])
+open(e.counter + ".mended", "w").close()
+code, out = e.gate("pilot", "--approved-runs", str(e.pilot_runs()))
+check("pilot retried once the fault passed", (code, e.state().get("verdict")), (0, None))
+
+# --- too few cases the old arm fails is said as such, not as the change failing ---
+e = Eval([("negative", "bad", "bad")] * 3 + [("target", "bad", "good")] * 5 + [("target", "good", "good")] * 25)
+report = e.to_verdict()
+check("underpowered verdict", report["verdict"], harness.UNTESTABLE)
+check_in("underpowered reason", "the old arm failed only", report["reason"])
+
+# --- the pilot samples across the cases, and never fewer than four ---
+spread = {"cases": [{"id": f"c{i}", "kind": "target"} for i in range(20)], "pilot_cases": 1}
+check("pilot sample", [c["id"] for c in harness.pilot_sample(spread)], ["c0", "c5", "c10", "c15"])
+
+# --- values that would hollow out a gate are refused; braces in a command are left alone ---
+for label, change, message in (
+    ("a loose line", {"bar": {"alpha": 0.99, "negatives_max_regressions": 0}}, "bar.alpha"),
+    ("every negative allowed to regress", {"bar": {"alpha": 0.05, "negatives_max_regressions": 3}}, "negatives_max_regressions"),
+    ("a scorer bar of nothing", {"scorer_bar": {"fails_caught": 0, "passes_passed": 0.9}}, "scorer_bar"),
+    ("a bad pattern", {"private_patterns": ["("]}, "private_patterns"),
+):
+    code, out = Eval(cases(("bad", "good")), **change).gate("freeze")
+    check(f"{label} refused", code, 1)
+    check_in(f"{label} named", message, out)
+e = Eval(cases(("bad", "good")))
+e.spec["cases"][1]["input"] = e.spec["cases"][0]["input"]
+e.write()
+check_in("repeated input refused", "same input", e.gate("freeze")[1])
+check("braces survive", harness.fill(["x", '{"a": 1}', "{input_file}"], input_file="/f"), ["x", '{"a": 1}', "/f"])
 
 # --- the judge panel: majority verdict, splits flagged, each judge sealed ---
 JUDGES = os.path.join(os.path.dirname(HARNESS), "judges.py")

@@ -55,7 +55,10 @@ import uuid
 GATES = ["freeze", "context", "scorer", "pilot", "run"]
 WORKS, FAILS, UNTESTABLE = "works", "does not work", "cannot be tested this way"
 MIN_KNOWN = 5
+MAX_ALPHA = 0.1  # a looser line than this calls luck real too often to be a bar
+MIN_SCORER_BAR = 0.7
 MAX_ERROR_SHARE = 0.1
+MIN_PILOT_CASES = 4  # fewer and one lucky case decides whether the eval goes ahead
 REHEARSAL_CASES = 2  # target cases the pilot also runs on the new arm, to be read, never counted
 PILOT_PRINT_CHARS = 400
 MAX_RULINGS = 5  # the most outputs the human is ever asked to rule on
@@ -134,6 +137,9 @@ def require(d, gate):
     state = load_state(d)
     if state.get("hash") != digest:
         raise Refused("eval.json is not frozen, or changed after freeze: run freeze again (this voids every gate)")
+    if state.get("verdict") and state.get("ended_on_errors") == gate:
+        # Errors are usually passing faults: running the gate again retries the runs that errored.
+        del state["verdict"], state["reason"], state["ended_on_errors"]
     if state.get("verdict"):
         raise Refused(f"this eval already ended: {state['verdict']} ({state.get('reason', '')}). Run report.")
     for earlier in GATES[:GATES.index(gate)]:
@@ -147,7 +153,10 @@ def passed(d, state, gate, **record):
     save_json(os.path.join(d, "state.json"), state)
 
 
-def end(d, state, verdict, reason):
+def end(d, state, verdict, reason, errors_in=None):
+    if errors_in:
+        state["ended_on_errors"] = errors_in
+        reason += f" Run {errors_in} again to retry them."
     state["verdict"], state["reason"] = verdict, reason
     save_json(os.path.join(d, "state.json"), state)
     print(f"VERDICT: {verdict}. {reason}")
@@ -233,19 +242,32 @@ def gate_freeze(d, args):
         need(isinstance(spec.get(key), str) and spec.get(key, "").strip(), f"`{key}` is missing or empty")
     need(spec.get("cannot_show"), "`cannot_show` must list what this eval cannot show")
     bar = spec.get("bar") or {}
-    need(isinstance(bar.get("alpha"), (int, float)) and 0 < bar.get("alpha", 0) < 1, "`bar.alpha` must be set")
-    need(isinstance(bar.get("negatives_max_regressions"), int), "`bar.negatives_max_regressions` must be set")
+    def number(x, low, high):
+        return isinstance(x, (int, float)) and not isinstance(x, bool) and low <= x <= high
+
+    need(number(bar.get("alpha"), 0.0001, MAX_ALPHA), f"`bar.alpha` must be set, at most {MAX_ALPHA}")
+    n_neg = sum(1 for c in spec.get("cases") or [] if c.get("kind") == "negative")
+    need(number(bar.get("negatives_max_regressions"), 0, max(0, n_neg - 1)) and isinstance(bar.get("negatives_max_regressions"), int),
+         "`bar.negatives_max_regressions` must be a whole number below the number of negative cases")
     for arm in ("old", "new"):
         need(((spec.get("arms") or {}).get(arm) or {}).get("run"), f"`arms.{arm}.run` is missing")
     need((spec.get("scorer") or {}).get("cmd"), "`scorer.cmd` is missing")
     sbar = spec.get("scorer_bar") or {}
-    need("fails_caught" in sbar and "passes_passed" in sbar, "`scorer_bar` needs fails_caught and passes_passed")
+    need(number(sbar.get("fails_caught"), MIN_SCORER_BAR, 1) and number(sbar.get("passes_passed"), MIN_SCORER_BAR, 1),
+         f"`scorer_bar` needs fails_caught and passes_passed, each between {MIN_SCORER_BAR} and 1")
+    for pattern in spec.get("private_patterns", []):
+        try:
+            re.compile(pattern)
+        except re.error as e:
+            need(False, f"`private_patterns` entry {pattern!r} is not a regular expression: {e}")
     need(isinstance(spec.get("est_cost_per_run_usd"), (int, float)), "`est_cost_per_run_usd` must be set")
     cases = spec.get("cases") or []
     ids = [c.get("id") for c in cases]
     need(len(set(ids)) == len(ids) and all(ids), "every case needs a unique `id`")
     need(all(c.get("kind") in ("target", "negative") and c.get("input") for c in cases),
          "every case needs `kind` (target or negative) and `input`")
+    inputs = [c.get("input") for c in cases]
+    need(len(set(inputs)) == len(inputs), "two cases have the same input: repeats of one case are not more cases")
     need(not any("rule" in c for c in cases),
          "a case carries its own `rule`: an eval counts one thing, and a negative case passes when the "
          "scorer says that one thing is absent")
@@ -255,6 +277,7 @@ def gate_freeze(d, args):
              f"`known` needs at least {MIN_KNOWN} outputs whose right answer is {verdict}")
     for k in known:
         need(os.path.isfile(os.path.join(d, k.get("file", ""))), f"known output not found: {k.get('file')}")
+    need(len({k.get("file") for k in known}) == len(known), "a known output is listed twice")
     if problems:
         raise Refused("eval.json is not fully stated:\n  - " + "\n  - ".join(problems))
 
@@ -336,7 +359,13 @@ def work_root(args):
 # --- running arms and scoring ---------------------------------------------------
 
 def fill(cmd, **values):
-    return [part.format(**values) for part in cmd]
+    """Put values into a command's {placeholders}; any other braces are left as written."""
+    out = []
+    for part in cmd:
+        for name, value in values.items():
+            part = part.replace("{" + name + "}", str(value))
+        out.append(part)
+    return out
 
 
 def redact(text, spec):
@@ -361,12 +390,18 @@ def redact(text, spec):
 
 
 def run_arm(d, spec, phase, case, arm, root):
-    """Run one arm on one case in a fresh directory; a finished run is never repeated."""
+    """Run one arm on one case in a fresh directory.
+
+    A run that finished is never repeated. One that errored is tried again the next
+    time the gate is run, since most errors are a busy provider or a timeout.
+    """
     out_dir = os.path.join(d, "runs", phase, case["id"], arm)
     meta_path = os.path.join(out_dir, "meta.json")
     if os.path.isfile(meta_path):
         with open(meta_path) as f:
-            return json.load(f)
+            saved = json.load(f)
+        if not saved["error"]:
+            return saved
     os.makedirs(out_dir, exist_ok=True)
     workdir = tempfile.mkdtemp(prefix="aiw-eval-", dir=root)
     input_file = os.path.join(workdir, ".aiw-eval-input.txt")
@@ -400,10 +435,16 @@ def run_arm(d, spec, phase, case, arm, root):
         else:
             # One rule for every case. On a negative case the counted behaviour should be
             # absent, so the run passes when the scorer says the output does not show it.
-            flip = {"pass": "fail", "fail": "pass"}
-            meta["score"] = flip[meta["shows"]] if case["kind"] == "negative" else meta["shows"]
+            meta["score"] = as_score(meta["shows"], case)
     save_json(meta_path, meta)
     return meta
+
+
+def as_score(shows, case):
+    """Whether a run passed, from whether its output shows the counted behaviour."""
+    if case["kind"] == "negative":
+        return {"pass": "fail", "fail": "pass"}[shows]
+    return shows
 
 
 def score(d, spec, output_file, case):
@@ -490,7 +531,7 @@ def gate_pilot(d, args):
     if not reviewed:
         raise Refused(f"no design review of this eval: a fresh agent attacks the design before any spend, and its "
                       f"findings go in {review} naming the frozen hash {state['hash']}")
-    sample = targets(spec)[:spec.get("pilot_cases", 8)]
+    sample = pilot_sample(spec)
     rehearsal = sample[:REHEARSAL_CASES]
     approve(args, len(sample) + len(negatives(spec)) + len(rehearsal), spec,
             "pilot (old arm, plus the new arm on its first cases)")
@@ -507,7 +548,8 @@ def gate_pilot(d, args):
         shows = {"pass": "shows the behaviour", "fail": "does not show it"}.get(m.get("shows"), f"error: {m['error']}")
         print(f"--- {m['case']} ({m['arm']} arm): {shows}{', judges split' if m.get('split') else ''}\n    {text}")
     if sum(1 for m in metas if m["error"]) > len(metas) * MAX_ERROR_SHARE:
-        end(d, state, UNTESTABLE, f"{sum(1 for m in metas if m['error'])} of {len(metas)} pilot runs errored; see runs/pilot")
+        end(d, state, UNTESTABLE, f"{sum(1 for m in metas if m['error'])} of {len(metas)} pilot runs errored; see runs/pilot.",
+            errors_in="pilot")
         return
     # The old arm lacks the change: a negative case where it already shows the behaviour is a bad case.
     broken = [m["case"] for m in metas[len(sample):] if not m["error"] and m["score"] == "fail"]
@@ -517,7 +559,7 @@ def gate_pilot(d, args):
         return
     scored = [m for m in metas[:len(sample)] if not m["error"]]
     if not scored:
-        end(d, state, UNTESTABLE, "every pilot run on a target case errored; see runs/pilot")
+        end(d, state, UNTESTABLE, "every pilot run on a target case errored; see runs/pilot.", errors_in="pilot")
         return
     fails = sum(1 for m in scored if m["score"] == "fail")
     projected = fails / len(scored) * len(targets(spec))
@@ -530,6 +572,13 @@ def gate_pilot(d, args):
             f"there is nothing for the new arm to fix on these cases, so no result could show a gain")
         return
     passed(d, state, "pilot", **record)
+
+
+def pilot_sample(spec):
+    """Target cases spread evenly through the list, so its order cannot flatter the pilot."""
+    cases = targets(spec)
+    n = min(len(cases), max(MIN_PILOT_CASES, spec.get("pilot_cases", 8)))
+    return [cases[i * len(cases) // n] for i in range(n)]
 
 
 # --- run ----------------------------------------------------------------------
@@ -550,24 +599,30 @@ def gate_run(d, args):
             continue
         # Stop once no remaining case can change the verdict, however the outputs the judges
         # split on are scored. Running a case is cheaper than asking the human to rule.
-        ends = []
-        for stress in ("against new", "for new"):
-            t = tally(d, spec, state.get("rulings"), stress)
-            over = t["neg_regressions"] > bar["negatives_max_regressions"]
-            ends.append(FAILS if over else settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]))
+        ends = [verdict_of(tally(d, spec, state.get("rulings"), stress), bar, state["min_flips"])[0]
+                for stress in ("against new", "for new")]
         if ends[0] and ends[0] == ends[1]:
             break
     passed(d, state, "run", cases_run=done, cases_total=len(order))
     conclude(d, spec, state)
 
 
-def verdict_of(t, bar):
-    if t["errors"] > MAX_ERROR_SHARE * max(1, t["pairs"] + t["errors"]):
-        return UNTESTABLE, f"{t['errors']} of {t['pairs'] + t['errors']} case pairs errored; see runs/main"
+def verdict_of(t, bar, needed):
+    """The verdict the counts give so far, or (None, None) while a remaining case could change it."""
+    if t["errors"] > MAX_ERROR_SHARE * t["cases"]:
+        return UNTESTABLE, f"{t['errors']} of {t['cases']} case pairs errored; see runs/main."
     if t["neg_regressions"] > bar["negatives_max_regressions"]:
         return FAILS, (f"the new arm failed {t['neg_regressions']} negative cases the old arm passed, more than "
                        f"the {bar['negatives_max_regressions']} the bar allows: it fires where it should not")
-    verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]) or FAILS
+    old_failed = t["new_wins"] + t["both_fail"]
+    if old_failed + t["targets_left"] < needed:
+        # The pilot's sample suggested otherwise, and it was wrong: saying "does not work" here
+        # would blame the change for a test that could not have shown it working.
+        return UNTESTABLE, (f"the old arm failed only {old_failed} target cases and {needed} flips are needed, "
+                            f"so no result on these cases could show a gain: add cases the old arm fails")
+    verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"])
+    if not verdict:
+        return None, None
     return verdict, (f"flips toward new {t['new_wins']}, toward old {t['old_wins']}, "
                      f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}")
 
@@ -580,13 +635,15 @@ def conclude(d, spec, state):
     blind to the arm, up to MAX_RULINGS; more than that means the rule is too loose
     to judge.
     """
-    bar = spec["bar"]
+    bar, needed = spec["bar"], state["min_flips"]
     rulings = state.setdefault("rulings", {})
-    low = verdict_of(tally(d, spec, rulings, "against new"), bar)
-    high = verdict_of(tally(d, spec, rulings, "for new"), bar)
+    low = verdict_of(tally(d, spec, rulings, "against new"), bar, needed)
+    high = verdict_of(tally(d, spec, rulings, "for new"), bar, needed)
     if low[0] == high[0]:
         state.pop("awaiting", None)
-        end(d, state, *verdict_of(tally(d, spec, rulings), bar))
+        t = tally(d, spec, rulings)
+        verdict, reason = verdict_of(t, bar, needed)
+        end(d, state, verdict, reason, errors_in="run" if t["errors"] > MAX_ERROR_SHARE * t["cases"] else None)
         return
     open_splits = sorted((hashlib.sha256(f"{state['hash']}{c['id']}{arm}".encode()).hexdigest()[:6], c["id"], arm)
                          for c in spec["cases"] for arm in ("old", "new")
@@ -602,8 +659,9 @@ def conclude(d, spec, state):
                         os.path.join(d, "splits", f"{sid}.txt"))
     save_json(os.path.join(d, "state.json"), state)
     print(f"RULING NEEDED: the judges split on {len(open_splits)} outputs and the verdict turns on them. "
-          f"The human reads each file in {os.path.join(d, 'splits')} and rules: "
-          f"harness.py rule --dir {d} --id <name> --verdict pass|fail")
+          f"The human reads each file in {os.path.join(d, 'splits')}, without being told which arm or case "
+          f"it came from, and answers one question of each: does it show this? {spec['counted']}\n"
+          f"  pass = it shows it, fail = it does not: harness.py rule --dir {d} --id <name> --verdict pass|fail")
 
 
 def gate_rule(d, args):
@@ -641,14 +699,15 @@ def tally(d, spec, rulings=None, stress=None):
     def scored(meta, case, arm):
         key = f"{case['id']}/{arm}"
         if key in rulings:
-            return rulings[key]
+            # The human answers what the judges were asked: does the output show the behaviour?
+            return as_score(rulings[key], case)
         if stress and meta.get("split"):
             return "pass" if (arm == "new") == (stress == "for new") else "fail"
         return meta["score"]
 
     t = {"new_wins": 0, "old_wins": 0, "both_pass": 0, "both_fail": 0, "errors": 0, "pairs": 0,
          "neg_regressions": 0, "neg_new_fails": 0, "neg_old_fails": 0, "flips": [], "targets_left": 0,
-         "same_arm_cases": 0, "same_arm_flips": 0, "splits": 0}
+         "same_arm_cases": 0, "same_arm_flips": 0, "splits": 0, "cases": len(spec["cases"])}
     for c in spec["cases"]:
         old, new = read_meta(d, "main", c, "old"), read_meta(d, "main", c, "new")
         if not old or not new:
