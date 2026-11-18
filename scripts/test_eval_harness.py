@@ -316,6 +316,59 @@ report = e.to_verdict()
 check("too many decisive splits", report["verdict"], harness.UNTESTABLE)
 check_in("says the rule is too loose", "too loose to judge", report["reason"])
 
+# --- the judge panel: majority verdict, splits flagged, each judge sealed ---
+JUDGES = os.path.join(os.path.dirname(HARNESS), "judges.py")
+tmp = tempfile.mkdtemp(prefix="aiw-judges-test-")
+STRICT = "import sys\nprint('reasoning...')\nprint('**PASS**' if 'GOOD' in sys.stdin.read().split('<output>')[1] else 'FAIL.')\n"
+LENIENT = "import sys\nsys.stdin.read()\nprint('PASS')\n"
+SILENT = "import sys\nsys.stdin.read()\nprint('I cannot decide')\n"
+BY_RULE = "import sys\nprint('PASS' if 'special-rule' in sys.stdin.read() else 'FAIL')\n"
+RECORDER = f"import sys\nopen({os.path.join(tmp, 'saw.txt')!r}, 'w').write(sys.stdin.read())\nprint('PASS')\n"
+
+
+def judge(output, panel, case=None):
+    """Run the panel on one output; returns (exit code, stdout lines, last log row)."""
+    paths = {}
+    for name, body in (("rule.txt", "the output says GOOD"), ("out.txt", output), ("case.json", json.dumps(case or {}))):
+        paths[name] = os.path.join(tmp, name)
+        with open(paths[name], "w") as f:
+            f.write(body)
+    members = []
+    for i, body in enumerate(panel):
+        script = os.path.join(tmp, f"judge{i}.py")
+        with open(script, "w") as f:
+            f.write(body)
+        members.append({"name": f"j{i}", "provider": f"p{i}", "cmd": [sys.executable, script]})
+    with open(os.path.join(tmp, "panel.json"), "w") as f:
+        json.dump(members, f)
+    log = os.path.join(tmp, "log.jsonl")
+    done = subprocess.run([sys.executable, JUDGES, "--rule-file", paths["rule.txt"], "--output-file", paths["out.txt"],
+                           "--case-file", paths["case.json"], "--log", log, "--panel", os.path.join(tmp, "panel.json")],
+                          capture_output=True, text=True)
+    with open(log) as f:
+        row = json.loads(f.read().splitlines()[-1])
+    return done.returncode, done.stdout.split(), row
+
+
+code, out, row = judge("GOOD", [STRICT, STRICT, STRICT])
+check("judges agree on a pass", out, ["pass"])
+check("every vote is logged", [v["vote"] for v in row["votes"]], ["pass"] * 3)
+code, out, row = judge("BAD", [STRICT, STRICT, LENIENT])
+check("a lenient judge is outvoted and the split flagged", out, ["SPLIT", "fail"])
+code, out, row = judge("BAD", [STRICT, LENIENT])
+check("a tie counts as fail", out, ["SPLIT", "fail"])
+code, out, row = judge("GOOD", [STRICT, STRICT, SILENT])
+check("two answers are enough", out, ["pass"])
+code, out, row = judge("GOOD", [STRICT, SILENT, SILENT])
+check("one answer is no verdict", (code, out), (1, []))
+code, out, row = judge("x", [BY_RULE] * 3, case={"id": "neg1", "rule": "special-rule: says nothing"})
+check("a case's own rule replaces the rule file", out, ["pass"])
+judge("GOOD", [RECORDER, STRICT, STRICT], case={"id": "case-zebra", "kind": "target"})
+with open(os.path.join(tmp, "saw.txt")) as f:
+    saw = f.read()
+check("a judge is not shown the case", "case-zebra" in saw, False)
+check_in("a judge is shown the rule", "the output says GOOD", saw)
+
 if failures:
     print("eval harness test: FAILED")
     for failure in failures:

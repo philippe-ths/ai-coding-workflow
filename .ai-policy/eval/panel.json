@@ -1,0 +1,17 @@
+[
+  {
+    "name": "claude",
+    "provider": "Anthropic",
+    "cmd": ["claude", "-p", "--model", "haiku", "--tools", "", "--setting-sources", "", "--no-session-persistence"]
+  },
+  {
+    "name": "codex",
+    "provider": "OpenAI",
+    "cmd": ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "-s", "read-only", "-c", "project_doc_max_bytes=0", "-"]
+  },
+  {
+    "name": "gemini",
+    "provider": "Google",
+    "cmd": ["gemini", "-p", ""]
+  }
+]
