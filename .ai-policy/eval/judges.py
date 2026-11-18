@@ -65,6 +65,9 @@ def ask(judge, message, timeout):
     # A file the judge's own tool loads whatever we pass it: recorded, since it is not sealed out.
     loads = judge.get("still_loads")
     loaded = loads if loads and os.path.exists(os.path.expanduser(loads)) else None
+    # A judge's tool can print the home directory in an error; the log should not keep it.
+    home = os.path.expanduser("~")
+    answer, problem = answer.replace(home, "~"), problem.replace(home, "~") if problem else problem
     return {"judge": judge["name"], "provider": judge.get("provider"), "vote": vote, "answer": answer,
             "still_loaded": loaded, "problem": problem, "seconds": round(time.time() - started, 1)}
 
