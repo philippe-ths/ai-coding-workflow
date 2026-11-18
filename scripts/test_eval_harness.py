@@ -255,6 +255,17 @@ check_in("a case with its own rule", "counts one thing", out)
 code, out = Eval(cases(("bad", "good"), n_negative=0)).gate("freeze")
 check_in("no negative case", "no negative case", out)
 
+# --- the skeleton names every field, and cannot be frozen until it is filled in ---
+d = tempfile.mkdtemp(prefix="aiw-eval-init-")
+subprocess.run([sys.executable, HARNESS, "init", "--dir", d], capture_output=True)
+done = subprocess.run([sys.executable, HARNESS, "freeze", "--dir", d], capture_output=True, text=True)
+check("unfilled skeleton refused", done.returncode, 1)
+check_in("says a TODO is left", "TODO", done.stderr)
+with open(os.path.join(d, "eval.json")) as f:
+    skeleton = json.load(f)
+check("the skeleton has every field a working eval sets",
+      sorted(set(Eval(cases(("bad", "good"))).spec) - set(skeleton)), [])
+
 # --- instruction files above the run directory end the eval before any spend ---
 e = Eval(cases(("bad", "good")))
 with open(os.path.join(e.tmp, "CLAUDE.md"), "w") as f:

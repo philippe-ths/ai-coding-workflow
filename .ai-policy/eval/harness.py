@@ -7,6 +7,7 @@ The eval directory holds `eval.json`, written before any run, and everything the
 harness saves. Gates run in this order, cheapest first, and each refuses until
 the one before it has passed for the same `eval.json`:
 
+  init      write a skeleton eval.json naming every field
   freeze    check the eval is fully stated (claim, bar, cases, scorer) and lock it
   context   check no instruction file leaks into a run from the directories above it
   scorer    measure the scorer on known answers, both ways
@@ -23,6 +24,12 @@ should not fire, passes when it does not.
 Every eval ends in one of three verdicts: "works", "does not work", or "cannot be
 tested this way". The last comes from context, scorer or pilot, before the full
 spend. Changing `eval.json` after freeze voids every gate.
+
+An arm's `run` command is run in a fresh empty directory with its stdout saved as
+the output; `setup`, if given, runs there first. Commands may use {input_file},
+{workdir}, {case_id} and {eval_dir}; the scorer's may use {output_file},
+{case_file} and {eval_dir}. `text_under_test` lists files holding the changed
+text, so freeze can show which cases share its distinctive words.
 
 `pilot` and `run` print how many runs they will make and what that costs, and need
 `--approved-runs N` to match, so the number is said before it is spent.
@@ -158,6 +165,47 @@ def negatives(spec):
     return [c for c in spec["cases"] if c["kind"] == "negative"]
 
 
+# --- init ---------------------------------------------------------------------
+
+TODO = "TODO: "
+SKELETON = {
+    "claim": TODO + "one sentence: what the change is claimed to do",
+    "counted": TODO + "one sentence: the behaviour an output must show to count, as the scorer will be asked it",
+    "human_confirmation": TODO + "the human's own words agreeing that `counted` is what they want measured, "
+                                 "or why there is no goal of theirs to check it against",
+    "pass_example": TODO + "an output that shows the behaviour",
+    "fail_example": TODO + "an output that does not",
+    "cannot_show": [TODO + "each thing a verdict from this eval would not tell you"],
+    "bar": {"alpha": 0.05, "negatives_max_regressions": 0},
+    "arms": {
+        "old": {"run": [TODO + "command that prints the old version's output; {input_file} holds the case input"]},
+        "new": {"run": [TODO + "the same command with the one thing changed"]},
+    },
+    "home_instructions_excluded_by": TODO + "how the arm commands keep home-directory instruction files out of a run",
+    "cases": [
+        {"id": "t1", "kind": "target", "input": TODO + "an input where the old version should fail and the new should not"},
+        {"id": "n1", "kind": "negative", "input": TODO + "an input where the behaviour should stay absent"},
+    ],
+    "scorer": {"cmd": [TODO + "command that prints pass when {output_file} shows the behaviour, fail when it does not; "
+                              "for the judge panel: python3 .ai-policy/eval/judges.py --rule-file {eval_dir}/rule.txt "
+                              "--output-file {output_file} --case-file {case_file} --log {eval_dir}/judges.jsonl"]},
+    "scorer_bar": {"fails_caught": 0.9, "passes_passed": 0.9},
+    "known": [{"file": "known/pass-1.txt", "verdict": "pass"}, {"file": "known/fail-1.txt", "verdict": "fail"}],
+    "text_under_test": [],
+    "pilot_cases": 4,
+    "est_cost_per_run_usd": 0.0,
+}
+
+
+def gate_init(d, args):
+    path = os.path.join(d, "eval.json")
+    if os.path.exists(path):
+        raise Refused(f"{path} already exists")
+    save_json(path, SKELETON)
+    os.makedirs(os.path.join(d, "known"), exist_ok=True)
+    print(f"wrote {path}: replace every TODO, add cases and at least {MIN_KNOWN} known outputs each way, then freeze")
+
+
 # --- freeze -------------------------------------------------------------------
 
 def gate_freeze(d, args):
@@ -180,6 +228,7 @@ def gate_freeze(d, args):
         if not cond:
             problems.append(msg)
 
+    need(TODO not in json.dumps(spec), "a TODO from the skeleton is still in eval.json")
     for key in ("claim", "counted", "human_confirmation", "pass_example", "fail_example"):
         need(isinstance(spec.get(key), str) and spec.get(key, "").strip(), f"`{key}` is missing or empty")
     need(spec.get("cannot_show"), "`cannot_show` must list what this eval cannot show")
@@ -683,7 +732,7 @@ def gate_report(d, args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("gate", choices=GATES + ["rule", "report"])
+    parser.add_argument("gate", choices=["init"] + GATES + ["rule", "report"])
     parser.add_argument("--dir", required=True, help="the eval directory holding eval.json")
     parser.add_argument("--work-root", help="where run directories are made (default: the system temp directory)")
     parser.add_argument("--approved-runs", type=int, help="the run count the human agreed to")
