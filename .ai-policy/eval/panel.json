@@ -2,7 +2,7 @@
   {
     "name": "claude",
     "provider": "Anthropic",
-    "cmd": ["claude", "-p", "--model", "haiku", "--tools", "", "--setting-sources", "", "--no-session-persistence"]
+    "cmd": ["claude", "-p", "--model", "haiku", "--tools", "", "--setting-sources", "", "--strict-mcp-config", "--no-session-persistence"]
   },
   {
     "name": "codex",

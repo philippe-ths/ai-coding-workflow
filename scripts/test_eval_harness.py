@@ -69,7 +69,7 @@ class Eval:
             "claim": "the new arm does the thing", "counted": "outputs that say GOOD",
             "human_confirmation": "yes, count that", "pass_example": "GOOD", "fail_example": "BAD",
             "cannot_show": ["anything about a real model"],
-            "bar": {"alpha": 0.05, "negatives_max_new_fails": 0},
+            "bar": {"alpha": 0.05, "negatives_max_regressions": 0},
             "arms": {"old": {"run": arm + ["old", "{input_file}", self.counter]},
                      "new": {"run": arm + ["new", "{input_file}", self.counter]}},
             "cases": [{"id": f"c{i}", "kind": kind, "input": json.dumps({"old": old, "new": new})}
@@ -165,6 +165,9 @@ check_in("ceiling reason", "nothing for the new arm to fix", report["reason"])
 report = Eval(cases(("bad", "good"), negative=("good", "bad"))).to_verdict()
 check("over-fire verdict", report["verdict"], harness.FAILS)
 check_in("over-fire reason", "fires where it should not", report["reason"])
+
+# --- a negative case both arms fail is noise, not the change firing ---
+check("shared negative failure", Eval(cases(("bad", "good"), negative=("bad", "bad"))).to_verdict()["verdict"], harness.WORKS)
 
 # --- a scorer that passes everything is caught before any run ---
 e = Eval(cases(("bad", "good")), scorer=BROKEN_SCORER)

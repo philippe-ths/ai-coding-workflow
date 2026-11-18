@@ -175,7 +175,7 @@ def gate_freeze(d, args):
     need(spec.get("cannot_show"), "`cannot_show` must list what this eval cannot show")
     bar = spec.get("bar") or {}
     need(isinstance(bar.get("alpha"), (int, float)) and 0 < bar.get("alpha", 0) < 1, "`bar.alpha` must be set")
-    need(isinstance(bar.get("negatives_max_new_fails"), int), "`bar.negatives_max_new_fails` must be set")
+    need(isinstance(bar.get("negatives_max_regressions"), int), "`bar.negatives_max_regressions` must be set")
     for arm in ("old", "new"):
         need(((spec.get("arms") or {}).get(arm) or {}).get("run"), f"`arms.{arm}.run` is missing")
     need((spec.get("scorer") or {}).get("cmd"), "`scorer.cmd` is missing")
@@ -454,7 +454,7 @@ def gate_run(d, args):
         run_many(d, spec, "main", [(c, arm) for c in chunk for arm in ("old", "new")], root, args.jobs)
         done += len(chunk)
         t = tally(d, spec)
-        if t["neg_new_fails"] > bar["negatives_max_new_fails"]:
+        if t["neg_regressions"] > bar["negatives_max_regressions"]:
             break
         if done >= len(negatives(spec)) and settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]):
             break
@@ -465,9 +465,9 @@ def gate_run(d, args):
 def verdict_of(t, bar):
     if t["errors"] > MAX_ERROR_SHARE * max(1, t["pairs"] + t["errors"]):
         return UNTESTABLE, f"{t['errors']} of {t['pairs'] + t['errors']} case pairs errored; see runs/main"
-    if t["neg_new_fails"] > bar["negatives_max_new_fails"]:
-        return FAILS, (f"the new arm failed {t['neg_new_fails']} negative cases, more than the "
-                       f"{bar['negatives_max_new_fails']} the bar allows: it fires where it should not")
+    if t["neg_regressions"] > bar["negatives_max_regressions"]:
+        return FAILS, (f"the new arm failed {t['neg_regressions']} negative cases the old arm passed, more than "
+                       f"the {bar['negatives_max_regressions']} the bar allows: it fires where it should not")
     verdict = settled(t["new_wins"], t["old_wins"], t["targets_left"], bar["alpha"]) or FAILS
     return verdict, (f"flips toward new {t['new_wins']}, toward old {t['old_wins']}, "
                      f"sign test p = {sign_test(t['new_wins'], t['old_wins']):.3f} against {bar['alpha']}")
@@ -547,7 +547,7 @@ def tally(d, spec, rulings=None, stress=None):
         return meta["score"]
 
     t = {"new_wins": 0, "old_wins": 0, "both_pass": 0, "both_fail": 0, "errors": 0, "pairs": 0,
-         "neg_new_fails": 0, "neg_old_fails": 0, "flips": [], "targets_left": 0,
+         "neg_regressions": 0, "neg_new_fails": 0, "neg_old_fails": 0, "flips": [], "targets_left": 0,
          "same_arm_cases": 0, "same_arm_flips": 0, "splits": 0}
     for c in spec["cases"]:
         old, new = read_meta(d, "main", c, "old"), read_meta(d, "main", c, "new")
@@ -561,6 +561,8 @@ def tally(d, spec, rulings=None, stress=None):
         t["splits"] += bool(old.get("split")) + bool(new.get("split"))
         pair = (scored(old, c, "old"), scored(new, c, "new"))
         if c["kind"] == "negative":
+            # A negative case both arms fail is noise or a bad case, not the change firing.
+            t["neg_regressions"] += pair == ("pass", "fail")
             t["neg_new_fails"] += pair[1] == "fail"
             t["neg_old_fails"] += pair[0] == "fail"
             continue
@@ -602,7 +604,7 @@ def gate_report(d, args):
     lines = [f"# Eval report: {state['verdict']}", "", state.get("reason", ""), "",
              f"- Claim: {spec['claim']}", f"- Counted: {spec['counted']}",
              f"- Bar, set before the run: sign test under {spec['bar']['alpha']} on the flips; at most "
-             f"{spec['bar']['negatives_max_new_fails']} negative cases failed by the new arm",
+             f"{spec['bar']['negatives_max_regressions']} negative cases the new arm fails and the old arm passes",
              f"- Eval {digest}, version {state.get('version')}"
              + (" (changed after earlier results were seen)" if state.get("version", 1) > 1 else ""), ""]
     if state.get("gates", {}).get("run"):
@@ -611,7 +613,8 @@ def gate_report(d, args):
                   f"- Cases run: {run['cases_run']} of {run['cases_total']} (stops once no remaining case can change the verdict)",
                   f"- Target cases: {t['new_wins']} flipped toward new, {t['old_wins']} toward old, "
                   f"{t['both_pass']} both passed, {t['both_fail']} both failed",
-                  f"- Negative cases failed: new {t['neg_new_fails']}, old {t['neg_old_fails']}",
+                  f"- Negative cases failed: new {t['neg_new_fails']}, old {t['neg_old_fails']}; "
+                  f"failed by new and passed by old: {t['neg_regressions']}",
                   f"- Same arm twice (pilot and run, old arm): {t['same_arm_flips']} of {t['same_arm_cases']} cases changed score",
                   f"- Outputs the judges split on: {t['splits']}; ruled on by the human: {len(state.get('rulings', {}))}",
                   f"- Pairs dropped for errors: {t['errors']}", ""]
