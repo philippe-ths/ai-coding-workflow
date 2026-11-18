@@ -33,29 +33,36 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+# Seconds to wait before each try. A busy provider turns a judge away; a missing judge
+# leaves two, whose disagreement is a tie, so a judge is tried again before it is dropped.
+RETRY_WAITS = [float(w) for w in os.environ.get("AIW_EVAL_JUDGE_RETRY_WAITS", "0 10 30").split()]
 
 
 def ask(judge, message, timeout):
-    """One judge's vote: pass, fail, or None when it gave no usable answer."""
+    """One judge's vote: pass, fail, or None when it gave no usable answer after retries."""
     started = time.time()
-    try:
-        # An empty directory, so the judge's own tool finds no project files to load.
-        with tempfile.TemporaryDirectory(prefix="aiw-eval-judge-") as cwd:
-            cmd = [part.replace("{here}", HERE) for part in judge["cmd"]]
-            done = subprocess.run(cmd, input=message, capture_output=True, text=True,
-                                  errors="replace", cwd=cwd, timeout=timeout)
-        answer = done.stdout.strip()
-        lines = [re.sub(r"[^A-Za-z]", "", line).upper() for line in answer.splitlines() if line.strip()]
-        vote = lines[-1].lower() if lines and lines[-1] in ("PASS", "FAIL") else None
-        problem = None if vote else f"no PASS or FAIL line (exit {done.returncode}): {done.stderr[-200:]}"
-    except (subprocess.SubprocessError, OSError) as e:
-        answer, vote, problem = "", None, f"{type(e).__name__}: {str(e)[-200:]}"
+    cmd = [part.replace("{here}", HERE) for part in judge["cmd"]]
+    answer, vote, problem = "", None, None
+    for wait in RETRY_WAITS:
+        time.sleep(wait)
+        try:
+            # An empty directory, so the judge's own tool finds no project files to load.
+            with tempfile.TemporaryDirectory(prefix="aiw-eval-judge-") as cwd:
+                done = subprocess.run(cmd, input=message, capture_output=True, text=True,
+                                      errors="replace", cwd=cwd, timeout=timeout)
+            answer = done.stdout.strip()
+            lines = [re.sub(r"[^A-Za-z]", "", line).upper() for line in answer.splitlines() if line.strip()]
+            vote = lines[-1].lower() if lines and lines[-1] in ("PASS", "FAIL") else None
+            problem = None if vote else f"no PASS or FAIL line (exit {done.returncode}): {done.stderr[-200:]}"
+        except (subprocess.SubprocessError, OSError) as e:
+            problem = f"{type(e).__name__}: {str(e)[-200:]}"
+        if vote:
+            break
     # A file the judge's own tool loads whatever we pass it: recorded, since it is not sealed out.
     loads = judge.get("still_loads")
     loaded = loads if loads and os.path.exists(os.path.expanduser(loads)) else None
     return {"judge": judge["name"], "provider": judge.get("provider"), "vote": vote, "answer": answer,
-            "still_loaded": loaded,
-            "problem": problem, "seconds": round(time.time() - started, 1)}
+            "still_loaded": loaded, "problem": problem, "seconds": round(time.time() - started, 1)}
 
 
 def main(argv=None):

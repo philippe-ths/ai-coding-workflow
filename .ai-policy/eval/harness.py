@@ -281,12 +281,16 @@ def redact(text, spec):
     """Replace the human's private details before anything is saved."""
     count = 0
     patterns = [(re.escape(os.path.expanduser("~")), "~")]
+    # A model run under the human's account is told who they are, and may greet them by name.
     try:
-        email = subprocess.run(["git", "config", "--global", "user.email"], capture_output=True, text=True).stdout.strip()
-        if email:
-            patterns.append((re.escape(email), "[email]"))
+        git = {k: subprocess.run(["git", "config", "--global", f"user.{k}"], capture_output=True, text=True).stdout.strip()
+               for k in ("email", "name")}
     except OSError:
-        pass
+        git = {}
+    if git.get("email"):
+        patterns.append((re.escape(git["email"]), "[email]"))
+    names = re.split(r"[^A-Za-z]+", git.get("email", "").split("@")[0] + " " + git.get("name", ""))
+    patterns += [(rf"(?i)\b{re.escape(n)}\b", "[name]") for n in sorted(set(names)) if len(n) >= 4]
     patterns += [(p, "[private]") for p in spec.get("private_patterns", [])]
     for pattern, repl in patterns:
         text, n = re.subn(pattern, repl, text)
@@ -419,12 +423,21 @@ def gate_pilot(d, args):
         raise Refused(f"no design review of this eval: a fresh agent attacks the design before any spend, and its "
                       f"findings go in {review} naming the frozen hash {state['hash']}")
     sample = targets(spec)[:spec.get("pilot_cases", 8)]
-    approve(args, len(sample), spec, "pilot (old arm only)")
+    approve(args, len(sample) + len(negatives(spec)), spec, "pilot (old arm only)")
     root = state["gates"]["context"]["work_root"]
-    metas = run_many(d, spec, "pilot", [(c, "old") for c in sample], root, args.jobs)
-    scored = [m for m in metas if not m["error"]]
-    if len(scored) < len(metas) * (1 - MAX_ERROR_SHARE) or not scored:
-        end(d, state, UNTESTABLE, f"{len(metas) - len(scored)} of {len(metas)} pilot runs errored; see runs/pilot")
+    metas = run_many(d, spec, "pilot", [(c, "old") for c in sample + negatives(spec)], root, args.jobs)
+    if sum(1 for m in metas if m["error"]) > len(metas) * MAX_ERROR_SHARE:
+        end(d, state, UNTESTABLE, f"{sum(1 for m in metas if m['error'])} of {len(metas)} pilot runs errored; see runs/pilot")
+        return
+    # The old arm lacks the change, so it cannot fire: a negative case it fails is a bad case or rule.
+    broken = [m["case"] for m in metas[len(sample):] if not m["error"] and m["score"] == "fail"]
+    if broken:
+        end(d, state, UNTESTABLE, f"the old arm fails negative cases {', '.join(broken)}, where the change is absent: "
+            f"those cases or their rule mark something other than the change firing, so fix them in a new version")
+        return
+    scored = [m for m in metas[:len(sample)] if not m["error"]]
+    if not scored:
+        end(d, state, UNTESTABLE, "every pilot run on a target case errored; see runs/pilot")
         return
     fails = sum(1 for m in scored if m["score"] == "fail")
     projected = fails / len(scored) * len(targets(spec))

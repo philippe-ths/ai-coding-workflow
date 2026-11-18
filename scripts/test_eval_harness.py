@@ -105,13 +105,17 @@ class Eval:
         except OSError:
             return 0
 
+    def pilot_runs(self):
+        kinds = [c["kind"] for c in self.spec["cases"]]
+        return min(4, kinds.count("target")) + kinds.count("negative")
+
     def to_verdict(self):
         """Every gate in order, approving each spend, until one ends the eval."""
         self.gate("freeze")
         self.gate("context")
         self.gate("scorer")
         self.review()
-        self.gate("pilot", "--approved-runs", str(min(4, sum(c["kind"] == "target" for c in self.spec["cases"]))))
+        self.gate("pilot", "--approved-runs", str(self.pilot_runs()))
         self.gate("run", "--approved-runs", str(2 * len(self.spec["cases"])))
         self.gate("report")
         try:
@@ -139,14 +143,14 @@ check("still open", harness.settled(3, 0, 9, 0.05), None)
 e = Eval(cases(("bad", "good")))
 report = e.to_verdict()
 check("planted effect verdict", report["verdict"], harness.WORKS)
-check("planted effect stops once settled", e.runs() < 4 + 2 * 15, True)
+check("planted effect stops once settled", e.runs() < 7 + 2 * 15, True)
 
 # --- old against old shows no effect, and stops once it cannot pass ---
 e = Eval(cases(("bad", "bad")))
 report = e.to_verdict()
 check("old against old verdict", report["verdict"], harness.FAILS)
 check("old against old flips", report["tally"]["new_wins"] + report["tally"]["old_wins"], 0)
-check("old against old stops early", e.runs() < 4 + 2 * 15, True)
+check("old against old stops early", e.runs() < 7 + 2 * 15, True)
 check("same arm twice is reported", report["tally"]["same_arm_cases"] > 0, True)
 
 # --- a change that makes things worse does not pass ---
@@ -158,7 +162,7 @@ check("worse flips go toward old", report["tally"]["old_wins"] > 0, True)
 e = Eval(cases(("good", "good")))
 report = e.to_verdict()
 check("ceiling verdict", report["verdict"], harness.UNTESTABLE)
-check("ceiling spends only the pilot", e.runs(), 4)
+check("ceiling spends only the pilot", e.runs(), 7)
 check_in("ceiling reason", "nothing for the new arm to fix", report["reason"])
 
 # --- a new arm that fires where it should not ---
@@ -166,8 +170,12 @@ report = Eval(cases(("bad", "good"), negative=("good", "bad"))).to_verdict()
 check("over-fire verdict", report["verdict"], harness.FAILS)
 check_in("over-fire reason", "fires where it should not", report["reason"])
 
-# --- a negative case both arms fail is noise, not the change firing ---
-check("shared negative failure", Eval(cases(("bad", "good"), negative=("bad", "bad"))).to_verdict()["verdict"], harness.WORKS)
+# --- a negative case the old arm fails is a broken case, caught in the pilot ---
+e = Eval(cases(("bad", "good"), negative=("bad", "bad")))
+report = e.to_verdict()
+check("broken negative verdict", report["verdict"], harness.UNTESTABLE)
+check_in("broken negative named", "c0", report["reason"])
+check("broken negative spends only the pilot", e.runs(), 7)
 
 # --- a scorer that passes everything is caught before any run ---
 e = Eval(cases(("bad", "good")), scorer=BROKEN_SCORER)
@@ -177,7 +185,7 @@ check("broken scorer spends nothing", e.runs(), 0)
 
 # --- gates cannot be skipped or reordered ---
 e = Eval(cases(("bad", "good")))
-code, out = e.gate("pilot", "--approved-runs", "4")
+code, out = e.gate("pilot", "--approved-runs", "7")
 check("pilot before freeze refused", code, 1)
 e.gate("freeze")
 code, out = e.gate("scorer")
@@ -185,19 +193,19 @@ check("scorer before context refused", code, 1)
 check_in("names the missing gate", "needs the context gate", out)
 e.gate("context")
 e.gate("scorer")
-code, out = e.gate("pilot", "--approved-runs", "4")
+code, out = e.gate("pilot", "--approved-runs", "7")
 check("pilot without a design review refused", code, 1)
 check_in("asks for the review", "design review", out)
 e.review()
 code, out = e.gate("pilot")
 check("pilot without the approved count refused", code, 1)
-check_in("states the spend", "up to 4 runs", out)
+check_in("states the spend", "up to 7 runs", out)
 check("nothing ran while refused", e.runs(), 0)
 
 # --- changing the eval after freeze voids the gates ---
 e.spec["bar"]["alpha"] = 0.2
 e.write()
-code, out = e.gate("pilot", "--approved-runs", "4")
+code, out = e.gate("pilot", "--approved-runs", "7")
 check("changed eval refused", code, 1)
 check_in("says why", "changed after freeze", out)
 e.gate("freeze")
@@ -273,6 +281,18 @@ with open(os.path.join(e.dir, "runs", "main", "c3", "new", "output.txt")) as f:
 check_in("pattern replaced", "[private]", saved)
 check("pattern gone", "sekrit-42" in saved, False)
 check("home path gone", e.home in saved, False)
+
+# --- the human's name, read from their git identity, is replaced too ---
+e = Eval(cases(("bad", "good")))
+with open(os.path.join(e.home, ".gitconfig"), "w") as f:
+    f.write("[user]\n\temail = zelda.quux@example.com\n\tname = zelda-ths\n")
+e.spec["cases"][3]["input"] = json.dumps({"old": "bad", "new": "good", "extra": "Thanks, Zelda! zelda.quux@example.com"})
+e.write()
+e.to_verdict()
+with open(os.path.join(e.dir, "runs", "main", "c3", "new", "output.txt")) as f:
+    saved = f.read()
+check("name gone", "zelda" in saved.lower(), False)
+check_in("name replaced", "[name]", saved)
 check("replacements counted", report["redactions"] > 0, True)
 
 # --- the scorer never learns which arm wrote an output ---
@@ -349,7 +369,7 @@ def judge(output, panel, case=None):
     log = os.path.join(tmp, "log.jsonl")
     done = subprocess.run([sys.executable, JUDGES, "--rule-file", paths["rule.txt"], "--output-file", paths["out.txt"],
                            "--case-file", paths["case.json"], "--log", log, "--panel", os.path.join(tmp, "panel.json")],
-                          capture_output=True, text=True)
+                          capture_output=True, text=True, env=dict(os.environ, AIW_EVAL_JUDGE_RETRY_WAITS="0 0 0"))
     with open(log) as f:
         row = json.loads(f.read().splitlines()[-1])
     return done.returncode, done.stdout.split(), row
@@ -372,6 +392,11 @@ judge("GOOD", [RECORDER, STRICT, STRICT], case={"id": "case-zebra", "kind": "tar
 with open(os.path.join(tmp, "saw.txt")) as f:
     saw = f.read()
 check("a judge is not shown the case", "case-zebra" in saw, False)
+# A judge turned away on its first try answers on its second.
+FLAKY = (f"import os, sys\nsys.stdin.read()\nflag = {os.path.join(tmp, 'tried')!r}\n"
+         "if os.path.exists(flag):\n    print('PASS')\nelse:\n    open(flag, 'w').close()\n    sys.exit('429 Too Many Requests')\n")
+code, out, row = judge("GOOD", [FLAKY, STRICT, STRICT])
+check("a judge turned away is tried again", [v["vote"] for v in row["votes"]], ["pass"] * 3)
 check_in("a judge is shown the rule", "the output says GOOD", saw)
 
 # --- the Jev seat refuses a prompt it cannot split into rule and output (no network touched) ---
