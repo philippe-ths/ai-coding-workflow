@@ -80,6 +80,7 @@ class Eval:
             "scorer": {"cmd": [sys.executable, os.path.join(self.tmp, "scorer.py"), "{output_file}"]},
             "scorer_bar": {"fails_caught": 0.9, "passes_passed": 0.9},
             "known": known, "pilot_cases": 4, "est_cost_per_run_usd": 0.0,
+            "no_text_under_test_because": "the arms are scripts with fixed answers",
         }
         self.spec.update(overrides)
         self.write()
@@ -217,13 +218,63 @@ check_in("states the spend", "up to 9 runs", out)
 check("nothing ran while refused", e.runs(), 0)
 
 # --- changing the eval after freeze voids the gates ---
-e.spec["bar"]["alpha"] = 0.2
+e.spec["bar"]["alpha"] = 0.1
 e.write()
 code, out = e.gate("pilot", "--approved-runs", "9")
 check("changed eval refused", code, 1)
 check_in("says why", "changed after freeze", out)
+check("freezing again once a gate has measured something needs a new version", e.gate("freeze")[0], 1)
+e.gate("freeze", "--new-version")
+check("and counts as one", e.state()["version"], 2)
+e = Eval(cases(("bad", "good")))
 e.gate("freeze")
-check("freezing again before any run is still version 1", e.state()["version"], 1)
+e.spec["claim"] = "reworded before anything was measured"
+e.write()
+e.gate("freeze")
+check("freezing again before any result is still version 1", e.state()["version"], 1)
+
+# --- the rule, the known answers and the scorer are locked with the eval ---
+for label, tamper in (
+    ("a known answer", lambda e: open(os.path.join(e.dir, "known", "fail-0.txt"), "w").write("GOOD")),
+    ("the rule file", lambda e: open(os.path.join(e.dir, "rule.txt"), "w").write("anything goes")),
+    ("the scorer script", lambda e: open(os.path.join(e.tmp, "scorer.py"), "w").write(BROKEN_SCORER)),
+):
+    e = Eval(cases(("bad", "good")))
+    with open(os.path.join(e.dir, "rule.txt"), "w") as f:
+        f.write("the output says GOOD")
+    for g in ("freeze", "context", "scorer"):
+        e.gate(g)
+    e.review()
+    tamper(e)
+    code, out = e.gate("pilot", "--approved-runs", str(e.pilot_runs()))
+    check(f"changing {label} after freeze voids the gates", (code, e.runs()), (1, 0))
+
+# --- a verdict cannot be wiped by freezing the same eval again ---
+e = Eval(cases(("bad", "good")))
+e.to_verdict()
+check("same eval refrozen after a verdict", e.gate("freeze")[0], 1)
+check("the verdict stands", e.state()["verdict"], harness.WORKS)
+
+# --- a scorer that missed its bar cannot be waved through by lowering the bar unrecorded ---
+e = Eval(cases(("bad", "good")), scorer=BROKEN_SCORER)
+for g in ("freeze", "context", "scorer"):
+    e.gate(g)
+e.spec["scorer_bar"] = {"fails_caught": 0.7, "passes_passed": 0.7}
+e.write()
+check("lowering the scorer bar after seeing the scorer's result", e.gate("freeze")[0], 1)
+
+# --- a new arm changed after its results were seen is not scored on the same cases ---
+e = Eval(cases(("bad", "bad")))
+e.to_verdict()
+e.spec["arms"]["new"]["run"].append("tuned")
+e.write()
+code, out = e.gate("freeze", "--new-version")
+check("tuned arm on seen cases refused", code, 1)
+check_in("says why", "not scored on it", out)
+for c in e.spec["cases"]:
+    c["input"] = json.dumps(dict(json.loads(c["input"]), fresh=True))
+e.write()
+check("tuned arm on fresh cases accepted", e.gate("freeze", "--new-version")[0], 0)
 
 # --- changing the eval after results exist is a new version, said in the report ---
 e = Eval(cases(("bad", "bad")))
@@ -267,7 +318,7 @@ check_in("says a TODO is left", "TODO", done.stderr)
 with open(os.path.join(d, "eval.json")) as f:
     skeleton = json.load(f)
 check("the skeleton has every field a working eval sets",
-      sorted(set(Eval(cases(("bad", "good"))).spec) - set(skeleton)), [])
+      sorted(set(Eval(cases(("bad", "good"))).spec) - set(skeleton) - {"no_text_under_test_because"}), [])
 
 # --- instruction files above the run directory end the eval before any spend ---
 e = Eval(cases(("bad", "good")))
@@ -325,6 +376,37 @@ with open(os.path.join(e.dir, "runs", "main", "c3", "new", "output.txt")) as f:
     saved = f.read()
 check("name gone", "zelda" in saved.lower(), False)
 check_in("name replaced", "[name]", saved)
+# The name still entered the run, and the report says so rather than counting it a success.
+with open(os.path.join(e.dir, "report.json")) as f:
+    check("outputs naming the human are counted", json.load(f)["outputs_naming_the_human"] > 0, True)
+with open(os.path.join(e.dir, "report.md")) as f:
+    report_md = f.read()
+check_in("the report says it entered the run", "it did enter the run", report_md)
+check_in("the report shows what it takes on the worker's word", "yes, count that", report_md)
+check_in("the report names what ran", "- harness: ", report_md)
+check_in("the run states how long it will take", " min", e.run_out)
+
+# --- every case is checked against the text under test, and the report shows what it shares ---
+e = Eval(cases(("bad", "good")))
+del e.spec["no_text_under_test_because"]
+e.write()
+check_in("no text under test and no reason", "text_under_test", e.gate("freeze")[1])
+with open(os.path.join(e.dir, "change.txt"), "w") as f:
+    f.write("Example: the pangolin invoice 4471 was late.")
+e.spec["text_under_test"] = ["change.txt"]
+for c in e.spec["cases"]:
+    c["input"] = json.dumps(dict(json.loads(c["input"]), extra="pangolin invoice 4471"))
+e.write()
+code, out = e.gate("freeze")
+check_in("a word every case shares with the text under test is still shown", "c0 shares with the text under test: 4471, invoice, pangolin", out)
+e.to_verdict()
+with open(os.path.join(e.dir, "report.md")) as f:
+    check_in("and reaches the report", "c0 shares: 4471, invoice, pangolin", f.read())
+
+# --- what ran is recorded at freeze ---
+e = Eval(cases(("bad", "good")), version_cmds=[[sys.executable, "-c", "print('model-tool 9.9')"]])
+e.gate("freeze")
+check("a version command's answer is kept", [v for v in e.state()["versions"].values() if v == "model-tool 9.9"], ["model-tool 9.9"])
 check("replacements counted", report["redactions"] > 0, True)
 
 # --- the scorer never learns which arm wrote an output ---
@@ -375,6 +457,13 @@ report = e.to_verdict()
 check("remaining cases are run before the human is asked", report["verdict"], harness.WORKS)
 check("no ruling awaited after running on", e.state().get("awaiting"), None)
 check("every case was run", e.state()["gates"]["run"]["cases_run"], 13)
+
+# Judges splitting on much of the pilot ends the eval there, before the full run would.
+e = Eval(cases(("maybe", "good")), scorer=SPLIT_SCORER)
+report = e.to_verdict()
+check("a pilot full of splits", report["verdict"], harness.UNTESTABLE)
+check_in("says the rule is too loose, at the pilot", "pilot outputs", report["reason"])
+check("and spends only the pilot", e.runs(), 9)
 
 e = Eval(cases(("bad", "maybe"), n_target=8), scorer=SPLIT_SCORER)
 report = e.to_verdict()
@@ -496,6 +585,27 @@ FLAKY = (f"import os, sys\nsys.stdin.read()\nflag = {os.path.join(tmp, 'tried')!
 code, out, row = judge("GOOD", [FLAKY, STRICT, STRICT])
 check("a judge turned away is tried again", [v["vote"] for v in row["votes"]], ["pass"] * 3)
 check_in("a judge is shown the rule", "the output says GOOD", saw)
+
+# --- each judge is measured alone: a lenient one is caught though the panel outvotes it ---
+e = Eval(cases(("bad", "good")))
+with open(os.path.join(e.dir, "rule.txt"), "w") as f:
+    f.write("the output says GOOD")
+members = []
+for i, body in enumerate([STRICT, STRICT, LENIENT]):
+    with open(os.path.join(e.dir, f"judge{i}.py"), "w") as f:
+        f.write(body)
+    members.append({"name": f"judge{i}", "provider": f"p{i}", "cmd": [sys.executable, os.path.join(e.dir, f"judge{i}.py")]})
+with open(os.path.join(e.dir, "panel.json"), "w") as f:
+    json.dump(members, f)
+e.spec["scorer"] = {"cmd": [sys.executable, JUDGES, "--rule-file", "{eval_dir}/rule.txt", "--output-file", "{output_file}",
+                            "--log", "{eval_dir}/judges.jsonl", "--panel", "{eval_dir}/panel.json"]}
+e.write()
+for g in ("freeze", "context"):
+    e.gate(g)
+code, out = e.gate("scorer")
+check("a lenient judge hidden by the majority", e.state().get("verdict"), harness.UNTESTABLE)
+check_in("is named", "judge judge2 missed the bar alone", out)
+check_in("with its own record", "judge judge2: fails caught 0/5, passes passed 5/5", out)
 
 # --- a judge too unsure to vote abstains: no vote, no split, no second try ---
 ABSTAINER = (f"import sys\nsys.stdin.read()\nopen({os.path.join(tmp, 'abstained')!r}, 'a').write('x')\n"
