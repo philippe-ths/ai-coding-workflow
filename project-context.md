@@ -35,7 +35,7 @@ Version: 2.6.0
 - `observation/uninstall-observation.sh` and `upkeep/uninstall-upkeep.sh` each reverse what their install script adds outside this repository, keeping recorded data unless told otherwise.
 
 ## Build and Validate
-- `./.ai-policy/scripts/run-validation.sh` runs validation and records the result the commit and push gate reads; it takes about four minutes.
+- `./.ai-policy/scripts/run-validation.sh` runs validation and records the result the commit and push gate reads; it takes about seven minutes.
 - Validation runs `bash -n` on the policy layer, every executable `.ai-policy/scripts/test-*.sh` (found by glob, so a test without the executable bit never runs), then `scripts/repo-validation.sh`.
 - `scripts/repo-validation.sh` lists its checks by name and skips any that is not executable, so a new factory test under `scripts/` runs only once it is added there and made executable.
 - `scripts/check-prose-integrity.sh` enforces the prose constraints above, and also that every skill listing the done gate names the same members as `ai-workflow.md` and that a skill claiming a Task Flow step number matches it.
