@@ -740,7 +740,7 @@ def aiw_source():
 
 def scan_sessions(state):
     """Add the main checkout of every session newer than the last scan to the known repos."""
-    known, newest = set(state["known"]), state["scanned"]
+    known, newest, tops = set(state["known"]), state["scanned"], {}
     for f in PROJECTS.glob("*/*.jsonl"):
         try:
             mtime = f.stat().st_mtime
@@ -750,10 +750,10 @@ def scan_sessions(state):
             continue
         newest = max(newest, mtime)
         cwd, _ = session_origin(f)
-        if cwd and Path(cwd).is_dir():
-            top = main_checkout(cwd)
-            if top:
-                known.add(top)
+        if cwd and cwd not in tops:
+            tops[cwd] = main_checkout(cwd) if Path(cwd).is_dir() else None
+        if cwd and tops[cwd]:
+            known.add(tops[cwd])
     state["known"], state["scanned"] = sorted(known), newest
 
 
