@@ -19,7 +19,7 @@ if [ "${AIW_UPKEEP_NO_LAUNCHCTL:-}" != 1 ]; then
   launchctl bootout "gui/$(id -u)/$DEPLOY_LABEL" 2>/dev/null || true
 fi
 rm -f "$PLIST" "$DEPLOY_PLIST" "$STATE/scheduler.py" "$STATE/launchd.log" "$STATE/quota.json" "$STATE/run.lock" \
-  "$STATE/deploy-launchd.log" "$STATE/deploy-state.json" "$STATE/deploy.lock"
+  "$STATE/deploy-launchd.log" "$STATE/deploy-state.json" "$STATE/deploy-state.tmp" "$STATE/deploy.lock"
 
 STATUSLINE="$CLAUDE_DIR/statusline.sh"
 # Only with both markers present: one missing would delete to the end of the file.

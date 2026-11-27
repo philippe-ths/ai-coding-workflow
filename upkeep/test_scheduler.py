@@ -1,6 +1,7 @@
 """Quota gates and the scheduled-slot gate, against a sandbox state dir."""
 import calendar
 import contextlib
+import fcntl
 import io
 import json
 import os
@@ -444,6 +445,45 @@ class Deploy(unittest.TestCase):
         self.assertIn("tool: blocked", out.getvalue())
         self.assertIn("1 merged commit(s) not live", out.getvalue())
 
+    def test_an_ignored_local_file_is_never_overwritten_by_a_merge(self):
+        open(os.path.join(self.repo, ".git", "info", "exclude"), "a").write("secret.env\n")
+        open(os.path.join(self.repo, "secret.env"), "w").write("LOCAL\n")
+        open(os.path.join(self.other, "secret.env"), "w").write("UPSTREAM\n")
+        git(self.other, "add", "secret.env")
+        git(self.other, "commit", "-q", "-m", "track secret.env")
+        git(self.other, "push", "-q", "origin", "main")
+        scheduler.cmd_deploy([])
+        self.assertEqual(open(os.path.join(self.repo, "secret.env")).read(), "LOCAL\n")
+        self.assertEqual(self.state()["status"], "failed")
+
+    def test_a_failed_hook_stays_reported_while_the_checkout_is_on_another_branch(self):
+        self.hook("exit 3\n")
+        scheduler.cmd_deploy([])
+        git(self.repo, "switch", "-q", "-c", "feature")
+        scheduler.cmd_deploy([])
+        self.assertEqual(self.state()["status"], "failed")
+
+    def test_a_new_merge_while_blocked_keeps_when_the_wait_began(self):
+        git(self.repo, "switch", "-q", "-c", "feature")
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        began = self.state()["at"]
+        os.environ["AIW_UPKEEP_NOW"] = str(int(time.time()) + 3600)
+        try:
+            self.merge_upstream("v3\n")
+            scheduler.cmd_deploy([])
+        finally:
+            del os.environ["AIW_UPKEEP_NOW"]
+        self.assertEqual(self.state()["at"], began)
+        self.assertIn("2 merged commit(s)", self.state()["why"])
+
+    def test_nothing_is_touched_while_a_nightly_run_holds_the_lock(self):
+        self.merge_upstream()
+        before = head(self.repo)
+        with open(os.path.join(STATE, "run.lock"), "w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            scheduler.cmd_deploy([])
+        self.assertEqual(head(self.repo), before)
 
 if __name__ == "__main__":
     unittest.main()

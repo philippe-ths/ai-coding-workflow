@@ -27,6 +27,7 @@ import calendar
 import fcntl
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -574,7 +575,10 @@ def deploy_one(repo, last):
     if not (Path(repo) / ".git").exists():
         return "blocked", {"why": "not a git checkout"}
     try:
-        sh(["git", "fetch", "--quiet", "origin"], cwd=repo, timeout=120)
+        try:
+            sh(["git", "fetch", "--quiet", "origin"], cwd=repo, timeout=120)
+        except (RuntimeError, subprocess.TimeoutExpired) as e:
+            return "unreachable", {"why": "could not fetch origin: " + (str(e).splitlines() or ["timed out"])[0]}
         default = sh(["git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD"], cwd=repo).strip()
         branch = sh(["git", "branch", "--show-current"], cwd=repo).strip()
         behind = int(sh(["git", "rev-list", "--count", f"HEAD..{default}"], cwd=repo).strip() or 0)
@@ -588,7 +592,9 @@ def deploy_one(repo, last):
             return ("blocked", {"why": f"{why}; {behind} merged commit(s) not live"}) if behind \
                 else ("current", {})
         before = sh(["git", "rev-parse", "HEAD"], cwd=repo).strip()
-        sh(["git", "merge", "--ff-only", "--quiet", default], cwd=repo)
+        # Without --no-overwrite-ignore, a merge that starts tracking a path replaces an
+        # ignored local file there (a .env, say) without a word.
+        sh(["git", "merge", "--ff-only", "--no-overwrite-ignore", "--quiet", default], cwd=repo)
         after = sh(["git", "rev-parse", "HEAD"], cwd=repo).strip()
         pulled = int(sh(["git", "rev-list", "--count", f"{before}..{after}"], cwd=repo).strip() or 0)
     except (RuntimeError, OSError, subprocess.TimeoutExpired, ValueError) as e:
@@ -616,9 +622,14 @@ def deploy_one(repo, last):
 
 def cmd_deploy(args):
     STATE.mkdir(parents=True, exist_ok=True)
-    with open(DEPLOY_LOCK, "w") as lock:
+    with open(DEPLOY_LOCK, "w") as lock, open(LOCK, "a") as run_lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            # A nightly run works in a main checkout and switches its branch; wait it out
+            # rather than race it. Released at once: held, it would make a run starting now
+            # stop as "in progress" and lose the night.
+            fcntl.flock(run_lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            fcntl.flock(run_lock, fcntl.LOCK_UN)
         except OSError:
             return
         state = deploy_state()
@@ -626,7 +637,10 @@ def cmd_deploy(args):
         for repo in deploy_projects():
             prev = state.get(repo, {})
             status, detail = deploy_one(repo, prev.get("deployed"))
-            changed = status != prev.get("status") or detail.get("why") != prev.get("why")
+            if status == "current" and prev.get("status") == "failed":
+                # Off the default branch with nothing new merged; the failed hook still waits.
+                status, detail = "failed", {"why": prev.get("why")}
+            changed = status != prev.get("status") or waiting(detail.get("why")) != waiting(prev.get("why"))
             # "at" is when this status began, so the report can say how long work has waited.
             entry = {"status": status, "at": stamp if changed else prev.get("at", stamp),
                      "deployed": detail["head"] if status == "deployed" else prev.get("deployed")}
@@ -639,13 +653,20 @@ def cmd_deploy(args):
             state[repo] = entry
         for repo in [r for r in state if r not in deploy_projects()]:
             del state[repo]
-        DEPLOY_STATE.write_text(json.dumps(state, indent=2) + "\n")
+        tmp = DEPLOY_STATE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(state, indent=2) + "\n")
+        os.replace(tmp, DEPLOY_STATE)
+
+
+def waiting(why):
+    """The reason without its commit count, so a further merge does not restart the wait."""
+    return re.sub(r"; \d+ merged commit\(s\) not live$", "", why or "")
 
 
 def print_deploy_needs():
     needs = [(r, e) for r, e in deploy_state().items() if e.get("status") not in ("deployed", "current")]
     if needs:
-        print("\nMerged work not live (deploy-projects):")
+        print("\nDeploys needing a look (deploy-projects):")
         for repo, e in needs:
             print(f"    {Path(repo).name}: {e.get('status')} since {e.get('at')}, {e.get('why')}")
 

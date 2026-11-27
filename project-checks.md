@@ -79,8 +79,8 @@ Surfaces this repository has no instance of are recorded under "Not Covered Here
 - The observation tool and the upkeep scheduler install outside the repository. `./observation/uninstall-observation.sh` and `./upkeep/uninstall-upkeep.sh` remove what each registered; run them before deleting this repository.
 
 ### Upkeep scheduler
-- Check: `launchctl print gui/$(id -u)/com.aiw.upkeep | grep 'last exit code'`, the same for `com.aiw.upkeep-deploy`, `diff -q upkeep/scheduler.py ~/.claude/aiw-upkeep/scheduler.py`, and `python3 upkeep/scheduler.py report 1 | sed -n '/Merged work not live/,$p'`
-- Normal: `com.aiw.upkeep` and `com.aiw.upkeep-deploy` are the deliberate entries the job check above finds; both last exit codes `0`; the two scheduler files identical; no "Merged work not live" block.
+- Check: `launchctl print gui/$(id -u)/com.aiw.upkeep | grep 'last exit code'`, the same for `com.aiw.upkeep-deploy`, `diff -q upkeep/scheduler.py ~/.claude/aiw-upkeep/scheduler.py`, and `python3 upkeep/scheduler.py report 1 | sed -n '/Deploys needing a look/,$p'`
+- Normal: `com.aiw.upkeep` and `com.aiw.upkeep-deploy` are the deliberate entries the job check above finds; both last exit codes `0`; the two scheduler files identical; no "Deploys needing a look" block.
 - Matters for the deploy job: a listed tool whose checkout is on another branch, has local changes, or whose `scripts/deploy.sh` failed is still running code from before a merge, and nothing alerts about it.
 - Matters: `install-upkeep.sh` copies the scheduler rather than linking it, so the copy that runs nightly drifts from the repository in either direction. A repository change never reaches the job until a reinstall, and an edit made to the installed copy is lost at the next one.
 
