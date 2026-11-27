@@ -1,7 +1,11 @@
 """Quota gates and the scheduled-slot gate, against a sandbox state dir."""
 import calendar
+import contextlib
+import fcntl
+import io
 import json
 import os
+import subprocess
 import tempfile
 import time
 import unittest
@@ -330,6 +334,156 @@ class WorkMode(unittest.TestCase):
         self.assertEqual(scheduler.pending(), [repo])
         scheduler.set_pending(repo, False)
 
+
+def git(cwd, *args):
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *args], cwd=cwd, check=True,
+                   capture_output=True, text=True)
+
+
+def head(repo, ref="HEAD"):
+    return subprocess.run(["git", "rev-parse", ref], cwd=repo, capture_output=True, text=True).stdout.strip()
+
+
+class Deploy(unittest.TestCase):
+    """deploy against a real bare origin, a main checkout, and a second clone that merges."""
+
+    def setUp(self):
+        root = tempfile.mkdtemp()
+        self.origin, self.repo, self.other = (os.path.join(root, n) for n in ("origin.git", "tool", "other"))
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", self.origin], check=True)
+        git(root, "clone", "-q", self.origin, self.other)
+        open(os.path.join(self.other, "app.txt"), "w").write("v1\n")
+        git(self.other, "add", "-A")
+        git(self.other, "commit", "-q", "-m", "v1")
+        git(self.other, "push", "-q", "origin", "main")
+        git(root, "clone", "-q", self.origin, self.repo)
+        for f in ("deploy-projects", "deploy-state.json", "deploys.jsonl"):
+            try:
+                os.remove(os.path.join(STATE, f))
+            except FileNotFoundError:
+                pass
+        with open(os.path.join(STATE, "deploy-projects"), "w") as fh:
+            fh.write(f"# own tools only\n{self.repo}\n")
+
+    def merge_upstream(self, text="v2\n"):
+        open(os.path.join(self.other, "app.txt"), "w").write(text)
+        git(self.other, "commit", "-q", "-am", text.strip())
+        git(self.other, "push", "-q", "origin", "main")
+
+    def hook(self, body):
+        os.makedirs(os.path.join(self.repo, "scripts"), exist_ok=True)
+        path = os.path.join(self.repo, "scripts", "deploy.sh")
+        with open(path, "w") as fh:
+            fh.write("#!/usr/bin/env bash\n" + body)
+        os.chmod(path, 0o755)
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-q", "-m", "hook")
+        git(self.repo, "push", "-q", "origin", "main")
+        git(self.other, "pull", "-q")
+
+    def state(self):
+        return scheduler.deploy_state()[self.repo]
+
+    def test_a_merge_upstream_reaches_the_main_checkout(self):
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        self.assertEqual(open(os.path.join(self.repo, "app.txt")).read(), "v2\n")
+        self.assertEqual(self.state()["status"], "deployed")
+
+    def test_a_project_not_listed_is_never_touched(self):
+        open(os.path.join(STATE, "deploy-projects"), "w").write("# none\n")
+        self.merge_upstream()
+        before = head(self.repo)
+        scheduler.cmd_deploy([])
+        self.assertEqual(head(self.repo), before)
+
+    def test_a_checkout_on_another_branch_is_left_and_reported(self):
+        git(self.repo, "switch", "-q", "-c", "feature")
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        self.assertEqual(open(os.path.join(self.repo, "app.txt")).read(), "v1\n")
+        self.assertEqual(self.state()["status"], "blocked")
+        self.assertIn("on feature", self.state()["why"])
+
+    def test_a_checkout_on_another_branch_with_nothing_missing_needs_nothing(self):
+        git(self.repo, "switch", "-q", "-c", "feature")
+        scheduler.cmd_deploy([])
+        self.assertEqual(self.state()["status"], "current")
+
+    def test_uncommitted_changes_are_never_overwritten(self):
+        self.merge_upstream()
+        open(os.path.join(self.repo, "app.txt"), "w").write("local edit\n")
+        scheduler.cmd_deploy([])
+        self.assertEqual(open(os.path.join(self.repo, "app.txt")).read(), "local edit\n")
+        self.assertEqual(self.state()["status"], "blocked")
+
+    def test_the_hook_gets_the_old_and_new_commit(self):
+        self.hook('echo "$1 $2" > "$(dirname "$0")/../hook-args"\n')
+        scheduler.cmd_deploy([])  # first sight: runs once with no previous commit
+        first = head(self.repo)
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        args = open(os.path.join(self.repo, "hook-args")).read().split()
+        self.assertEqual(args, [first, head(self.repo)])
+
+    def test_a_failed_hook_is_reported_and_retried_until_it_succeeds(self):
+        self.hook('[ -f "$(dirname "$0")/../ok" ] || { echo "install broke" >&2; exit 3; }\n')
+        scheduler.cmd_deploy([])
+        self.assertEqual(self.state()["status"], "failed")
+        self.assertIn("exited 3: install broke", self.state()["why"])
+        open(os.path.join(self.repo, "ok"), "w").close()
+        scheduler.cmd_deploy([])
+        self.assertEqual(self.state()["status"], "deployed")
+
+    def test_the_report_names_work_that_is_not_live(self):
+        git(self.repo, "switch", "-q", "-c", "feature")
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            scheduler.print_deploy_needs()
+        self.assertIn("tool: blocked", out.getvalue())
+        self.assertIn("1 merged commit(s) not live", out.getvalue())
+
+    def test_an_ignored_local_file_is_never_overwritten_by_a_merge(self):
+        open(os.path.join(self.repo, ".git", "info", "exclude"), "a").write("secret.env\n")
+        open(os.path.join(self.repo, "secret.env"), "w").write("LOCAL\n")
+        open(os.path.join(self.other, "secret.env"), "w").write("UPSTREAM\n")
+        git(self.other, "add", "secret.env")
+        git(self.other, "commit", "-q", "-m", "track secret.env")
+        git(self.other, "push", "-q", "origin", "main")
+        scheduler.cmd_deploy([])
+        self.assertEqual(open(os.path.join(self.repo, "secret.env")).read(), "LOCAL\n")
+        self.assertEqual(self.state()["status"], "failed")
+
+    def test_a_failed_hook_stays_reported_while_the_checkout_is_on_another_branch(self):
+        self.hook("exit 3\n")
+        scheduler.cmd_deploy([])
+        git(self.repo, "switch", "-q", "-c", "feature")
+        scheduler.cmd_deploy([])
+        self.assertEqual(self.state()["status"], "failed")
+
+    def test_a_new_merge_while_blocked_keeps_when_the_wait_began(self):
+        git(self.repo, "switch", "-q", "-c", "feature")
+        self.merge_upstream()
+        scheduler.cmd_deploy([])
+        began = self.state()["at"]
+        os.environ["AIW_UPKEEP_NOW"] = str(int(time.time()) + 3600)
+        try:
+            self.merge_upstream("v3\n")
+            scheduler.cmd_deploy([])
+        finally:
+            del os.environ["AIW_UPKEEP_NOW"]
+        self.assertEqual(self.state()["at"], began)
+        self.assertIn("2 merged commit(s)", self.state()["why"])
+
+    def test_nothing_is_touched_while_a_nightly_run_holds_the_lock(self):
+        self.merge_upstream()
+        before = head(self.repo)
+        with open(os.path.join(STATE, "run.lock"), "w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            scheduler.cmd_deploy([])
+        self.assertEqual(head(self.repo), before)
 
 if __name__ == "__main__":
     unittest.main()

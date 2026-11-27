@@ -1,12 +1,13 @@
 # Project Context
 
-Version: 2.6.0
+Version: 2.7.0
 
 ## Product Summary
 - This repository is a project-agnostic AI coding workflow: rules, skills, and a policy layer that an installer copies into a target repository for Claude Code, Codex, or VS Code Copilot.
 - Its users are developers who direct an AI coding agent in their own repositories.
 - It also holds a local tool, under `observation/`, that reads the maintainer's own Claude Code sessions across repositories.
 - `upkeep/` holds a nightly scheduler that runs `aiw-upkeep` in one of the maintainer's projects from a copy `upkeep/install-upkeep.sh` installs, so change it here and re-run that script; an edit to the installed copy is lost at the next install.
+- The same scheduler's `deploy` job fast-forwards every main checkout listed in `~/.claude/aiw-upkeep/deploy-projects` to its merged default branch every 15 minutes and runs its `scripts/deploy.sh`, so only the maintainer's own tools may be listed there, never a client project.
 
 ## Constraints
 - No work happens on `main` or `master`: git hooks and agent hooks block commits and pushes there.
