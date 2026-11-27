@@ -503,7 +503,8 @@ class AiwSync(unittest.TestCase):
     def setUp(self):
         root = os.path.realpath(tempfile.mkdtemp())
         self.source, self.target = os.path.join(root, "aiw"), os.path.join(root, "app")
-        git(root, "clone", "-q", AIW, self.source)
+        git(root, "clone", "-q", "--bare", AIW, os.path.join(root, "aiw.git"))
+        git(root, "clone", "-q", os.path.join(root, "aiw.git"), self.source)
         os.makedirs(self.target)
         git(self.target, "init", "-q", "-b", "main")
         open(os.path.join(self.target, "README"), "w").write("app\n")
@@ -525,13 +526,16 @@ class AiwSync(unittest.TestCase):
     def tearDown(self):
         scheduler.PROJECTS = self.old_projects
 
-    def session(self, cwd, name="s.jsonl"):
+    def session(self, cwd, name="s.jsonl", age=2 * 3600):
         d = os.path.join(self.projects, cwd.replace("/", "-"))
         os.makedirs(d, exist_ok=True)
-        with open(os.path.join(d, name), "w") as fh:
+        path = os.path.join(d, name)
+        with open(path, "w") as fh:
             fh.write(json.dumps({"cwd": cwd, "entrypoint": "cli"}) + "\n")
+        t = time.time() - age
+        os.utime(path, (t, t))
 
-    def release(self, new="99.0.0"):
+    def release(self, new="99.0.0", push=True):
         path = os.path.join(self.source, WORKFLOW)
         old = version(self.source)
         with open(path) as fh:
@@ -539,6 +543,8 @@ class AiwSync(unittest.TestCase):
         with open(path, "w") as fh:
             fh.write(text.replace(f"Version: {old}", f"Version: {new}", 1))
         git(self.source, "commit", "--no-verify", "-q", "-am", f"release {new}")
+        if push:
+            git(self.source, "push", "-q", "--no-verify", "origin", "HEAD")
 
     def entry(self):
         return scheduler.aiw_sync_state()["targets"][self.target]
@@ -602,11 +608,66 @@ class AiwSync(unittest.TestCase):
         other = os.path.join(os.path.dirname(self.target), "later")
         shutil.copytree(self.target, other)
         scheduler.sync_aiw()
-        os.utime(os.path.join(self.projects, self.target.replace("/", "-"), "s.jsonl"), (1, 1))
-        self.session(other, "t.jsonl")
+        self.session(other, "t.jsonl", age=3600)
         self.release()
         scheduler.sync_aiw()
         self.assertEqual(version(other), "99.0.0")
+
+    def test_an_unpushed_commit_on_the_aiw_checkout_is_never_shipped(self):
+        before = version(self.target)
+        self.release(push=False)
+        scheduler.sync_aiw()
+        self.assertEqual(version(self.target), before)
+
+    def test_uncommitted_edits_to_a_committed_aiw_file_hold_the_update(self):
+        hook = os.path.join(self.target, ".githooks", "pre-push")
+        git(self.target, "add", "-f", hook)
+        git(self.target, "commit", "--no-verify", "-q", "-m", "track a hook")
+        with open(hook, "a") as fh:
+            fh.write("# my edit\n")
+        self.release()
+        scheduler.sync_aiw()
+        self.assertIn("# my edit", open(hook).read())
+        self.assertEqual(self.entry()["status"], "blocked")
+        self.assertIn(".githooks/pre-push", self.entry()["why"])
+
+    def test_a_project_in_use_is_left_until_its_session_goes_quiet(self):
+        self.session(self.target, "live.jsonl", age=60)
+        self.release()
+        before = version(self.target)
+        scheduler.sync_aiw()
+        self.assertEqual(version(self.target), before)
+
+    def test_a_changed_warning_survives_a_pass_where_the_project_looked_ineligible(self):
+        gi = os.path.join(self.target, ".gitignore")
+        with open(gi) as fh:
+            text = fh.read()
+        with open(gi, "w") as fh:
+            fh.write(text.replace(".claude/\n", ""))
+        git(self.target, "commit", "--no-verify", "-q", "-am", "drop a line from the block")
+        self.release()
+        scheduler.sync_aiw()
+        self.assertEqual(self.entry()["status"], "changed")
+        os.rename(gi, gi + ".aside")
+        scheduler.sync_aiw()
+        os.rename(gi + ".aside", gi)
+        scheduler.sync_aiw()
+        self.assertEqual(self.entry()["status"], "changed")
+        git(self.target, "add", ".gitignore")
+        scheduler.sync_aiw()
+        self.assertEqual(self.entry()["status"], "changed", "staged is not committed")
+
+    def test_an_interrupted_update_is_run_again(self):
+        self.release()
+        scheduler.sync_aiw()
+        dropped = os.path.join(self.target, ".claude", "skills", "aiw-upkeep", "SKILL.md")
+        os.remove(dropped)
+        state = scheduler.aiw_sync_state()
+        state["targets"][self.target]["status"] = "updating"
+        scheduler.write_json(scheduler.AIW_SYNC_STATE, state)
+        scheduler.sync_aiw()
+        self.assertTrue(os.path.exists(dropped))
+        self.assertEqual(self.entry()["status"], "updated")
 
     def test_the_report_names_an_update_needing_a_look(self):
         self.release()

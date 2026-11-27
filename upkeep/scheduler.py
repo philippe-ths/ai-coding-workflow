@@ -678,7 +678,7 @@ def print_deploy_needs():
         print("\nDeploys needing a look (deploy-projects):")
         for repo, e in needs:
             print(f"    {Path(repo).name}: {e.get('status')} since {e.get('at')}, {e.get('why')}")
-    needs = [(r, e) for r, e in aiw_sync_state()["targets"].items() if e.get("status") in ("failed", "changed")]
+    needs = [(r, e) for r, e in aiw_sync_state()["targets"].items() if e.get("status") in ("failed", "changed", "blocked")]
     if needs:
         print("\naiw updates needing a look:")
         for repo, e in needs:
@@ -704,6 +704,7 @@ def aiw_sync_state():
     d.setdefault("scanned", 0)
     d.setdefault("known", [])
     d.setdefault("targets", {})
+    d.setdefault("last_session", {})
     return d
 
 
@@ -731,10 +732,12 @@ def aiw_source():
             default = sh(["git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD"], cwd=repo).strip()
             branch = sh(["git", "branch", "--show-current"], cwd=repo).strip()
             dirty = sh(["git", "status", "--porcelain", "--untracked-files=no"], cwd=repo).strip()
-        except (RuntimeError, OSError, subprocess.TimeoutExpired):
+            ahead = int(sh(["git", "rev-list", "--count", f"{default}..HEAD"], cwd=repo).strip() or 0)
+        except (RuntimeError, OSError, subprocess.TimeoutExpired, ValueError):
             return None
-        # Off its default branch, or with local edits, the checkout holds unmerged work.
-        return repo if f"origin/{branch}" == default and not dirty else None
+        # Off its default branch, with local edits, or with commits the remote lacks, the
+        # checkout holds unmerged work.
+        return repo if f"origin/{branch}" == default and not dirty and not ahead else None
     return None
 
 
@@ -754,6 +757,8 @@ def scan_sessions(state):
             tops[cwd] = main_checkout(cwd) if Path(cwd).is_dir() else None
         if cwd and tops[cwd]:
             known.add(tops[cwd])
+            last = state["last_session"]
+            last[tops[cwd]] = max(last.get(tops[cwd], 0), int(mtime))
     state["known"], state["scanned"] = sorted(known), newest
 
 
@@ -772,44 +777,78 @@ def ignored_copy(repo):
         ["git", "ls-files", "--error-unmatch", WORKFLOW_FILE], cwd=repo, capture_output=True).returncode != 0
 
 
-def status_lines(repo):
-    return set(sh(["git", "status", "--porcelain", "--untracked-files=all"], cwd=repo).splitlines())
-
-
-def update_one(repo, source, prev):
-    """Returns (status, detail): updated, current, changed, or failed."""
-    have, want = workflow_version(repo), workflow_version(source)
-    if prev.get("status") == "changed":
-        try:
-            still = [l for l in prev.get("lines", []) if l in status_lines(repo)]
-        except (RuntimeError, OSError, subprocess.TimeoutExpired):
-            still = prev.get("lines", [])
-        if still:
-            return "changed", {"why": prev.get("why"), "lines": still}
-    if not have or not want or version_key(have) >= version_key(want):
-        return "current", {}
+def aiw_paths(repo):
+    """.gitignore and every path in the installer-managed block: what an update may write."""
     try:
-        before = status_lines(repo)
-        r = subprocess.run([str(Path(source) / "scripts" / "update.sh"), "--target", repo, "--source", source],
-                           capture_output=True, text=True, timeout=AIW_UPDATE_TIMEOUT)
-        after = status_lines(repo)
+        lines = (Path(repo) / ".gitignore").read_text(errors="replace").splitlines()
+    except OSError:
+        return [".gitignore"]
+    paths, inside = [".gitignore"], False
+    for line in lines:
+        if line == GITIGNORE_BLOCK:
+            inside = True
+        elif line.startswith("# <<< ai-workflow"):
+            inside = False
+        elif inside and line.strip():
+            paths.append(line.strip().rstrip("/"))
+    return paths
+
+
+def git_status(repo, paths, untracked="all"):
+    return sh(["git", "status", "--porcelain", f"--untracked-files={untracked}", "--", *paths], cwd=repo).splitlines()
+
+
+def run_update(source, repo):
+    """update.sh in its own process group, so a timeout stops install.sh with it."""
+    p = subprocess.Popen([str(Path(source) / "scripts" / "update.sh"), "--target", repo, "--source", source],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
+    try:
+        out, err = p.communicate(timeout=AIW_UPDATE_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        os.killpg(p.pid, signal.SIGKILL)
+        p.communicate()
+        raise
+    return p.returncode, out, err
+
+
+def update_one(repo, source, prev, mark):
+    """Returns (status, detail): updated, current, blocked, changed, or failed.
+
+    `mark` is called just before update.sh starts, so a pass cut off mid-update is seen
+    by the next one and the update run again: the version line is copied first, and on
+    its own would read as current.
+    """
+    have, want = workflow_version(repo), workflow_version(source)
+    try:
+        if prev.get("status") == "changed" and git_status(repo, prev.get("files") or ["."]):
+            return "changed", {"why": prev.get("why"), "files": prev.get("files")}
+        if prev.get("status") != "updating" and (not have or not want or version_key(have) >= version_key(want)):
+            return "current", {}
+        paths = aiw_paths(repo)
+        dirty = git_status(repo, paths, untracked="no")
+        if dirty:
+            files = sorted({l[3:] for l in dirty})
+            return "blocked", {"why": f"uncommitted edits to aiw files git tracks hold the update to {want}: "
+                                      + ", ".join(files)[:200]}
+        mark()
+        code, out, err = run_update(source, repo)
+        after = git_status(repo, paths)
     except subprocess.TimeoutExpired:
         return "failed", {"why": f"update.sh timed out going {have} -> {want}"}
     except (RuntimeError, OSError) as e:
         return "failed", {"why": str(e).splitlines()[0] if str(e) else type(e).__name__}
-    if r.returncode != 0:
-        tail = (r.stderr or r.stdout).strip().splitlines()
-        return "failed", {"why": f"update.sh exited {r.returncode} going {have} -> {want}"
+    if code != 0:
+        tail = (err or out).strip().splitlines()
+        return "failed", {"why": f"update.sh exited {code} going {have} -> {want}"
                           + (f": {tail[-1][:200]}" if tail else "")}
     detail = {"from": have, "to": workflow_version(repo)}
-    notes = [l for l in r.stdout.splitlines() if l.startswith(("note:", "Removed", "removed"))
+    notes = [l.strip() for l in out.splitlines() if l.strip().startswith(("note:", "removed"))
              or "added new setting" in l or "did not add setting" in l]
     if notes:
         detail["notes"] = notes[:20]
-    new = sorted(after - before)
-    if new:
-        files = sorted({l[3:] for l in new})
-        return "changed", {**detail, "lines": new,
+    if after:
+        files = sorted({l[3:] for l in after})
+        return "changed", {**detail, "files": files,
                            "why": f"update to {detail['to']} changed files git tracks, to commit: {', '.join(files)[:200]}"}
     return "updated", detail
 
@@ -820,26 +859,41 @@ def sync_aiw():
         return
     state = aiw_sync_state()
     scan_sessions(state)
-    stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(now()))
-    targets = {}
+    t = now()
+    stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(t))
+    old, targets = state["targets"], {}
+    state["targets"] = targets
     src = os.path.realpath(source)
     for repo in state["known"]:
-        if os.path.realpath(repo) == src or not ignored_copy(repo):
+        prev = old.get(repo, {})
+        if os.path.realpath(repo) == src:
             continue
-        prev = state["targets"].get(repo, {})
-        status, detail = update_one(repo, source, prev)
+        # A session working here now may be running a hook or script the update would
+        # rewrite under it; a project that only looks ineligible for one pass (mid-rebase,
+        # on a branch without the block) keeps what was waiting on it.
+        if t - state["last_session"].get(repo, 0) < ACTIVE_SECONDS or not ignored_copy(repo):
+            if prev and Path(repo).is_dir():
+                targets[repo] = prev
+            continue
+
+        def mark(repo=repo, prev=prev):
+            targets[repo] = {**prev, "status": "updating", "at": stamp}
+            write_json(AIW_SYNC_STATE, state)
+
+        status, detail = update_one(repo, source, prev, mark)
+        if status == "updated" and prev.get("status") == "updating":
+            prev = {k: v for k, v in prev.items() if k != "status"}
         changed = status != prev.get("status") or detail.get("why") != prev.get("why")
         entry = {"status": status, "at": stamp if changed else prev.get("at", stamp)}
-        for k in ("why", "lines"):
+        for k in ("why", "files"):
             if k in detail:
                 entry[k] = detail[k]
         # First sight of an up-to-date project is not news; every other change is.
         if status == "updated" or (changed and (prev or status != "current")):
             with open(DEPLOY_LOG, "a") as fh:
                 fh.write(json.dumps({"at": stamp, "repo": repo, "aiw": status,
-                                     **{k: v for k, v in detail.items() if k != "lines"}}) + "\n")
+                                     **{k: v for k, v in detail.items() if k != "files"}}) + "\n")
         targets[repo] = entry
-    state["targets"] = targets
     write_json(AIW_SYNC_STATE, state)
 
 
