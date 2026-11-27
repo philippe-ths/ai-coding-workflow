@@ -6,6 +6,7 @@ can see the others. One invocation is one decision, logged as one line.
 
     scheduler.py run [--scheduled] [--dry-run]   decide, and run unless --dry-run
     scheduler.py report [N]                       the last N decisions and what needs the human
+    scheduler.py deploy                           fast-forward each deploy-projects checkout, run its hook
 
 A run needs both quota gates to pass, read from the snapshot the status line saves:
 weekly use at or below its even pace (100/7 % per elapsed day of the weekly window),
@@ -13,6 +14,11 @@ and room left in the 5-hour window. The task-level limit (Light and Standard onl
 is not checked here: aiw-upkeep owns it and escalates anything wider.
 
 A project whose path is a line of `excluded-projects` in the state dir is never picked.
+
+`deploy` touches only the paths listed in `deploy-projects` in the state dir, the human's own
+tools and never a client's: it fast-forwards a clean main checkout on its default branch to
+the remote, then runs the repository's executable scripts/deploy.sh, if any, with the last
+deployed and the new commit, until the hook succeeds on that commit.
 
 Overrides, for testing: AIW_UPKEEP_HOME (state dir), AIW_UPKEEP_PROJECTS (transcripts
 dir), AIW_UPKEEP_NOW (epoch seconds).
@@ -35,6 +41,12 @@ LOG = STATE / "runs.jsonl"
 LOCK = STATE / "run.lock"
 PENDING = STATE / "work-mode-pending.json"
 EXCLUDED = STATE / "excluded-projects"
+DEPLOY_PROJECTS = STATE / "deploy-projects"
+DEPLOY_STATE = STATE / "deploy-state.json"
+DEPLOY_LOG = STATE / "deploys.jsonl"
+DEPLOY_LOCK = STATE / "deploy.lock"
+DEPLOY_HOOK = "scripts/deploy.sh"
+DEPLOY_HOOK_TIMEOUT = 600
 
 RECENT_DAYS = 7
 WEEKLY_PACE_PER_DAY = 100 / 7
@@ -469,6 +481,7 @@ def cmd_report(args):
         lines = LOG.read_text().splitlines()[-n:]
     except OSError:
         print("No upkeep decisions logged yet.")
+        print_deploy_needs()
         return
     latest = None
     records = []
@@ -528,12 +541,121 @@ def cmd_report(args):
                 print(f"    {name}: close proposed, {item}")
 
 
+    print_deploy_needs()
+
+
+# --- deploy --------------------------------------------------------------------
+# The human's own tools run from their main checkout, and a merge on GitHub leaves that
+# checkout behind until someone pulls it. Client projects never deploy this way: only a
+# path listed in deploy-projects is touched, and only by a fast-forward of its default branch.
+
+def deploy_projects():
+    try:
+        lines = DEPLOY_PROJECTS.read_text().splitlines()
+    except OSError:
+        return []
+    return [l.strip() for l in lines if l.strip() and not l.strip().startswith("#")]
+
+
+def deploy_state():
+    try:
+        d = json.loads(DEPLOY_STATE.read_text())
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def deploy_one(repo, last):
+    """Bring one main checkout up to its remote default branch and run its deploy hook.
+
+    Returns (status, detail). `last` is the commit the hook last succeeded on, so a failed
+    hook is retried on the next pass even when the pull itself has nothing new to bring.
+    """
+    if not (Path(repo) / ".git").exists():
+        return "blocked", {"why": "not a git checkout"}
+    try:
+        sh(["git", "fetch", "--quiet", "origin"], cwd=repo, timeout=120)
+        default = sh(["git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD"], cwd=repo).strip()
+        branch = sh(["git", "branch", "--show-current"], cwd=repo).strip()
+        behind = int(sh(["git", "rev-list", "--count", f"HEAD..{default}"], cwd=repo).strip() or 0)
+        why = None
+        if f"origin/{branch}" != default:
+            why = f"main checkout is on {branch or 'a detached HEAD'}, not {default}"
+        elif sh(["git", "status", "--porcelain", "--untracked-files=no"], cwd=repo).strip():
+            why = "main checkout has uncommitted changes"
+        if why:
+            # Nothing merged is missing from what is checked out, so nothing waits on this.
+            return ("blocked", {"why": f"{why}; {behind} merged commit(s) not live"}) if behind \
+                else ("current", {})
+        before = sh(["git", "rev-parse", "HEAD"], cwd=repo).strip()
+        sh(["git", "merge", "--ff-only", "--quiet", default], cwd=repo)
+        after = sh(["git", "rev-parse", "HEAD"], cwd=repo).strip()
+        pulled = int(sh(["git", "rev-list", "--count", f"{before}..{after}"], cwd=repo).strip() or 0)
+    except (RuntimeError, OSError, subprocess.TimeoutExpired, ValueError) as e:
+        return "failed", {"why": str(e).splitlines()[0] if str(e) else type(e).__name__}
+    detail = {"head": after}
+    if pulled:
+        detail["pulled"] = pulled
+    hook = Path(repo) / DEPLOY_HOOK
+    if not os.access(hook, os.X_OK) or after == last:
+        return "deployed", detail
+    try:
+        r = subprocess.run([str(hook), last or "", after], cwd=repo, capture_output=True, text=True,
+                           timeout=DEPLOY_HOOK_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return "failed", {**detail, "why": f"{DEPLOY_HOOK} timed out"}
+    except OSError as e:
+        return "failed", {**detail, "why": f"{DEPLOY_HOOK} could not start: {e}"}
+    if r.returncode != 0:
+        tail = (r.stderr or r.stdout).strip().splitlines()
+        return "failed", {**detail, "why": f"{DEPLOY_HOOK} exited {r.returncode}"
+                          + (f": {tail[-1][:200]}" if tail else "")}
+    detail["hook"] = "ran"
+    return "deployed", detail
+
+
+def cmd_deploy(args):
+    STATE.mkdir(parents=True, exist_ok=True)
+    with open(DEPLOY_LOCK, "w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            return
+        state = deploy_state()
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(now()))
+        for repo in deploy_projects():
+            prev = state.get(repo, {})
+            status, detail = deploy_one(repo, prev.get("deployed"))
+            changed = status != prev.get("status") or detail.get("why") != prev.get("why")
+            # "at" is when this status began, so the report can say how long work has waited.
+            entry = {"status": status, "at": stamp if changed else prev.get("at", stamp),
+                     "deployed": detail["head"] if status == "deployed" else prev.get("deployed")}
+            if "why" in detail:
+                entry["why"] = detail["why"]
+            # Log what changed, not every quiet pass: a pull, a hook run, or a new status.
+            if changed or detail.get("pulled") or detail.get("hook"):
+                with open(DEPLOY_LOG, "a") as fh:
+                    fh.write(json.dumps({"at": stamp, "repo": repo, "status": status, **detail}) + "\n")
+            state[repo] = entry
+        for repo in [r for r in state if r not in deploy_projects()]:
+            del state[repo]
+        DEPLOY_STATE.write_text(json.dumps(state, indent=2) + "\n")
+
+
+def print_deploy_needs():
+    needs = [(r, e) for r, e in deploy_state().items() if e.get("status") not in ("deployed", "current")]
+    if needs:
+        print("\nMerged work not live (deploy-projects):")
+        for repo, e in needs:
+            print(f"    {Path(repo).name}: {e.get('status')} since {e.get('at')}, {e.get('why')}")
+
+
 def main(argv):
-    if not argv or argv[0] not in ("run", "report"):
+    if not argv or argv[0] not in ("run", "report", "deploy"):
         print(__doc__.strip().splitlines()[0])
-        print("usage: scheduler.py run [--scheduled] [--dry-run] | report [N]")
+        print("usage: scheduler.py run [--scheduled] [--dry-run] | report [N] | deploy")
         return 2
-    {"run": cmd_run, "report": cmd_report}[argv[0]](argv[1:])
+    {"run": cmd_run, "report": cmd_report, "deploy": cmd_deploy}[argv[0]](argv[1:])
     return 0
 
 
