@@ -48,5 +48,15 @@ printf 'input=$(cat)\n# >>> aiw-upkeep quota snapshot >>>\nsave\necho line\n' > 
 "$ROOT/upkeep/uninstall-upkeep.sh" >/dev/null 2>&1 || fail "uninstall with a broken block exited non-zero"
 grep -q 'echo line' "$CLAUDE_HOME/statusline.sh" || fail "uninstall deleted past a block missing its end marker"
 
+# This repository's own deploy hook reinstalls the copies on a first deploy, and leaves them
+# alone when nothing under upkeep/ or observation/ changed.
+"$ROOT/upkeep/uninstall-upkeep.sh" --purge-data >/dev/null 2>&1
+"$ROOT/scripts/deploy.sh" "" HEAD >/dev/null 2>&1 || fail "deploy hook exited non-zero on a first deploy"
+[ -f "$CLAUDE_HOME/aiw-upkeep/scheduler.py" ] || fail "deploy hook did not reinstall the scheduler"
+[ -f "$CLAUDE_HOME/aiw-observation/manifest-hook.sh" ] || fail "deploy hook did not reinstall observation"
+rm "$CLAUDE_HOME/aiw-upkeep/scheduler.py"
+[ -z "$("$ROOT/scripts/deploy.sh" HEAD HEAD)" ] || fail "deploy hook reinstalled with nothing changed"
+[ ! -e "$CLAUDE_HOME/aiw-upkeep/scheduler.py" ] || fail "deploy hook reinstalled upkeep with nothing changed"
+
 python3 -m unittest discover -s "$ROOT/upkeep" -p 'test_*.py' -q 2>/dev/null || fail "scheduler tests"
 echo "upkeep install test: OK"
