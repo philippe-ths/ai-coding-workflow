@@ -18,7 +18,9 @@ A project whose path is a line of `excluded-projects` in the state dir is never 
 `deploy` touches only the paths listed in `deploy-projects` in the state dir, the human's own
 tools and never a client's: it fast-forwards a clean main checkout on its default branch to
 the remote, then runs the repository's executable scripts/deploy.sh, if any, with the last
-deployed and the new commit, until the hook succeeds on that commit.
+deployed and the new commit, until the hook succeeds on that commit. Each pass then updates,
+with that checkout's scripts/update.sh, every project Claude Code has run in whose aiw copy
+is gitignored and older, while the listed aiw checkout is clean on its default branch.
 
 Overrides, for testing: AIW_UPKEEP_HOME (state dir), AIW_UPKEEP_PROJECTS (transcripts
 dir), AIW_UPKEEP_NOW (epoch seconds).
