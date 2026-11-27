@@ -177,6 +177,18 @@ has_outside "$T" ".agents/skills/"
 has_outside "$T" "build-output/"
 one_block "$T"
 
+echo "a re-install leaves a block above later lines where it is (#443):"
+T="$(new_target block-in-middle)"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude install exited non-zero"
+printf '\n# added after install\nbuild/\n' >> "$T/.gitignore"
+cp "$T/.gitignore" "$T/.gitignore.before"
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool claude >/dev/null 2>&1 || bad "claude re-install exited non-zero"
+if cmp -s "$T/.gitignore" "$T/.gitignore.before"; then ok "re-install with nothing new leaves .gitignore byte-identical"; else bad "re-install rewrote .gitignore: $(diff "$T/.gitignore.before" "$T/.gitignore" | head -5 | tr '\n' ' ')"; fi
+"$INSTALL" --source "$ROOT_DIR" --target "$T" --tool codex >/dev/null 2>&1 || bad "codex install exited non-zero"
+if [ "$(tail -1 "$T/.gitignore")" = "build/" ]; then ok "a new tool's paths join the block where it sits"; else bad "block moved to the end when a tool was added"; fi
+exactly_once "$T" "build/"
+one_block "$T"
+
 # The one moment the installer cannot tell a deliberate hand-maintained entry
 # from the residue of an earlier manual install is the first one, because there
 # is no managed block yet to date the file against. It folds on that run only

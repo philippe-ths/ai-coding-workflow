@@ -137,7 +137,8 @@ copy_tracked() {
   done < <(git -C "$SOURCE" ls-files -- "$pathspec")
 }
 
-# Rewrite the installer-managed block in the target .gitignore (idempotent).
+# Rewrite the installer-managed block in the target .gitignore (idempotent), in
+# place: lines after the block stay after it.
 # The block is a UNION across installs: entries already in it are kept in order
 # and this run's paths are appended if absent, so installing a second tool does
 # not un-ignore the first tool's paths (#216).
@@ -179,9 +180,10 @@ write_gitignore_block() {
     END {
       fold = (hadblock ? 0 : 1)
       skip = 0
+      at = -1; no = 0
       for (i = 1; i <= nl; i++) {
         line = lines[i]
-        if (line == b) skip = 1
+        if (line == b) { skip = 1; if (at < 0) at = no }
         if (skip == 0) {
           k = norm(line)
           if (!(fold && k != "" && (k in runkey))) out[++no] = line
@@ -191,7 +193,10 @@ write_gitignore_block() {
         }
         if (line == e) skip = 0
       }
-      for (i = 1; i <= no; i++) print out[i]
+      # The block goes back where its first marker was, so a re-run that adds no
+      # path leaves the file byte-identical; with no block yet it goes at the end.
+      if (at < 0) at = no
+      for (i = 1; i <= at; i++) print out[i]
       print b
       for (i = 1; i <= nk; i++) print keep[i]
       for (i = 1; i <= np; i++) {
@@ -201,6 +206,7 @@ write_gitignore_block() {
         print raw[i]
       }
       print e
+      for (i = at + 1; i <= no; i++) print out[i]
     }
   ' "$paths_file" "$gi" > "$gi.tmp"; then
     rm -f "$paths_file"
